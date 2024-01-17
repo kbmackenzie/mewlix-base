@@ -304,6 +304,9 @@ Mewlix.Op = {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Can't calculate length for value of type "${typeof value}": ${value}`);
   },
+  concat: function concat(a, b) {
+    return Mewlix.purrify(a) + Mewlix.purrify(b);
+  },
 
   /* Reflection: */
   typeOf: function typeOf(value) {
@@ -318,9 +321,19 @@ Mewlix.Op = {
       case 'function':
         return typeof value;
       default:
-        throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-          `Value of type "${typeof value}" shouldn't be in Mewlix context: ${value}`);
+        return 'unrecognized';
     }
+  },
+
+  /* Box Operations: */
+  pairs: function pairs(value) {
+    if (!(value instanceof Mewlix.MewlixBox)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Can't retrieve keys: Expected box, got value of type "${typeof value}": ${value}`);
+    }
+    return Mewlix.MewlixStack.fromArray(Object.entries(value).map(
+      ([key, value]) => { return { mewlix__key: key, mewlix__value: value }; }
+    ));
   },
 }
 
