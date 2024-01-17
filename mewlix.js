@@ -142,10 +142,10 @@ Mewlix.purrify = function purrify(obj) {
 };
 
 /* Utility. */
-const typeCheck = function typeCheck(value, type) {
-  if (typeof value === type) return;
+const typeCheck = function typeCheck(value, targetType) {
+  if (typeof value === targetType) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-    `Expected value of type ${type}, received ${typeof value}!`);
+    `Expected value of type ${targetType}, received ${typeof value}!`);
 }
 
 const isNothing = function isNothing(x) {
@@ -154,9 +154,9 @@ const isNothing = function isNothing(x) {
 
 /* Numeric comparisons */
 Mewlix.Comparison = class Comparison {
-  static LessThan    = Comparison('<'  , -1);
-  static EqualTo     = Comparison('==' ,  0);
-  static GreaterThan = Comparison('>'  ,  1);
+  static LessThan    = new Comparison('<'  , -1);
+  static EqualTo     = new Comparison('==' ,  0);
+  static GreaterThan = new Comparison('>'  ,  1);
 
   constructor(operator, id) {
     this.operator = operator;
@@ -215,6 +215,7 @@ Mewlix.Op = {
     typeCheck(b, 'number');
     return a ** b;
   },
+
   /* Comparison: */
   isEqual: function isEqual(a, b) {
     if (isNothing(a)) return isNothing(b);
@@ -225,6 +226,7 @@ Mewlix.Op = {
     }
     return a === b;
   },
+
   /* Conversion: */
   toBool: function toBool(x) {
     if (x instanceof Mewlix.MewlixStack) return !(x instanceof Mewlix.StackBottom);
@@ -235,6 +237,7 @@ Mewlix.Op = {
       default         : return true;
     }
   },
+
   /* Boolean operations: */
   not: function not(a) {
     return !Mewlix.Op.toBool(a);
@@ -248,27 +251,13 @@ Mewlix.Op = {
     return toBool(a) ? fb() : a;
   },
 
-  /* to note (#important):
-   * In order to preserve the short-circuiting behavior of the && and || operators,
-   * the arguments must be passed to the function *without* being evaluated. To
-   * achieve this, the arguments are wrapped in functions:
-   *
-   * a++ and b++
-   * ... becomes ...
-   * Mewlix.Op.and(() => a++, () => b++)
-   */
-
+  /* Numeric comparison: */
   compare: function compare(a, b) {
     typeCheck(a, 'number');
     typeCheck(b, 'number');
     if (a === b) return Mewlix.Comparison.EqualTo;
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
   },
-
-  /* to note (#important):
-   * >, <, <= and >= are only available for *numeric comparison*.
-   * I don't want locale-specific string comparison to be an operator!
-   */
 }
 
 /* Add to globalThis -- make it available globally. This is necessary. */
