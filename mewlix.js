@@ -184,7 +184,7 @@ Mewlix.Comparison = class Comparison {
     return x.valueOf() === this.valueOf();
   }
 
-  isOneOf(xs) {
+  isOneOf(...xs) {
     return xs.some(x => x.valueOf() === this.valueOf());
   }
 };
@@ -266,6 +266,11 @@ Mewlix.Op = {
   and: function and(fa, fb) {
     const a = fa();
     return toBool(a) ? fb() : a;
+  },
+
+  /* Ternary operator: */
+  ternary: function ternary(condition, fa, fb) {
+    return Mewlix.Op.toBool(condition) ? fa() : fb();
   },
 
   /* Numeric comparison: */
