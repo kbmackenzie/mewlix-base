@@ -29,6 +29,11 @@ Mewlix.MewlixObject = class MewlixObject {
   get box() {
     return this;
   }
+
+  valueOf() {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `Mewlix object "${this.constructor.name}" cannot be coerced to a value with .valueOf()!`);
+  }
 };
 
 /* Mewlix's shelves -- which work like stacks. */
@@ -40,7 +45,7 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
 
   toArray() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-      "The base class MewlixStack doesn't implement the method 'toArray'!");
+      `Mewlix stack class "${this.constructor.name}" doesn't implement the method 'toArray'!`);
   }
 
   toString() {
@@ -115,7 +120,6 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
 }
 
 /* Mewlix's box class! */
-
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   toString() {
     return purrifyObject(this);
