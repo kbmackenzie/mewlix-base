@@ -12,6 +12,14 @@ Mewlix.ErrorCode = class ErrorCode {
     this.id = id;
   }
 
+  valueOf() {
+    return this.id;
+  }
+
+  isEqual(x) {
+    return x.valueOf() === this.valueOf();
+  }
+
   makeMessage(str) {
     return `[${this.name}] ${str}`
   }
@@ -41,11 +49,6 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
   get box() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       "Can't peek properties of a shelf!");
-  }
-
-  toArray() {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-      `Mewlix stack class "${this.constructor.name}" doesn't implement the method 'toArray'!`);
   }
 
   toString() {
@@ -81,12 +84,12 @@ Mewlix.StackBottom = class StackBottom extends Mewlix.MewlixStack {
     return new Mewlix.StackNode(value, this);
   }
 
-  toArray() {
-    return [];
+  length() {
+    return 0;
   }
 
-  getSize() {
-    return 0;
+  toArray() {
+    return [];
   }
 }
 
@@ -108,14 +111,14 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
     return new Mewlix.StackNode(value, this);
   }
 
+  length() {
+    return 1 + this.next.length();
+  }
+
   toArray() {
     const arr = this.next.toArray();
     arr.push(this.value);
     return arr;
-  }
-
-  getSize() {
-    return this.toArray().length;
   }
 }
 
@@ -150,11 +153,17 @@ const typeCheck = function typeCheck(value, targetType) {
   if (typeof value === targetType) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
     `Expected value of type ${targetType}, received ${typeof value}!`);
-}
+};
 
 const isNothing = function isNothing(x) {
   return x === null || x === undefined;
-}
+};
+
+const stackCheck = function stackCheck(x) {
+  if (x instanceof Mewlix.MewlixStack) return;
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+    `Expected shelf; received value of type "${typeof x}": ${x}`);
+};
 
 /* Numeric comparisons */
 Mewlix.Comparison = class Comparison {
@@ -167,12 +176,16 @@ Mewlix.Comparison = class Comparison {
     this.id = id;
   }
 
+  valueOf() {
+    return this.id;
+  }
+
   isEqual(x) {
-    return x.id === this.id;
+    return x.valueOf() === this.valueOf();
   }
 
   isOneOf(xs) {
-    return xs.some(x => x.id === this.id);
+    return xs.some(x => x.valueOf() === this.valueOf());
   }
 };
 
@@ -261,6 +274,48 @@ Mewlix.Op = {
     typeCheck(b, 'number');
     if (a === b) return Mewlix.Comparison.EqualTo;
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
+  },
+
+  /* Stack operations: */
+  peek: function peek(shelf) {
+    stackCheck(shelf);
+    return shelf.peek();
+  },
+  pop: function pop(shelf) {
+    stackCheck(shelf);
+    return shelf.pop();
+  },
+  push: function push(value = null, shelf) {
+    stackCheck(shelf);
+    return shelf.push(value);
+  },
+
+  /* Miscellaneous operations: */
+  length: function length(value) {
+    if (value instanceof Mewlix.MewlixStack) return value.length();
+    if (typeof value === 'string') return value.length;
+    if (value instanceof Mewlix.MewlixBox) return Object.entries(value).length;
+
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `Can't calculate length for value of type "${typeof value}": ${value}`);
+  },
+
+  /* Reflection: */
+  typeOf: function typeOf(value) {
+    if (value instanceof Mewlix.MewlixStack) return 'shelf';
+    if (value instanceof Mewlix.MewlixBox) return 'box';
+    if (value === null || value === undefined) return 'nothing';
+
+    switch (typeof value) {
+      case 'number':
+      case 'string':
+      case 'boolean':
+      case 'function':
+        return typeof value;
+      default:
+        throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
+          `Value of type "${typeof value}" shouldn't be in Mewlix context: ${value}`);
+    }
   },
 }
 
