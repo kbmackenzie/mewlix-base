@@ -35,7 +35,7 @@ Mewlix.MewlixObject = class MewlixObject {
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
   get box() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      "Can't assign properties to a shelf!");
+      "Can't peek properties of a shelf!");
   }
 
   toArray() {
@@ -51,7 +51,7 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
     if (a instanceof Mewlix.StackBottom) return b instanceof Mewlix.StackBottom;
     if (b instanceof Mewlix.StackBottom) return a instanceof Mewlix.StackBottom;
 
-    return Mewlix.Op.equal(a.peek(), b.peek()) && MewlixStack.isEqual(a.pop(), b.pop());
+    return Mewlix.Op.isEqual(a.peek(), b.peek()) && MewlixStack.isEqual(a.pop(), b.pop());
   }
 
   static fromArray(arr) {
@@ -152,6 +152,26 @@ const isNothing = function isNothing(x) {
   return x === null || x === undefined;
 }
 
+/* Numeric comparisons */
+Mewlix.Comparison = class Comparison {
+  static LessThan    = Comparison('<'  , -1);
+  static EqualTo     = Comparison('==' ,  0);
+  static GreaterThan = Comparison('>'  ,  1);
+
+  constructor(operator, id) {
+    this.operator = operator;
+    this.id = id;
+  }
+
+  isEqual(x) {
+    return x.id === this.id;
+  }
+
+  isOneOf(xs) {
+    return xs.some(x => x.id === this.id);
+  }
+};
+
 /* Basic operations. */
 Mewlix.Op = {
   /* Arithmetic operations: */
@@ -196,11 +216,59 @@ Mewlix.Op = {
     return a ** b;
   },
   /* Comparison: */
-  equal: function equal(a, b) {
+  isEqual: function isEqual(a, b) {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
+
+    if (a instanceof Mewlix.MewlixStack || b instanceof Mewlix.MewlixStack) {
+      return Mewlix.MewlixStack.isEqual(a, b);
+    }
     return a === b;
   },
+  /* Conversion: */
+  toBool: function toBool(x) {
+    if (x instanceof Mewlix.MewlixStack) return !(x instanceof Mewlix.StackBottom);
+    switch (typeof x) {
+      case 'object'   : return x !== null;
+      case 'boolean'  : return x;
+      case 'undefined': return false;
+      default         : return true;
+    }
+  },
+  /* Boolean operations: */
+  not: function not(a) {
+    return !Mewlix.Op.toBool(a);
+  },
+  or: function or(fa, fb) {
+    const a = fa();
+    return toBool(a) ? a : fb();
+  },
+  and: function and(fa, fb) {
+    const a = fa();
+    return toBool(a) ? fb() : a;
+  },
+
+  /* to note (#important):
+   * In order to preserve the short-circuiting behavior of the && and || operators,
+   * the arguments must be passed to the function *without* being evaluated. To
+   * achieve this, the arguments are wrapped in functions:
+   *
+   * a++ and b++
+   * ... becomes ...
+   * Mewlix.Op.and(() => a++, () => b++)
+   */
+
+  compare: function compare(a, b) {
+    typeCheck(a, 'number');
+    typeCheck(b, 'number');
+    if (a === b) return Mewlix.Comparison.EqualTo;
+    return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
+  },
+
+  /* to note (#important):
+   * >, <, <= and >= are only available for *numeric comparison*.
+   * I don't want locale-specific string comparison to be an operator!
+   */
 }
 
 /* Add to globalThis -- make it available globally. This is necessary. */
