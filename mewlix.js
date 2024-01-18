@@ -29,6 +29,7 @@ Mewlix.MewlixError = class MewlixError extends Error {
   constructor(errorCode, message) {
     super(errorCode.makeMessage(message));
     this.name = this.constructor.name;
+    this.code = errorCode;
   }
 }
 
