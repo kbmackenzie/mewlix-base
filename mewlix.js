@@ -44,6 +44,14 @@ Mewlix.MewlixObject = class MewlixObject {
   }
 };
 
+/* A module's namespace. */
+Mewlix.Namespace = class Namespace extends MewlixObject {
+  constructor(path) {
+    super();
+    this.path = path;
+  }
+};
+
 /* Mewlix's shelves -- which work like stacks. */
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
   get box() {
@@ -146,7 +154,10 @@ Mewlix.purrify = function purrify(obj) {
   if (obj === null || obj === undefined) {
     return 'nothing';
   }
-  return obj.toString();
+  switch (typeof obj) {
+    case 'function': return '<function>';
+    default: return obj.toString();
+  }
 };
 
 /* Utility. */
@@ -291,7 +302,7 @@ Mewlix.Op = {
     stackCheck(shelf);
     return shelf.pop();
   },
-  push: function push(value = null, shelf) {
+  push: function push(shelf, value = null) {
     stackCheck(shelf);
     return shelf.push(value);
   },
