@@ -46,7 +46,7 @@ Mewlix.MewlixObject = class MewlixObject {
 };
 
 /* A module's namespace. */
-Mewlix.Namespace = class Namespace extends MewlixObject {
+Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   constructor(path) {
     super();
     this.path = path;
