@@ -95,6 +95,7 @@ Mewlix.StackBottom = class StackBottom extends Mewlix.MewlixStack {
 
 Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
   constructor(value, tail) {
+    super();
     this.value = value;
     this.next  = tail || new Mewlix.StackBottom();
   }
@@ -125,7 +126,7 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
 /* Mewlix's box class! */
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   toString() {
-    return purrifyObject(this);
+    return Mewlix.purrifyObject(this);
   }
 };
 
