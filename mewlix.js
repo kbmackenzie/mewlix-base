@@ -2,9 +2,9 @@ const Mewlix = {};
 
 /* A custom exception type. */
 Mewlix.ErrorCode = class ErrorCode {
-  static TypeMismatch   = new ErrorCode('TypeMismatch'  , 0);
-  static InvalidOp      = new ErrorCode('InvalidOp'     , 1);
-  static DivideByZero   = new ErrorCode('DivideByZero'  , 2);
+  static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
+  static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
+  static DivideByZero   = new ErrorCode('DivideByZero'  , 3);
   static CriticalError  = new ErrorCode('CriticalError' , 9);
 
   constructor(name, id) {
