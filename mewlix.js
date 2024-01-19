@@ -48,9 +48,14 @@ Mewlix.MewlixObject = class MewlixObject {
 
 /* A namespace for modules. */
 Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
-  constructor() {
+  constructor(name) {
     super();
+    this.name = name;
     this.modules = new Map();
+  }
+
+  setName(name) {
+    this.name = name;
   }
 
   addModule(path, func) {
@@ -69,6 +74,9 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     return this.modules.get(path);
   }
 };
+
+/* A default namespace for all modules. */
+Mewlix.Modules = new Mewlix.Namespace('default');
 
 /* Mewlix's shelves -- which work like stacks. */
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
