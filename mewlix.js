@@ -152,6 +152,13 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
 
 /* Mewlix's box class! */
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
+  constructor(entries = []) {
+    super();
+    for (const [key, value] of entries) {
+      this[key] = value;
+    }
+  }
+
   toString() {
     return Mewlix.purrifyObject(this);
   }
