@@ -5,6 +5,7 @@ Mewlix.ErrorCode = class ErrorCode {
   static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
   static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
   static DivideByZero   = new ErrorCode('DivideByZero'  , 3);
+  static InvalidImport  = new ErrorCode('InvalidImport' , 4);
   static CriticalError  = new ErrorCode('CriticalError' , 9);
 
   constructor(name, id) {
@@ -50,6 +51,23 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   constructor(path) {
     super();
     this.path = path;
+    this.modules = new Map();
+  }
+
+  addModule(path, func) {
+    if (this.modules.has(path)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
+        `Double import: The module "${path}" has already been imported!`);
+    }
+    this.modules.set(path, func);
+  }
+
+  getModule(path) {
+    if (!this.modules.has(path)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
+        `The module "${path}" doesn't exist or hasn't been properly loaded!`);
+    }
+    return this.modules.get(path);
   }
 };
 
