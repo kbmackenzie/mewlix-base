@@ -46,11 +46,10 @@ Mewlix.MewlixObject = class MewlixObject {
   }
 };
 
-/* A module's namespace. */
+/* A namespace for modules. */
 Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
-  constructor(path) {
+  constructor() {
     super();
-    this.path = path;
     this.modules = new Map();
   }
 
