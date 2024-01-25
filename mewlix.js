@@ -6,7 +6,8 @@ Mewlix.ErrorCode = class ErrorCode {
   static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
   static DivideByZero   = new ErrorCode('DivideByZero'  , 3);
   static InvalidImport  = new ErrorCode('InvalidImport' , 4);
-  static CriticalError  = new ErrorCode('CriticalError' , 9);
+  static CriticalError  = new ErrorCode('CriticalError' , 8);
+  static ExternalError  = new ErrorCode('ExternalError' , 9);
 
   constructor(name, id) {
     this.name = name;
@@ -277,6 +278,10 @@ Mewlix.Op = {
     typeCheck(b, 'number');
     return a ** b;
   },
+  negate: function negate(a) {
+    typeCheck(a, 'number');
+    return -a;
+  },
 
   /* Comparison: */
   isEqual: function isEqual(a, b) {
@@ -304,12 +309,10 @@ Mewlix.Op = {
   not: function not(a) {
     return !Mewlix.Op.toBool(a);
   },
-  or: function or(fa, fb) {
-    const a = fa();
+  or: function or(a, fb) {
     return toBool(a) ? a : fb();
   },
-  and: function and(fa, fb) {
-    const a = fa();
+  and: function and(a, fb) {
     return toBool(a) ? fb() : a;
   },
 
@@ -374,13 +377,30 @@ Mewlix.Op = {
   pairs: function pairs(value) {
     if (!(value instanceof Mewlix.MewlixBox)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Can't retrieve keys: Expected box, got value of type "${typeof value}": ${value}`);
+        `Can't retrieve entries: Expected box, got value of type "${typeof value}": ${value}`);
     }
     return Mewlix.MewlixStack.fromArray(Object.entries(value).map(
-      ([key, value]) => { return { mewlix__key: key, mewlix__value: value }; }
+      ([key, value]) => new Mewlix.MewlixBox([["key", key], ["value", value]])
     ));
   },
 }
+
+/* Watch/Pounce: A little wrapper around try/catch. */
+Mewlix.watchPounce = async function watchPounce(watch, pounce) {
+  try {
+    await watch();
+  }
+  catch (error) {
+    const errorCode = (error instanceof Mewlix.MewlixError)
+      ? error.code 
+      : Mewlix.ErrorCode.ExternalError;
+    const errorBox = new Mewlix.MewlixBox([
+      [ "name" , errorCode.name ],
+      [ "id"   , errorCode.id   ]
+    ]);
+    await pounce(errorBox);
+  }
+};
 
 /* Add to globalThis -- make it available globally. This is necessary. */
 globalThis.Mewlix = Mewlix;
