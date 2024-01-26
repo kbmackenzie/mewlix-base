@@ -90,6 +90,14 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
     return Mewlix.purrifyArray(this.toArray());
   }
 
+  *[Symbol.iterator]() {
+    let node = this;
+    while (node instanceof Mewlix.StackNode) {
+      yield node.peek();
+      node = node.pop();
+    }
+  }
+
   static isEqual(a, b) {
     if (a instanceof Mewlix.StackBottom) return b instanceof Mewlix.StackBottom;
     if (b instanceof Mewlix.StackBottom) return a instanceof Mewlix.StackBottom;
@@ -401,6 +409,79 @@ Mewlix.watchPounce = async function watchPounce(watch, pounce) {
     await pounce(errorBox);
   }
 };
+
+/* Deep-copying utils. */
+Mewlix.deepcopyShelf = function deepcopyShelf(shelf) {
+  const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
+  return Mewlix.MewlixStack.fromArray(copy);
+};
+
+Mewlix.deepcopyBox = function deepcopyBox(box) {
+  const copy = Object.entries(box).map(
+    ([key, value]) => [key, Mewlix.deepcopy(value)]
+  );
+  return Mewlix.MewlixBox(copy);
+};
+
+Mewlix.deepcopy = function deepcopy(value) {
+  if (typeof value !== 'object') return value;
+
+  if (value instanceof Mewlix.MewlixStack) { return Mewlix.deepcopyShelf(value); }
+  if (value instanceof Mewlix.MewlixBox)   { return Mewlix.deepcopyBox(value);  }
+
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
+    `Invalid object in Mewlix context - object isn't an instance of Mewlix.MewlixBox: ${value}`);
+};
+
+
+// -------------------------------------------------------
+/* Base library. */
+// -------------------------------------------------------
+
+// The functions in the base library use snake-case intentionally.
+// It's the standard in Mewlix, after all.
+
+Mewlix.Base = {
+  substring: function substring(str, start, end) {
+    return str.toString().substring(start, end);
+  },
+  to_lower: function toLower(str) {
+    return str.toString().toLowerCase();
+  },
+  to_upper: function toUpper(str) {
+    return str.toString().toUpperCase();
+  },
+  range: function range(start = 0, end) {
+    /* A call like range(3) should give you 0, 1, 2, 3. */
+    if (end === undefined) {
+      end = start;
+      start = 0;
+    }
+
+    const array = [];
+    if (start < end) {
+      /* A call like range(0, 3) should give you 0, 1, 2, 3. */
+      for (let count = start; count <= end; count++) {
+        array.push(count);
+      }
+    }
+    else {
+      /* A call like range(3, 0) should give you 3, 2, 1, 0. */
+      for (let count = start; count >= end; count--) {
+        array.push(count);
+      }
+    }
+    return Mewlix.MewlixStack.fromArray(array);
+  },
+};
+
+/* Intentionally adding the Math namespace to the Mewlix standard library.
+ * It's purely a copy by reference. */
+Mewlix.Base.math = Math;
+
+/* Freezing the base library, as it's going to be fully accessible inside
+ * every Mewlix module. It shouldn't be modifiable. */
+Object.freeze(Mewlix.Base);
 
 /* Add to globalThis -- make it available globally. This is necessary. */
 globalThis.Mewlix = Mewlix;
