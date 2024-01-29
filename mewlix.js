@@ -37,10 +37,6 @@ Mewlix.MewlixError = class MewlixError extends Error {
 
 /* Mewlix's base object class. */
 Mewlix.MewlixObject = class MewlixObject {
-  get box() {
-    return this;
-  }
-
   valueOf() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Mewlix object "${this.constructor.name}" cannot be coerced to a value with .valueOf()!`);
@@ -168,6 +164,10 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
 
 /* Mewlix's box class! */
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
+  get box() {
+    return this;
+  }
+
   constructor(entries = []) {
     super();
     for (const [key, value] of entries) {
@@ -179,6 +179,12 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
     return Mewlix.purrifyObject(this);
   }
 };
+
+/* Mewlix's clowder base class! */
+Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
+  /* Empty definition.
+   * This class exists mostly to differentiate boxes and clowders. */
+}
 
 Mewlix.purrifyArray = function purrifyArray(arr) {
   const items = arr.map(Mewlix.purrify).join(', ');
@@ -417,6 +423,9 @@ Mewlix.deepcopyShelf = function deepcopyShelf(shelf) {
 };
 
 Mewlix.deepcopyBox = function deepcopyBox(box) {
+  if (box instanceof Mewlix.MewlixClowder && deepcopy in box) {
+    return box.deepcopy();
+  }
   const copy = Object.entries(box).map(
     ([key, value]) => [key, Mewlix.deepcopy(value)]
   );
@@ -427,7 +436,7 @@ Mewlix.deepcopy = function deepcopy(value) {
   if (typeof value !== 'object') return value;
 
   if (value instanceof Mewlix.MewlixStack) { return Mewlix.deepcopyShelf(value); }
-  if (value instanceof Mewlix.MewlixBox)   { return Mewlix.deepcopyBox(value);  }
+  if (value instanceof Mewlix.MewlixBox)   { return Mewlix.deepcopyBox(value);   }
 
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     `Invalid object in Mewlix context - object isn't an instance of Mewlix.MewlixBox: ${value}`);
@@ -442,31 +451,56 @@ Mewlix.deepcopy = function deepcopy(value) {
 // It's the standard in Mewlix, after all.
 
 Mewlix.Base = {
-  substring: function substring(str, start, end) {
-    return str.toString().substring(start, end);
+  // substring.
+  tear_apart: function tear_apart(str, start, end) {
+    return Mewlix.purrify(str).substring(start, end);
   },
-  to_lower: function toLower(str) {
-    return str.toString().toLowerCase();
+
+  // to lower.
+  push_down: function push_down(str) {
+    return Mewlix.purrify(str).toLowerCase();
   },
-  to_upper: function toUpper(str) {
-    return str.toString().toUpperCase();
+
+  // to upper.
+  push_up: function push_up(str) {
+    return Mewlix.purrify(str).toUpperCase();
   },
-  range: function range(start = 0, end) {
-    /* A call like range(3) should give you 0, 1, 2, 3. */
+
+  // boolean conversion.
+  nuzzle: function nuzzle(value) {
+    return Mewlix.Op.toBool(value);
+  },
+
+  // number conversion.
+  slap: function slap(value) {
+    const num = Number(value);
+    if (Number.isNaN(num)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Value cannot be converted to a number: ${value}`);
+    }
+    return num;
+  },
+
+  // akin to python's range().
+  // count(3) should give you 0, 1, 2, 3.
+  // count(1, 3) should give you 1, 2, 3.
+  // count(3, 1) should give you 3, 2, 1.
+  count: function count(start = 0, end) {
     if (end === undefined) {
       end = start;
       start = 0;
     }
 
+    start = Mewlix.Base.slap(start);
+    end   = Mewlix.Base.slap(end);
+
     const array = [];
     if (start < end) {
-      /* A call like range(0, 3) should give you 0, 1, 2, 3. */
       for (let count = start; count <= end; count++) {
         array.push(count);
       }
     }
     else {
-      /* A call like range(3, 0) should give you 3, 2, 1, 0. */
       for (let count = start; count >= end; count--) {
         array.push(count);
       }
