@@ -452,39 +452,39 @@ Mewlix.deepcopy = function deepcopy(value) {
 // It's the standard in Mewlix, after all.
 
 Mewlix.Base = {
-  // string conversion.
+  // String conversion.
   purr: function purr(value) {
     return Mewlix.purrify(value);
   },
 
-  // substring.
+  // Substring.
   tear_apart: function tear_apart(str, start, end) {
     return Mewlix.purrify(str).substring(start, end);
   },
 
-  // to lower.
+  // To lower.
   push_down: function push_down(str) {
     return Mewlix.purrify(str).toLowerCase();
   },
 
-  // to upper.
+  // To upper.
   push_up: function push_up(str) {
     return Mewlix.purrify(str).toUpperCase();
   },
 
-  // string indexing.
+  // String indexing.
   poke_around: function poke_around(str, index = 0) {
     // If (typeof index !== number) this returns undefined.
     // I think that's acceptable behavior...?
     return Mewlix.purrify(str)[index];
   },
 
-  // boolean conversion.
+  // Boolean conversion.
   nuzzle: function nuzzle(value) {
     return Mewlix.Op.toBool(value);
   },
 
-  // number conversion.
+  // Number conversion.
   slap: function slap(value) {
     const num = Number(value);
     if (Number.isNaN(num)) {
@@ -494,7 +494,7 @@ Mewlix.Base = {
     return num;
   },
 
-  // akin to python's range().
+  // Akin to python's range().
   // count(3) should give you 0, 1, 2, 3.
   // count(1, 3) should give you 1, 2, 3.
   // count(3, 1) should give you 3, 2, 1.
