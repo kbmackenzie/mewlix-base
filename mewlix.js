@@ -198,13 +198,14 @@ Mewlix.purrifyObject = function purrifyObject(obj) {
   return `=^-x-^= [ ${entries} ]`;
 }
 
-Mewlix.purrify = function purrify(obj) {
-  if (obj === null || obj === undefined) {
+Mewlix.purrify = function purrify(value) {
+  if (typeof value === 'string') return value;
+  if (value === null || value === undefined) {
     return 'nothing';
   }
-  switch (typeof obj) {
+  switch (typeof value) {
     case 'function': return '<function>';
-    default: return obj.toString();
+    default: return value.toString();
   }
 };
 
@@ -451,6 +452,11 @@ Mewlix.deepcopy = function deepcopy(value) {
 // It's the standard in Mewlix, after all.
 
 Mewlix.Base = {
+  // string conversion.
+  purr: function purr(value) {
+    return Mewlix.purrify(value);
+  },
+
   // substring.
   tear_apart: function tear_apart(str, start, end) {
     return Mewlix.purrify(str).substring(start, end);
@@ -464,6 +470,11 @@ Mewlix.Base = {
   // to upper.
   push_up: function push_up(str) {
     return Mewlix.purrify(str).toUpperCase();
+  },
+
+  // string indexing.
+  poke_around: function poke_around(str, index = 0) {
+    return Mewlix.purrify(str)[Mewlix.Base.slap(index)];
   },
 
   // boolean conversion.
