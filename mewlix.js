@@ -474,7 +474,9 @@ Mewlix.Base = {
 
   // string indexing.
   poke_around: function poke_around(str, index = 0) {
-    return Mewlix.purrify(str)[Mewlix.Base.slap(index)];
+    // If (typeof index !== number) this returns undefined.
+    // I think that's acceptable behavior...?
+    return Mewlix.purrify(str)[index];
   },
 
   // boolean conversion.
