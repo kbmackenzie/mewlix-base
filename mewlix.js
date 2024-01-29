@@ -1,6 +1,6 @@
 const Mewlix = {};
 
-/* A custom exception type. */
+// A custom exception type.
 Mewlix.ErrorCode = class ErrorCode {
   static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
   static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
@@ -35,7 +35,7 @@ Mewlix.MewlixError = class MewlixError extends Error {
   }
 }
 
-/* Mewlix's base object class. */
+// Mewlix's base object class.
 Mewlix.MewlixObject = class MewlixObject {
   valueOf() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -43,7 +43,7 @@ Mewlix.MewlixObject = class MewlixObject {
   }
 };
 
-/* A namespace for modules. */
+// A namespace for modules.
 Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   constructor(name) {
     super();
@@ -72,10 +72,10 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   }
 };
 
-/* A default namespace for all modules. */
+// A default namespace for all modules.
 Mewlix.Modules = new Mewlix.Namespace('default');
 
-/* Mewlix's shelves -- which work like stacks. */
+// Mewlix's shelves -- which work like stacks.
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
   get box() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -162,7 +162,7 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
   }
 }
 
-/* Mewlix's box class! */
+// Mewlix's box class!
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   get box() {
     return this;
@@ -180,10 +180,10 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   }
 };
 
-/* Mewlix's clowder base class! */
+// Mewlix's clowder base class!
 Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
-  /* Empty definition.
-   * This class exists mostly to differentiate boxes and clowders. */
+  // Empty definition.
+  // This class exists mostly to differentiate boxes and clowders.
 }
 
 Mewlix.purrifyArray = function purrifyArray(arr) {
@@ -208,7 +208,7 @@ Mewlix.purrify = function purrify(obj) {
   }
 };
 
-/* Utility. */
+// Utility.
 const typeCheck = function typeCheck(value, targetType) {
   if (typeof value === targetType) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -225,7 +225,7 @@ const stackCheck = function stackCheck(x) {
     `Expected shelf; received value of type "${typeof x}": ${x}`);
 };
 
-/* Numeric comparisons */
+// Numeric comparisons
 Mewlix.Comparison = class Comparison {
   static LessThan    = new Comparison('<'  , -1);
   static EqualTo     = new Comparison('==' ,  0);
@@ -249,9 +249,9 @@ Mewlix.Comparison = class Comparison {
   }
 };
 
-/* Basic operations. */
+// Basic operations.
 Mewlix.Op = {
-  /* Arithmetic operations: */
+  // Arithmetic operations:
   add: function add(a, b) {
     typeCheck(a, 'number');
     typeCheck(a, 'number');
@@ -297,7 +297,7 @@ Mewlix.Op = {
     return -a;
   },
 
-  /* Comparison: */
+  // Comparison:
   isEqual: function isEqual(a, b) {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -308,7 +308,7 @@ Mewlix.Op = {
     return a === b;
   },
 
-  /* Conversion: */
+  // Conversion:
   toBool: function toBool(x) {
     if (x instanceof Mewlix.MewlixStack) return !(x instanceof Mewlix.StackBottom);
     switch (typeof x) {
@@ -319,7 +319,7 @@ Mewlix.Op = {
     }
   },
 
-  /* Boolean operations: */
+  // Boolean operations:
   not: function not(a) {
     return !Mewlix.Op.toBool(a);
   },
@@ -330,12 +330,12 @@ Mewlix.Op = {
     return toBool(a) ? fb() : a;
   },
 
-  /* Ternary operator: */
+  // Ternary operator:
   ternary: function ternary(condition, fa, fb) {
     return Mewlix.Op.toBool(condition) ? fa() : fb();
   },
 
-  /* Numeric comparison: */
+  // Numeric comparison:
   compare: function compare(a, b) {
     typeCheck(a, 'number');
     typeCheck(b, 'number');
@@ -343,7 +343,7 @@ Mewlix.Op = {
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
   },
 
-  /* Stack operations: */
+  // Stack operations:
   peek: function peek(shelf) {
     stackCheck(shelf);
     return shelf.peek();
@@ -357,7 +357,7 @@ Mewlix.Op = {
     return shelf.push(value);
   },
 
-  /* Miscellaneous operations: */
+  // Miscellaneous operations:
   length: function length(value) {
     if (value instanceof Mewlix.MewlixStack) return value.length();
     if (typeof value === 'string') return value.length;
@@ -370,7 +370,7 @@ Mewlix.Op = {
     return Mewlix.purrify(a) + Mewlix.purrify(b);
   },
 
-  /* Reflection: */
+  // Reflection:
   typeOf: function typeOf(value) {
     if (value instanceof Mewlix.MewlixStack) return 'shelf';
     if (value instanceof Mewlix.MewlixBox) return 'box';
@@ -387,7 +387,7 @@ Mewlix.Op = {
     }
   },
 
-  /* Box Operations: */
+  // Box Operations:
   pairs: function pairs(value) {
     if (!(value instanceof Mewlix.MewlixBox)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -399,7 +399,7 @@ Mewlix.Op = {
   },
 }
 
-/* Watch/Pounce: A little wrapper around try/catch. */
+// Watch/Pounce: A little wrapper around try/catch.
 Mewlix.watchPounce = async function watchPounce(watch, pounce) {
   try {
     await watch();
@@ -416,7 +416,7 @@ Mewlix.watchPounce = async function watchPounce(watch, pounce) {
   }
 };
 
-/* Deep-copying utils. */
+// Deep-copying utils.
 Mewlix.deepcopyShelf = function deepcopyShelf(shelf) {
   const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
   return Mewlix.MewlixStack.fromArray(copy);
@@ -444,7 +444,7 @@ Mewlix.deepcopy = function deepcopy(value) {
 
 
 // -------------------------------------------------------
-/* Base library. */
+// Base library.
 // -------------------------------------------------------
 
 // The functions in the base library use snake-case intentionally.
@@ -509,13 +509,13 @@ Mewlix.Base = {
   },
 };
 
-/* Intentionally adding the Math namespace to the Mewlix standard library.
- * It's purely a copy by reference. */
+// Intentionally adding the Math namespace to the Mewlix standard library.
+// It's purely a copy by reference.
 Mewlix.Base.math = Math;
 
-/* Freezing the base library, as it's going to be fully accessible inside
- * every Mewlix module. It shouldn't be modifiable. */
+// Freezing the base library, as it's going to be fully accessible inside
+// every Mewlix module. It shouldn't be modifiable.
 Object.freeze(Mewlix.Base);
 
-/* Add to globalThis -- make it available globally. This is necessary. */
+// Add to globalThis -- make it available globally. This is necessary.
 globalThis.Mewlix = Mewlix;
