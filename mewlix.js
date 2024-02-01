@@ -6,8 +6,10 @@ Mewlix.ErrorCode = class ErrorCode {
   static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
   static DivideByZero   = new ErrorCode('DivideByZero'  , 3);
   static InvalidImport  = new ErrorCode('InvalidImport' , 4);
-  static CriticalError  = new ErrorCode('CriticalError' , 8);
-  static ExternalError  = new ErrorCode('ExternalError' , 9);
+  static BadConversion  = new ErrorCode('BadConversion' , 5);
+  static CatOnComputer  = new ErrorCode('CatOnComputer' , 6);
+  static CriticalError  = new ErrorCode('CriticalError' , 7);
+  static ExternalError  = new ErrorCode('ExternalError' , 8);
 
   constructor(name, id) {
     this.name = name;
@@ -488,7 +490,7 @@ Mewlix.Base = {
   slap: function slap(value) {
     const num = Number(value);
     if (Number.isNaN(num)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
         `Value cannot be converted to a number: ${value}`);
     }
     return num;
