@@ -1,6 +1,8 @@
 const Mewlix = {};
 
-// A custom exception type.
+// -----------------------------------------------------
+// MewlixError -> Custom error type.
+// -----------------------------------------------------
 Mewlix.ErrorCode = class ErrorCode {
   static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
   static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
@@ -37,7 +39,9 @@ Mewlix.MewlixError = class MewlixError extends Error {
   }
 }
 
-// Mewlix's base object class.
+// -----------------------------------------------------
+// MewlixObject -> Base object class.
+// -----------------------------------------------------
 Mewlix.MewlixObject = class MewlixObject {
   valueOf() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -45,7 +49,9 @@ Mewlix.MewlixObject = class MewlixObject {
   }
 };
 
-// A namespace for modules.
+// -----------------------------------------------------
+// Mewlix.Namespace -> Container for modules.
+// -----------------------------------------------------
 Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   constructor(name) {
     super();
@@ -74,10 +80,14 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   }
 };
 
-// A default namespace for all modules.
+// -----------------------------------------------------
+// Mewlix.Modules -> Default module container.
+// -----------------------------------------------------
 Mewlix.Modules = new Mewlix.Namespace('default');
 
-// Mewlix's shelves -- which work like stacks.
+// -----------------------------------------------------
+// Shelf/Stack -> Mewlix's 'list' type.
+// -----------------------------------------------------
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
   get box() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -164,7 +174,9 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
   }
 }
 
-// Mewlix's box class!
+// -----------------------------------------------------
+// MewlixBox -> Mewlix's associative array.
+// -----------------------------------------------------
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   get box() {
     return this;
@@ -182,12 +194,17 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
   }
 };
 
-// Mewlix's clowder base class!
+// -----------------------------------------------------
+// MewlixClowder -> Clowder base class.
+// -----------------------------------------------------
 Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
   // Empty definition.
   // This class exists mostly to differentiate boxes and clowders.
 }
 
+// -----------------------------------------------------
+// String utils.
+// -----------------------------------------------------
 Mewlix.purrifyArray = function purrifyArray(arr) {
   const items = arr.map(Mewlix.purrify).join(', ');
   return `[${items}]`;
@@ -211,7 +228,9 @@ Mewlix.purrify = function purrify(value) {
   }
 };
 
-// Utility.
+// -----------------------------------------------------
+// Type utils.
+// -----------------------------------------------------
 const typeCheck = function typeCheck(value, targetType) {
   if (typeof value === targetType) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -228,7 +247,9 @@ const stackCheck = function stackCheck(x) {
     `Expected shelf; received value of type "${typeof x}": ${x}`);
 };
 
-// Numeric comparisons
+// -----------------------------------------------------
+// Numeric comparisons.
+// -----------------------------------------------------
 Mewlix.Comparison = class Comparison {
   static LessThan    = new Comparison('<'  , -1);
   static EqualTo     = new Comparison('==' ,  0);
@@ -252,7 +273,9 @@ Mewlix.Comparison = class Comparison {
   }
 };
 
+// -----------------------------------------------------
 // Basic operations.
+// -----------------------------------------------------
 Mewlix.Op = {
   // Arithmetic operations:
   add: function add(a, b) {
@@ -402,6 +425,9 @@ Mewlix.Op = {
   },
 }
 
+// -----------------------------------------------------
+// Statement wrappers
+// -----------------------------------------------------
 // Watch/Pounce: A little wrapper around try/catch.
 Mewlix.watchPounce = async function watchPounce(watch, pounce) {
   try {
@@ -419,7 +445,20 @@ Mewlix.watchPounce = async function watchPounce(watch, pounce) {
   }
 };
 
-// Deep-copying utils.
+// It's Raining: A little wrapper around for/of.
+Mewlix.itsRaining = async function itsRaining(iter, callback) {
+  if (typeof iter !== 'string' || !(iter instanceof Mewlix.MewlixStack)) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `Expected 'rainable' value; received "${iter}"!`);
+  }
+  for (const item of iter) {
+    callback(item);
+  }
+}
+
+// -----------------------------------------------------
+// Deepcopying Utils
+// -----------------------------------------------------
 Mewlix.deepcopyShelf = function deepcopyShelf(shelf) {
   const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
   return Mewlix.MewlixStack.fromArray(copy);
@@ -444,6 +483,19 @@ Mewlix.deepcopy = function deepcopy(value) {
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     `Invalid object in Mewlix context - object isn't an instance of Mewlix.MewlixBox: ${value}`);
 };
+
+// -----------------------------------------------------
+// IO:
+// -----------------------------------------------------
+Mewlix.meow = function meow(_) {
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
+    "Core function 'Mewlix.meow' hasn't been implemented!");
+}
+
+Mewlix.listen = function listen(_) {
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
+    "Core function 'Mewlix.listen' hasn't been implemented!");
+}
 
 
 // -------------------------------------------------------
@@ -532,5 +584,8 @@ Mewlix.Base.math = Math;
 // every Mewlix module. It shouldn't be modifiable.
 Object.freeze(Mewlix.Base);
 
+// -------------------------------------------------------
+// Final Touches
+// -------------------------------------------------------
 // Add to globalThis -- make it available globally. This is necessary.
 globalThis.Mewlix = Mewlix;
