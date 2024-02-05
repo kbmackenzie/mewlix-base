@@ -63,20 +63,20 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     this.name = name;
   }
 
-  addModule(path, func) {
-    if (this.modules.has(path)) {
+  addModule(key, func) {
+    if (this.modules.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
-        `Double import: The module "${path}" has already been imported!`);
+        `Duplicate key: A module with the key "path" has already been imported!`);
     }
-    this.modules.set(path, func);
+    this.modules.set(key, func);
   }
 
-  getModule(path) {
-    if (!this.modules.has(path)) {
+  getModule(key) {
+    if (!this.modules.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
-        `The module "${path}" doesn't exist or hasn't been properly loaded!`);
+        `The module "${key}" doesn't exist or hasn't been properly loaded!`);
     }
-    return this.modules.get(path);
+    return this.modules.get(key);
   }
 };
 
