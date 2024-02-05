@@ -350,10 +350,10 @@ Mewlix.Op = {
     return !Mewlix.Op.toBool(a);
   },
   or: function or(a, fb) {
-    return toBool(a) ? a : fb();
+    return Mewlix.Op.toBool(a) ? a : fb();
   },
   and: function and(a, fb) {
-    return toBool(a) ? fb() : a;
+    return Mewlix.Op.toBool(a) ? fb() : a;
   },
 
   // Ternary operator:
@@ -454,6 +454,12 @@ Mewlix.itsRaining = async function itsRaining(iter, callback) {
   for (const item of iter) {
     callback(item);
   }
+}
+
+Mewlix.assert = function assert(expr, message) {
+  if (Mewlix.Op.toBool(expr)) return;
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,
+    `Assertion failed:`);
 }
 
 // -----------------------------------------------------
