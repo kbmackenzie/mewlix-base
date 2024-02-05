@@ -459,7 +459,7 @@ Mewlix.itsRaining = async function itsRaining(iter, callback) {
 Mewlix.assert = function assert(expr, message) {
   if (Mewlix.Op.toBool(expr)) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,
-    `Assertion failed:`);
+    `Assertion failed: ${message}`);
 }
 
 // -----------------------------------------------------
