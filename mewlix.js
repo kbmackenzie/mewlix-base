@@ -57,6 +57,7 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     super();
     this.name = name;
     this.modules = new Map();
+    this.cache = new Map();
   }
 
   setName(name) {
@@ -71,12 +72,19 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     this.modules.set(key, func);
   }
 
-  getModule(key) {
+  async getModule(key) {
     if (!this.modules.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
         `The module "${key}" doesn't exist or hasn't been properly loaded!`);
     }
-    return this.modules.get(key);
+
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
+    }
+
+    const yarnball = await this.modules.get(key)();
+    this.cache.set(key, yarnball);
+    return yarnball;
   }
 };
 
