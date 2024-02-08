@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap');
+
+.console {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 2.5rem auto 4rem;
+  margin: 0 auto;
+}
+
+.console h1 {
+  font-size: 1.2rem;
+  font-style: normal;
+}
+
+.console-text {
+  color: #fff;
+  font: 1.1rem 'Fira Mono', 'Courier New', monospace;
+}
+
+.console__header {
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 1px 5px black;
+  z-index: 1;
+}
+
+.console__content {
+  min-height: 30vh;
+  max-height: 80vh;
+  background-color: #1f1f1f;
+  overflow: scroll;
+}
+
+.console__content-lines {
+  list-style: square;
+  margin: 0;
+  padding: 1rem 2rem;
+}
+
+.console__content-lines > li {
+  margin-bottom: 0.5rem;
+}
+
+.console__input {
+  font-size: 1.1rem;
+  border: none;
+  padding: 1rem;
+  background-color: #1f1f1f;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  transition-property: background-color;
+  transition-duration: 0.25s;
+}
+
+.console__input:focus:enabled,
+.console__input:hover:enabled {
+  /* Note: As I'm removing the outline, I should add a custom appearance for focus.
+   * It's important for accessibility. */
+  outline: 0;
+  background-color: #1a1a1a;
+}
+
+@media (min-width: 60rem) {
+  .console {
+    width: 90%;
+  }
+
+  .console-text {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  .console {
+    width: 80%;
+  }
+}
