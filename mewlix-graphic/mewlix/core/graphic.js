@@ -13,6 +13,8 @@ MewlixGraphic.Color = class Color {
   }
 
   static fromHex(code) {
+    /* The compiler will take care of passing a valid string to this.
+     * No more validation is really needed. */
     if (typeof code !== 'string' || code.length < 6) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
         `Expected a valid 6-character hex string. Received ${code}.`);
