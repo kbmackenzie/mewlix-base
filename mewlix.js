@@ -10,8 +10,10 @@ Mewlix.ErrorCode = class ErrorCode {
   static InvalidImport  = new ErrorCode('InvalidImport' , 4);
   static BadConversion  = new ErrorCode('BadConversion' , 5);
   static CatOnComputer  = new ErrorCode('CatOnComputer' , 6);
-  static CriticalError  = new ErrorCode('CriticalError' , 7);
-  static ExternalError  = new ErrorCode('ExternalError' , 8);
+  static Console        = new ErrorCode('ConsoleOp'     , 7);
+  static Graphic        = new ErrorCode('GraphicOp'     , 8);
+  static CriticalError  = new ErrorCode('CriticalError' , 9);
+  static ExternalError  = new ErrorCode('ExternalError' , 10);
 
   constructor(name, id) {
     this.name = name;
@@ -597,6 +599,20 @@ Mewlix.Base.math = Math;
 // Freezing the base library, as it's going to be fully accessible inside
 // every Mewlix module. It shouldn't be modifiable.
 Object.freeze(Mewlix.Base);
+
+// -------------------------------------------------------
+// Script Loader 
+// -------------------------------------------------------
+Mewlix.scriptLoader = function scriptLoader(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.setAttribute('src', src);
+    script.addEventListener('load', resolve);
+    script.addEventListener('error', reject);
+
+    document.body.appendChild(script);
+  });
+};
 
 // -------------------------------------------------------
 // Final Touches
