@@ -10,8 +10,8 @@ Mewlix.ErrorCode = class ErrorCode {
   static InvalidImport  = new ErrorCode('InvalidImport' , 4);
   static BadConversion  = new ErrorCode('BadConversion' , 5);
   static CatOnComputer  = new ErrorCode('CatOnComputer' , 6);
-  static Console        = new ErrorCode('ConsoleOp'     , 7);
-  static Graphic        = new ErrorCode('GraphicOp'     , 8);
+  static Console        = new ErrorCode('Console'       , 7);
+  static Graphic        = new ErrorCode('Graphic'       , 8);
   static CriticalError  = new ErrorCode('CriticalError' , 9);
   static ExternalError  = new ErrorCode('ExternalError' , 10);
 
