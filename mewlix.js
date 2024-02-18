@@ -258,32 +258,32 @@ const ensure = {
   number: x => {
     if (typeof x === 'number') return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected number, got ${typeof x}: ${x}!`);
+      `Expected number, got ${typeof x}: ${x}!`);
   },
   string: x => {
     if (typeof x === 'string') return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected string, got ${typeof x}: ${x}!`);
+      `Expected string, got ${typeof x}: ${x}!`);
   },
   boolean: x => {
     if (typeof x === 'boolean') return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected boolean, got ${typeof x}: ${x}!`);
+      `Expected boolean, got ${typeof x}: ${x}!`);
   },
   shelf: x => {
     if (x instanceof Mewlix.MewlixStack) return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected shelf, got ${typeof x}: ${x}!`);
+      `Expected shelf, got ${typeof x}: ${x}!`);
   },
   box: x => {
     if (x instanceof Mewlix.MewlixBox) return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected box, got ${typeof x}: ${x}!`);
+      `Expected box, got ${typeof x}: ${x}!`);
   },
   func: x => {
     if (typeof x === 'function') return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected function, got ${typeof x}: ${x}!`);
+      `Expected function, got ${typeof x}: ${x}!`);
   },
 
   all: {
