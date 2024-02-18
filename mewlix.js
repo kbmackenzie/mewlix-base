@@ -5,15 +5,14 @@ const Mewlix = {};
 // -----------------------------------------------------
 Mewlix.ErrorCode = class ErrorCode {
   static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
-  static InvalidOp      = new ErrorCode('InvalidOp'     , 2);
-  static DivideByZero   = new ErrorCode('DivideByZero'  , 3);
-  static InvalidImport  = new ErrorCode('InvalidImport' , 4);
-  static BadConversion  = new ErrorCode('BadConversion' , 5);
-  static CatOnComputer  = new ErrorCode('CatOnComputer' , 6);
-  static Console        = new ErrorCode('Console'       , 7);
-  static Graphic        = new ErrorCode('Graphic'       , 8);
-  static CriticalError  = new ErrorCode('CriticalError' , 9);
-  static ExternalError  = new ErrorCode('ExternalError' , 10);
+  static DivideByZero   = new ErrorCode('DivideByZero'  , 2);
+  static BadConversion  = new ErrorCode('BadConversion' , 3);
+  static CatOnComputer  = new ErrorCode('CatOnComputer' , 4);
+  static Console        = new ErrorCode('Console'       , 5);
+  static Graphic        = new ErrorCode('Graphic'       , 6);
+  static InvalidImport  = new ErrorCode('InvalidImport' , 7);
+  static CriticalError  = new ErrorCode('CriticalError' , 8);
+  static ExternalError  = new ErrorCode('ExternalError' , 9);
 
   constructor(name, id) {
     this.name = name;
@@ -99,9 +98,17 @@ Mewlix.Modules = new Mewlix.Namespace('default');
 // Shelf/Stack -> Mewlix's 'list' type.
 // -----------------------------------------------------
 Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
-  get box() {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      "Can't peek properties of a shelf!");
+  constructor() {
+    super();
+    Object.defineProperty(this, 'box', {
+      value: () => {
+        throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+          "Can't peek properties of a shelf!");
+      },
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
   }
 
   toString() {
@@ -132,13 +139,16 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
 }
 
 Mewlix.StackBottom = class StackBottom extends Mewlix.MewlixStack {
+  constructor() {
+    super();
+  }
+
   peek() {
     return null;
   }
 
   pop() {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOp,
-      "Invalid operation: Cannot pop empty stack!");
+    return this;
   }
 
   push(value) {
@@ -188,12 +198,16 @@ Mewlix.StackNode = class StackNode extends Mewlix.MewlixStack {
 // MewlixBox -> Mewlix's associative array.
 // -----------------------------------------------------
 Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
-  get box() {
-    return this;
-  }
-
   constructor(entries = []) {
     super();
+
+    Object.defineProperty(this, 'box', {
+      value: () => this,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
+
     for (const [key, value] of entries) {
       this[key] = value;
     }
@@ -208,8 +222,7 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
 // MewlixClowder -> Clowder base class.
 // -----------------------------------------------------
 Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
-  // Empty definition.
-  // This class exists mostly to differentiate boxes and clowders.
+  // Empty definition. This class exists mostly to differentiate boxes and clowders.
 }
 
 // -----------------------------------------------------
@@ -423,6 +436,14 @@ Mewlix.Op = {
     }
   },
 
+  instanceOf: function instanceOf(a, b) {
+    if (!(b instanceof Mewlix.MewlixObject)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected Mewlix object in operation; received "${b}"!`);
+    }
+    return a instanceof b;
+  },
+
   // Box Operations:
   pairs: function pairs(value) {
     if (!(value instanceof Mewlix.MewlixBox)) {
@@ -438,34 +459,28 @@ Mewlix.Op = {
 // -----------------------------------------------------
 // Statement wrappers
 // -----------------------------------------------------
-// Watch/Pounce: A little wrapper around try/catch.
-Mewlix.watchPounce = async function watchPounce(watch, pounce) {
-  try {
-    await watch();
-  }
-  catch (error) {
-    const errorCode = (error instanceof Mewlix.MewlixError)
-      ? error.code 
-      : Mewlix.ErrorCode.ExternalError;
-    const errorBox = new Mewlix.MewlixBox([
-      [ "name" , errorCode.name ],
-      [ "id"   , errorCode.id   ]
-    ]);
-    await pounce(errorBox);
-  }
-};
 
-// It's Raining: A little wrapper around for/of.
-Mewlix.itsRaining = async function itsRaining(iter, callback) {
+// It's Raining: Type check iterable value.
+Mewlix.rainable = function rainable(iter) {
   if (typeof iter !== 'string' || !(iter instanceof Mewlix.MewlixStack)) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Expected 'rainable' value; received "${iter}"!`);
   }
-  for (const item of iter) {
-    callback(item);
-  }
+  return rainable;
 }
 
+// Watch/Pounce: Generate 'error box'.
+Mewlix.pounceError = function pounceError(error) {
+  const errorCode = (error instanceof Mewlix.MewlixError)
+    ? error.code 
+    : Mewlix.ErrorCode.ExternalError;
+  return new Mewlix.MewlixBox([
+    [ "name" , errorCode.name ],
+    [ "id"   , errorCode.id   ]
+  ]);
+}
+
+// Assert: Self-explanatory, inspired by C's assert() macro.
 Mewlix.assert = function assert(expr, message) {
   if (Mewlix.Op.toBool(expr)) return;
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,

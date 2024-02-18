@@ -1,38 +1,70 @@
 const MewlixGraphic = {};
 
-MewlixGraphic.Color = class Color {
-  constructor(r, g, b) {
-    this.red = r || 0;
-    this.green = g || 0;
-    this.blue = b || 0;
+MewlixGraphic.Vector2 = class Vector2 {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
   }
 
   toString() {
-    const toHex = decimal => decimal.toString(16);
-    return `#${toHex(this.red)}${toHex(this.green)}${toHex(this.blue)}`;
+    return `Vector2(${this.x}, ${this.y})`
   }
 
-  static fromHex(code) {
-    /* The compiler will take care of passing a valid string to this.
-     * No more validation is really needed. */
-    if (typeof code !== 'string' || code.length < 6) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-        `Expected a valid 6-character hex string. Received ${code}.`);
-    }
-    const decode = hex => parseInt(hex, 16);
-    return new Color(
-      decode(code.slice(0, 1)),
-      decode(code.slice(2, 3)),
-      decode(code.slice(4, 5)),
-    );
+  static add(a, b) {
+    return new Vector2(a.x + b.x, a.y + b.y);
+  }
+
+  static mul(a, b) {
+    return new Vector2(a.x * b.x, a.y * b.y);
+  }
+}
+
+
+// ---------------------------------------------------------
+// Canvas:
+// ---------------------------------------------------------
+const tileSize = 16;
+const canvasRows = 16;
+const canvasColumns = 16;
+
+MewlixGraphic.TileCanvas = class TileCanvas {
+  constructor(rows, columns) {
+    this.rows = rows;
+    this.columns = columns;
+    this.matrix = Array(rows * columns);
+  }
+
+  setTile(row, col, tile) {
+    if (!this.isValidSlot(row, col)) return;
+    this.matrix[row][col] = tile;
+  }
+
+  isValidSlot(row, col) {
+    return row >= 0 && row < this.rows && col >= 0 && col < this.cols;
+  }
+}
+
+MewlixGraphic.Tile = class Tile {
+  constructor(image) {
   }
 }
 
 MewlixGraphic.canvasInfo = {
-  width: 1920,
-  height: 1080,
   background: new MewlixGraphic.Color(),
 };
 
-/* Add to global context: */
-Mewlix.Graphic = MewlixGraphic;
+// ----------------------------------------------------------------------------------------
+
+/* Commenting out for debugging:
+const canvasElement = document.getElementById('mewlix-canvas');
+const drawingContext = canvasElement.getContext('2d');
+
+const draw = () => undefined;
+
+// Add event listeners:
+window.addEventListener('load', draw)
+
+// Add to global context:
+Mewlix.Graphic = MewlixGraphic; */
+
+globalThis.PixelCanvas = PixelCanvas;
