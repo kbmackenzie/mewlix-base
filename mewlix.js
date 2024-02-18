@@ -254,20 +254,50 @@ Mewlix.purrify = function purrify(value) {
 // -----------------------------------------------------
 // Type utils.
 // -----------------------------------------------------
-const typeCheck = function typeCheck(value, targetType) {
-  if (typeof value === targetType) return;
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-    `Expected value of type ${targetType}, received ${typeof value}!`);
+const ensure = {
+  number: x => {
+    if (typeof x === 'number') return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected number, got ${typeof x}: ${x}!`);
+  },
+  string: x => {
+    if (typeof x === 'string') return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected string, got ${typeof x}: ${x}!`);
+  },
+  boolean: x => {
+    if (typeof x === 'boolean') return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected boolean, got ${typeof x}: ${x}!`);
+  },
+  shelf: x => {
+    if (x instanceof Mewlix.MewlixStack) return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected shelf, got ${typeof x}: ${x}!`);
+  },
+  box: x => {
+    if (x instanceof Mewlix.MewlixBox) return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected box, got ${typeof x}: ${x}!`);
+  },
+  func: x => {
+    if (typeof x === 'function') return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected function, got ${typeof x}: ${x}!`);
+  },
+
+  all: {
+    number:  (...values) => values.forEach(ensure.number),
+    string:  (...values) => values.forEach(ensure.string),
+    boolean: (...values) => values.forEach(ensure.boolean),
+    shelf:   (...values) => values.forEach(ensure.shelf),
+    box:     (...values) => values.forEach(ensure.box),
+    func:    (...values) => values.forEach(ensure.func),
+  },
 };
 
 const isNothing = function isNothing(x) {
   return x === null || x === undefined;
-};
-
-const stackCheck = function stackCheck(x) {
-  if (x instanceof Mewlix.MewlixStack) return;
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-    `Expected shelf; received value of type "${typeof x}": ${x}`);
 };
 
 // -----------------------------------------------------
@@ -302,24 +332,19 @@ Mewlix.Comparison = class Comparison {
 Mewlix.Op = {
   // -- Arithmetic operations:
   add: function add(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(a, 'number');
+    ensure.all.number(a, b);
     return a + b;
   },
   sub: function sub(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
+    ensure.all.number(a, b);
     return a - b;
   },
   mul: function mul(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
+    ensure.all.number(a, b);
     return a * b;
   },
   div: function div(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
-
+    ensure.all.number(a, b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -327,9 +352,7 @@ Mewlix.Op = {
     return a / b;
   },
   mod: function mod(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
-
+    ensure.all.number(a, b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -337,12 +360,11 @@ Mewlix.Op = {
     return a % b;
   },
   pow: function pow(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
+    ensure.all.number(a, b);
     return a ** b;
   },
   negate: function negate(a) {
-    typeCheck(a, 'number');
+    ensure.all.number(a, b);
     return -a;
   },
 
@@ -386,23 +408,22 @@ Mewlix.Op = {
 
   // -- Numeric comparison:
   compare: function compare(a, b) {
-    typeCheck(a, 'number');
-    typeCheck(b, 'number');
+    ensure.all.number(a, b);
     if (a === b) return Mewlix.Comparison.EqualTo;
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
   },
 
   // -- Stack operations:
   peek: function peek(shelf) {
-    stackCheck(shelf);
+    ensure.shelf(shelf);
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    stackCheck(shelf);
+    ensure.shelf(shelf);
     return shelf.pop();
   },
   push: function push(shelf, value = null) {
-    stackCheck(shelf);
+    ensure.shelf(shelf);
     return shelf.push(value);
   },
 
@@ -437,19 +458,13 @@ Mewlix.Op = {
   },
 
   instanceOf: function instanceOf(a, b) {
-    if (!(b instanceof Mewlix.MewlixObject)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected Mewlix object in operation; received "${b}"!`);
-    }
+    ensure.all.box(a, b);
     return a instanceof b;
   },
 
   // -- Box Operations:
   pairs: function pairs(value) {
-    if (!(value instanceof Mewlix.MewlixBox)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Can't retrieve entries: Expected box, got value of type "${typeof value}": ${value}`);
-    }
+    ensure.box(value);
     return Mewlix.MewlixStack.fromArray(Object.entries(value).map(
       ([key, value]) => new Mewlix.MewlixBox([["key", key], ["value", value]])
     ));
@@ -546,35 +561,37 @@ Mewlix.Base = {
   /* The 'substring' function. Indices are inclusive.
    * type: string, int, int => string */
   tear_apart: function tear_apart(str, start, end) {
-    typeCheck(str, 'string'); typeCheck(start, 'number'); typeCheck(end, 'number');
+    ensure.string(str);
+    ensure.all.number(start, end);
     return str.substring(start, end);
   },
 
   /* Converts a string to lowercase.
    * type: string => string */
   push_down: function push_down(str) {
-    typeCheck(str, 'string');
+    ensure.string(str);
     return str.toLowerCase();
   },
 
   /* Converts a string to full upper-case.
    * type: string => string */
   push_up: function push_up(str) {
-    typeCheck(str, 'string');
+    ensure.string(str);
     return str.toUpperCase();
   },
 
   /* Index into a shelf or string.
    * type: shelf | string, int => shelf | string */
   poke: function poke(value, index = 0) {
-    typeCheck(index, 'number');
+    ensure.number(index);
     if (value instanceof Mewlix.MewlixStack) {
       for (let i = 0; i < index; i++) {
         value = value.pop();
       }
       return value;
     }
-    typeCheck(value, 'string');
+
+    ensure.string(value);
     return value[index];
   },
 
@@ -606,8 +623,7 @@ Mewlix.Base = {
       end = start;
       start = 0;
     }
-    typeCheck(start, 'number');
-    typeCheck(end, 'number');
+    ensure.all.number(start, end);
 
     const array = [];
     if (start < end) {
@@ -626,8 +642,8 @@ Mewlix.Base = {
   /* Applies callback to each item in the shelf, returning a new shelf.
    * type: shelf, function => shelf */
   map: function map(shelf, callback) {
-    typeCheck(callback, 'function');
-    stackCheck(shelf);
+    ensure.shelf(shelf);
+    ensure.func(callback);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -639,8 +655,8 @@ Mewlix.Base = {
   /* Filters element in the shelf by a predicate. Returns a new shelf.
    * type: shelf, function => shelf */
   filter: function filter(shelf, predicate) {
-    typeCheck(predicate, 'function');
-    stackCheck(shelf);
+    ensure.shelf(shelf);
+    ensure.func(predicate);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -654,8 +670,8 @@ Mewlix.Base = {
   /* Folds over a shelf.
    * type: shelf, function, any => shelf */
   fold: function fold(shelf, callback, initial) {
-    typeCheck(callback, 'function');
-    stackCheck(shelf);
+    ensure.shelf(shelf);
+    ensure.func(callback);
 
     let accumulator = initial;
     for (const value of shelf) {
