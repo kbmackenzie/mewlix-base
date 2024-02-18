@@ -300,7 +300,7 @@ Mewlix.Comparison = class Comparison {
 // Basic operations.
 // -----------------------------------------------------
 Mewlix.Op = {
-  // Arithmetic operations:
+  // -- Arithmetic operations:
   add: function add(a, b) {
     typeCheck(a, 'number');
     typeCheck(a, 'number');
@@ -346,7 +346,7 @@ Mewlix.Op = {
     return -a;
   },
 
-  // Comparison:
+  // -- Comparison:
   isEqual: function isEqual(a, b) {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -368,7 +368,7 @@ Mewlix.Op = {
     }
   },
 
-  // Boolean operations:
+  // -- Boolean operations:
   not: function not(a) {
     return !Mewlix.Op.toBool(a);
   },
@@ -379,12 +379,12 @@ Mewlix.Op = {
     return Mewlix.Op.toBool(a) ? fb() : a;
   },
 
-  // Ternary operator:
+  // -- Ternary operator:
   ternary: function ternary(condition, fa, fb) {
     return Mewlix.Op.toBool(condition) ? fa() : fb();
   },
 
-  // Numeric comparison:
+  // -- Numeric comparison:
   compare: function compare(a, b) {
     typeCheck(a, 'number');
     typeCheck(b, 'number');
@@ -392,7 +392,7 @@ Mewlix.Op = {
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
   },
 
-  // Stack operations:
+  // -- Stack operations:
   peek: function peek(shelf) {
     stackCheck(shelf);
     return shelf.peek();
@@ -406,7 +406,7 @@ Mewlix.Op = {
     return shelf.push(value);
   },
 
-  // Miscellaneous operations:
+  // -- Miscellaneous operations:
   length: function length(value) {
     if (value instanceof Mewlix.MewlixStack) return value.length();
     if (typeof value === 'string') return value.length;
@@ -419,7 +419,7 @@ Mewlix.Op = {
     return Mewlix.purrify(a) + Mewlix.purrify(b);
   },
 
-  // Reflection:
+  // -- Reflection:
   typeOf: function typeOf(value) {
     if (value instanceof Mewlix.MewlixStack) return 'shelf';
     if (value instanceof Mewlix.MewlixBox) return 'box';
@@ -444,7 +444,7 @@ Mewlix.Op = {
     return a instanceof b;
   },
 
-  // Box Operations:
+  // -- Box Operations:
   pairs: function pairs(value) {
     if (!(value instanceof Mewlix.MewlixBox)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -533,43 +533,59 @@ Mewlix.listen = function listen(_) {
 // Base library.
 // -------------------------------------------------------
 
-// The functions in the base library use snake-case intentionally.
-// It's the standard in Mewlix, after all.
+/* Note: The functions in the base library use snake-case intentionally.
+ * They're visible in Mewlix, and I don't want to do name-mangling. */
 
 Mewlix.Base = {
-  // String conversion.
+  /* Converts any value to a string.
+   * type: any => string        */
   purr: function purr(value) {
     return Mewlix.purrify(value);
   },
 
-  // Substring.
+  /* The 'substring' function. Indices are inclusive.
+   * type: string, int, int => string */
   tear_apart: function tear_apart(str, start, end) {
-    return Mewlix.purrify(str).substring(start, end);
+    typeCheck(str, 'string'); typeCheck(start, 'number'); typeCheck(end, 'number');
+    return str.substring(start, end);
   },
 
-  // To lower.
+  /* Converts a string to lowercase.
+   * type: string => string */
   push_down: function push_down(str) {
-    return Mewlix.purrify(str).toLowerCase();
+    typeCheck(str, 'string');
+    return str.toLowerCase();
   },
 
-  // To upper.
+  /* Converts a string to full upper-case.
+   * type: string => string */
   push_up: function push_up(str) {
-    return Mewlix.purrify(str).toUpperCase();
+    typeCheck(str, 'string');
+    return str.toUpperCase();
   },
 
-  // String indexing.
-  poke_around: function poke_around(str, index = 0) {
-    // If (typeof index !== number) this returns undefined.
-    // I think that's acceptable behavior...?
-    return Mewlix.purrify(str)[index];
+  /* Index into a shelf or string.
+   * type: shelf | string, int => shelf | string */
+  poke: function poke(value, index = 0) {
+    typeCheck(index, 'number');
+    if (value instanceof Mewlix.MewlixStack) {
+      for (let i = 0; i < index; i++) {
+        value = value.pop();
+      }
+      return value;
+    }
+    typeCheck(value, 'string');
+    return value[index];
   },
 
-  // Boolean conversion.
+  /* Boolean conversion.
+   * type: any => boolean */
   nuzzle: function nuzzle(value) {
     return Mewlix.Op.toBool(value);
   },
 
-  // Number conversion.
+  /* Number conversion.
+   * type: any => number */
   slap: function slap(value) {
     const num = Number(value);
     if (Number.isNaN(num)) {
@@ -579,18 +595,19 @@ Mewlix.Base = {
     return num;
   },
 
-  // Akin to python's range().
-  // count(3) should give you 0, 1, 2, 3.
-  // count(1, 3) should give you 1, 2, 3.
-  // count(3, 1) should give you 3, 2, 1.
+  /* Akin to python's range(). It aims be a little smart:
+   * count(3) should give you 0, 1, 2, 3.
+   * count(1, 3) should give you 1, 2, 3.
+   * count(3, 1) should give you 3, 2, 1.
+   *
+   * type: int, int => int */
   count: function count(start = 0, end) {
     if (end === undefined) {
       end = start;
       start = 0;
     }
-
-    start = Mewlix.Base.slap(start);
-    end   = Mewlix.Base.slap(end);
+    typeCheck(start, 'number');
+    typeCheck(end, 'number');
 
     const array = [];
     if (start < end) {
@@ -605,15 +622,55 @@ Mewlix.Base = {
     }
     return Mewlix.MewlixStack.fromArray(array);
   },
+
+  /* Applies callback to each item in the shelf, returning a new shelf.
+   * type: shelf, function => shelf */
+  map: function map(shelf, callback) {
+    typeCheck(callback, 'function');
+    stackCheck(shelf);
+
+    let accumulator = [];
+    for (const value of shelf) {
+      accumulator.push(callback(value));
+    }
+    return Mewlix.MewlixStack.fromArray(accumulator.reverse());
+  },
+
+  /* Filters element in the shelf by a predicate. Returns a new shelf.
+   * type: shelf, function => shelf */
+  filter: function filter(shelf, predicate) {
+    typeCheck(predicate, 'function');
+    stackCheck(shelf);
+
+    let accumulator = [];
+    for (const value of shelf) {
+      if (predicate(value)) {
+        accumulator.push(value);
+      }
+    }
+    return Mewlix.MewlixStack.fromArray(accumulator.reverse());
+  },
+
+  /* Folds over a shelf.
+   * type: shelf, function, any => shelf */
+  fold: function fold(shelf, callback, initial) {
+    typeCheck(callback, 'function');
+    stackCheck(shelf);
+
+    let accumulator = initial;
+    for (const value of shelf) {
+      accumulator = callback(accumulator, value);
+    }
+    return accumulator;
+  },
 };
 
-// Intentionally adding the Math namespace to the Mewlix standard library.
-// It's purely a copy by reference.
+/* Adding the Math namespace to the Mewlix standard library. */
 Mewlix.Base.math = Math;
 
-// Freezing the base library, as it's going to be fully accessible inside
-// every Mewlix module. It shouldn't be modifiable.
+/* Freezing the base library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Base);
+
 
 // -------------------------------------------------------
 // Script Loader 
