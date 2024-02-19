@@ -33,21 +33,18 @@ html, body {
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
-.project-name {
+.slight-fade {
   opacity: 60%;
 }
 
-.console__input,
-.console__header {
+.console__footer, .console__header {
   background-color: #121212;
 }
 
 .console__content {
   width: 100%;
-  min-height: 30%;
   padding: 1rem 2rem;
   background-color: #000;
-
   word-wrap: break-word;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -59,16 +56,33 @@ html, body {
 
 .console__content li {
   display: block;
-  margin-left: 0;
   margin-bottom: 1rem;
 }
 
+.console__footer {
+  display: grid;
+  grid-template-columns: auto minmax(6rem, 10%);
+}
+
 .console__input {
-  display: inline-block; 
+  width: 100%;
+  height: 100%;
   border: none;
   padding: 1rem 2rem;
   overflow-x: hidden;
   resize: none;
+  background-color: inherit;
+}
+
+.console__button {
+  background-color: inherit;
+}
+
+.console__button-circle {
+  width: 3rem;
+  height: 3rem;
+  background-color: #ccc;
+  border-radius: 50%;
 }
 
 .console__input:hover:enabled,
