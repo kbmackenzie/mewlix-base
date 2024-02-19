@@ -76,12 +76,3 @@ html, body {
   background-color: #171717;
   transition: 1s;
 }
-
-@media (min-width: 60rem) {
-  .console {
-    width: 80%;
-    height: 80%;
-    border-radius: 2rem;
-    overflow: hidden;
-  }
-}
