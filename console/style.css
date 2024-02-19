@@ -3,6 +3,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 html, body {
@@ -32,6 +33,10 @@ html, body {
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
+.project-name {
+  opacity: 60%;
+}
+
 .console__input,
 .console__header {
   background-color: #121212;
@@ -40,12 +45,12 @@ html, body {
 .console__content {
   width: 100%;
   min-height: 30%;
-  padding: 1rem 3rem;
+  padding: 1rem 2rem;
   background-color: #000;
 
   word-wrap: break-word;
-  word-break: break-all;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .console__content ul {
@@ -53,15 +58,15 @@ html, body {
 }
 
 .console__content li {
+  display: block;
+  margin-left: 0;
   margin-bottom: 1rem;
 }
 
 .console__input {
   display: inline-block; 
-  width: 100%;
-  max-width: 100%;
   border: none;
-  padding: 0 3rem;
+  padding: 1rem 2rem;
   overflow-x: hidden;
 }
 
