@@ -132,7 +132,7 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
     if (a instanceof Mewlix.StackBottom) return b instanceof Mewlix.StackBottom;
     if (b instanceof Mewlix.StackBottom) return a instanceof Mewlix.StackBottom;
 
-    return Mewlix.Op.isEqual(a.peek(), b.peek()) && MewlixStack.isEqual(a.pop(), b.pop());
+    return Mewlix.Compare.isEqual(a.peek(), b.peek()) && MewlixStack.isEqual(a.pop(), b.pop());
   }
 
   static fromArray(arr) {
@@ -379,16 +379,16 @@ Mewlix.Arithmetic = {
 
 Mewlix.Boolean = {
   not: function not(a) {
-    return !Mewlix.Op.toBool(a);
+    return !Mewlix.Conversion.toBool(a);
   },
   or: function or(a, fb) {
-    return Mewlix.Op.toBool(a) ? a : fb();
+    return Mewlix.Conversion.toBool(a) ? a : fb();
   },
   and: function and(a, fb) {
-    return Mewlix.Op.toBool(a) ? fb() : a;
+    return Mewlix.Conversion.toBool(a) ? fb() : a;
   },
   ternary: function ternary(condition, fa, fb) {
-    return Mewlix.Op.toBool(condition) ? fa() : fb();
+    return Mewlix.Conversion.toBool(condition) ? fa() : fb();
   },
 };
 
@@ -479,6 +479,14 @@ Mewlix.Conversion = {
       default         : return true;
     }
   },
+  toNumber: function toNumber(x) {
+    const number = Number(x);
+    if (Number.isNaN(number)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
+        `Value cannot be converted to a number: ${x}`);
+    }
+    return number;
+  }
 };
 
 // -----------------------------------------------------
@@ -505,7 +513,7 @@ Mewlix.Inner = {
   },
   // Assert: Self-explanatory, inspired by C's assert() macro.
   assert: function assert(expr, message) {
-    if (Mewlix.Op.toBool(expr)) return;
+    if (Mewlix.Conversion.toBool(expr)) return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,
       `Assertion failed: ${message}`);
   }
@@ -638,18 +646,13 @@ Mewlix.Base = {
   /* Boolean conversion.
    * type: any => boolean */
   nuzzle: function nuzzle(value) {
-    return Mewlix.Op.toBool(value);
+    return Mewlix.Conversion.toBool(value);
   },
 
   /* Number conversion.
    * type: any => number */
   slap: function slap(value) {
-    const num = Number(value);
-    if (Number.isNaN(num)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
-        `Value cannot be converted to a number: ${value}`);
-    }
-    return num;
+    return Mewlix.Conversion.toNumber(value);
   },
 
   /* Akin to python's range(). It aims be a little smart:
