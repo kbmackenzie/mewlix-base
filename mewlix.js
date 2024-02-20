@@ -523,10 +523,9 @@ const deepcopyBox = function deepcopyBox(box) {
   if (box instanceof Mewlix.MewlixClowder && deepcopy in box) {
     return box.deepcopy();
   }
-  const copy = Object.entries(box).map(
+  return Mewlix.MewlixBox(Object.entries(box).map(
     ([key, value]) => [key, Mewlix.deepcopy(value)]
-  );
-  return Mewlix.MewlixBox(copy);
+  ));
 };
 
 Mewlix.deepcopy = function deepcopy(value) {
