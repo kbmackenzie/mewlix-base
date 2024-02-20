@@ -111,6 +111,11 @@ Mewlix.MewlixStack = class MewlixStack extends Mewlix.MewlixObject {
     });
   }
 
+  toArray() {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
+      "Shelf error: 'toArray()' method not implemented!");
+  }
+
   toString() {
     return Mewlix.purrifyArray(this.toArray());
   }
@@ -300,8 +305,12 @@ const isNothing = function isNothing(x) {
   return x === null || x === undefined;
 };
 
+// Adding utils to Mewlix object for convenience:
+Mewlix.ensure = ensure;
+Mewlix.isNothing = isNothing;
+
 // -----------------------------------------------------
-// Numeric comparisons.
+// Comparison: Enum-like class.
 // -----------------------------------------------------
 Mewlix.Comparison = class Comparison {
   static LessThan    = new Comparison('<'  , -1);
@@ -329,8 +338,7 @@ Mewlix.Comparison = class Comparison {
 // -----------------------------------------------------
 // Basic operations.
 // -----------------------------------------------------
-Mewlix.Op = {
-  // -- Arithmetic operations:
+Mewlix.Arithmetic = {
   add: function add(a, b) {
     ensure.all.number(a, b);
     return a + b;
@@ -367,8 +375,24 @@ Mewlix.Op = {
     ensure.all.number(a, b);
     return -a;
   },
+};
 
-  // -- Comparison:
+Mewlix.Boolean = {
+  not: function not(a) {
+    return !Mewlix.Op.toBool(a);
+  },
+  or: function or(a, fb) {
+    return Mewlix.Op.toBool(a) ? a : fb();
+  },
+  and: function and(a, fb) {
+    return Mewlix.Op.toBool(a) ? fb() : a;
+  },
+  ternary: function ternary(condition, fa, fb) {
+    return Mewlix.Op.toBool(condition) ? fa() : fb();
+  },
+};
+
+Mewlix.Compare = {
   isEqual: function isEqual(a, b) {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -379,41 +403,15 @@ Mewlix.Op = {
     return a === b;
   },
 
-  // Conversion:
-  toBool: function toBool(x) {
-    if (x instanceof Mewlix.MewlixStack) return !(x instanceof Mewlix.StackBottom);
-    switch (typeof x) {
-      case 'object'   : return x !== null;
-      case 'boolean'  : return x;
-      case 'undefined': return false;
-      default         : return true;
-    }
-  },
-
-  // -- Boolean operations:
-  not: function not(a) {
-    return !Mewlix.Op.toBool(a);
-  },
-  or: function or(a, fb) {
-    return Mewlix.Op.toBool(a) ? a : fb();
-  },
-  and: function and(a, fb) {
-    return Mewlix.Op.toBool(a) ? fb() : a;
-  },
-
-  // -- Ternary operator:
-  ternary: function ternary(condition, fa, fb) {
-    return Mewlix.Op.toBool(condition) ? fa() : fb();
-  },
-
   // -- Numeric comparison:
   compare: function compare(a, b) {
     ensure.all.number(a, b);
     if (a === b) return Mewlix.Comparison.EqualTo;
     return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
   },
+};
 
-  // -- Stack operations:
+Mewlix.Shelf = {
   peek: function peek(shelf) {
     ensure.shelf(shelf);
     return shelf.peek();
@@ -426,8 +424,6 @@ Mewlix.Op = {
     ensure.shelf(shelf);
     return shelf.push(value);
   },
-
-  // -- Miscellaneous operations:
   length: function length(value) {
     if (value instanceof Mewlix.MewlixStack) return value.length();
     if (typeof value === 'string') return value.length;
@@ -439,8 +435,9 @@ Mewlix.Op = {
   concat: function concat(a, b) {
     return Mewlix.purrify(a) + Mewlix.purrify(b);
   },
+};
 
-  // -- Reflection:
+Mewlix.Reflection = {
   typeOf: function typeOf(value) {
     if (value instanceof Mewlix.MewlixStack) return 'shelf';
     if (value instanceof Mewlix.MewlixBox) return 'box';
@@ -461,56 +458,68 @@ Mewlix.Op = {
     ensure.all.box(a, b);
     return a instanceof b;
   },
+};
 
-  // -- Box Operations:
+Mewlix.Box = {
   pairs: function pairs(value) {
     ensure.box(value);
     return Mewlix.MewlixStack.fromArray(Object.entries(value).map(
       ([key, value]) => new Mewlix.MewlixBox([["key", key], ["value", value]])
     ));
   },
-}
+};
+
+Mewlix.Conversion = {
+  toBool: function toBool(x) {
+    if (x instanceof Mewlix.MewlixStack) return !(x instanceof Mewlix.StackBottom);
+    switch (typeof x) {
+      case 'object'   : return x !== null;
+      case 'boolean'  : return x;
+      case 'undefined': return false;
+      default         : return true;
+    }
+  },
+};
 
 // -----------------------------------------------------
-// Statement wrappers
+// Statement built-ins
 // -----------------------------------------------------
-
-// It's Raining: Type check iterable value.
-Mewlix.rainable = function rainable(iter) {
-  if (typeof iter !== 'string' || !(iter instanceof Mewlix.MewlixStack)) {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected 'rainable' value; received "${iter}"!`);
+Mewlix.Inner = {
+  // It's Raining: Type check iterable value.
+  rainable: function rainable(iter) {
+    if (typeof iter !== 'string' || !(iter instanceof Mewlix.MewlixStack)) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Expected 'rainable' value; received "${iter}"!`);
+    }
+    return rainable;
+  },
+  // Watch/Pounce: Generate 'error box'.
+  pounceError: function pounceError(error) {
+    const errorCode = (error instanceof Mewlix.MewlixError)
+      ? error.code 
+      : Mewlix.ErrorCode.ExternalError;
+    return new Mewlix.MewlixBox([
+      [ "name" , errorCode.name ],
+      [ "id"   , errorCode.id   ]
+    ]);
+  },
+  // Assert: Self-explanatory, inspired by C's assert() macro.
+  assert: function assert(expr, message) {
+    if (Mewlix.Op.toBool(expr)) return;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,
+      `Assertion failed: ${message}`);
   }
-  return rainable;
-}
-
-// Watch/Pounce: Generate 'error box'.
-Mewlix.pounceError = function pounceError(error) {
-  const errorCode = (error instanceof Mewlix.MewlixError)
-    ? error.code 
-    : Mewlix.ErrorCode.ExternalError;
-  return new Mewlix.MewlixBox([
-    [ "name" , errorCode.name ],
-    [ "id"   , errorCode.id   ]
-  ]);
-}
-
-// Assert: Self-explanatory, inspired by C's assert() macro.
-Mewlix.assert = function assert(expr, message) {
-  if (Mewlix.Op.toBool(expr)) return;
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CatOnComputer,
-    `Assertion failed: ${message}`);
-}
+};
 
 // -----------------------------------------------------
 // Deepcopying Utils
 // -----------------------------------------------------
-Mewlix.deepcopyShelf = function deepcopyShelf(shelf) {
+const deepcopyShelf = function deepcopyShelf(shelf) {
   const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
   return Mewlix.MewlixStack.fromArray(copy);
 };
 
-Mewlix.deepcopyBox = function deepcopyBox(box) {
+const deepcopyBox = function deepcopyBox(box) {
   if (box instanceof Mewlix.MewlixClowder && deepcopy in box) {
     return box.deepcopy();
   }
@@ -523,8 +532,8 @@ Mewlix.deepcopyBox = function deepcopyBox(box) {
 Mewlix.deepcopy = function deepcopy(value) {
   if (typeof value !== 'object') return value;
 
-  if (value instanceof Mewlix.MewlixStack) { return Mewlix.deepcopyShelf(value); }
-  if (value instanceof Mewlix.MewlixBox)   { return Mewlix.deepcopyBox(value);   }
+  if (value instanceof Mewlix.MewlixStack) { return deepcopyShelf(value); }
+  if (value instanceof Mewlix.MewlixBox)   { return deepcopyBox(value);   }
 
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     `Invalid object in Mewlix context - object isn't an instance of Mewlix.MewlixBox: ${value}`);
@@ -536,13 +545,12 @@ Mewlix.deepcopy = function deepcopy(value) {
 Mewlix.meow = function meow(_) {
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     "Core function 'Mewlix.meow' hasn't been implemented!");
-}
+};
 
 Mewlix.listen = function listen(_) {
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     "Core function 'Mewlix.listen' hasn't been implemented!");
-}
-
+};
 
 // -------------------------------------------------------
 // Base library.
@@ -679,28 +687,13 @@ Mewlix.Base = {
     }
     return accumulator;
   },
-};
 
-/* Adding the Math namespace to the Mewlix standard library. */
-Mewlix.Base.math = Math;
+  /* Adding the Math namespace to the Mewlix standard library. */
+  math: Mewlix.wrap(Math),
+};
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Base);
-
-
-// -------------------------------------------------------
-// Script Loader 
-// -------------------------------------------------------
-Mewlix.scriptLoader = function scriptLoader(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.setAttribute('src', src);
-    script.addEventListener('load', resolve);
-    script.addEventListener('error', reject);
-
-    document.body.appendChild(script);
-  });
-};
 
 // -------------------------------------------------------
 // Final Touches
