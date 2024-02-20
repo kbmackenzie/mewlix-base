@@ -552,6 +552,39 @@ Mewlix.listen = function listen(_) {
     "Core function 'Mewlix.listen' hasn't been implemented!");
 };
 
+// -----------------------------------------------------
+// API:
+// -----------------------------------------------------
+Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixBox {
+  constructor(object) {
+    super();
+    this.wrapped = object;
+
+    Object.defineProperty(this, 'box', {
+      value: () => wrapped,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
+  }
+
+  toString() {
+    return this.wrapped.toString();
+  }
+
+  valueOf() {
+    return this.wrapped.valueOf();
+  }
+};
+
+Mewlix.wrap = function wrap(object) {
+  if (typeof object !== 'object') {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
+      `Special import "${object}" isn't an object!`);
+  }
+  return new Mewlix.BoxWrapper(object);
+};
+
 // -------------------------------------------------------
 // Base library.
 // -------------------------------------------------------
