@@ -238,12 +238,35 @@ Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
 // Mewlix.YarnBall  -> Yarn ball export list.
 // -----------------------------------------------------
 Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixBox {
-  constructor(exportList) {
+  constructor(moduleKey, exportList = []) {
     super();
-    for (const [key, func] of exportList) {
-      Object.defineProperty(this, key, { get: func });
+    this.key = moduleKey;
+
+    for (const [field, func] of exportList) {
+      Object.defineProperty(this, field, {
+        get: func,
+        set() {
+          throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+            `Cannot set field ${field}: Yarn ball fields are read-only!`);
+        }
+      });
     }
   }
+
+  toString() {
+    return `<yarn ball '${this.key}'>`
+  }
+}
+
+// -----------------------------------------------------
+// Generate standard yarn ball.
+// -----------------------------------------------------
+Mewlix.library = function(key, object = {}) {
+  const yarn = new Mewlix.YarnBall(key);
+  for (const key in object) {
+    yarn[key] = object[key];
+  }
+  return yarn;
 }
 
 // -----------------------------------------------------
@@ -457,6 +480,7 @@ Mewlix.Reflection = {
   typeOf: function typeOf(value) {
     if (value instanceof Mewlix.MewlixStack) return 'shelf';
     if (value instanceof Mewlix.MewlixBox) return 'box';
+    if (value instanceof Mewlix.YarnBall) return 'yarn ball';
     if (value === null || value === undefined) return 'nothing';
 
     switch (typeof value) {
@@ -615,7 +639,7 @@ Mewlix.wrap = function wrap(object) {
 /* Note: The functions in the base library use snake-case intentionally.
  * They're visible in Mewlix, and I don't want to do name-mangling. */
 
-Mewlix.Base = {
+Mewlix.Base = Mewlix.library('std', {
   /* Converts any value to a string.
    * type: any => string        */
   purr: function purr(value) {
@@ -741,7 +765,7 @@ Mewlix.Base = {
 
   /* Adding the Math namespace to the Mewlix standard library. */
   math: Mewlix.wrap(Math),
-};
+});
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Base);
