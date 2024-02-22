@@ -247,7 +247,7 @@ Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixObject {
         get: func,
         set() {
           throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-            `Cannot set field ${field}: Yarn ball fields are read-only!`);
+            `Cannot set field '${field}': Yarn ball fields are read-only!`);
         }
       });
     }
