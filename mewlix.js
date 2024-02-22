@@ -237,7 +237,7 @@ Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
 // -----------------------------------------------------
 // Mewlix.YarnBall  -> Yarn ball export list.
 // -----------------------------------------------------
-Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixBox {
+Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixObject {
   constructor(moduleKey, exportList = []) {
     super();
     this.key = moduleKey;
@@ -251,6 +251,13 @@ Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixBox {
         }
       });
     }
+
+    Object.defineProperty(this, 'box', {
+      value: () => this,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
   }
 
   toString() {
