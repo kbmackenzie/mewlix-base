@@ -227,7 +227,11 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
 // MewlixClowder -> Clowder base class.
 // -----------------------------------------------------
 Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
-  // Empty definition. This class exists mostly to differentiate boxes and clowders.
+  /* All clowders should inherit from this class.
+   * It provides a default definition for .wake(), too! */
+  async wake() {
+    return this;
+  }
 }
 
 // -----------------------------------------------------
