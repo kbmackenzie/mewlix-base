@@ -235,6 +235,18 @@ Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
 }
 
 // -----------------------------------------------------
+// Mewlix.YarnBall  -> Yarn ball export list.
+// -----------------------------------------------------
+Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixBox {
+  constructor(exportList) {
+    super();
+    for (const [key, func] of exportList) {
+      Object.defineProperty(this, key, { get: func });
+    }
+  }
+}
+
+// -----------------------------------------------------
 // String utils.
 // -----------------------------------------------------
 Mewlix.purrifyArray = function purrifyArray(arr) {
@@ -566,7 +578,7 @@ Mewlix.listen = function listen(_) {
 // -----------------------------------------------------
 // API:
 // -----------------------------------------------------
-Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixBox {
+Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixObject {
   constructor(object) {
     super();
     this.wrapped = object;
