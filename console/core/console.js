@@ -6,9 +6,11 @@ const inputReceived = new Event('input-received');
 const consoleInput = document.getElementById('input-box');
 const consoleLines = document.getElementById('console-lines');
 
-function addLine(text) {
+const addLine = (str, fromUser) => {
+  const message = fromUser ? str : `=^-x-^= \$ ${str}`
+
   const line = document.createElement('li');
-  line.appendChild(document.createTextNode(text));
+  line.appendChild(document.createTextNode(message));
   consoleLines.appendChild(line);
   fixScroll();
 }
@@ -18,7 +20,7 @@ function fixScroll() {
   parent.scrollTop = parent.scrollHeight;
 }
 
-function getInput() {
+const getInput = function getInput() {
   consoleInput.disabled = false;
   consoleInput.focus();
 

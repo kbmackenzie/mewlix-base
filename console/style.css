@@ -16,11 +16,43 @@ html, body {
   justify-content: center;
 }
 
+.console-text {
+  color: #fff;
+  font: 1.1rem 'Fira Mono', 'Courier New', monospace;
+}
+
+.cat-background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-image: url('./assets/cat-in-field-butterflies.png');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+.styleless-link {
+  text-decoration: none;
+}
+
+.image-credits {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  display: inline-block;
+  opacity: 60%;
+}
+
+.desktop-only {
+  display: none;
+}
+
 .console {
   width: 100%;
   height: 100%;
   display: grid;
   grid-template-rows: 3rem auto 5rem;
+  opacity: 90%;
 }
 
 .console h1 {
@@ -28,23 +60,18 @@ html, body {
   font-style: normal;
 }
 
-.console-text {
-  color: #fff;
-  font: 1.1rem 'Fira Mono', 'Courier New', monospace;
-}
-
 .slight-fade {
   opacity: 60%;
 }
 
 .console__footer, .console__header {
-  background-color: #121212;
+  background-color: #000;
 }
 
 .console__content {
   width: 100%;
   padding: 1rem 2rem;
-  background-color: #000;
+  background-color: #121212;
   word-wrap: break-word;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -89,4 +116,17 @@ html, body {
 .console__input:focus:enabled {
   background-color: #171717;
   transition: 1s;
+}
+
+@media (min-width: 40rem) {
+  .console {
+    width: 80%;
+    height: 80%;
+    border-radius: 2rem;
+    overflow: hidden;
+  }
+
+  .desktop-only {
+    display: block;
+  }
 }
