@@ -73,7 +73,7 @@ html, body {
   height: 100%;
   display: grid;
   grid-template-areas:
-    "gear       title       todo"
+    "todo       title       menu"
     "content    content     content"
     "input-box  input-box   arrow-button";
   grid-template-rows: 3rem auto 5rem;
@@ -104,15 +104,13 @@ html, body {
   margin-bottom: 1rem;
 }
 
-.console__input {
-  grid-area: input-box;
-  width: 100%;
-  height: 100%;
-  border: none;
-  padding: 1rem 2rem;
-  overflow-x: hidden;
-  resize: none;
-  background-color: inherit;
+.console__settings {
+  grid-area: menu;
+}
+
+.console__settings > svg {
+  width: 80%;
+  height: 80%;
 }
 
 .console__arrow {
@@ -123,6 +121,15 @@ html, body {
 .console__arrow > svg {
   width: 60%;
   height: 60%;
+}
+
+.console__input {
+  grid-area: input-box;
+  border: none;
+  padding: 1rem 2rem;
+  overflow-x: hidden;
+  resize: none;
+  background-color: inherit;
 }
 
 .console__input:focus {
