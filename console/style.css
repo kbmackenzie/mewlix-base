@@ -21,6 +21,18 @@ html, body {
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
+.console-text h1 {
+  font-size: 1.2rem;
+  font-style: normal;
+}
+
+#background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
 .cat-background {
   position: fixed;
   width: 100%;
@@ -28,7 +40,6 @@ html, body {
   background-image: url('./assets/cat-in-field-butterflies.png');
   background-size: cover;
   background-position: center;
-  z-index: -1;
 }
 
 .styleless-link {
@@ -47,6 +58,10 @@ html, body {
   display: none;
 }
 
+.slight-fade {
+  opacity: 60%;
+}
+
 .console {
   width: 100%;
   height: 100%;
@@ -55,18 +70,18 @@ html, body {
   opacity: 90%;
 }
 
-.console h1 {
-  font-size: 1.2rem;
-  font-style: normal;
-}
-
-.slight-fade {
-  opacity: 60%;
-}
-
-.console__footer, .console__header {
+.console__footer,
+.console__header {
   background-color: #000;
 }
+
+.console__header {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 4rem auto 4rem;
+}
+
 
 .console__content {
   width: 100%;
@@ -105,9 +120,9 @@ html, body {
   background-color: inherit;
 }
 
-.console__button-circle {
-  width: 3rem;
-  height: 3rem;
+.circle-placeholder {
+  width: 2rem;
+  height: 2rem;
   background-color: #ccc;
   border-radius: 50%;
 }

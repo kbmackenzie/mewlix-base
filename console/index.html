@@ -12,14 +12,18 @@
   </head>
   <body class="center-items">
     <main class="console">
-      <section class="console-text console__header center-items">
-        <h1>mewlix
-          <span class="slight-fade"> - </span>
-          <span id="project-name" class="slight-fade">untitled</span>
-        </h1>
+      <section class="console__header">
+        <div class="center-items"><div class="circle-placeholder"></div></div>
+        <div class="console-text center-items console__header__title">
+          <h1>mewlix
+            <span class="slight-fade"> - </span>
+            <span id="project-name" class="slight-fade">untitled</span>
+          </h1>
+        </div>
+        <div class="center-items"><div class="circle-placeholder"></div></div>
       </section>
       <section class="console-text console__content">
-        <ul id="console-lines"> </ul>
+        <ul id="console-lines"></ul>
       </section>
       <section class="console__footer">
         <textarea
@@ -29,13 +33,17 @@
             class="console-text console__input"
             disabled></textarea>
         <div id="input-button" class="console__button center-items">
-          <div class="console__button-circle"></div>
+          <div class="circle-placeholder"></div>
         </div>
       </section>
     </main>
-    <div class="cat-background"></div>
-    <a href="https://www.pexels.com/photo/white-cat-on-grass-field-460985/" class="styleless-link desktop-only">
-      <p class="console-text image-credits">Original photo by Pixabay from Pexels</p>
-    </a>
+
+    <!-- Cat background image. -->
+    <div id="background">
+      <div class="cat-background"></div>
+      <a href="https://www.pexels.com/photo/white-cat-on-grass-field-460985/" class="styleless-link desktop-only">
+        <p class="console-text image-credits">Original photo by Pixabay from Pexels</p>
+      </a>
+    </div>
   </body>
 </html>
