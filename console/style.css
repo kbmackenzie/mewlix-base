@@ -30,7 +30,6 @@ html, body {
   position: absolute;
   width: 100%;
   height: 100%;
-  z-index: -1;
 }
 
 .cat-background {
@@ -40,6 +39,7 @@ html, body {
   background-image: url('./assets/cat-in-field-butterflies.png');
   background-size: cover;
   background-position: center;
+  z-index: -1;
 }
 
 .styleless-link {
