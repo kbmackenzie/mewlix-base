@@ -17,7 +17,7 @@ html, body {
 }
 
 .console-text {
-  color: #fff;
+  color: white;
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
@@ -26,17 +26,15 @@ html, body {
   font-style: normal;
 }
 
-#background {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+.console-icon svg {
+  color: white;
 }
 
 .cat-background {
   position: fixed;
   width: 100%;
   height: 100%;
-  background-image: url('./assets/cat-in-field-butterflies.png');
+  background-image: url('./assets/cat-in-field-butterflies.jpg');
   background-size: cover;
   background-position: center;
   z-index: -1;
@@ -111,6 +109,7 @@ html, body {
 
 .console__button {
   grid-area: arrow-button;
+  padding-right: 1rem;
   background-color: inherit;
 }
 
