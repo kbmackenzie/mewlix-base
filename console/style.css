@@ -30,6 +30,16 @@ html, body {
   color: white;
 }
 
+.console-button {
+  opacity: 60%;
+}
+
+.console-button:hover {
+  cursor: pointer;
+  opacity: 100%;
+  transition: 0.2s;
+}
+
 .cat-background {
   position: fixed;
   width: 100%;
@@ -50,9 +60,7 @@ html, body {
   left: 1rem;
   display: inline-block;
   opacity: 60%;
-}
-
-.desktop-only {
+  /* Invisible by default; only visible on larger screens. */
   display: none;
 }
 
@@ -69,7 +77,7 @@ html, body {
     "content    content     content"
     "input-box  input-box   arrow-button";
   grid-template-rows: 3rem auto 5rem;
-  grid-template-columns: 4rem auto 4rem;
+  grid-template-columns: 5rem auto 5rem;
   opacity: 90%;
   background-color: #000;
 }
@@ -107,23 +115,23 @@ html, body {
   background-color: inherit;
 }
 
-.console__button {
+.console__arrow {
   grid-area: arrow-button;
-  padding-right: 1rem;
   background-color: inherit;
 }
 
-.circle-placeholder {
-  width: 2rem;
-  height: 2rem;
-  background-color: #ccc;
-  border-radius: 50%;
+.console__arrow > svg {
+  width: 60%;
+  height: 60%;
+}
+
+.console__input:focus {
+  outline: none;
 }
 
 .console__input:hover:enabled,
 .console__input:focus:enabled {
-  background-color: #171717;
-  transition: 1s;
+  /* to do! */
 }
 
 @media (min-width: 40rem) {
@@ -134,7 +142,7 @@ html, body {
     overflow: hidden;
   }
 
-  .desktop-only {
+  .image-credits {
     display: block;
   }
 }
