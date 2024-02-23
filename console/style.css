@@ -66,30 +66,27 @@ html, body {
   width: 100%;
   height: 100%;
   display: grid;
+  grid-template-areas:
+    "gear       title       todo"
+    "content    content     content"
+    "input-box  input-box   arrow-button";
   grid-template-rows: 3rem auto 5rem;
+  grid-template-columns: 4rem auto 4rem;
   opacity: 90%;
-}
-
-.console__footer,
-.console__header {
   background-color: #000;
 }
 
-.console__header {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: 4rem auto 4rem;
+.console__title {
+  grid-area: title;
 }
 
-
 .console__content {
-  width: 100%;
-  padding: 1rem 2rem;
-  background-color: #121212;
-  word-wrap: break-word;
+  grid-area: content;
   overflow-y: scroll;
   overflow-x: hidden;
+  background-color: #121212;
+  padding: 1rem 2rem;
+  word-wrap: break-word;
 }
 
 .console__content ul {
@@ -101,12 +98,8 @@ html, body {
   margin-bottom: 1rem;
 }
 
-.console__footer {
-  display: grid;
-  grid-template-columns: auto minmax(6rem, 10%);
-}
-
 .console__input {
+  grid-area: input-box;
   width: 100%;
   height: 100%;
   border: none;
@@ -117,6 +110,7 @@ html, body {
 }
 
 .console__button {
+  grid-area: arrow-button;
   background-color: inherit;
 }
 
