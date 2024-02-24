@@ -137,7 +137,7 @@ showHighlight.addEventListener('change', toggleHighlight);
 
 selectBackground.addEventListener('change', () => {
   if (selectBackground.files.length === 0) return;
-  setBackground(selectBackground.files[0]).then(console.log('yay!'));
+  setBackground(selectBackground.files[0]);
 });
 
 /* -------------------------------------
