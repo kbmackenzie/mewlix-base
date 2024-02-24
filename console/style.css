@@ -167,12 +167,12 @@ html, body {
   height: 100%;
 }
 
-.settings-menu {
+.settings {
   position: fixed;
   display: grid;
   grid-template-areas:
     "settings-header  settings-buttons"
-    "settings-content settings-content";
+    "settings-options settings-options";
   grid-template-columns: auto 5rem;
   grid-template-rows: 2rem auto;
   background-color: #1f1f1f;
@@ -182,21 +182,21 @@ html, body {
   z-index: 11;
 }
 
-.settings-menu__header {
+.settings__header {
   grid-area: settings-header;
 }
 
-.settings-menu__exit {
+.settings__exit {
   grid-area: settings-buttons;
 }
 
-.settings-menu__exit > svg {
+.settings__exit > svg {
   width: 90%;
   height: 90%;
 }
 
-.settings-menu__content {
-  grid-area: settings-content;
+.settings__options {
+  grid-area: settings-options;
   background-color: #262626;
   display: flex;
   flex-flow: column nowrap;
@@ -204,11 +204,11 @@ html, body {
   align-items: center;
 }
 
-.settings-menu__content ul {
+.settings__options ul {
   list-style: none;
 }
 
-.settings-menu__content li {
+.settings__options li {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,19 +219,19 @@ html, body {
   margin: 1rem 0.5rem;
 }
 
-.settings-menu__content li > input {
+.settings__options li > input {
   margin-left: 1rem;
   padding: 0.2rem;
   min-height: 1rem;
   min-width: 1rem;
 }
 
-.settings-menu__content li > input[type='checkbox'] {
+.settings__options li > input[type='checkbox'] {
   height: 1.5rem;
   width: 1.5rem;
 }
 
-.settings-menu__content li > label {
+.settings__options li > label {
   text-align: center;
 }
 
@@ -256,11 +256,11 @@ html, body {
     display: block;
   }
 
-  .settings-menu {
+  .settings {
     width: auto;
   }
 
-  .settings-menu__content {
+  .settings__options {
     padding: 1rem 2rem;
   }
 }
