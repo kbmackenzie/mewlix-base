@@ -16,33 +16,33 @@ html, body {
   justify-content: center;
 }
 
-.console-text {
+.font-console {
   color: white;
   font-weight: 400;
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
-.console-text h1 {
+.font-console h1 {
   font-size: 1.2rem;
   font-weight: 500;
   font-style: normal;
 }
 
-.console-button {
+.white-button {
   opacity: 60%;
 }
 
-.console-button svg {
+.white-button svg {
   color: white;
 }
 
-.console-button:hover {
+.white-button:hover {
   cursor: pointer;
   opacity: 100%;
   transition: 0.6s;
 }
 
-.slight-fade {
+.translucent {
   opacity: 60%;
 }
 
