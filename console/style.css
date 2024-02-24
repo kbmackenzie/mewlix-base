@@ -141,9 +141,9 @@ html, body {
   outline: none;
 }
 
-.console__input:hover:enabled,
-.console__input:focus:enabled {
-  /* to do! */
+.console--outline:hover,
+.console--outline:focus {
+  outline: 1rem solid white;
 }
 
 /* -----------------------------------------
@@ -160,8 +160,8 @@ html, body {
   background-color: #1f1f1f;
   overflow: hidden;
   border-radius: 2rem;
+  width: 90%;
   z-index: 11;
-  margin: 1rem;
 }
 
 .settings__header {
@@ -179,7 +179,6 @@ html, body {
 
 .settings__content {
   grid-area: settings-content;
-  padding: 1.5rem;
   background-color: #262626;
   display: flex;
   flex-flow: column nowrap;
@@ -195,11 +194,11 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
   border-radius: 1rem;
   box-shadow: 1px 3px 3px black;
   background-color: #1f1f1f;
-  margin: 1rem;
+  padding: 0.5rem;
+  margin: 1rem 0.5rem;
 }
 
 .settings__content li > input {
@@ -218,7 +217,7 @@ html, body {
   text-align: center;
 }
 
-.show-settings {
+.hide-settings {
   display: none;
 }
 
@@ -244,5 +243,13 @@ html, body {
 
   .image-credits {
     display: block;
+  }
+
+  .settings {
+    width: auto;
+  }
+
+  .settings__content {
+    padding: 1rem 2rem;
   }
 }
