@@ -97,11 +97,11 @@ inputButton.addEventListener('click', () => {
 });
 
 showSettings.addEventListener('click', () => {
-  settings.classList.remove('hide-item');
+  settings.classList.remove('hide');
 });
 
 exitSettings.addEventListener('click', () => {
-  settings.classList.add('hide-item');
+  settings.classList.add('hide');
 });
 
 consoleOpacity.addEventListener('change', () => {
