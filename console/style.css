@@ -84,9 +84,9 @@ html, body {
   height: 100%;
   display: grid;
   grid-template-areas:
-    "todo       title       menu"
-    "content    content     content"
-    "input-box  input-box   arrow-button";
+    ".              console-title   show-settings"
+    "console-lines  console-lines   console-lines"
+    "console-input  console-input   console-arrow";
   grid-template-rows: 3rem auto 5rem;
   grid-template-columns: 5rem auto 5rem;
   opacity: 90%;
@@ -94,12 +94,12 @@ html, body {
 }
 
 .console__title {
-  grid-area: title;
+  grid-area: console-title;
   text-align: center;
 }
 
 .console__content {
-  grid-area: content;
+  grid-area: console-lines;
   overflow-y: scroll;
   overflow-x: hidden;
   background-color: #121212;
@@ -122,7 +122,7 @@ html, body {
 }
 
 .console__settings {
-  grid-area: menu;
+  grid-area: show-settings;
 }
 
 .console__settings > svg {
@@ -131,7 +131,7 @@ html, body {
 }
 
 .console__arrow {
-  grid-area: arrow-button;
+  grid-area: console-arrow;
   background-color: inherit;
 }
 
@@ -141,7 +141,7 @@ html, body {
 }
 
 .console__input {
-  grid-area: input-box;
+  grid-area: console-input;
   border: none;
   padding: 1rem 2rem;
   overflow-x: hidden;

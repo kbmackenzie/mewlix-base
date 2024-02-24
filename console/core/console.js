@@ -11,10 +11,10 @@ const promptMessage = '=^-x-^= $ ';
 
 /* Console: */
 const consoleBox = document.getElementById('console');
-const input = document.getElementById('input-box');
+const input = document.getElementById('console-input');
 const lines = document.getElementById('console-lines');
 const projectName = document.getElementById('project-name');
-const inputButton = document.getElementById('input-button');
+const inputButton = document.getElementById('console-arrow');
 const showSettings = document.getElementById('show-settings');
 
 /* Settings menu : */
