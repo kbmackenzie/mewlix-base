@@ -7,18 +7,19 @@
 const inputReceived = new Event('input-received');
 
 /* The console prompt string: */
-const promptMessage = '=^-x-^= $';
+const promptMessage = '=^-x-^= $ ';
 
 /* Console: */
 const consoleBox = document.getElementById('console');
 const input = document.getElementById('input-box');
 const lines = document.getElementById('console-lines');
+const projectName = document.getElementById('project-name');
 const inputButton = document.getElementById('input-button');
 const showSettings = document.getElementById('show-settings');
 
 /* Settings menu : */
 const settings = document.getElementById('settings');
-const settingsExit = document.getElementById('settings-menu-exit');
+const exitSettings = document.getElementById('settings-menu-exit');
 
 /* Settings options: */
 const promptColor = document.getElementById('select-color');
@@ -77,6 +78,11 @@ const clearConsole = () => {
   lines.replaceChildren();
 }
 
+const setProjectName = name => {
+  if (name === '') return;
+  projectName.textContent = name;
+}
+
 /* -------------------------------------
  * Events:
  * ------------------------------------- */
@@ -94,7 +100,7 @@ showSettings.addEventListener('click', () => {
   settings.classList.remove('hide-item');
 });
 
-settingsExit.addEventListener('click', () => {
+exitSettings.addEventListener('click', () => {
   settings.classList.add('hide-item');
 });
 
@@ -115,5 +121,6 @@ showOutline.addEventListener('change', () => {
 // Todo: Comment these out.
 window.mewlixInput = getInput;
 window.mewlixClear = clearConsole;
+window.mewlixProject = setProjectName;
 
 export { addLine, fixScroll, getInput, clearConsole };

@@ -95,6 +95,7 @@ html, body {
 
 .console__title {
   grid-area: title;
+  text-align: center;
 }
 
 .console__content {
@@ -116,7 +117,7 @@ html, body {
 }
 
 .console__prompt {
-  margin-right: 1rem;
+  margin-right: 0.3rem;
   font-weight: 700;
 }
 
