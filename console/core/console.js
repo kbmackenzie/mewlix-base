@@ -24,7 +24,7 @@ const exitSettings = document.getElementById('exit-settings');
 /* Settings options: */
 const promptColor = document.getElementById('select-color');
 const hidePrompt = document.getElementById('hide-prompt');
-const showOutline = document.getElementById('select-outline');
+const showHighlight = document.getElementById('show-highlight');
 const consoleOpacity = document.getElementById('select-opacity');
 
 /* -------------------------------------
@@ -76,12 +76,23 @@ const getInput = () => {
 
 const clearConsole = () => {
   lines.replaceChildren();
-}
+};
+
+const toggleHighlight = () => {
+  if (showHighlight.checked)
+    input.classList.add('console__input--highlight');
+  else
+    input.classList.remove('console__input--highlight');
+};
+
+const setOpacity = () => {
+  consoleBox.style.opacity = `${consoleOpacity.value}%`;
+};
 
 const setProjectName = name => {
   if (name === '') return;
   projectName.textContent = name;
-}
+};
 
 /* -------------------------------------
  * Events:
@@ -104,18 +115,14 @@ exitSettings.addEventListener('click', () => {
   settings.classList.add('hide');
 });
 
-consoleOpacity.addEventListener('change', () => {
-  consoleBox.style.opacity = `${consoleOpacity.value}%`;
-});
+consoleOpacity.addEventListener('change', setOpacity);
+showHighlight.addEventListener('change', toggleHighlight);
 
-showOutline.addEventListener('change', () => {
-  if(showOutline.checked) {
-    inputBox.classList.add('console__input--outline');
-  }
-  else {
-    inputBox.classList.remove('console__input--outline');
-  }
-});
+/* -------------------------------------
+ * Initialize:
+ * ------------------------------------- */
+setOpacity();
+toggleHighlight();
 
 // Temporarily adding to global scope for easier debugging.
 // Todo: Comment these out.
