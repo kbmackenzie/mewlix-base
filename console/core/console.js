@@ -19,7 +19,7 @@ const showSettings = document.getElementById('show-settings');
 
 /* Settings menu : */
 const settings = document.getElementById('menu-settings');
-const exitSettings = document.getElementById('settings-menu-exit');
+const exitSettings = document.getElementById('exit-settings');
 
 /* Settings options: */
 const promptColor = document.getElementById('select-color');
