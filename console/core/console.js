@@ -168,29 +168,58 @@ Mewlix.listen = async question => {
 const ensure = Mewlix.ensure;
 
 Mewlix.Console = Mewlix.library('std.console', {
+  /* Clear console.
+   * type: nothing */
   clear: clearConsole,
+
+  /* Set console project name.
+   * type: string -> nothing */
   name: name => {
     ensure.string(name);
     setProjectName(name);
   },
+
+  /* Set console background image.
+   * This function expects a valid path to an image file.
+   *
+   * type: string -> nothing */
   background: async path => {
     ensure.string(path);
     await setBackground(path);
   },
+
+  /* Set console opacity level.
+   *
+   * Only values between 0 and 100 are accepted.
+   * Any value outside of the accepted range will be clamped.
+   *
+   * type: number -> nothing */
   opacity: value => {
     const clamped = Mewlix.clamp(value, 0, 100);
     consoleOpacity.value = clamped.toString();
     setOpacity(clamped);
-    return clamped;
   },
+
+  /* Toggle the console input box's 'highlight' behavior.
+   * This is an accessibility feature!
+   *
+   * type: boolean -> nothing */
   highlight: enable => {
     showHighlight.checked = enable;
     toggleHighlight(enable);
   },
+
+  /* Set console prompt color.
+   * This function expects a valid hex code as argument!
+   *
+   * type: string -> nothing */
   prompt_color: color => {
     ensure.string(color);
     promptColor.value = color;
   },
+
+  /* Sets whether or not to show the console prompt string before an user message.
+   * type: boolean -> nothing */
   hide_prompt: hide => {
     ensure.boolean(hide);
     hidePrompt.checked = hide;
