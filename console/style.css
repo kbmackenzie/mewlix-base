@@ -65,7 +65,6 @@ html, body {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  display: inline-block;
   opacity: 60%;
   /* Invisible by default; only visible on larger screens. */
   display: none;
