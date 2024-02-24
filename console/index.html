@@ -38,7 +38,7 @@
         </svg>
       </section>
 
-      <nav id="settings" class="console-button center-items console__settings">
+      <nav id="settings-button" class="console-button center-items console__settings">
         <!-- Icon from: https://heroicons.dev/ -->
         <svg data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -55,37 +55,37 @@
     </aside>
 
     <!-- Settings Menu -->
-    <aside class="settings hide-settings">
-      <nav class="console-button center-items settings__buttons">
+    <aside class="settings-menu hide-settings">
+      <nav class="console-button center-items settings-menu__exit">
         <svg data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </nav>
 
-      <section class="console-text settings__content">
+      <section class="console-text settings-menu__content">
         <ul>
           <li>
-            <label for="settings-color">Prompt color:</label>
-            <input type="color" name="settings-color" id="settings-color" />
+            <label for="select-color">Prompt color:</label>
+            <input type="color" name="select-color" id="select-color" />
           </li>
           <li>
-            <label for="settings-prefix">Hide prompt:</label>
-            <input type="checkbox" name="settings-prefix" id="settings-prefix" />
+            <label for="select-prefix">Hide prompt:</label>
+            <input type="checkbox" name="select-prefix" id="select-prefix" />
           </li>
           <li>
-            <label for="settings-outline">Box outline:</label>
-            <input type="checkbox" name="settings-outline" id="settings-outline" />
+            <label for="select-outline">Box outline:</label>
+            <input type="checkbox" name="select-outline" id="select-outline" />
           </li>
           <li>
-            <label for="settings-opacity">Opacity:</label>
+            <label for="select-opacity">Opacity:</label>
             <input
               type="range"
               min="0"
               max="10"
               step="1"
               value="9"
-              name="settings-opacity"
-              id="settings-opacity" />
+              name="select-opacity"
+              id="select-opacity" />
           </li>
         </ul>
       </section>
