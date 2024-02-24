@@ -17,6 +17,10 @@ const projectName = document.getElementById('project-name');
 const inputButton = document.getElementById('console-arrow');
 const showSettings = document.getElementById('show-settings');
 
+/* Background: */
+const catBackground = document.getElementById('cat-background');
+const imageCredits = document.getElementById('image-credits');
+
 /* Settings menu : */
 const settings = document.getElementById('menu-settings');
 const exitSettings = document.getElementById('exit-settings');
@@ -26,6 +30,7 @@ const promptColor = document.getElementById('select-color');
 const hidePrompt = document.getElementById('hide-prompt');
 const showHighlight = document.getElementById('show-highlight');
 const consoleOpacity = document.getElementById('select-opacity');
+const selectBackground = document.getElementById('select-background');
 
 /* -------------------------------------
  * Console functionality:
@@ -94,6 +99,18 @@ const setProjectName = name => {
   projectName.textContent = name;
 };
 
+const setBackground = path => {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.readAsDataURL(path);
+    reader.addEventListener('load', () => {
+      catBackground.style.backgroundImage = `url('${reader.result}')`;
+      imageCredits.classList.add('hide');
+      resolve();
+    });
+  });
+};
+
 /* -------------------------------------
  * Events:
  * ------------------------------------- */
@@ -117,6 +134,11 @@ exitSettings.addEventListener('click', () => {
 
 consoleOpacity.addEventListener('change', setOpacity);
 showHighlight.addEventListener('change', toggleHighlight);
+
+selectBackground.addEventListener('change', () => {
+  if (selectBackground.files.length === 0) return;
+  setBackground(selectBackground.files[0]).then(console.log('yay!'));
+});
 
 /* -------------------------------------
  * Initialize:

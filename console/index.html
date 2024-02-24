@@ -46,8 +46,8 @@
     </main>
 
     <!-- Cat background image. -->
-    <div class="cat-background"></div>
-    <aside class="image-credits">
+    <div id="cat-background" class="cat-background"></div>
+    <aside id="image-credits" class="image-credits">
       <a href="https://www.pexels.com/photo/white-cat-on-grass-field-460985/" class="styleless-link">
         <p class="font-console">Original photo by Pixabay from Pexels</p>
       </a>
@@ -86,6 +86,15 @@
                   value="90"
                   name="select-opacity"
                   id="select-opacity" />
+            </li>
+            <li>
+              <label for="select-background">Change Background</label>
+              <input
+                  type="file"
+                  class="hide"
+                  accept="image/*"
+                  name="select-background"
+                  id="select-background" />
             </li>
           </ul>
         </section>
