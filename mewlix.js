@@ -1,3 +1,5 @@
+'use strict';
+
 const Mewlix = {};
 
 // -----------------------------------------------------
@@ -351,8 +353,14 @@ const isNothing = function isNothing(x) {
   return x === null || x === undefined;
 };
 
+const clamp = function clamp(x, min, max) {
+  ensure.all.number(x, min, max);
+  return x < min ? min : (x > max ? max : x);
+};
+
 // Adding utils to Mewlix object for convenience:
 Mewlix.ensure = ensure;
+Mewlix.clamp = clamp;
 Mewlix.isNothing = isNothing;
 
 // -----------------------------------------------------
