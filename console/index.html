@@ -11,7 +11,7 @@
     <script type="module" src="core/console.js"></script>
   </head>
   <body class="center-items">
-    <main class="console">
+    <main id="console" class="console">
       <section class="console-text center-items console__title">
         <h1>mewlix
           <span class="slight-fade"> - </span>
@@ -28,8 +28,7 @@
           name="textarea"
           placeholder="Enter input here..."
           class="console-text console__input"
-          disabled>
-      </textarea>
+          disabled></textarea>
 
       <section id="input-button" class="console-button center-items console__arrow">
         <!-- Icon from: https://heroicons.dev/ -->
@@ -38,7 +37,7 @@
         </svg>
       </section>
 
-      <nav id="settings-button" class="console-button center-items console__settings">
+      <nav id="show-settings" class="console-button center-items console__settings">
         <!-- Icon from: https://heroicons.dev/ -->
         <svg data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -55,41 +54,43 @@
     </aside>
 
     <!-- Settings Menu -->
-    <aside class="settings-menu hide-settings">
-      <nav class="console-button center-items settings-menu__exit">
-        <svg data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </nav>
+    <aside id="settings" class="center-items hide-item">
+      <section class="settings-menu">
+        <nav id="settings-menu-exit" class="console-button center-items settings-menu__exit">
+          <svg data-slot="icon" aria-hidden="true" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </nav>
 
-      <section class="console-text settings-menu__content">
-        <ul>
-          <li>
-            <label for="select-color">Prompt color:</label>
-            <input type="color" name="select-color" id="select-color" />
-          </li>
-          <li>
-            <label for="select-prefix">Hide prompt:</label>
-            <input type="checkbox" name="select-prefix" id="select-prefix" />
-          </li>
-          <li>
-            <label for="select-outline">Box outline:</label>
-            <input type="checkbox" name="select-outline" id="select-outline" />
-          </li>
-          <li>
-            <label for="select-opacity">Opacity:</label>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="1"
-              value="9"
-              name="select-opacity"
-              id="select-opacity" />
-          </li>
-        </ul>
+        <section class="console-text settings-menu__content">
+          <ul>
+            <li>
+              <label for="select-color">Prompt color:</label>
+              <input type="color" value="#f6d52d" name="select-color" id="select-color" />
+            </li>
+            <li>
+              <label for="hide-prompt">Hide prompt:</label>
+              <input type="checkbox" name="hide-prompt" id="hide-prompt" />
+            </li>
+            <li>
+              <label for="select-outline">Box outline:</label>
+              <input type="checkbox" name="select-outline" id="select-outline" />
+            </li>
+            <li>
+              <label for="select-opacity">Opacity:</label>
+              <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="10"
+                  value="90"
+                  name="select-opacity"
+                  id="select-opacity" />
+            </li>
+          </ul>
+        </section>
       </section>
+      <div class="dark-overlay"></div>
     </aside>
-    <div class="dark-overlay hide-settings"></div>
   </body>
 </html>
