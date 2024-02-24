@@ -18,7 +18,7 @@ const inputButton = document.getElementById('console-arrow');
 const showSettings = document.getElementById('show-settings');
 
 /* Settings menu : */
-const settings = document.getElementById('settings');
+const settings = document.getElementById('menu-settings');
 const exitSettings = document.getElementById('settings-menu-exit');
 
 /* Settings options: */

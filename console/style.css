@@ -161,7 +161,7 @@ html, body {
 /* -----------------------------------------
  * Settings:
  * ----------------------------------------- */
-#settings {
+.screen-overlay {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -236,9 +236,6 @@ html, body {
 }
 
 .dark-overlay {
-  position: fixed;
-  width: 100%;
-  height: 100%;
   background-color: black;
   opacity: 80%;
   z-index: 10;
