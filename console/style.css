@@ -47,7 +47,15 @@ html, body {
 }
 
 .hide {
-  display: none;
+  /* I'm using !important because:
+   * 1. I want .hide to *always* hide elements, regardless of media queries.
+   * 2. I want to keep media queries at the bottom of the file, for organization.
+   *
+   * The !important keyword solves all of these issues cleanly.
+   *
+   * Also, I've seen !important being used for .hide / .hidden classes before.
+   * This is an utility class with a single purpose. It should always serve its purpose. */
+  display: none !important; 
 }
 
 /* -----------------------------------------
@@ -230,6 +238,10 @@ html, body {
 .settings__options li > input[type='checkbox'] {
   height: 1.5rem;
   width: 1.5rem;
+}
+
+.settings__options li > input[type='range'] {
+  max-width: 6rem;
 }
 
 .settings__options li > label {
