@@ -26,20 +26,27 @@ html, body {
   font-style: normal;
 }
 
-.console-icon svg {
-  color: white;
-}
-
 .console-button {
   opacity: 60%;
+}
+
+.console-button svg {
+  color: white;
 }
 
 .console-button:hover {
   cursor: pointer;
   opacity: 100%;
-  transition: 0.2s;
+  transition: 0.6s;
 }
 
+.slight-fade {
+  opacity: 60%;
+}
+
+/* -----------------------------------------
+ * Cat background:
+ * ----------------------------------------- */
 .cat-background {
   position: fixed;
   width: 100%;
@@ -62,10 +69,6 @@ html, body {
   opacity: 60%;
   /* Invisible by default; only visible on larger screens. */
   display: none;
-}
-
-.slight-fade {
-  opacity: 60%;
 }
 
 /* -----------------------------------------
@@ -147,15 +150,6 @@ html, body {
 /* -----------------------------------------
  * Settings:
  * ----------------------------------------- */
-.dark-overlay {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: black;
-  opacity: 80%;
-  z-index: 10;
-}
-
 .settings {
   position: fixed;
   display: grid;
@@ -225,8 +219,17 @@ html, body {
   text-align: center;
 }
 
-.settings-menu {
+.show-settings {
   display: none;
+}
+
+.dark-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 80%;
+  z-index: 10;
 }
 
 /* -----------------------------------------
