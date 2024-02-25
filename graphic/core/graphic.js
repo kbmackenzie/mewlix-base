@@ -1,16 +1,27 @@
 'use strict';
 const ensure = Mewlix.ensure;
+const clamp  = Mewlix.clamp;
 
-/* .toColor() : interface
+/* Convert percentage value (0% - 100%) to byte (0 - 255) */
+const percentToByte = p => Math.floor((255 * p) / 100);
+
+/* Color contained, wrapping a RGBA color value.
+ *
+ * It also implements .toColor(), complying with the 'ToColor' interface concept:
  * Any object that implements a .toColor() method can be considered a valid color representation. */
 
 class Color extends Mewlix.MewlixClowder {
-  constructor(red, green, blue) {
+  constructor(red, green, blue, opacity = 100) {
     super();
     ensure.all.number(red, green, blue);
-    this.red = red;
-    this.green = green;
-    this.blue = blue;
+    this.red      = clamp(red, 0, 255);
+    this.green    = clamp(green, 0, 255);
+    this.blue     = clamp(blue, 0, 255);
+    this.opacity  = clamp(opacity, 0, 100);
+  }
+
+  alpha() { /* alpha byte value! */
+    return percentToByte(this.opacity);
   }
 
   toColor() {
@@ -18,7 +29,7 @@ class Color extends Mewlix.MewlixClowder {
   }
 
   toString() {
-    return `rgb(${this.red} ${this.green} ${this.blue})`;
+    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.opacity}%)`;
   }
 
   static fromHex(hex) {
@@ -51,24 +62,24 @@ class PixelCanvas extends Mewlix.MewlixClowder {
     Mewlix.opaque(this.data);
   }
 
-  fill({ red, green, blue }) {
+  fill(color) {
     for (let i = 0; i < this.data.length; i += 4) {
-      this.data[i]     = red;
-      this.data[i + 1] = green;
-      this.data[i + 2] = blue;
-      this.data[i + 3] = 1;
+      this.data[i]     = color.red;
+      this.data[i + 1] = color.green;
+      this.data[i + 2] = color.blue;
+      this.data[i + 3] = color.alpha();
     }
   }
 
-  setPixel(x, y, { red, green, blue }) {
+  setPixel(x, y, color) {
     const index = (x * this.width + y) * 4;
-    this.data[index]     = red;
-    this.data[index + 1] = green;
-    this.data[index + 2] = blue;
-    this.data[index + 3] = 1;
+    this.data[index]     = color.red;
+    this.data[index + 1] = color.green;
+    this.data[index + 2] = color.blue;
+    this.data[index + 3] = color.alpha();
   }
 
-  setData(x, y, { data }) {
+  setTile(x, y, { data }) {
     const index = (x * this.width + y) * 4;
     const dataSize = Math.min(this.data.length - index, data.length);
 
