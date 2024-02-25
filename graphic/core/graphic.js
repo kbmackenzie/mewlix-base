@@ -13,7 +13,7 @@ const percentToByte = p => Math.floor((255 * p) / 100);
 class Color extends Mewlix.MewlixClowder {
   constructor(red, green, blue, opacity = 100) {
     super();
-    ensure.all.number(red, green, blue);
+    ensure.all.number(red, green, blue, opacity);
     this.red      = clamp(red, 0, 255);
     this.green    = clamp(green, 0, 255);
     this.blue     = clamp(blue, 0, 255);
