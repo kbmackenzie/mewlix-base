@@ -358,10 +358,23 @@ const clamp = function clamp(x, min, max) {
   return x < min ? min : (x > max ? max : x);
 };
 
+const opaque = function opaque(x) {
+  Object.defineProperty(x, 'box', {
+    value: () => {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `Can't peek into object: Object "${x}" (type: ${typeof x}) isn't accessible through Mewlix!`);
+    },
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
+};
+
 // Adding utils to Mewlix object for convenience:
 Mewlix.ensure = ensure;
 Mewlix.clamp = clamp;
 Mewlix.isNothing = isNothing;
+Mewlix.opaque = opaque;
 
 // -----------------------------------------------------
 // Comparison: Enum-like class.
