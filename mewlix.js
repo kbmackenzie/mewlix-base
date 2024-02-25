@@ -620,10 +620,8 @@ Mewlix.listen = function listen(_) {
 Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixObject {
   constructor(object) {
     super();
-    this.wrapped = object;
-
     Object.defineProperty(this, 'box', {
-      value: () => wrapped,
+      value: () => object,
       writable: false,
       enumerable: false,
       configurable: false,
@@ -631,11 +629,11 @@ Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixObject {
   }
 
   toString() {
-    return this.wrapped.toString();
+    return this.box().toString();
   }
 
   valueOf() {
-    return this.wrapped.valueOf();
+    return this.box().valueOf();
   }
 };
 
