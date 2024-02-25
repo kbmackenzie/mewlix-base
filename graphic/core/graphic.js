@@ -51,8 +51,8 @@ class Color extends Mewlix.MewlixClowder {
 
 /* A pixel canvas for efficiently creating sprites and tiles.
  *
- * The .toImage() creates a new ImageData object from the pixel data.
- * The generated ImageData object can be used with the HTML5 Canvas .drawImage() method! */
+ * The .toImage() creates a new ImageBitmap object from the pixel data.
+ * The generated ImageBitmap object can be used with the HTML5 Canvas .drawImage() method! */
 class PixelCanvas extends Mewlix.MewlixClowder {
   constructor(width, height) {
     super();
@@ -89,49 +89,58 @@ class PixelCanvas extends Mewlix.MewlixClowder {
   }
 
   toImage() {
-    return new ImageData(this.data, this.width, this.height);
+    const data = new ImageData(this.data, this.width, this.height);
+    return createImageBitmap(data); /* promise! */
   }
 };
-
-
 
 /* -----------------------------------
  * Canvas:
  * ----------------------------------- */
+
+/** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('drawing-canvas');
+/** @type {CanvasRenderingContext2D} */
 const drawingCtx = canvas.getContext('2d');
 
-const imageCanvas = document.createElement('canvas');
-const imageCtx = imageCanvas.getContext('2d');
-
-const tileMap = Map();
-const soundMap = Map();
+/** @type {Map<string, HTMLImageElement>} */
+const tileMap = new Map();
+const soundMap = new Map();
 
 /* -----------------------------------
  * Loading:
  * ----------------------------------- */
+/** @type {number} */
 const tileWidth  = 8;
+/** @type {number} */
 const tileHeight = 8;
 
-const loadImage = (path, width, height) => {
+const loadImage = (key, path, width, height) => {
   return new Promise((resolve, reject) => {
     const img = new Image(width, height);
     img.src = path;
-    img.addEventListener('load', () => resolve(img));
+    img.addEventListener('load', async () => {
+      const bitmap = await createImageBitmap(img, 0, 0, width, height);
+      tileMap.set(key, bitmap);
+      resolve(bitmap)
+    });
     img.addEventListener('error', reject);
   });
 }
 
-const loadTile = async path => {
-  return await loadImage(path, tileWidth, tileHeight);
-};
-
-/* -----------------------------------
- * Making:
- * ----------------------------------- */
-const makeSprite = transforms => {
+const loadTile = path => {
+  return loadImage(path, tileWidth, tileHeight);
 };
 
 /* -----------------------------------
  * Drawing:
  * ----------------------------------- */
+const getImage = key => {
+  if (tileMap.has(key)) return tileMap.get(key);
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    `No loaded image resource associated with key "${key}"!`);
+}
+
+const drawImage = async (key, x, y) => {
+  const image = getImage(key);
+};
