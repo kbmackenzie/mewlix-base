@@ -8,11 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="style.css" rel="stylesheet">
-    <script type="module" src="mewlix/core/graphic.js"></script>
+    <script type="module" src="core/mewlix.js"></script>
+    <script type="module" src="core/graphic.js"></script>
   </head>
-  <body>
-    <main>
-      <canvas id="mewlix-canvas"></canvas>
+  <body class="center-items">
+    <main class="screen-overlay">
+      <canvas
+          id="drawing-canvas"
+          width="128"
+          height="128"
+          class="screen-overlay drawing-canvas"
+          ></canvas>
     </main>
   </body>
 </html>
