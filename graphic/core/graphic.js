@@ -128,9 +128,11 @@ const loadTile = async path => {
  * Drawing:
  * ----------------------------------- */
 const getImage = key => {
-  if (tileMap.has(key)) return tileMap.get(key);
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-    `No loaded image resource associated with key "${key}"!`);
+  if (!tileMap.has(key)) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `No loaded image resource associated with key "${key}"!`);
+  }
+  return tileMap.get(key);
 }
 
 const drawImage = async (key, x = 0, y = 0) => {
