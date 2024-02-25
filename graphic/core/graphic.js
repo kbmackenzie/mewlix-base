@@ -88,22 +88,21 @@ class PixelCanvas extends Mewlix.MewlixClowder {
     }
   }
 
-  toImage() {
+  async toImage() {
     const data = new ImageData(this.data, this.width, this.height);
-    return createImageBitmap(data); /* promise! */
+    return await createImageBitmap(data);
   }
 };
 
 /* -----------------------------------
  * Canvas:
  * ----------------------------------- */
-
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('drawing-canvas');
 /** @type {CanvasRenderingContext2D} */
 const drawingCtx = canvas.getContext('2d');
 
-/** @type {Map<string, HTMLImageElement>} */
+/** @type {Map<string, ImageBitmap>} */
 const tileMap = new Map();
 const soundMap = new Map();
 
@@ -115,21 +114,14 @@ const tileWidth  = 8;
 /** @type {number} */
 const tileHeight = 8;
 
-const loadImage = (key, path, width, height) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image(width, height);
-    img.src = path;
-    img.addEventListener('load', async () => {
-      const bitmap = await createImageBitmap(img, 0, 0, width, height);
-      tileMap.set(key, bitmap);
-      resolve(bitmap)
-    });
-    img.addEventListener('error', reject);
-  });
-}
+const loadImage = async (key, path, width, height) => {
+  const image = await createImageBitmap(path, 0, 0, width, height);
+  tileMap.set(key, image);
+  return image;
+};
 
-const loadTile = path => {
-  return loadImage(path, tileWidth, tileHeight);
+const loadTile = async path => {
+  return await loadImage(path, tileWidth, tileHeight);
 };
 
 /* -----------------------------------
@@ -141,6 +133,7 @@ const getImage = key => {
     `No loaded image resource associated with key "${key}"!`);
 }
 
-const drawImage = async (key, x, y) => {
+const drawImage = async (key, x = 0, y = 0) => {
   const image = getImage(key);
+  ctx.drawImage(image, x, y);
 };
