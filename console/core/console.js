@@ -100,7 +100,7 @@ const setProjectName = name => {
 };
 
 const setBackground = path => {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(path);
     reader.addEventListener('load', () => {
@@ -108,6 +108,7 @@ const setBackground = path => {
       imageCredits.classList.add('hide');
       resolve();
     });
+    reader.addEventListener('error', reject);
   });
 };
 
