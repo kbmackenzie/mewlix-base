@@ -35,4 +35,5 @@ html, body {
 
 .drawing-canvas {
   object-fit: contain;
+  image-rendering: pixelated;
 }
