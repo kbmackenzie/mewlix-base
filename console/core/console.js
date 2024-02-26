@@ -99,20 +99,15 @@ const setProjectName = name => {
   projectName.textContent = name;
 };
 
-const setBackground = path => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(path);
-    reader.addEventListener('load', () => {
-      catBackground.style.backgroundImage = `url('${reader.result}')`;
-      imageCredits.classList.add('hide');
-      resolve();
-    });
-    reader.addEventListener('error', reject);
+const setBackground = path => fetch(path)
+  .then(response => response.blob())
+  .then(blob => URL.createObjectURL(blob))
+  .then(url => {
+    catBackground.style.backgroundImage = `url('${url}')`;
+    imageCredits.classList.add('hide');
   });
-};
 
-/* -------------------------------------
+  /* -------------------------------------
  * Events:
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
