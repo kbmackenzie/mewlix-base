@@ -112,9 +112,9 @@ class PixelCanvas extends Mewlix.MewlixClowder {
     }
   }
 
-  async toImage() {
+  toImage() {
     const data = new ImageData(this.data, this.width, this.height);
-    return await createImageBitmap(data);
+    return createImageBitmap(data);
   }
 };
 
@@ -127,8 +127,8 @@ const loadImage = async (key, path, width, height) => {
   return image;
 };
 
-const loadTile = async path => {
-  return await loadImage(path, tileWidth, tileHeight);
+const loadTile = path => {
+  return loadImage(path, tileWidth, tileHeight);
 };
 
 /* -----------------------------------
