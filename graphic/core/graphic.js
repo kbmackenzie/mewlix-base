@@ -5,11 +5,35 @@ const clamp  = Mewlix.clamp;
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
 const percentToByte = p => Math.floor((255 * p) / 100);
 
+/* -----------------------------------
+ * Constants:
+ * ----------------------------------- */
+/** @type {HTMLCanvasElement} */
+const canvas = document.getElementById('drawing-canvas');
+
+/** @type {CanvasRenderingContext2D} */
+const drawingCtx = canvas.getContext('2d');
+
+/** @type {Map<string, ImageBitmap>} */
+const tileMap   = new Map();
+
+/** @type {Map<string, AudioBuffer>} */
+const audioMap  = new Map();
+
+const tileWidth  = 8;
+const tileHeight = 8;
+
+/* Audio: */
+const audioContext = new AudioContext();
+
+/* -----------------------------------
+ * Types:
+ * ----------------------------------- */
+
 /* Color contained, wrapping a RGBA color value.
  *
  * It also implements .toColor(), complying with the 'ToColor' interface concept:
  * Any object that implements a .toColor() method can be considered a valid color representation. */
-
 class Color extends Mewlix.MewlixClowder {
   constructor(red, green, blue, opacity = 100) {
     super();
@@ -95,23 +119,8 @@ class PixelCanvas extends Mewlix.MewlixClowder {
 };
 
 /* -----------------------------------
- * Canvas:
- * ----------------------------------- */
-/** @type {HTMLCanvasElement} */
-const canvas = document.getElementById('drawing-canvas');
-/** @type {CanvasRenderingContext2D} */
-const drawingCtx = canvas.getContext('2d');
-
-/** @type {Map<string, ImageBitmap>} */
-const tileMap = new Map();
-const soundMap = new Map();
-
-/* -----------------------------------
  * Loading Images:
  * ----------------------------------- */
-const tileWidth  = 8;
-const tileHeight = 8;
-
 const loadImage = async (key, path, width, height) => {
   const image = await createImageBitmap(path, 0, 0, width, height);
   tileMap.set(key, image);
@@ -147,18 +156,15 @@ const drawImage = async (key, x = 0, y = 0) => {
  * ----------------------------------- */
 
 /* -----------------------------------
- * Initialize Audio:
- * ----------------------------------- */
-const audioContext = new AudioContext();
-
-/* -----------------------------------
  * Loading Audio:
  * ----------------------------------- */
-const loadAudio = async (key, path) => {
-  await fetch(path)
-    .then(response => response.arrayBuffer())
-    .then(buffer => audioContext(;
-};
+const loadAudio = (key, path) => fetch(path)
+  .then(response => response.arrayBuffer())
+  .then(buffer => audioContext.decodeAudioData(buffer))
+  .then(audio => {
+    audioMap.set(key, audio);
+    return audio;
+  });
 
 /* -----------------------------------
  * Playing Audio:
