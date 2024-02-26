@@ -150,17 +150,17 @@ toggleHighlight(showHighlight.checked);
 /* -------------------------------------
  * Standard library:
  * ------------------------------------- */
-Mewlix.meow = async message => {
+Mewlix.meow = message => {
   const str = Mewlix.purrify(message);
   addLine(str, false);
   return str;
 };
 
-Mewlix.listen = async question => {
+Mewlix.listen = question => {
   if (!Mewlix.isNothing(question)) {
     addLine(Mewlix.purrify(question), false);
   }
-  return await getInput();
+  return getInput();
 };
 
 const ensure = Mewlix.ensure;
