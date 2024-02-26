@@ -231,7 +231,7 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
 Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
   /* All clowders should inherit from this class.
    * It provides a default definition for .wake(), too! */
-  async wake() {
+  wake() {
     return this;
   }
 }
