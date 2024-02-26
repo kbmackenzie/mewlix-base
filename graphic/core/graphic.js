@@ -147,12 +147,33 @@ const drawImage = async (key, x = 0, y = 0) => {
  * ----------------------------------- */
 
 /* -----------------------------------
+ * Initialize Audio:
+ * ----------------------------------- */
+const audioContext = new AudioContext();
+
+/* -----------------------------------
  * Loading Audio:
  * ----------------------------------- */
+const loadAudio = async (key, path) => {
+  await fetch(path)
+    .then(response => response.arrayBuffer())
+    .then(buffer => audioContext(;
+};
 
 /* -----------------------------------
  * Playing Audio:
  * ----------------------------------- */
+const playSong = key => {
+};
+
+const playSound = key => {
+};
+
+const stopSong  = key => undefined;
+const stopSound = key => undefined;
+
+const stopAllMusic = () => undefined;
+const stopAllSound = () => undefined;
 
 /* -----------------------------------
  * Initialization:
