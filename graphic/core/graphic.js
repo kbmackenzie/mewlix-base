@@ -15,13 +15,13 @@ const canvas = document.getElementById('drawing-canvas');
 const drawingCtx = canvas.getContext('2d');
 
 /** @type {Map<string, ImageBitmap>} */
-const tileMap   = new Map();
+const spriteMap   = new Map();
 
 /** @type {Map<string, AudioBuffer>} */
 const audioMap  = new Map();
 
-const tileWidth  = 8;
-const tileHeight = 8;
+const spriteWidth  = 8;
+const spriteHeight = 8;
 
 /* Audio: */
 const audioContext = new AudioContext();
@@ -33,23 +33,23 @@ const loadImage = (key, path, width, height) => fetch(path)
   .then(response => response.blob())
   .then(blob => createImageBitmap(blob, 0, 0, width, height))
   .then(image => {
-    tileMap.set(key, image);
+    spriteMap.set(key, image);
     return image;
   });
 
-const loadTile = path => {
-  return loadImage(path, tileWidth, tileHeight);
+const loadSprite = path => {
+  return loadImage(path, spriteWidth, spriteHeight);
 };
 
 /* -----------------------------------
  * Drawing:
  * ----------------------------------- */
 const getImage = key => {
-  if (!tileMap.has(key)) {
+  if (!spriteMap.has(key)) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
       `No loaded image resource associated with key "${key}"!`);
   }
-  return tileMap.get(key);
+  return spriteMap.get(key);
 }
 
 const drawImage = (key, x = 0, y = 0) => {
@@ -138,7 +138,7 @@ class Color extends Mewlix.MewlixClowder {
   }
 }
 
-/* A pixel canvas for efficiently creating sprites and tiles.
+/* A pixel canvas for efficiently creating sprites and sprites.
  *
  * The .toImage() creates a new ImageBitmap object from the pixel data.
  * The generated ImageBitmap object can be used with the HTML5 Canvas .drawImage() method! */
