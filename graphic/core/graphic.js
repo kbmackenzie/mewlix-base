@@ -175,11 +175,18 @@ class PixelCanvas extends Mewlix.MewlixClowder {
     }
   }
 
-  toImage() {
-    const data = new ImageData(this.data, this.width, this.height);
-    return createImageBitmap(data);
+  async toImage(key) {
+    const data  = new ImageData(this.data, this.width, this.height);
+    const image = await createImageBitmap(data);
+    spriteMap.set(key, image);
   }
 };
+
+class SpriteCanvas extends PixelCanvas {
+  constructor() {
+    super(spriteWidth, spriteHeight);
+  }
+}
 
 /* -----------------------------------
  * Initialization:
