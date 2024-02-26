@@ -27,6 +27,71 @@ const tileHeight = 8;
 const audioContext = new AudioContext();
 
 /* -----------------------------------
+ * Loading Images:
+ * ----------------------------------- */
+const loadImage = (key, path, width, height) => fetch(path)
+  .then(response => response.blob())
+  .then(blob => createImageBitmap(blob, 0, 0, width, height))
+  .then(image => {
+    tileMap.set(key, image);
+    return image;
+  });
+
+const loadTile = path => {
+  return loadImage(path, tileWidth, tileHeight);
+};
+
+/* -----------------------------------
+ * Drawing:
+ * ----------------------------------- */
+const getImage = key => {
+  if (!tileMap.has(key)) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `No loaded image resource associated with key "${key}"!`);
+  }
+  return tileMap.get(key);
+}
+
+const drawImage = (key, x = 0, y = 0) => {
+  const image = getImage(key);
+  ctx.drawImage(image, x, y);
+};
+
+/* -----------------------------------
+ * Loading Fonts:
+ * ----------------------------------- */
+
+/* -----------------------------------
+ * Drawing Texts:
+ * ----------------------------------- */
+
+/* -----------------------------------
+ * Loading Audio:
+ * ----------------------------------- */
+const loadAudio = (key, path) => fetch(path)
+  .then(response => response.arrayBuffer())
+  .then(buffer => audioContext.decodeAudioData(buffer))
+  .then(audio => {
+    audioMap.set(key, audio);
+    return audio;
+  });
+
+/* -----------------------------------
+ * Playing Audio:
+ * ----------------------------------- */
+const playSong = key => {
+};
+
+const playSound = key => {
+};
+
+const stopSong  = key => undefined;
+const stopSound = key => undefined;
+
+const stopAllMusic = () => undefined;
+const stopAllSound = () => undefined;
+
+/* -----------------------------------
  * Types:
  * ----------------------------------- */
 
@@ -117,69 +182,6 @@ class PixelCanvas extends Mewlix.MewlixClowder {
     return createImageBitmap(data);
   }
 };
-
-/* -----------------------------------
- * Loading Images:
- * ----------------------------------- */
-const loadImage = async (key, path, width, height) => {
-  const image = await createImageBitmap(path, 0, 0, width, height);
-  tileMap.set(key, image);
-  return image;
-};
-
-const loadTile = path => {
-  return loadImage(path, tileWidth, tileHeight);
-};
-
-/* -----------------------------------
- * Drawing:
- * ----------------------------------- */
-const getImage = key => {
-  if (!tileMap.has(key)) {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-      `No loaded image resource associated with key "${key}"!`);
-  }
-  return tileMap.get(key);
-}
-
-const drawImage = async (key, x = 0, y = 0) => {
-  const image = getImage(key);
-  ctx.drawImage(image, x, y);
-};
-
-/* -----------------------------------
- * Loading Fonts:
- * ----------------------------------- */
-
-/* -----------------------------------
- * Drawing Texts:
- * ----------------------------------- */
-
-/* -----------------------------------
- * Loading Audio:
- * ----------------------------------- */
-const loadAudio = (key, path) => fetch(path)
-  .then(response => response.arrayBuffer())
-  .then(buffer => audioContext.decodeAudioData(buffer))
-  .then(audio => {
-    audioMap.set(key, audio);
-    return audio;
-  });
-
-/* -----------------------------------
- * Playing Audio:
- * ----------------------------------- */
-const playSong = key => {
-};
-
-const playSound = key => {
-};
-
-const stopSong  = key => undefined;
-const stopSound = key => undefined;
-
-const stopAllMusic = () => undefined;
-const stopAllSound = () => undefined;
 
 /* -----------------------------------
  * Initialization:
