@@ -37,9 +37,7 @@ const loadImage = (key, path, width, height) => fetch(path)
     return image;
   });
 
-const loadSprite = path => {
-  return loadImage(path, spriteWidth, spriteHeight);
-};
+const loadSprite = path => loadImage(path, spriteWidth, spriteHeight);
 
 /* -----------------------------------
  * Drawing:
