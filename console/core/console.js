@@ -13,8 +13,6 @@ const promptMessage = '=^-x-^= $ ';
 const consoleBox = document.getElementById('console');
 const input = document.getElementById('console-input');
 const lines = document.getElementById('console-lines');
-const projectName = document.getElementById('project-name');
-const inputButton = document.getElementById('console-arrow');
 
 /* Background: */
 const catBackground = document.getElementById('cat-background');
@@ -94,7 +92,7 @@ const setOpacity = value => {
 
 const setProjectName = name => {
   if (name === '') return;
-  projectName.textContent = name;
+  document.getElementById('project-name').textContent = name;
 };
 
 const setBackground = path => fetch(path)
@@ -119,7 +117,7 @@ input.addEventListener('keyup', event => {
   input.dispatchEvent(inputReceived);
 });
 
-inputButton.addEventListener('click', () => {
+document.getElementById('input-button').addEventListener('click', () => {
   if (input.value === '') return;
   input.dispatchEvent(inputReceived);
 });
