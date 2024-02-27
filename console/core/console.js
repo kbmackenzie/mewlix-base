@@ -15,7 +15,6 @@ const input = document.getElementById('console-input');
 const lines = document.getElementById('console-lines');
 const projectName = document.getElementById('project-name');
 const inputButton = document.getElementById('console-arrow');
-const showSettings = document.getElementById('show-settings');
 
 /* Background: */
 const catBackground = document.getElementById('cat-background');
@@ -23,7 +22,6 @@ const imageCredits = document.getElementById('image-credits');
 
 /* Settings menu : */
 const settings = document.getElementById('menu-settings');
-const exitSettings = document.getElementById('exit-settings');
 
 /* Settings options: */
 const promptColor = document.getElementById('select-color');
@@ -126,14 +124,14 @@ inputButton.addEventListener('click', () => {
   input.dispatchEvent(inputReceived);
 });
 
-showSettings.addEventListener('click', () => {
-  document.body.appendChild(obscureOverlay());
+document.getElementById('show-settings').addEventListener('click', () => {
   settings.classList.remove('hide');
+  document.body.appendChild(obscureOverlay());
 });
 
-exitSettings.addEventListener('click', () => {
-  document.getElementsByClassName('obscure').forEach(x => x.remove());
+document.getElementById('exit-settings').addEventListener('click', () => {
   settings.classList.add('hide');
+  document.getElementsByClassName('obscure').forEach(x => x.remove());
 });
 
 consoleOpacity.addEventListener('change', () => {
