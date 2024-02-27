@@ -107,6 +107,15 @@ const setBackground = path => fetch(path)
     imageCredits.classList.add('hide');
   });
 
+const obscureOverlay = () => {
+  const div = document.createElement('div');
+  div.classList.add('screen-overlay');
+  div.style.zIndex = '10';
+  div.style.backgroundColor = '#000';
+  div.style.opacity = '80%';
+  return div;
+}
+
   /* -------------------------------------
  * Events:
  * ------------------------------------- */

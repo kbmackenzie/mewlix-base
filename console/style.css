@@ -64,11 +64,6 @@ html, body {
   height: 100%;
 }
 
-.obscure {
-  background-color: black;
-  opacity: 80%;
-}
-
 /* -----------------------------------------
  * Cat background:
  * ----------------------------------------- */
@@ -193,7 +188,7 @@ html, body {
   overflow: hidden;
   border-radius: 2rem;
   width: 90%;
-  z-index: 11;
+  z-index: 20;
 }
 
 .settings__header {
