@@ -13,6 +13,7 @@ const promptMessage = '=^-x-^= $ ';
 const consoleBox = document.getElementById('console');
 const input = document.getElementById('console-input');
 const lines = document.getElementById('console-lines');
+const projectName = document.getElementById('project-name');
 
 /* Background: */
 const catBackground = document.getElementById('cat-background');
@@ -92,7 +93,7 @@ const setOpacity = value => {
 
 const setProjectName = name => {
   if (name === '') return;
-  document.getElementById('project-name').textContent = name;
+  projectName.textContent = name;
 };
 
 const setBackground = path => fetch(path)
