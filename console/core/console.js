@@ -118,7 +118,7 @@ input.addEventListener('keyup', event => {
   input.dispatchEvent(inputReceived);
 });
 
-document.getElementById('input-button').addEventListener('click', () => {
+document.getElementById('console-arrow').addEventListener('click', () => {
   if (input.value === '') return;
   input.dispatchEvent(inputReceived);
 });
@@ -128,9 +128,9 @@ document.getElementById('show-settings').addEventListener('click', () => {
   document.body.appendChild(obscureOverlay());
 });
 
-document.getElementById('exit-settings').addEventListener('click', () => {
+document.getElementById('hide-settings').addEventListener('click', () => {
   settings.classList.add('hide');
-  document.getElementsByClassName('obscure').forEach(x => x.remove());
+  Array.from(document.getElementsByClassName('obscure')).forEach(x => x.remove());
 });
 
 consoleOpacity.addEventListener('change', () => {

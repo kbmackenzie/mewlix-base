@@ -182,6 +182,10 @@ html, body {
 /* -----------------------------------------
  * Settings:
  * ----------------------------------------- */
+#menu-settings {
+  z-index: 20;
+}
+
 .settings {
   position: fixed;
   display: grid;
@@ -194,7 +198,6 @@ html, body {
   overflow: hidden;
   border-radius: 2rem;
   width: 90%;
-  z-index: 20;
 }
 
 .settings__header {
