@@ -58,6 +58,18 @@ html, body {
   display: none !important; 
 }
 
+.screen-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.obscure-overlay {
+  background-color: black;
+  opacity: 80%;
+  z-index: 10;
+}
+
 /* -----------------------------------------
  * Cat background:
  * ----------------------------------------- */
@@ -170,12 +182,6 @@ html, body {
 /* -----------------------------------------
  * Settings:
  * ----------------------------------------- */
-.screen-overlay {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-
 .settings {
   position: fixed;
   display: grid;
@@ -246,12 +252,6 @@ html, body {
 
 .settings__options li > label {
   text-align: center;
-}
-
-.dark-overlay {
-  background-color: black;
-  opacity: 80%;
-  z-index: 10;
 }
 
 /* -----------------------------------------
