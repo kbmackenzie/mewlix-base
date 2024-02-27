@@ -76,60 +76,58 @@
     </aside>
 
     <!-- Settings Menu -->
-    <aside id="menu-settings" class="screen-overlay center-items hide">
-      <section class="settings">
-        <nav id="hide-settings" class="white-button center-items settings__exit">
-          <svg
-            data-slot="icon"
-            aria-hidden="true"
-            fill="none"
-            stroke-width="1.5"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M6 18 18 6M6 6l12 12"
-              stroke-linecap="round" 
-              stroke-linejoin="round"></path>
-          </svg>
-        </nav>
+    <aside id="menu-settings" class="settings">
+      <nav id="hide-settings" class="white-button center-items settings__exit">
+        <svg
+          data-slot="icon"
+          aria-hidden="true"
+          fill="none"
+          stroke-width="1.5"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M6 18 18 6M6 6l12 12"
+            stroke-linecap="round" 
+            stroke-linejoin="round"></path>
+        </svg>
+      </nav>
 
-        <section class="font-console settings__options">
-          <ul>
-            <li>
-              <label for="select-color">Prompt color:</label>
-              <input type="color" value="#f6d52d" name="select-color" id="select-color" />
-            </li>
-            <li>
-              <label for="hide-prompt">Hide prompt:</label>
-              <input type="checkbox" name="hide-prompt" id="hide-prompt" />
-            </li>
-            <li>
-              <label for="show-highlight">Highlighted:</label>
-              <input type="checkbox" name="show-highlight" id="show-highlight" />
-            </li>
-            <li>
-              <label for="select-opacity">Opacity:</label>
-              <input
-                type="range"
-                min="30"
-                max="100"
-                step="10"
-                value="90"
-                name="select-opacity"
-                id="select-opacity" />
-            </li>
-            <li>
-              <label for="select-background">Change Background</label>
-              <input
-                type="file"
-                class="hide"
-                accept="image/*"
-                name="select-background"
-                id="select-background" />
-            </li>
-          </ul>
-        </section>
+      <section class="font-console settings__options">
+        <ul>
+          <li>
+            <label for="select-color">Prompt color:</label>
+            <input type="color" value="#f6d52d" name="select-color" id="select-color" />
+          </li>
+          <li>
+            <label for="hide-prompt">Hide prompt:</label>
+            <input type="checkbox" name="hide-prompt" id="hide-prompt" />
+          </li>
+          <li>
+            <label for="show-highlight">Highlighted:</label>
+            <input type="checkbox" name="show-highlight" id="show-highlight" />
+          </li>
+          <li>
+            <label for="select-opacity">Opacity:</label>
+            <input
+              type="range"
+              min="30"
+              max="100"
+              step="10"
+              value="90"
+              name="select-opacity"
+              id="select-opacity" />
+          </li>
+          <li>
+            <label for="select-background">Change Background</label>
+            <input
+              type="file"
+              class="hide"
+              accept="image/*"
+              name="select-background"
+              id="select-background" />
+          </li>
+        </ul>
       </section>
     </aside>
   </body>
