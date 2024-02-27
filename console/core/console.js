@@ -109,10 +109,7 @@ const setBackground = path => fetch(path)
 
 const obscureOverlay = () => {
   const div = document.createElement('div');
-  div.classList.add('screen-overlay');
-  div.style.zIndex = '10';
-  div.style.backgroundColor = '#000';
-  div.style.opacity = '80%';
+  div.classList.add('screen-overlay', 'obscure');
   return div;
 }
 
@@ -130,10 +127,12 @@ inputButton.addEventListener('click', () => {
 });
 
 showSettings.addEventListener('click', () => {
+  document.body.appendChild(obscureOverlay());
   settings.classList.remove('hide');
 });
 
 exitSettings.addEventListener('click', () => {
+  document.getElementsByClassName('obscure').forEach(x => x.remove());
   settings.classList.add('hide');
 });
 
