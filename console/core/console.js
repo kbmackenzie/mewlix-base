@@ -96,6 +96,7 @@ const setProjectName = name => {
   projectName.textContent = name;
 };
 
+/* Set console background to an image in the server, asynchronously. */
 const setBackground = path => fetch(path)
   .then(response => response.blob())
   .then(blob => URL.createObjectURL(blob))
@@ -103,6 +104,13 @@ const setBackground = path => fetch(path)
     catBackground.style.backgroundImage = `url('${url}')`;
     imageCredits.classList.add('hide');
   });
+
+/* Set console background to an image in the local filesystem. */
+const setBackgroundLocal = file => {
+  const url = URL.createObjectURL(file);
+  catBackground.style.backgroundImage = `url('${url}')`;
+  imageCredits.classList.add('hide');
+};
 
 const obscureOverlay = () => {
   const div = document.createElement('div');
@@ -143,7 +151,7 @@ showHighlight.addEventListener('change', () => {
 
 selectBackground.addEventListener('change', () => {
   if (selectBackground.files.length === 0) return;
-  setBackground(selectBackground.files[0]);
+  setBackgroundLocal(selectBackground.files[0]);
 });
 
 /* -------------------------------------
