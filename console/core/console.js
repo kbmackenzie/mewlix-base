@@ -99,9 +99,8 @@ const setProjectName = name => {
 /* Set console background to an image in the server, asynchronously. */
 const setBackground = path => fetch(path)
   .then(response => response.blob())
-  .then(blob => URL.createObjectURL(blob))
-  .then(url => {
-    catBackground.style.backgroundImage = `url('${url}')`;
+  .then(blob => {
+    catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
     imageCredits.classList.add('hide');
   });
 
