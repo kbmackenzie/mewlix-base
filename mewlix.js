@@ -528,7 +528,7 @@ Mewlix.Reflection = {
   },
 };
 
-Mewlix.Box = {
+Mewlix.Boxes = {
   pairs: function pairs(value) {
     ensure.box(value);
     return Mewlix.Shelf.fromArray(Object.entries(value).map(
