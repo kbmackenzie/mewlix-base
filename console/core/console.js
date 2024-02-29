@@ -1,35 +1,34 @@
 'use strict';
 
 /* -------------------------------------
- * Constants:
+ * Events:
  * ------------------------------------- */
-/* A custom event for when a user sends input to the console. */
+// A custom event for when a user sends input to the console.
 const inputReceived = file => new CustomEvent('input-received', {
   detail: { fromFile: file !== undefined, file: file },
 });
 
-/* The console prompt string: */
+/* -------------------------------------
+ * Constants:
+ * ------------------------------------- */
+// The console prompt string:
 const promptMessage = '=^-x-^= $ ';
 
-/* Console: */
-const consoleBox  = document.getElementById('console');
-const input       = document.getElementById('console-input');
-const lines       = document.getElementById('console-lines');
-const projectName = document.getElementById('project-name');
+// Console:
+const consoleBox        = document.getElementById('console');
+const input             = document.getElementById('console-input');
+const lines             = document.getElementById('console-lines');
+const projectName       = document.getElementById('project-name');
+const arrowButton       = document.getElementById('console-arrow');
+const paperclipInput    = document.getElementById('paperclip-input');
+const paperclipButton   = document.getElementById('console-paperclip');
 
-/* Buttons: */
-const arrowButton     = document.getElementById('console-arrow');
-const paperclipInput  = document.getElementById('paperclip-input');
-const paperclipButton = document.getElementById('console-paperclip');
+// Background:
+const catBackground     = document.getElementById('cat-background');
+const imageCredits      = document.getElementById('image-credits');
 
-/* Background: */
-const catBackground = document.getElementById('cat-background');
-const imageCredits  = document.getElementById('image-credits');
-
-/* Settings menu : */
-const settings = document.getElementById('menu-settings');
-
-/* Settings options: */
+// Settings:
+const settingsMenu      = document.getElementById('menu-settings');
 const promptColor       = document.getElementById('select-color');
 const hidePrompt        = document.getElementById('hide-prompt');
 const showHighlight     = document.getElementById('show-highlight');
@@ -43,17 +42,19 @@ const createPrompt = () => {
   const span = document.createElement('span');
   span.style.color = promptColor.value;
   span.classList.add('console__prompt');
+
   span.appendChild(document.createTextNode(promptMessage));
   return span;
 }
 
 const addLine = (text, fromUser = true) => {
   const line = document.createElement('li');
+
   if (fromUser && !hidePrompt.checked) {
     line.appendChild(createPrompt());
   }
-  line.appendChild(document.createTextNode(text));
 
+  line.appendChild(document.createTextNode(text));
   lines.appendChild(line);
   fixScroll();
 }
@@ -62,6 +63,7 @@ const addError = text => {
   const line = document.createElement('li');
   line.style.color = '#c90e17';
   line.appendChild(document.createTextNode(`[Console] ${text}`));
+
   lines.appendChild(line);
   fixScroll();
 };
@@ -133,7 +135,7 @@ const setProjectName = name => {
   projectName.textContent = name;
 };
 
-/* Set console background to an image in the server, asynchronously. */
+// Set console background to an image in the server, asynchronously.
 const setBackground = path => fetch(path)
   .then(response => response.blob())
   .then(blob => {
@@ -141,7 +143,7 @@ const setBackground = path => fetch(path)
     imageCredits.classList.add('hide');
   });
 
-/* Set console background to an image in the local filesystem. */
+// Set console background to an image in the local filesystem.
 const setBackgroundLocal = file => {
   const url = URL.createObjectURL(file);
   catBackground.style.backgroundImage = `url('${url}')`;
@@ -154,8 +156,8 @@ const obscureOverlay = () => {
   return div;
 }
 
-  /* -------------------------------------
- * Events:
+/* -------------------------------------
+ * Initialization:
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
   if (event.key !== 'Enter' || input.value === '') return;
@@ -173,12 +175,12 @@ paperclipInput.addEventListener('change', () => {
 });
 
 document.getElementById('show-settings').addEventListener('click', () => {
-  settings.classList.remove('hide');
+  settingsMenu.classList.remove('hide');
   document.body.appendChild(obscureOverlay());
 });
 
 document.getElementById('hide-settings').addEventListener('click', () => {
-  settings.classList.add('hide');
+  settingsMenu.classList.add('hide');
   Array.from(document.getElementsByClassName('obscure')).forEach(x => x.remove());
 });
 
@@ -196,7 +198,7 @@ selectBackground.addEventListener('change', () => {
 });
 
 /* -------------------------------------
- * Initialize:
+ * Initialization (electric boogaloo):
  * ------------------------------------- */
 setOpacity(consoleOpacity.value);
 toggleHighlight(showHighlight.checked);
@@ -240,30 +242,28 @@ Mewlix.Console = Mewlix.library('std.console', {
     await setBackground(path);
   },
 
-  /* Set console opacity level.
+  /* Set console opacity level. Integer values expected: floats will be floored.
    *
-   * Only values between 0 and 100 are accepted.
+   * Only numeric values between 0 and 100 are accepted.
    * Any value outside of the accepted range will be clamped.
    *
    * type: number -> nothing */
   opacity: value => {
-    const clamped = Mewlix.clamp(value, 0, 100);
+    const clamped = Mewlix.clamp(Math.floor(value), 0, 100);
     consoleOpacity.value = clamped.toString();
     setOpacity(clamped);
   },
 
-  /* Toggle the console input box's 'highlight' behavior.
-   * This is an accessibility feature!
-   *
+  /* Toggle the console input box's 'highlight' option. This is an accessibility feature!
+   * Learn more about it in [link].
+   * 
    * type: boolean -> nothing */
   highlight: enable => {
     showHighlight.checked = enable;
     toggleHighlight(enable);
   },
 
-  /* Set console prompt color.
-   * This function expects a valid hex code as argument!
-   *
+  /* Set console prompt color. This function expects a valid hex code as argument!
    * type: string -> nothing */
   prompt_color: color => {
     ensure.string(color);
