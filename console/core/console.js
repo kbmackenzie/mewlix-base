@@ -145,8 +145,7 @@ const setBackground = path => fetch(path)
 
 // Set console background to an image in the local filesystem.
 const setBackgroundLocal = file => {
-  const url = URL.createObjectURL(file);
-  catBackground.style.backgroundImage = `url('${url}')`;
+  catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
   imageCredits.classList.add('hide');
 };
 
