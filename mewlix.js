@@ -202,9 +202,9 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
 }
 
 // -----------------------------------------------------
-// MewlixBox -> Mewlix's associative array.
+// Box -> Mewlix's associative array.
 // -----------------------------------------------------
-Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
+Mewlix.Box = class Box extends Mewlix.MewlixObject {
   constructor(entries = []) {
     super();
 
@@ -228,7 +228,7 @@ Mewlix.MewlixBox = class MewlixBox extends Mewlix.MewlixObject {
 // -----------------------------------------------------
 // MewlixClowder -> Clowder base class.
 // -----------------------------------------------------
-Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.MewlixBox {
+Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.Box {
   /* All clowders should inherit from this class.
    * It provides a default definition for .wake(), too! */
   wake() {
@@ -329,7 +329,7 @@ const ensure = {
       `Expected shelf, got ${typeof x}: ${x}!`);
   },
   box: x => {
-    if (x instanceof Mewlix.MewlixBox) return;
+    if (x instanceof Mewlix.Box) return;
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Expected box, got ${typeof x}: ${x}!`);
   },
@@ -494,7 +494,7 @@ Mewlix.Shelf = {
   length: function length(value) {
     if (value instanceof Mewlix.Shelf) return value.length();
     if (typeof value === 'string') return value.length;
-    if (value instanceof Mewlix.MewlixBox) return Object.entries(value).length;
+    if (value instanceof Mewlix.Box) return Object.entries(value).length;
 
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Can't calculate length for value of type "${typeof value}": ${value}`);
@@ -507,7 +507,7 @@ Mewlix.Shelf = {
 Mewlix.Reflection = {
   typeOf: function typeOf(value) {
     if (value instanceof Mewlix.Shelf) return 'shelf';
-    if (value instanceof Mewlix.MewlixBox) return 'box';
+    if (value instanceof Mewlix.Box) return 'box';
     if (value instanceof Mewlix.YarnBall) return 'yarn ball';
     if (value === null || value === undefined) return 'nothing';
 
@@ -532,7 +532,7 @@ Mewlix.Box = {
   pairs: function pairs(value) {
     ensure.box(value);
     return Mewlix.Shelf.fromArray(Object.entries(value).map(
-      ([key, value]) => new Mewlix.MewlixBox([["key", key], ["value", value]])
+      ([key, value]) => new Mewlix.Box([["key", key], ["value", value]])
     ));
   },
 };
@@ -574,7 +574,7 @@ Mewlix.Inner = {
     const errorCode = (error instanceof Mewlix.MewlixError)
       ? error.code 
       : Mewlix.ErrorCode.ExternalError;
-    return new Mewlix.MewlixBox([
+    return new Mewlix.Box([
       [ "name" , errorCode.name ],
       [ "id"   , errorCode.id   ]
     ]);
@@ -599,7 +599,7 @@ const deepcopyBox = function deepcopyBox(box) {
   if (box instanceof Mewlix.MewlixClowder && deepcopy in box) {
     return box.deepcopy();
   }
-  return Mewlix.MewlixBox(Object.entries(box).map(
+  return Mewlix.Box(Object.entries(box).map(
     ([key, value]) => [key, Mewlix.deepcopy(value)]
   ));
 };
@@ -608,10 +608,10 @@ Mewlix.deepcopy = function deepcopy(value) {
   if (typeof value !== 'object') return value;
 
   if (value instanceof Mewlix.Shelf) { return deepcopyShelf(value); }
-  if (value instanceof Mewlix.MewlixBox)   { return deepcopyBox(value);   }
+  if (value instanceof Mewlix.Box)   { return deepcopyBox(value);   }
 
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-    `Invalid object in Mewlix context - object isn't an instance of Mewlix.MewlixBox: ${value}`);
+    `Invalid object in Mewlix context - object isn't an instance of Mewlix.Box: ${value}`);
 };
 
 // -----------------------------------------------------
