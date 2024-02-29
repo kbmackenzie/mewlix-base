@@ -12,7 +12,7 @@ const percentToByte = p => Math.floor((255 * p) / 100);
 const canvas = document.getElementById('drawing-canvas');
 
 /** @type {CanvasRenderingContext2D} */
-const drawingCtx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 
 /** @type {Map<string, ImageBitmap>} */
 const spriteMap   = new Map();
@@ -25,6 +25,8 @@ const spriteHeight = 8;
 
 /* Audio: */
 const audioContext = new AudioContext();
+const masterVolume = audioContext.createGain();
+masterVolume.connect(audioContext.destination);
 
 /* -----------------------------------
  * Loading Images:
