@@ -29,14 +29,20 @@ html, body {
 }
 
 .white-button {
-  opacity: 60%;
+  opacity: 30%;
+  transition: 1s;
 }
 
 .white-button svg {
   color: white;
 }
 
-.white-button:hover {
+.white-button.enabled {
+  opacity: 60%;
+  transition: 1s;
+}
+
+.white-button.enabled:hover {
   cursor: pointer;
   opacity: 100%;
   transition: 0.6s;
@@ -106,7 +112,7 @@ html, body {
   grid-template-areas:
     ".              console-title   show-settings"
     "console-lines  console-lines   console-lines"
-    "console-input  console-input   console-arrow";
+    "console-clip   console-input   console-arrow";
   grid-template-rows: 3rem auto 5rem;
   grid-template-columns: 5rem auto 5rem;
   opacity: 90%;
@@ -150,11 +156,17 @@ html, body {
   height: 80%;
 }
 
+.console__paperclip {
+  grid-area: console-clip;
+  background-color: inherit;
+}
+
 .console__arrow {
   grid-area: console-arrow;
   background-color: inherit;
 }
 
+.console__paperclip > svg,
 .console__arrow > svg {
   width: 60%;
   height: 60%;

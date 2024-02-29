@@ -15,6 +15,10 @@ const input       = document.getElementById('console-input');
 const lines       = document.getElementById('console-lines');
 const projectName = document.getElementById('project-name');
 
+/* Buttons: */
+const arrowButton     = document.getElementById('console-arrow');
+const paperclipButton = document.getElementById('console-paperclip');
+
 /* Background: */
 const catBackground = document.getElementById('cat-background');
 const imageCredits  = document.getElementById('image-credits');
@@ -64,9 +68,21 @@ const fixScroll = () => {
   parent.scrollTop = parent.scrollHeight;
 }
 
+const enableButtons = enable => {
+  if (enable) {
+    arrowButton.classList.add('enabled');
+    paperclipButton.classList.add('enabled');
+  }
+  else {
+    arrowButton.classList.remove('enabled');
+    paperclipButton.classList.remove('enabled');
+  }
+};
+
 const getInput = () => {
   input.disabled = false;
   input.focus();
+  enableButtons(true);
 
   return new Promise(resolve => {
     input.addEventListener(
@@ -75,6 +91,7 @@ const getInput = () => {
         const text = input.value;
         input.value = '';
         input.disabled = true;
+        enableButtons(false);
 
         addLine(text);
         resolve(text);
@@ -133,9 +150,14 @@ input.addEventListener('keyup', event => {
   input.dispatchEvent(inputReceived);
 });
 
-document.getElementById('console-arrow').addEventListener('click', () => {
-  if (input.value === '') return;
+arrowButton.addEventListener('click', () => {
+  if (input.disabled || input.value === '') return;
   input.dispatchEvent(inputReceived);
+});
+
+paperclipButton.addEventListener('click', () => {
+  if (input.disabled || input.value === '') return;
+  // todo
 });
 
 document.getElementById('show-settings').addEventListener('click', () => {
