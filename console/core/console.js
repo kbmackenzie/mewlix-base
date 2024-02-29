@@ -4,7 +4,9 @@
  * Constants:
  * ------------------------------------- */
 /* A custom event for when a user sends input to the console. */
-const inputReceived = new Event('input-received');
+const inputReceived = file => new CustomEvent('input-received', {
+  detail: { fromFile: file !== undefined, file: file },
+});
 
 /* The console prompt string: */
 const promptMessage = '=^-x-^= $ ';
@@ -17,6 +19,7 @@ const projectName = document.getElementById('project-name');
 
 /* Buttons: */
 const arrowButton     = document.getElementById('console-arrow');
+const paperclipInput  = document.getElementById('paperclip-input');
 const paperclipButton = document.getElementById('console-paperclip');
 
 /* Background: */
@@ -71,10 +74,12 @@ const fixScroll = () => {
 const enableButtons = enable => {
   if (enable) {
     arrowButton.classList.add('enabled');
+    paperclipInput.disabled = false;
     paperclipButton.classList.add('enabled');
   }
   else {
     arrowButton.classList.remove('enabled');
+    paperclipInput.disabled = true;
     paperclipButton.classList.remove('enabled');
   }
 };
@@ -87,13 +92,20 @@ const getInput = () => {
   return new Promise(resolve => {
     input.addEventListener(
       'input-received',
-      () => {
-        const text = input.value;
-        input.value = '';
+      async event => {
         input.disabled = true;
         enableButtons(false);
 
-        addLine(text);
+        const text = (event.detail.fromFile)
+          ? await event.detail.file.text()
+          : input.value;
+        input.value = '';
+
+        const line = (event.detail.fromFile)
+          ? `<Read file: "${event.detail.file.name}">`
+          : text;
+
+        addLine(line);
         resolve(text);
       }, 
       { once: true }
@@ -147,17 +159,17 @@ const obscureOverlay = () => {
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
   if (event.key !== 'Enter' || input.value === '') return;
-  input.dispatchEvent(inputReceived);
+  input.dispatchEvent(inputReceived());
 });
 
 arrowButton.addEventListener('click', () => {
   if (input.disabled || input.value === '') return;
-  input.dispatchEvent(inputReceived);
+  input.dispatchEvent(inputReceived());
 });
 
-paperclipButton.addEventListener('click', () => {
-  if (input.disabled || input.value === '') return;
-  // todo
+paperclipInput.addEventListener('change', () => {
+  if (paperclipInput.files.length === 0) return;
+  input.dispatchEvent(inputReceived(paperclipInput.files[0]));
 });
 
 document.getElementById('show-settings').addEventListener('click', () => {
