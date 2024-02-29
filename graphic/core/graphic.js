@@ -99,7 +99,7 @@ const stopAllSound = () => undefined;
  *
  * It also implements .toColor(), complying with the 'ToColor' interface concept:
  * Any object that implements a .toColor() method can be considered a valid color representation. */
-class Color extends Mewlix.MewlixClowder {
+class Color extends Mewlix.Clowder {
   constructor(red, green, blue, opacity = 100) {
     super();
     ensure.all.number(red, green, blue, opacity);
@@ -142,7 +142,7 @@ class Color extends Mewlix.MewlixClowder {
  *
  * The .toImage() creates a new ImageBitmap object from the pixel data.
  * The generated ImageBitmap object can be used with the HTML5 Canvas .drawImage() method! */
-class PixelCanvas extends Mewlix.MewlixClowder {
+class PixelCanvas extends Mewlix.Clowder {
   constructor(width, height) {
     super();
     this.width = width;
