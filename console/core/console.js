@@ -10,24 +10,24 @@ const inputReceived = new Event('input-received');
 const promptMessage = '=^-x-^= $ ';
 
 /* Console: */
-const consoleBox = document.getElementById('console');
-const input = document.getElementById('console-input');
-const lines = document.getElementById('console-lines');
+const consoleBox  = document.getElementById('console');
+const input       = document.getElementById('console-input');
+const lines       = document.getElementById('console-lines');
 const projectName = document.getElementById('project-name');
 
 /* Background: */
 const catBackground = document.getElementById('cat-background');
-const imageCredits = document.getElementById('image-credits');
+const imageCredits  = document.getElementById('image-credits');
 
 /* Settings menu : */
 const settings = document.getElementById('menu-settings');
 
 /* Settings options: */
-const promptColor = document.getElementById('select-color');
-const hidePrompt = document.getElementById('hide-prompt');
-const showHighlight = document.getElementById('show-highlight');
-const consoleOpacity = document.getElementById('select-opacity');
-const selectBackground = document.getElementById('select-background');
+const promptColor       = document.getElementById('select-color');
+const hidePrompt        = document.getElementById('hide-prompt');
+const showHighlight     = document.getElementById('show-highlight');
+const consoleOpacity    = document.getElementById('select-opacity');
+const selectBackground  = document.getElementById('select-background');
 
 /* -------------------------------------
  * Console functionality:
@@ -50,6 +50,14 @@ const addLine = (text, fromUser = true) => {
   lines.appendChild(line);
   fixScroll();
 }
+
+const addError = text => {
+  const line = document.createElement('li');
+  line.style.color = '#c90e17';
+  line.appendChild(document.createTextNode(`[Console] ${text}`));
+  lines.appendChild(line);
+  fixScroll();
+};
 
 const fixScroll = () => {
   const parent = lines.parentNode;
@@ -235,3 +243,5 @@ Mewlix.Console = Mewlix.library('std.console', {
     hidePrompt.checked = hide;
   },
 });
+
+export { addLine, addError };
