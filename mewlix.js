@@ -226,11 +226,11 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
 };
 
 // -----------------------------------------------------
-// MewlixClowder -> Clowder base class.
+// Clowder -> Clowder base class.
 // -----------------------------------------------------
-Mewlix.MewlixClowder = class MewlixClowder extends Mewlix.Box {
-  /* All clowders should inherit from this class.
-   * It provides a default definition for .wake(), too! */
+/* All clowders should inherit from this class.
+ * It provides a default definition for .wake(), too! */
+Mewlix.Clowder = class Clowder extends Mewlix.Box {
   wake() {
     return this;
   }
@@ -596,7 +596,7 @@ const deepcopyShelf = function deepcopyShelf(shelf) {
 };
 
 const deepcopyBox = function deepcopyBox(box) {
-  if (box instanceof Mewlix.MewlixClowder && deepcopy in box) {
+  if (box instanceof Mewlix.Clowder && deepcopy in box) {
     return box.deepcopy();
   }
   return Mewlix.Box(Object.entries(box).map(
