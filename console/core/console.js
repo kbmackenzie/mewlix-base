@@ -45,7 +45,7 @@ const createPrompt = () => {
 
   span.appendChild(document.createTextNode(promptMessage));
   return span;
-}
+};
 
 const addLine = (text, fromUser = true) => {
   const line = document.createElement('li');
@@ -57,7 +57,7 @@ const addLine = (text, fromUser = true) => {
   line.appendChild(document.createTextNode(text));
   lines.appendChild(line);
   fixScroll();
-}
+};
 
 const addError = text => {
   const line = document.createElement('li');
@@ -71,7 +71,7 @@ const addError = text => {
 const fixScroll = () => {
   const parent = lines.parentNode;
   parent.scrollTop = parent.scrollHeight;
-}
+};
 
 const enableButtons = enable => {
   if (enable) {
@@ -113,7 +113,7 @@ const getInput = () => {
       { once: true }
     );
   });
-}
+};
 
 const clearConsole = () => {
   lines.replaceChildren();
@@ -154,7 +154,7 @@ const obscureOverlay = () => {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
   return div;
-}
+};
 
 /* -------------------------------------
  * Initialization:
