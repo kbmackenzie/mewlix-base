@@ -287,7 +287,8 @@ const setVolumeOf = (node, volume) => {
 /* -----------------------------------
  * Initialization:
  * ----------------------------------- */
-let initialized = false;
+let initialized = false;  // Convenient flag.
+let deltaTime = 0;        // Delta time, in seconds!
 
 const init = async (callback) => {
   await loadFont('Silkscreen', '/assets/sinkscreen.ttf');
@@ -298,12 +299,11 @@ const init = async (callback) => {
   });
 
   const run = async () => {
-    let lastFrame = null; // Last frame's timestamp, in milliseconds.
-    let deltaTime = 0;    // Delta time, in seconds!
+    let lastFrame; // Last frame's timestamp, in milliseconds.
 
     while (true) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      await callback(deltaTime);
+      await callback();
       const now = await nextFrame();
       lastFrame ??= now;
 
@@ -324,3 +324,7 @@ canvas.addEventListener('click', () => {
 /* -----------------------------------
  * Standard library:
  * ----------------------------------- */
+Mewlix.Graphic = {
+  /* Delta time getter; readonly. */
+  get delta() { return deltaTime },
+};
