@@ -293,50 +293,6 @@ const init = async (callback) => {
   await run();
 };
 
-let x = 0;
-let elapsed = 0;
-let musicTimer = 0;
-let playingAura = false;
-let playingFlower = false;
-let loweredVolume = false;
-
-const example = async delta => {
-  drawSprite('cat', x, 20);
-  drawText('hahahaha', 40, 40, 6, 'Silkscreen');
-
-  elapsed += delta;
-  musicTimer += delta;
-
-  x += 30 * delta;
-
-  if (elapsed > 1) {
-    elapsed = 0;
-
-    if (!playingFlower) {
-      playMusic('flower');
-      playingFlower = true;
-    }
-  }
-
-  if (musicTimer > 3 && !playingAura) {
-    playingAura = true;
-    playMusic('aura');
-  }
-
-  if (musicTimer > 6 && !loweredVolume) {
-    loweredVolume = true;
-    setVolumeOf(musicVolume, 0);
-  }
-};
-
-loadSprite('cat', '/assets/cat.png')
-  .then(_ => {
-    setVolumeOf(masterVolume, 1);
-    return loadAudio('flower', '/assets/flower.mp3');
-  })
-  .then(_ => loadAudio('aura', '/assets/aura.mp3'))
-  .then(_ => init(example));
-
 canvas.addEventListener('click', () => {
   if (audioContext.state === 'suspended') {
     audioContext.resume();
