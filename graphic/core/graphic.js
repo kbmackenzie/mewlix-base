@@ -8,6 +8,8 @@ const percentToByte = p => Math.floor((255 * p) / 100);
 /* -----------------------------------
  * Initializing Canvas:
  * ----------------------------------- */
+const sizeModifier = 8;
+
 /** @type {HTMLCanvasElement} */
 const canvas  = document.getElementById('drawing-canvas');
 /** @type {CanvasRenderingContext2D} */
@@ -20,6 +22,8 @@ const audioMap  = new Map();
 
 const spriteWidth  = 16;
 const spriteHeight = 16;
+
+context.imageSmoothingEnabled = false;
 
 /* -----------------------------------
  * Loading Images:
@@ -47,7 +51,13 @@ const getSprite = key => {
 
 const drawSprite = (key, x = 0, y = 0) => {
   const image = getSprite(key);
-  context.drawImage(image, x, y);
+  context.drawImage(
+    image,
+    x * sizeModifier,
+    y * sizeModifier,
+    spriteWidth  * sizeModifier,
+    spriteHeight * sizeModifier,
+  );
 };
 
 /* -----------------------------------
@@ -171,12 +181,12 @@ const drawText = (value, x = 0, y = 0, fontSize = 12, font = null, color = null)
   ensure.number(fontSize);
   const text = Mewlix.purrify(value);
 
-  context.font = `${fontSize}px ${font ?? 'Courier New'}, monospace`;
+  context.font = `${fontSize * sizeModifier}px ${font ?? 'Courier New'}, monospace`;
   context.fillStyle = color?.toString() ?? 'black';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
-  context.fillText(text, x, y);
+  context.fillText(text, x * sizeModifier, y * sizeModifier);
 };
 
 /* -----------------------------------
@@ -297,7 +307,7 @@ let loweredVolume = false;
 
 const example = async delta => {
   drawSprite('cat', x, 20);
-  drawText('hahahaha', 0, 0, 8);
+  drawText('hahahaha', 40, 40, 12);
 
   elapsed += delta;
   musicTimer += delta;
