@@ -292,7 +292,25 @@ const setVolumeOf = (node, volume) => {
 /* -----------------------------------
  * Keyboard Events
  * ----------------------------------- */
+const keysDown = new Set();
+const keyQueue = new Set();
 
+window.addEventListener('keydown', event => {
+  if (!keysDown.has(event.key)) { keyQueue.add(event.key); }
+  keysDown.add(event.key);
+});
+
+window.addEventListener('keyup', event => {
+  keysDown.delete(event.key);
+});
+
+const isKeyPressed  = key => keyQueue.has(key);
+const isKeyDown     = key => keysDown.has(key);
+const isKeyUp       = key => !keysDown.has(key);
+
+const flushKeyQueue = () => {
+  keyQueue.clear();
+};
 
 /* -----------------------------------
  * Game Loop
@@ -314,6 +332,7 @@ const init = async (callback) => {
     while (true) {
       context.clearRect(0, 0, canvasWidth, canvasHeight);
       await callback();
+      flushKeyQueue();
       const now = await nextFrame();
       lastFrame ??= now;
 
@@ -330,6 +349,14 @@ canvas.addEventListener('click', () => {
     audioContext.resume();
   }
 });
+
+async function dummy() {
+  if (keyQueue.has('a')) {
+    console.log('yay!');
+  }
+}
+
+init(dummy);
 
 /* -----------------------------------
  * Standard library:
