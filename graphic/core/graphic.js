@@ -23,8 +23,6 @@ const audioMap  = new Map();
 const spriteWidth  = 16;
 const spriteHeight = 16;
 
-context.imageSmoothingEnabled = false;
-
 /* -----------------------------------
  * Loading Images:
  * ----------------------------------- */
@@ -159,18 +157,12 @@ class SpriteCanvas extends PixelCanvas {
 }
 
 /* -----------------------------------
- * Font Constants:
- * ----------------------------------- */
-const fontData = {
-  size: 12,
-};
-
-/* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
-const loadFont = (name, url) => new FontFace(name, url)
-  .load()
-  .then(font => {
+const loadFont = (name, path) => fetch(path)
+  .then(response => response.arrayBuffer())
+  .then(buffer => {
+    const font = new FontFace(name, buffer);
     document.fonts.add(font);
   });
 
@@ -179,7 +171,7 @@ const loadFont = (name, url) => new FontFace(name, url)
  * ----------------------------------- */
 const defaultFont = 'Courier New';
 
-const drawText = (value, x = 0, y = 0, fontSize = 12, font = null, color = null) => {
+const drawText = (value, x = 0, y = 0, fontSize = 8, font = null, color = null) => {
   ensure.number(fontSize);
   const text = Mewlix.purrify(value);
 
@@ -276,6 +268,7 @@ const setVolumeOf = (node, volume) => {
 let initialized = false;
 
 const init = async (callback) => {
+  await loadFont('Silkscreen', '/assets/sinkscreen.ttf');
   initialized = true;
 
   const nextFrame = () => new Promise(resolve => {
@@ -309,7 +302,7 @@ let loweredVolume = false;
 
 const example = async delta => {
   drawSprite('cat', x, 20);
-  drawText('hahahaha', 40, 40, 12);
+  drawText('hahahaha', 40, 40, 6, 'Silkscreen');
 
   elapsed += delta;
   musicTimer += delta;
