@@ -156,6 +156,28 @@ class SpriteCanvas extends PixelCanvas {
   }
 }
 
+class Vector2 extends Mewlix.Clowder {
+  constructor(x, y) {
+    super();
+    ensure.all.number(x, y);
+    this.x = x;
+    this.y = y;
+  }
+
+  add(that) {
+    new Vector2(this.x + that.x, this.y + that.y);
+  }
+
+  mul(that) {
+    new Vector2(this.x * that.x, this.y * that.y);
+  }
+
+  clamp(min, max) {
+    this.x = clamp(this.x, min.x, max.x);
+    this.y = clamp(this.y, min.y, max.y);
+  }
+}
+
 /* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
