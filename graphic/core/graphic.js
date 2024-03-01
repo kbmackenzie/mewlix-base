@@ -8,12 +8,17 @@ const percentToByte = p => Math.floor((255 * p) / 100);
 /* -----------------------------------
  * Initializing Canvas:
  * ----------------------------------- */
-const sizeModifier = 8;
-
 /** @type {HTMLCanvasElement} */
 const canvas  = document.getElementById('drawing-canvas');
 /** @type {CanvasRenderingContext2D} */
 const context = canvas.getContext('2d');
+
+// premature optimization? maybe...
+// i'm not taking chances!
+const canvasWidth  = canvas.width;
+const canvasHeight = canvas.height;
+
+const sizeModifier = Math.floor(canvas.width / 128);
 
 /** @type {Map<string, ImageBitmap>} */
 const spriteMap = new Map();
@@ -285,7 +290,12 @@ const setVolumeOf = (node, volume) => {
 };
 
 /* -----------------------------------
- * Initialization:
+ * Keyboard Events
+ * ----------------------------------- */
+
+
+/* -----------------------------------
+ * Game Loop
  * ----------------------------------- */
 let initialized = false;  // Convenient flag.
 let deltaTime = 0;        // Delta time, in seconds!
@@ -302,7 +312,7 @@ const init = async (callback) => {
     let lastFrame; // Last frame's timestamp, in milliseconds.
 
     while (true) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
       await callback();
       const now = await nextFrame();
       lastFrame ??= now;
