@@ -6,27 +6,20 @@ const clamp  = Mewlix.clamp;
 const percentToByte = p => Math.floor((255 * p) / 100);
 
 /* -----------------------------------
- * Constants:
+ * Initializing Canvas:
  * ----------------------------------- */
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('drawing-canvas');
-
 /** @type {CanvasRenderingContext2D} */
 const ctx = canvas.getContext('2d');
 
 /** @type {Map<string, ImageBitmap>} */
 const spriteMap   = new Map();
-
 /** @type {Map<string, AudioBuffer>} */
 const audioMap  = new Map();
 
 const spriteWidth  = 8;
 const spriteHeight = 8;
-
-/* Audio: */
-const audioContext = new AudioContext();
-const masterVolume = audioContext.createGain();
-masterVolume.connect(audioContext.destination);
 
 /* -----------------------------------
  * Loading Images:
@@ -44,7 +37,7 @@ const loadSprite = path => loadImage(path, spriteWidth, spriteHeight);
 /* -----------------------------------
  * Drawing:
  * ----------------------------------- */
-const getImage = key => {
+const getSprite = key => {
   if (!spriteMap.has(key)) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
       `No loaded image resource associated with key "${key}"!`);
@@ -52,49 +45,14 @@ const getImage = key => {
   return spriteMap.get(key);
 }
 
-const drawImage = (key, x = 0, y = 0) => {
-  const image = getImage(key);
+const drawSprite = (key, x = 0, y = 0) => {
+  const image = getSprite(key);
   ctx.drawImage(image, x, y);
 };
 
 /* -----------------------------------
- * Loading Fonts:
- * ----------------------------------- */
-
-/* -----------------------------------
- * Drawing Texts:
- * ----------------------------------- */
-
-/* -----------------------------------
- * Loading Audio:
- * ----------------------------------- */
-const loadAudio = (key, path) => fetch(path)
-  .then(response => response.arrayBuffer())
-  .then(buffer => audioContext.decodeAudioData(buffer))
-  .then(audio => {
-    audioMap.set(key, audio);
-    return audio;
-  });
-
-/* -----------------------------------
- * Playing Audio:
- * ----------------------------------- */
-const playSong = key => {
-};
-
-const playSound = key => {
-};
-
-const stopSong  = key => undefined;
-const stopSound = key => undefined;
-
-const stopAllMusic = () => undefined;
-const stopAllSound = () => undefined;
-
-/* -----------------------------------
  * Types:
  * ----------------------------------- */
-
 /* Color contained, wrapping a RGBA color value.
  *
  * It also implements .toColor(), complying with the 'ToColor' interface concept:
@@ -189,6 +147,83 @@ class SpriteCanvas extends PixelCanvas {
     super(spriteWidth, spriteHeight);
   }
 }
+
+/* -----------------------------------
+ * Loading Fonts:
+ * ----------------------------------- */
+
+/* -----------------------------------
+ * Drawing Texts:
+ * ----------------------------------- */
+
+/* -----------------------------------
+ * Initializing Audio:
+ * ----------------------------------- */
+const audioContext = new AudioContext();
+const masterVolume = audioContext.createGain();
+const compressor   = audioContext.createDynamicsCompressor();
+
+masterVolume.connect(compressor).connect(audioContext.destination);
+
+const musicVolume = audioContext.createGain();
+const sfxVolume   = audioContext.createGain();
+
+musicVolume.connect(masterVolume);
+sfxVolume.connect(masterVolume);
+
+// Mutable state my behated!
+/** @type {AudioBufferSourceNode} */
+let musicSource = null;
+/** @type {AudioBufferSourceNode} */
+let sfxSource   = null;
+
+/* -----------------------------------
+ * Loading Audio:
+ * ----------------------------------- */
+const loadAudio = (key, path) => fetch(path)
+  .then(response => response.arrayBuffer())
+  .then(buffer => audioContext.decodeAudioData(buffer))
+  .then(audio => {
+    audioMap.set(key, audio);
+    return audio;
+  });
+
+const getBuffer = key => {
+  if (!audioMap.has(key)) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `No existing audio track is associated with the key ${key}!`);
+  }
+  return audioMap.get(key);
+};
+
+/* -----------------------------------
+ * Playing Audio:
+ * ----------------------------------- */
+const playMusic = key => {
+  musicSource?.stop();
+  const buffer = getBuffer(key);
+
+  musicSource = audioContext.createBufferSource();
+  musicSource.buffer = buffer; 
+  musicSource.loop = true;
+  musicSource.connect(musicVolume);
+  musicSource.start();
+};
+
+const playSfx = key => {
+  sfxSource?.stop();
+  const buffer = getBuffer(key);
+
+  sfxSource = audioContext.createBufferSource();
+  sfxSource.buffer = buffer; 
+  sfxSource.connect(sfxVolume);
+  sfxSource.start();
+};
+
+const stopMusic = () => {
+  musicSource?.stop();
+  musicSource = null;
+};
 
 /* -----------------------------------
  * Initialization:
