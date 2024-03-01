@@ -9,17 +9,17 @@ const percentToByte = p => Math.floor((255 * p) / 100);
  * Initializing Canvas:
  * ----------------------------------- */
 /** @type {HTMLCanvasElement} */
-const canvas = document.getElementById('drawing-canvas');
+const canvas  = document.getElementById('drawing-canvas');
 /** @type {CanvasRenderingContext2D} */
-const ctx = canvas.getContext('2d');
+const context = canvas.getContext('2d');
 
 /** @type {Map<string, ImageBitmap>} */
-const spriteMap   = new Map();
+const spriteMap = new Map();
 /** @type {Map<string, AudioBuffer>} */
 const audioMap  = new Map();
 
-const spriteWidth  = 8;
-const spriteHeight = 8;
+const spriteWidth  = 16;
+const spriteHeight = 16;
 
 /* -----------------------------------
  * Loading Images:
@@ -32,7 +32,7 @@ const loadImage = (key, path, width, height) => fetch(path)
     return image;
   });
 
-const loadSprite = path => loadImage(path, spriteWidth, spriteHeight);
+const loadSprite = (key, path) => loadImage(key, path, spriteWidth, spriteHeight);
 
 /* -----------------------------------
  * Drawing:
@@ -47,13 +47,13 @@ const getSprite = key => {
 
 const drawSprite = (key, x = 0, y = 0) => {
   const image = getSprite(key);
-  ctx.drawImage(image, x, y);
+  context.drawImage(image, x, y);
 };
 
 /* -----------------------------------
  * Types:
  * ----------------------------------- */
-/* Color contained, wrapping a RGBA color value.
+/* Color container, wrapping a RGBA color value.
  *
  * It also implements .toColor(), complying with the 'ToColor' interface concept:
  * Any object that implements a .toColor() method can be considered a valid color representation. */
@@ -76,7 +76,7 @@ class Color extends Mewlix.Clowder {
   }
 
   toString() {
-    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.opacity}%)`;
+    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
   }
 
   static fromHex(hex) {
@@ -149,12 +149,35 @@ class SpriteCanvas extends PixelCanvas {
 }
 
 /* -----------------------------------
- * Loading Fonts:
+ * Font Constants:
  * ----------------------------------- */
+const fontData = {
+  size: 12,
+};
 
 /* -----------------------------------
- * Drawing Texts:
+ * Loading Fonts:
  * ----------------------------------- */
+const loadFont = (name, url) => new FontFace(name, url)
+  .load()
+  .then(font => {
+    document.fonts.add(font);
+  });
+
+/* -----------------------------------
+ * Drawing Fonts:
+ * ----------------------------------- */
+const drawText = (value, x = 0, y = 0, fontSize = 12, font = null, color = null) => {
+  ensure.number(fontSize);
+  const text = Mewlix.purrify(value);
+
+  context.font = `${fontSize}px ${font ?? 'Courier New'}, monospace`;
+  context.fillStyle = color?.toString() ?? 'black';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+
+  context.fillText(text, x, y);
+};
 
 /* -----------------------------------
  * Initializing Audio:
@@ -225,9 +248,95 @@ const stopMusic = () => {
   musicSource = null;
 };
 
+const setVolumeOf = (node, volume) => {
+  node.gain.cancelScheduledValues(audioContext.currentTime);
+  node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
+  node.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.5);
+};
+
 /* -----------------------------------
  * Initialization:
  * ----------------------------------- */
+let initialized = false;
+
+const init = async (callback) => {
+  /* await loadFont(
+    'Fira Mono',
+    `url(https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&display=swap)`
+  ); */
+  initialized = true;
+
+  const nextFrame = () => new Promise(resolve => {
+    window.requestAnimationFrame(resolve);
+  });
+
+  const run = async () => {
+    let lastFrame = null; // Last frame's timestamp, in milliseconds.
+    let deltaTime = 0;    // Delta time, in seconds!
+
+    while (true) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      await callback(deltaTime);
+      const now = await nextFrame();
+      lastFrame ??= now;
+
+      deltaTime = (now - lastFrame) / 1000;
+      lastFrame = now;
+    }
+  };
+
+  await run();
+};
+
+let x = 0;
+let elapsed = 0;
+let musicTimer = 0;
+let playingAura = false;
+let playingFlower = false;
+let loweredVolume = false;
+
+const example = async delta => {
+  drawSprite('cat', x, 20);
+  drawText('hahahaha', 0, 0, 8);
+
+  elapsed += delta;
+  musicTimer += delta;
+
+  x += 30 * delta;
+
+  if (elapsed > 1) {
+    elapsed = 0;
+
+    if (!playingFlower) {
+      playMusic('flower');
+      playingFlower = true;
+    }
+  }
+
+  if (musicTimer > 3 && !playingAura) {
+    playingAura = true;
+    playMusic('aura');
+  }
+
+  if (musicTimer > 6 && !loweredVolume) {
+    loweredVolume = true;
+    setVolumeOf(musicVolume, 0);
+  }
+};
+
+loadSprite('cat', '/assets/cat.png')
+  .then(_ => {
+    setVolumeOf(masterVolume, 1);
+    return loadAudio('flower', '/assets/flower.mp3');
+  })
+  .then(_ => loadAudio('aura', '/assets/aura.mp3'))
+  .then(_ => init(example));
+
+canvas.addEventListener('click', () => {
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+});
 
 /* -----------------------------------
  * Standard library:
