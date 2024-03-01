@@ -350,14 +350,6 @@ canvas.addEventListener('click', () => {
   }
 });
 
-async function dummy() {
-  if (keyQueue.has('a')) {
-    console.log('yay!');
-  }
-}
-
-init(dummy);
-
 /* -----------------------------------
  * Standard library:
  * ----------------------------------- */
@@ -365,3 +357,14 @@ Mewlix.Graphic = {
   /* Delta time getter; readonly. */
   get delta() { return deltaTime },
 };
+
+/* -----------------------------------
+ * Tests
+ * ----------------------------------- */
+async function dummy() {
+  if (keyQueue.has('a')) {
+    console.log('yay!');
+  }
+}
+
+init(dummy);
