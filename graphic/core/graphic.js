@@ -53,10 +53,10 @@ const drawSprite = (key, x = 0, y = 0) => {
   const image = getSprite(key);
   context.drawImage(
     image,
-    x * sizeModifier,
-    y * sizeModifier,
-    spriteWidth  * sizeModifier,
-    spriteHeight * sizeModifier,
+    Math.floor(x) * sizeModifier,
+    Math.floor(y) * sizeModifier,
+    spriteWidth   * sizeModifier,
+    spriteHeight  * sizeModifier,
   );
 };
 
@@ -177,16 +177,22 @@ const loadFont = (name, url) => new FontFace(name, url)
 /* -----------------------------------
  * Drawing Fonts:
  * ----------------------------------- */
+const defaultFont = 'Courier New';
+
 const drawText = (value, x = 0, y = 0, fontSize = 12, font = null, color = null) => {
   ensure.number(fontSize);
   const text = Mewlix.purrify(value);
 
-  context.font = `${fontSize * sizeModifier}px ${font ?? 'Courier New'}, monospace`;
+  context.font = `${Math.floor(fontSize) * sizeModifier}px ${font ?? defaultFont}, monospace`;
   context.fillStyle = color?.toString() ?? 'black';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
-  context.fillText(text, x * sizeModifier, y * sizeModifier);
+  context.fillText(
+    text,
+    Math.floor(x) * sizeModifier,
+    Math.floor(y) * sizeModifier,
+  );
 };
 
 /* -----------------------------------
@@ -270,10 +276,6 @@ const setVolumeOf = (node, volume) => {
 let initialized = false;
 
 const init = async (callback) => {
-  /* await loadFont(
-    'Fira Mono',
-    `url(https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&display=swap)`
-  ); */
   initialized = true;
 
   const nextFrame = () => new Promise(resolve => {
