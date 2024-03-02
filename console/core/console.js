@@ -25,7 +25,6 @@ const paperclipButton   = document.getElementById('console-paperclip');
 
 // Background:
 const catBackground     = document.getElementById('cat-background');
-const imageCredits      = document.getElementById('image-credits');
 
 // Settings:
 const settingsMenu      = document.getElementById('menu-settings');
@@ -140,13 +139,11 @@ const setBackground = path => fetch(path)
   .then(response => response.blob())
   .then(blob => {
     catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
-    imageCredits.classList.add('hide');
   });
 
 // Set console background to an image in the local filesystem.
 const setBackgroundLocal = file => {
   catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
-  imageCredits.classList.add('hide');
 };
 
 const obscureOverlay = () => {
