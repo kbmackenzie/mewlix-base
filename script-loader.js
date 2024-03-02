@@ -1,8 +1,6 @@
-/* -------------------------
- * script loader 
- * ------------------------- */
+'use strict';
 
-const scriptList = () => fetch('./script-list.json')
+const scriptList = () => fetch('/core/script-list.json')
   .then(response => response.json());
 
 const loadScript = function loadScript(src) {
@@ -16,3 +14,15 @@ const loadScript = function loadScript(src) {
     document.body.appendChild(script);
   });
 };
+
+const run = async () => {
+  const data = await scriptList();
+  const entrypoint = data.entrypoint ?? 'main';
+  
+  for (const script of data.scripts) {
+    await loadScript(script);
+  }
+  await Mewlix.Modules.getModule(entrypoint);
+};
+
+run();
