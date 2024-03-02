@@ -197,12 +197,13 @@ const loadFont = (name, url) => new FontFace(name, `url(${url})`)
  * ----------------------------------- */
 const defaultFont = 'Munro';
 
-const drawText = (value, x = 0, y = 0, fontSize = 8, font = null, color = null) => {
-  ensure.number(fontSize);
+const drawText = (value, x = 0, y = 0, options = null) => {
   const text = Mewlix.purrify(value);
+  const font = options?.font ?? defaultFont;
+  const fontSize = Math.floor(options?.size ?? 12);
 
-  context.font = `${Math.floor(fontSize) * sizeModifier}px ${font ?? defaultFont}, monospace`;
-  context.fillStyle = color?.toString() ?? 'black';
+  context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
+  context.fillStyle = options?.color?.toString() ?? 'black';
 
   context.fillText(
     text,
@@ -348,21 +349,178 @@ canvas.addEventListener('click', () => {
 });
 
 /* -----------------------------------
+ * Generic Loading:
+ * ----------------------------------- */
+let imageExtensions = new Set([
+  'png',
+  'jpg',
+  'bmp',
+  'jpeg',
+]);
+
+let audioExtensions = new Set([
+  'mp3',
+  'wav',
+  'ogg',
+]);
+
+const fontExtensions = new Set([
+  'ttf',
+  'otf',
+  'woff',
+  'woff2',
+]);
+
+const getExtensionOf = path => {
+  return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
+};
+
+const loadAny = async (key, path) => {
+  const extension = getExtensionOf(path)?.toLowerCase();
+  if (!extension) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `Couldn't parse file extension in filepath "${path}"!`);
+  }
+
+  if (imageExtensions.has(extension)) {
+    await loadSprite(key, path);
+    return;
+  }
+
+  if (audioExtensions.has(extension)) {
+    await loadAudio(key, path);
+    return;
+  }
+
+  if (fontExtensions.has(extension)) {
+    await loadFont(key, path);
+    return;
+  }
+
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    `Unrecognized file format "${extension}" in 'load' function!`);
+};
+
+/* -----------------------------------
  * Standard library:
  * ----------------------------------- */
-Mewlix.Graphic = {
-  /* Delta time getter; readonly. */
+Mewlix.Graphic = Mewlix.library('std.graphic', {
+  /* Delta time getter; readonly.
+   * type: () -> number */
   get delta() { return deltaTime },
-};
+
+  /* Load a resource file. The resource type is determined by the file extension:
+   * Image files (.png, .jpg, .bmp) will load a sprite.
+   * Audio files (.mp3, .wav, .ogg) will load an audio file.
+   * Font files  (.ttf, .otf, .woff, .woff2) will load a new font.
+   *
+   * type: (string, string) -> nothing */
+  load: (key, path) => {
+    ensure.all.string(key, path);
+    return loadAny(key, path);
+  },
+  
+  /* Draw a sprite on the screen at a specified (x, y) position.
+   * The sprite should already be loaded!
+   *
+   * No type-checking is done on this function for performance reasons.
+   * It'll be called multiple times *every single frame*.
+   * Type-checking input values every time would be an absolute waste.
+   *
+   * type: (string, number, number) -> nothing */
+  draw: drawSprite,
+
+  /* Draw text on the screen at a specified (x, y) position.
+   * An additional box argument can be passed iwht additional options:
+   *  - font: The key for an already-loaded font family.
+   *  - size: The font size.
+   *  - color: The text color.
+   *
+   * No type-checking is done on this function for performance reasons.
+   * It'll be called multiple times *every single frame*.
+   * Type-checking input values every time would be an absolute waste.
+   *
+   * type: (string, number, number, box) -> nothing */
+  write: drawText,
+
+  /* Asks whether a key has been pressed. Triggers only once for a single key press.
+   * 
+   * No type-checking is done on this function for performance reasons.
+   * It'll be called multiple times *every single frame*.
+   * Type-checking input values every time would be an absolute waste.
+   *
+   * type: (string) -> boolean */
+  key_pressed: isKeyPressed,
+
+  /* Asks whether a key is down.
+   *
+   * No type-checking is done on this function for performance reasons.
+   * It'll be called multiple times *every single frame*.
+   * Type-checking input values every time would be an absolute waste.
+   *
+   * type: (string) -> boolean */
+  key_down: isKeyDown,
+
+  /* Begin playing an already-loaded music track on loop.
+   * type: (string) -> nothing */
+  play_music: key => {
+    ensure.string(key);
+    return playMusic(key);
+  },
+
+  /* Play an already-loaded soundbyte once.
+   * type: (string) -> nothing */
+  play_sfx: key => {
+    ensure.string(key);
+    return playSfx(key);
+  },
+
+  /* Set the master volume.
+   * type: (number) -> nothing */
+  volume: value => {
+    ensure.number(value);
+    value = clamp(value, 0, 1);
+    return setVolumeOf(masterVolume, value / 2);
+  },
+
+  /* Set the music volume.
+   * type: (number) -> nothing */
+  music_volume: value => {
+    ensure.number(value);
+    value = clamp(value, 0, 1);
+    return setVolumeOf(musicVolume, value);
+  },
+
+  /* Set the SFX volume.
+   * type: (number) -> nothing */
+  sfx_volume: value => {
+    ensure.number(value);
+    value = clamp(value, 0, 1);
+    return setVolumeOf(sfxVolume, value);
+  },
+
+  /* Stop all music.
+   * type: () -> nothing */
+  stop_music: stopMusic,
+
+  /* Color clowder, for representing color values. */
+  Color: Color,
+
+  /* Vector2 clowder. */
+  Vector2: Vector2,
+
+  /* SpriteCanvas clowder, for creating new sprites! */
+  SpriteCanvas: SpriteCanvas,
+});
 
 /* -----------------------------------
  * Tests
  * ----------------------------------- */
 async function dummy() {
-  if (keyQueue.has('a')) {
+  if (Mewlix.Graphic.key_pressed('a')) {
     console.log('yay!');
   }
-  drawText('hello world!', 20, 20);
+  Mewlix.Graphic.write('hello world!', 20, 20);
 }
 
 init(dummy);
