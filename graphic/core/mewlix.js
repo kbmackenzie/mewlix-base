@@ -667,13 +667,13 @@ Mewlix.wrap = function wrap(object) {
 
 Mewlix.Base = Mewlix.library('std', {
   /* Converts any value to a string.
-   * type: any => string        */
+   * type: (any) -> string        */
   purr: function purr(value) {
     return Mewlix.purrify(value);
   },
 
   /* The 'substring' function. Indices are inclusive.
-   * type: string, int, int => string */
+   * type: (string, int, int) -> string */
   tear_apart: function tear_apart(str, start, end) {
     ensure.string(str);
     ensure.all.number(start, end);
@@ -681,21 +681,21 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Converts a string to lowercase.
-   * type: string => string */
+   * type: (string) -> string */
   push_down: function push_down(str) {
     ensure.string(str);
     return str.toLowerCase();
   },
 
   /* Converts a string to full upper-case.
-   * type: string => string */
+   * type: (string) -> string */
   push_up: function push_up(str) {
     ensure.string(str);
     return str.toUpperCase();
   },
 
   /* Index into a shelf or string.
-   * type: shelf | string, int => shelf | string */
+   * type: (shelf | string, int) -> shelf | string */
   poke: function poke(value, index = 0) {
     ensure.number(index);
     if (value instanceof Mewlix.Shelf) {
@@ -710,13 +710,13 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Boolean conversion.
-   * type: any => boolean */
+   * type: (any) -> boolean */
   nuzzle: function nuzzle(value) {
     return Mewlix.Conversion.toBool(value);
   },
 
   /* Number conversion.
-   * type: any => number */
+   * type: (any) -> number */
   slap: function slap(value) {
     return Mewlix.Conversion.toNumber(value);
   },
@@ -726,7 +726,7 @@ Mewlix.Base = Mewlix.library('std', {
    * count(1, 3) should give you 1, 2, 3.
    * count(3, 1) should give you 3, 2, 1.
    *
-   * type: int, int => int */
+   * type: (int, int) -> int */
   count: function count(start = 0, end) {
     if (end === undefined) {
       end = start;
@@ -749,7 +749,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Applies callback to each item in the shelf, returning a new shelf.
-   * type: shelf, function => shelf */
+   * type: (shelf, (any) -> any) -> shelf */
   map: function map(shelf, callback) {
     ensure.shelf(shelf);
     ensure.func(callback);
@@ -762,7 +762,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Filters element in the shelf by a predicate. Returns a new shelf.
-   * type: shelf, function => shelf */
+   * type: (shelf, (any) -> boolean) -> shelf */
   filter: function filter(shelf, predicate) {
     ensure.shelf(shelf);
     ensure.func(predicate);
@@ -777,7 +777,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Folds over a shelf.
-   * type: shelf, function, any => shelf */
+   * type: (shelf, (any, any) -> any, any) -> shelf */
   fold: function fold(shelf, callback, initial) {
     ensure.shelf(shelf);
     ensure.func(callback);
@@ -789,7 +789,8 @@ Mewlix.Base = Mewlix.library('std', {
     return accumulator;
   },
 
-  /* Adding the Math namespace to the Mewlix standard library. */
+  /* Adding the Math namespace to the Mewlix standard library.
+   * type: <external> */
   math: Mewlix.wrap(Math),
 });
 
