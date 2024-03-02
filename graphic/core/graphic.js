@@ -186,17 +186,16 @@ class Vector2 extends Mewlix.Clowder {
 /* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
-const loadFont = (name, path) => fetch(path)
-  .then(response => response.arrayBuffer())
-  .then(buffer => {
-    const font = new FontFace(name, buffer);
+const loadFont = (name, url) => new FontFace(name, `url(${url})`)
+  .load()
+  .then(font => {
     document.fonts.add(font);
   });
 
 /* -----------------------------------
  * Drawing Fonts:
  * ----------------------------------- */
-const defaultFont = 'Courier New';
+const defaultFont = 'Munro';
 
 const drawText = (value, x = 0, y = 0, fontSize = 8, font = null, color = null) => {
   ensure.number(fontSize);
@@ -204,8 +203,6 @@ const drawText = (value, x = 0, y = 0, fontSize = 8, font = null, color = null) 
 
   context.font = `${Math.floor(fontSize) * sizeModifier}px ${font ?? defaultFont}, monospace`;
   context.fillStyle = color?.toString() ?? 'black';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
 
   context.fillText(
     text,
@@ -319,7 +316,7 @@ let initialized = false;  // Convenient flag.
 let deltaTime = 0;        // Delta time, in seconds!
 
 const init = async (callback) => {
-  await loadFont('Silkscreen', '/assets/sinkscreen.ttf');
+  await loadFont('Munro', '/assets/munro.ttf');
   initialized = true;
 
   const nextFrame = () => new Promise(resolve => {
@@ -365,6 +362,7 @@ async function dummy() {
   if (keyQueue.has('a')) {
     console.log('yay!');
   }
+  drawText('hello world!', 20, 20);
 }
 
 init(dummy);
