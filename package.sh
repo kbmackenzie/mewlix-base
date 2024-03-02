@@ -7,7 +7,7 @@ mkdir  './build'
 # Template list:
 TEMPLATES='console graphic library'
 
-# Package templates.
+# Package templates:
 for TEMPLATE in $TEMPLATES; do
     echo "Copying '$TEMPLATE' template..."
     BUILD_FOLDER="./build/$TEMPLATE-build"
