@@ -655,6 +655,9 @@ Mewlix.wrap = function wrap(object) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
       `Special import "${object}" isn't an object!`);
   }
+  if (object instanceof Mewlix.YarnBall) {
+    return object;
+  }
   return new Mewlix.BoxWrapper(object);
 };
 
