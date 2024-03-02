@@ -478,7 +478,7 @@ Mewlix.Compare = {
   },
 };
 
-Mewlix.Shelf = {
+Mewlix.Shelves = {
   peek: function peek(shelf) {
     ensure.shelf(shelf);
     return shelf.peek();
