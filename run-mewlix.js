@@ -17,7 +17,7 @@ const loadScript = function loadScript(src) {
 
 const run = async () => {
   const data = await scriptList();
-  const entrypoint = data.entrypoint ?? 'main';
+  const entrypoint = data.entrypoint || 'main';
   
   for (const script of data.scripts) {
     await loadScript(script);
