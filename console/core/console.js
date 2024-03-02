@@ -23,9 +23,6 @@ const arrowButton       = document.getElementById('console-arrow');
 const paperclipInput    = document.getElementById('paperclip-input');
 const paperclipButton   = document.getElementById('console-paperclip');
 
-// Background:
-const catBackground     = document.getElementById('cat-background');
-
 // Settings:
 const settingsMenu      = document.getElementById('menu-settings');
 const promptColor       = document.getElementById('select-color');
@@ -37,6 +34,15 @@ const selectBackground  = document.getElementById('select-background');
 /* -------------------------------------
  * Console functionality:
  * ------------------------------------- */
+const createBackground = () => {
+  const catBackground = document.createElement('div');
+  catBackground.id = 'cat-background';
+  catBackground.classList.add('cat-background');
+
+  document.body.appendChild(catBackground);
+  return catBackground;
+};
+
 const createPrompt = () => {
   const span = document.createElement('span');
   span.style.color = promptColor.value;
@@ -138,11 +144,13 @@ const setProjectName = name => {
 const setBackground = path => fetch(path)
   .then(response => response.blob())
   .then(blob => {
+    const catBackground = document.getElementById('cat-background');
     catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
   });
 
 // Set console background to an image in the local filesystem.
 const setBackgroundLocal = file => {
+  const catBackground = document.getElementById('cat-background');
   catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
 };
 
@@ -196,6 +204,7 @@ selectBackground.addEventListener('change', () => {
 /* -------------------------------------
  * Initialization (electric boogaloo):
  * ------------------------------------- */
+createBackground();
 setOpacity(consoleOpacity.value);
 toggleHighlight(showHighlight.checked);
 
@@ -273,5 +282,3 @@ Mewlix.Console = Mewlix.library('std.console', {
     hidePrompt.checked = hide;
   },
 });
-
-export { addLine, addError };
