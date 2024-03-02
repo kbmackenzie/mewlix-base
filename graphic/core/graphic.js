@@ -405,6 +405,10 @@ const loadAny = async (key, path) => {
  * Standard library:
  * ----------------------------------- */
 Mewlix.Graphic = Mewlix.library('std.graphic', {
+  /* Initialize the canvas, passing your game loop function as argument.
+   * type: (() -> nothing) -> nothing */
+  init: init,
+
   /* Delta time getter; readonly.
    * type: () -> number */
   get delta() { return deltaTime },
@@ -512,15 +516,3 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* SpriteCanvas clowder, for creating new sprites! */
   SpriteCanvas: SpriteCanvas,
 });
-
-/* -----------------------------------
- * Tests
- * ----------------------------------- */
-async function dummy() {
-  if (Mewlix.Graphic.key_pressed('a')) {
-    console.log('yay!');
-  }
-  Mewlix.Graphic.write('hello world!', 20, 20);
-}
-
-init(dummy);
