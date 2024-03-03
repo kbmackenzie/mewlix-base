@@ -675,6 +675,13 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.purrify(value);
   },
 
+  /* The 'trim' function for strings.
+   * type: (string) -> string */
+  trim: function trim(str) {
+    ensure.string(str);
+    return str.trim();
+  },
+
   /* The 'substring' function. Indices are inclusive.
    * type: (string, int, int) -> string */
   tear_apart: function tear_apart(str, start, end) {
@@ -792,6 +799,8 @@ Mewlix.Base = Mewlix.library('std', {
     return accumulator;
   },
 
+  /* Zip two shelves into a shelf of tuples.
+   * type: (shelf, shelf) -> shelf */
   zip: function zip(a, b) {
     ensure.all.shelf(a, b);
     const accumulator = [];
@@ -806,10 +815,61 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(accumulator.reverse());
   },
 
+  /* Create a tuple box.
+   * type: (any, any) -> box */
   tuple: function tuple(a, b) {
     return new Mewlix.Box([
       ["first",  a]
       ["second", b]
+    ]);
+  },
+
+  /* Create a magic box with functions for working with a Set.
+   * () -> box */
+  set: () => {
+    const set = new Set();
+    return new Mewlix.Box([
+      ["add", value => {
+        set.add(value);
+        return set;
+      }],
+      ["has", value => {
+        return set.has(value);
+      }],
+      ["remove", value => {
+        set.delete(value);
+        return set;
+      }],
+      ["clear", () => {
+        set.clear();
+        return set;
+      }],
+    ]);
+  },
+
+  /* Create a magic box that functions for working with a Map.
+   * () -> box */
+  table: () => {
+    const table = new Map();
+    return new Mewlix.Box([
+      ["add", (key, value) => {
+        table.set(key, value);
+        return table;
+      }],
+      ["has", key => {
+        return table.has(key);
+      }],
+      ["get", key => {
+        return table.get(key);
+      }],
+      ["remove", key => {
+        table.delete(key);
+        return table;
+      }],
+      ["clear", () => {
+        table.clear();
+        return table;
+      }],
     ]);
   },
 
