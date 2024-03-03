@@ -792,6 +792,27 @@ Mewlix.Base = Mewlix.library('std', {
     return accumulator;
   },
 
+  zip: function zip(a, b) {
+    ensure.all.shelf(a, b);
+    const accumulator = [];
+    while (a instanceof Mewlix.ShelfNode && b instanceof Mewlix.ShelfNode) {
+      accumulator.push(new Mewlix.Box([
+        ["first",  a.peek()],
+        ["second", b.peek()],
+      ]));
+      a = a.pop();
+      b = b.pop();
+    }
+    return Mewlix.Shelf.fromArray(accumulator.reverse());
+  },
+
+  tuple: function tuple(a, b) {
+    return new Mewlix.Box([
+      ["first",  a]
+      ["second", b]
+    ]);
+  },
+
   /* Adding the Math namespace to the Mewlix standard library.
    * type: <external> */
   math: Mewlix.wrap(Math),
