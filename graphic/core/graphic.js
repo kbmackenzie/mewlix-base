@@ -10,6 +10,7 @@ const percentToByte = p => Math.floor((255 * p) / 100);
  * ----------------------------------- */
 const canvas  = document.getElementById('drawing-canvas');
 const context = canvas.getContext('2d');
+context.textBaseline = 'top';
 
 // premature optimization? maybe...
 // i'm not taking chances!
@@ -196,11 +197,12 @@ const loadFont = (name, url) => new FontFace(name, `url(${url})`)
  * Drawing Fonts:
  * ----------------------------------- */
 const defaultFont = 'Munro';
+const defaultFontSize = 8;
 
 const drawText = (value, x = 0, y = 0, options = null) => {
   const text = Mewlix.purrify(value);
   const font = options?.font ?? defaultFont;
-  const fontSize = Math.floor(options?.size ?? 12);
+  const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
   context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
   context.fillStyle = options?.color?.toString() ?? 'black';
@@ -311,12 +313,10 @@ const flushKeyQueue = () => {
 /* -----------------------------------
  * Game Loop
  * ----------------------------------- */
-let initialized = false;  // Convenient flag.
-let deltaTime = 0;        // Delta time, in seconds!
+let deltaTime = 0;    // Delta time, in seconds!
 
 const init = async (callback) => {
   await loadFont('Munro', '/assets/munro.ttf');
-  initialized = true;
 
   const nextFrame = () => new Promise(resolve => {
     window.requestAnimationFrame(resolve);
@@ -400,11 +400,83 @@ const loadAny = async (key, path) => {
 };
 
 /* -----------------------------------
- * Utility Types:
+ * Utility Functions:
  * ----------------------------------- */
+const lerp = (start, end, x) => start + (end - start) * x;
+
+/* -----------------------------------
+ * Dialogue box:
+ * ----------------------------------- */
+const lineDuration = (str, charsPerSecond = 30.0) => {
+  return str.length / charsPerSecond + 0.2;
+};
+
 class DialogueBox extends Mewlix.Clowder {
-  async wake(color) {
-    this.color = color ?? new Color(0, 0, 0);
+  /* The drawCallback parameter should be a function of type (string) -> nothing.
+   * It will be called to draw the dialogue box every frame. */
+  wake(drawCallback, key, options) {
+    this.drawCallback = drawCallback;
+    this.timer = 0.0;
+    this.key = key ?? ' ';
+    this.speed = options?.speed ?? 30.0;
+    return this;
+  }
+
+  play(lines) {
+    ensure.shelf(lines);
+    this.buffer = '';
+    this.lines = lines;
+    this.playing = true;
+    this.nextLine();
+  }
+
+  nextLine() {
+    const message = this.lines?.peek?.();
+    this.currentLine  = message ? {
+      message: message,
+      length: message.length,
+      duration: lineDuration(message, this.speed),
+      finished: false,
+    } : null;
+    this.lines = this.lines?.pop();
+    this.buffer = '';
+
+    this.playing = !!this.currentLine;
+  }
+
+  lineLerp() {
+    const len = this.currentLine.length;
+    const duration = this.currentLine.duration;
+    return Math.floor(lerp(0, len, this.timer / duration));
+  }
+
+  draw() {
+    if (this.playing && isKeyPressed(this.key)) {
+      if (this.currentLine.finished) {
+        this.nextLine();
+        this.timer = 0.0;
+      }
+      else {
+        this.currentLine.finished = true;
+      }
+    }
+
+    if (!this.playing) return;
+    this.timer += deltaTime;
+
+    const lineLength = this.currentLine.finished
+      ? this.currentLine.length
+      : clamp(this.lineLerp(), 0, this.currentLine.length);
+
+    if (!this.buffer || lineLength > this.buffer.length) {
+      this.buffer = this.currentLine.message.slice(0, lineLength);
+    }
+
+    this.drawCallback(this.buffer);
+
+    if (this.timer >= this.currentLine.duration) {
+      this.currentLine.finished = true;
+    }
   }
 }
 
@@ -527,5 +599,21 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* SpriteCanvas clowder, for creating new sprites! */
   SpriteCanvas: SpriteCanvas,
 
-
+  /* Lerp function.
+   * (number, number, number) -> number */
+  lerp: (start, end, x) => {
+    ensure.all.number(start, end, x);
+    return lerp(start, end, x);
+  },
 });
+
+/* -----------------------------------
+ * Tests:
+ * ----------------------------------- */
+const d = new DialogueBox().wake(text => drawText(text, 20, 20));
+d.play(Mewlix.Shelf.fromArray(["hello", "world"]));
+
+const test = async () => {
+  d.draw();
+}
+init(test);
