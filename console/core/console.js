@@ -226,6 +226,9 @@ Mewlix.listen = question => {
 
 const ensure = Mewlix.ensure;
 
+/* Note: The functions in the base library use snake-case intentionally.
+ * They're visible in Mewlix, and I don't want to do name-mangling. */
+
 Mewlix.Console = Mewlix.library('std.console', {
   /* Clear console.
    * type: nothing */

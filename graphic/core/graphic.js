@@ -8,9 +8,7 @@ const percentToByte = p => Math.floor((255 * p) / 100);
 /* -----------------------------------
  * Initializing Canvas:
  * ----------------------------------- */
-/** @type {HTMLCanvasElement} */
 const canvas  = document.getElementById('drawing-canvas');
-/** @type {CanvasRenderingContext2D} */
 const context = canvas.getContext('2d');
 
 // premature optimization? maybe...
@@ -20,9 +18,7 @@ const canvasHeight = canvas.height;
 
 const sizeModifier = Math.floor(canvas.width / 128);
 
-/** @type {Map<string, ImageBitmap>} */
 const spriteMap = new Map();
-/** @type {Map<string, AudioBuffer>} */
 const audioMap  = new Map();
 
 const spriteWidth  = 16;
@@ -92,19 +88,23 @@ class Color extends Mewlix.Clowder {
     return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
   }
 
-  static fromHex(hex) {
-    ensure.string(hex);
-    if (hex[0] === '#') { hex = hex.slice(1); }
+  static fromHex(str) {
+    ensure.string(str);
+    const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
 
-    if (hex.length === 3) {
-      hex = hex.split('').map(x => x + x).join('');
+    if (hex === null) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+        `Couldn't parse string '${str}' as a valid hex code!`);
     }
-    if (hex.length < 6) return null;
+
+    if (str.length === 3) {
+      str = str.split('').map(x => x + x).join('');
+    }
 
     return new Color(
-      parseInt(hex.slice(0, 1), 16),
-      parseInt(hex.slice(2, 3), 16),
-      parseInt(hex.slice(4, 5), 16),
+      parseInt(str.slice(0, 1), 16),
+      parseInt(str.slice(2, 3), 16),
+      parseInt(str.slice(4, 5), 16),
     );
   }
 }
@@ -227,10 +227,8 @@ const sfxVolume   = audioContext.createGain();
 musicVolume.connect(masterVolume);
 sfxVolume.connect(masterVolume);
 
-// Mutable state my behated!
-/** @type {AudioBufferSourceNode} */
+// Mutable state my behated
 let musicSource = null;
-/** @type {AudioBufferSourceNode} */
 let sfxSource   = null;
 
 /* -----------------------------------
@@ -402,8 +400,21 @@ const loadAny = async (key, path) => {
 };
 
 /* -----------------------------------
+ * Utility Types:
+ * ----------------------------------- */
+class DialogueBox extends Mewlix.Clowder {
+  async wake(color) {
+    this.color = color ?? new Color(0, 0, 0);
+  }
+}
+
+/* -----------------------------------
  * Standard library:
  * ----------------------------------- */
+
+/* Note: The functions in the base library use snake-case intentionally.
+ * They're visible in Mewlix, and I don't want to do name-mangling. */
+
 Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Initialize the canvas, passing your game loop function as argument.
    * type: (() -> nothing) -> nothing */
@@ -515,4 +526,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   /* SpriteCanvas clowder, for creating new sprites! */
   SpriteCanvas: SpriteCanvas,
+
+
 });
