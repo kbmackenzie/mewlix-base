@@ -575,12 +575,18 @@ Mewlix.Conversion = {
     }
   },
   toNumber: function toNumber(x) {
-    const number = Number(x);
-    if (Number.isNaN(number)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
-        `Value cannot be converted to a number: ${x}`);
+    switch (typeof x) {
+      case 'number' : return x;
+      case 'boolean': return x ? 1 : 0;
+      case 'string' : {
+        const number = Number(x);
+        if (Number.isNaN(number)) break;
+        return number;
+      }
+      default: break;
     }
-    return number;
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
+      `Value cannot be converted to a number: ${x}`);
   }
 };
 
@@ -709,7 +715,7 @@ Mewlix.Base = Mewlix.library('std', {
     return str.trim();
   },
 
-  /* Gets a substring from a string. Indices are inclusive.
+  /* Gets a substring from a string.
    * type: (string, number, number) -> string */
   tear: function tear(str, start, end) {
     ensure.string(str);
@@ -732,14 +738,14 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Index into a shelf or string.
-   * type: (shelf | string, number) -> shelf | string */
+   * type: ((shelf | string), number) -> (shelf | string) */
   poke: function poke(value, index = 0) {
     ensure.number(index);
     if (value instanceof Mewlix.Shelf) {
       for (let i = 0; i < index; i++) {
-        value = value.pop();
+        value = value?.pop();
       }
-      return value;
+      return value?.peek();
     }
 
     ensure.string(value);
@@ -759,6 +765,8 @@ Mewlix.Base = Mewlix.library('std', {
     return value instanceof Mewlix.ShelfBottom;
   },
 
+  /* Concatenates two strings or two shelves. Values must be of the same type.
+   * type: ((shelf | string), (shelf | string)) -> (shelf | string) */
   join: function join(a, b) {
     const typeofA = Mewlix.Reflection.typeOf(a);
     const typeofB = Mewlix.Reflection.typeOf(b);
@@ -776,8 +784,8 @@ Mewlix.Base = Mewlix.library('std', {
     }
   },
 
-  /* Converts any value to a number.
-   * type: (any) -> number */
+  /* Converts a value to a number.
+   * type: ((number | string | boolean)) -> number */
   slap: function slap(value) {
     return Mewlix.Conversion.toNumber(value);
   },
@@ -787,7 +795,7 @@ Mewlix.Base = Mewlix.library('std', {
    * count(1, 3) should give you 1, 2, 3.
    * count(3, 1) should give you 3, 2, 1.
    *
-   * type: (number, number) -> int */
+   * type: (number, number?) -> shelf */
   count: function count(start = 0, end) {
     if (end === undefined) {
       end = start;
@@ -838,8 +846,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Folds over a shelf.
-   * type: (shelf, (any, any) -> any, any) -> shelf */
-  fold: function fold(shelf, callback, initial) {
+   * type: (shelf, any, (any, any) -> any) -> shelf */
+  fold: function fold(shelf, initial, callback) {
     ensure.shelf(shelf);
     ensure.func(callback);
 
@@ -870,42 +878,19 @@ Mewlix.Base = Mewlix.library('std', {
    * type: (any, any) -> box */
   tuple: function tuple(a, b) {
     return new Mewlix.Box([
-      ["first",  a]
-      ["second", b]
+      ["first",  a],
+      ["second", b],
     ]);
   },
 
-  /* Create a magic box with functions for working with a Set.
-   * () -> box */
-  set: () => {
-    const set = new Set();
-    return new Mewlix.Box([
-      ["add", value => {
-        set.add(value);
-        return set;
-      }],
-      ["has", value => {
-        return set.has(value);
-      }],
-      ["remove", value => {
-        set.delete(value);
-        return set;
-      }],
-      ["clear", () => {
-        set.clear();
-        return set;
-      }],
-    ]);
-  },
-
-  /* Create a magic box that functions for working with a Map.
+  /* Create a magic box for storing key-value pairs.
    * () -> box */
   table: () => {
     const table = new Map();
-    return new Mewlix.Box([
+    const box = new Mewlix.Box([
       ["add", (key, value) => {
         table.set(key, value);
-        return table;
+        return box;
       }],
       ["has", key => {
         return table.has(key);
@@ -915,18 +900,39 @@ Mewlix.Base = Mewlix.library('std', {
       }],
       ["remove", key => {
         table.delete(key);
-        return table;
+        return box;
       }],
       ["clear", () => {
         table.clear();
-        return table;
+        return box;
       }],
     ]);
+    return box;
   },
 
-  /* Adding the Math namespace to the Mewlix standard library.
-   * type: <external> */
-  math: Mewlix.wrap(Math),
+  /* Create a magic box for storing unique values in a set.
+   * () -> box */
+  set: () => {
+    const set = new Set();
+    const box = new Mewlix.Box([
+      ["add", value => {
+        set.add(value);
+        return box;
+      }],
+      ["has", value => {
+        return set.has(value);
+      }],
+      ["remove", value => {
+        set.delete(value);
+        return box;
+      }],
+      ["clear", () => {
+        set.clear();
+        return box;
+      }],
+    ]);
+    return box;
+  },
 });
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
