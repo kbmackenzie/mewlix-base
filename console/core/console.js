@@ -231,11 +231,11 @@ const ensure = Mewlix.ensure;
 
 Mewlix.Console = Mewlix.library('std.console', {
   /* Clear console.
-   * type: nothing */
+   * type: () -> nothing */
   clear: clearConsole,
 
   /* Set console project name.
-   * type: string -> nothing */
+   * type: (string) -> nothing */
   name: name => {
     ensure.string(name);
     setProjectName(name);
@@ -244,7 +244,7 @@ Mewlix.Console = Mewlix.library('std.console', {
   /* Set console background image.
    * This function expects a valid path to an image file.
    *
-   * type: string -> nothing */
+   * type: (string) -> nothing */
   background: async path => {
     ensure.string(path);
     await setBackground(path);
@@ -255,31 +255,34 @@ Mewlix.Console = Mewlix.library('std.console', {
    * Only numeric values between 0 and 100 are accepted.
    * Any value outside of the accepted range will be clamped.
    *
-   * type: number -> nothing */
+   * type: (number) -> nothing */
   opacity: value => {
     const clamped = Mewlix.clamp(Math.floor(value), 0, 100);
     consoleOpacity.value = clamped.toString();
     setOpacity(clamped);
   },
 
-  /* Toggle the console input box's 'highlight' option. This is an accessibility feature!
-   * Learn more about it in [link].
+  /* Toggle the console input box's 'highlight' option. This is an accessibility feature.
+   * When enabled, the input box will change color when focused on.
+   *
+   * The reason why:
+   * https://stackoverflow.com/a/9274994/19764270
    * 
-   * type: boolean -> nothing */
+   * type: (boolean) -> nothing */
   highlight: enable => {
     showHighlight.checked = enable;
     toggleHighlight(enable);
   },
 
-  /* Set console prompt color. This function expects a valid hex code as argument!
-   * type: string -> nothing */
+  /* Set console prompt color. This function expects a valid hex code as argument.
+   * type: (string) -> nothing */
   prompt_color: color => {
     ensure.string(color);
     promptColor.value = color;
   },
 
   /* Sets whether or not to show the console prompt string before an user message.
-   * type: boolean -> nothing */
+   * type: (boolean) -> nothing */
   hide_prompt: hide => {
     ensure.boolean(hide);
     hidePrompt.checked = hide;
