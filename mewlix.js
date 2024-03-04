@@ -790,6 +790,34 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Conversion.toNumber(value);
   },
 
+  /* Rounds a number to its nearest integer.
+   * type: (number) -> number */
+  round: function round(value) {
+    ensure.number(value);
+    return Math.round(value);
+  },
+
+  /* Rounds down a number.
+   * type: (number) -> number */
+  floor: function floor(value) {
+    ensure.number(value);
+    return Math.floor(value);
+  },
+
+  /* Rounds up a number.
+   * type: (number) -> number */
+  ceiling: function ceiling(value) {
+    ensure.number(value);
+    return Math.ceil(value);
+  },
+
+  /* Clamps a number to a minimum and a maximum value.
+   * type: (number, number, number) -> number */
+  clamp: function clamp(value, min, max) {
+    ensure.all.number(value, min, max);
+    return Mewlix.clamp(value, min, max);
+  },
+
   /* Akin to python's range(). It aims be a little smart:
    * count(3) should give you 0, 1, 2, 3.
    * count(1, 3) should give you 1, 2, 3.
