@@ -543,7 +543,6 @@ Mewlix.Boxes = {
 
 Mewlix.Conversion = {
   toBool: function toBool(x) {
-    if (x instanceof Mewlix.Shelf) return !(x instanceof Mewlix.ShelfBottom);
     switch (typeof x) {
       case 'object'   : return x !== null;
       case 'boolean'  : return x;
