@@ -711,7 +711,7 @@ Mewlix.Base = Mewlix.library('std', {
 
   /* Gets a substring from a string. Indices are inclusive.
    * type: (string, int, int) -> string */
-  tear_apart: function tear_apart(str, start, end) {
+  tear: function tear(str, start, end) {
     ensure.string(str);
     ensure.all.number(start, end);
     return str.substring(start, end);
