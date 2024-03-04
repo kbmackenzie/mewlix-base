@@ -202,7 +202,7 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
 }
 
 /* -----------------------------------------------------
- * Box -> Mewlix's associative array.
+ * Box -> A core part of a cat-oriented language.
  * ----------------------------------------------------- */
 Mewlix.Box = class Box extends Mewlix.MewlixObject {
   constructor(entries = []) {
@@ -226,7 +226,7 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
 };
 
 /* -----------------------------------------------------
- * Clowder -> Clowder base class.
+ * Mewlix.Clowder -> Base for all clowders.
  * ----------------------------------------------------- */
 /* All clowders should inherit from this class.
  * It provides a default definition for .wake(), too! */

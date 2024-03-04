@@ -5,4 +5,5 @@ test/
 *.jpg
 *.mp3
 *.ttf
+*.wav
 build/

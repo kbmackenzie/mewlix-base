@@ -404,21 +404,41 @@ const loadAny = async (key, path) => {
  * ----------------------------------- */
 const lerp = (start, end, x) => start + (end - start) * x;
 
-/* -----------------------------------
- * Dialogue box:
- * ----------------------------------- */
-const lineDuration = (str, charsPerSecond = 30.0) => {
-  return str.length / charsPerSecond + 0.2;
+const lineDuration = (message, charsPerSecond = 30.0) => {
+  return message.length / charsPerSecond + 0.2;
 };
 
+/* -----------------------------------
+ * Dialogue Box - Utility Class
+ * ----------------------------------- */
+/* A class designed to make the creation of dialogue boxes easier.
+ * It accepts:
+ *  1. A shelf of dialogue lines
+ *  2. A 'draw' callback that controls how dialogue is drawn
+ *  3. A box of additional options and parameters for the dialogue box:
+ *    - A key to listen to to advance dialogue. (default: Space)
+ *    - Character speed, in characters per second (default: 30.0)
+ *    - Key of audio file to use as a sound (default: none)
+ *    - Sound speed, in beeps per second (default: 2.0)
+ * 
+ * All you need to do to start a new dialogue event is call .play()
+ * with a new shelf of lines. */
 class DialogueBox extends Mewlix.Clowder {
   /* The drawCallback parameter should be a function of type (string) -> nothing.
-   * It will be called to draw the dialogue box every frame. */
-  wake(drawCallback, key, options) {
+   * It will be called to draw a dialogue line every frame. */
+  wake(drawCallback, options) {
     this.drawCallback = drawCallback;
-    this.timer = 0.0;
-    this.key = key ?? ' ';
+    this.key = options?.key ?? ' ';
     this.speed = options?.speed ?? 30.0;
+
+    // Sound options:
+    this.sound = options?.sound;
+    this.soundSpeed = options?.soundSpeed ?? 2.0;
+
+    // Timers:
+    this.dialogueTimer = 0.0;
+    this.soundTimer = 0.0;
+    
     return this;
   }
 
@@ -447,14 +467,15 @@ class DialogueBox extends Mewlix.Clowder {
   lineLerp() {
     const len = this.currentLine.length;
     const duration = this.currentLine.duration;
-    return Math.floor(lerp(0, len, this.timer / duration));
+    return Math.floor(lerp(0, len, this.dialogueTimer / duration));
   }
 
   draw() {
     if (this.playing && isKeyPressed(this.key)) {
       if (this.currentLine.finished) {
         this.nextLine();
-        this.timer = 0.0;
+        this.dialogueTimer = 0.0;
+        this.soundTimer = 0.0;
       }
       else {
         this.currentLine.finished = true;
@@ -462,7 +483,7 @@ class DialogueBox extends Mewlix.Clowder {
     }
 
     if (!this.playing) return;
-    this.timer += deltaTime;
+    this.dialogueTimer += deltaTime;
 
     const lineLength = this.currentLine.finished
       ? this.currentLine.length
@@ -474,7 +495,16 @@ class DialogueBox extends Mewlix.Clowder {
 
     this.drawCallback(this.buffer);
 
-    if (this.timer >= this.currentLine.duration) {
+    if (this.sound && !this.currentLine.finished) {
+      this.soundTimer += deltaTime;
+
+      if (this.soundTimer >= this.soundSpeed) {
+        this.soundTimer = 0.0;
+        playSfx(this.sound);
+      }
+    }
+
+    if (this.dialogueTimer >= this.currentLine.duration) {
       this.currentLine.finished = true;
     }
   }
@@ -610,10 +640,11 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 /* -----------------------------------
  * Tests:
  * ----------------------------------- */
-const d = new DialogueBox().wake(text => drawText(text, 20, 20));
+const d = new DialogueBox().wake(text => drawText(text, 20, 20), { sound: 'voice' });
 d.play(Mewlix.Shelf.fromArray(["hello", "world"]));
 
 const test = async () => {
   d.draw();
 }
-init(test);
+
+loadAny('voice', 'assets/voice.wav').init(test);
