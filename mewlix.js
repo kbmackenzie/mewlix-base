@@ -2,9 +2,9 @@
 
 const Mewlix = {};
 
-// -----------------------------------------------------
-// MewlixError -> Custom error type.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * MewlixError -> Custom error type.
+ * ----------------------------------------------------- */
 Mewlix.ErrorCode = class ErrorCode {
   static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
   static DivideByZero   = new ErrorCode('DivideByZero'  , 2);
@@ -42,9 +42,9 @@ Mewlix.MewlixError = class MewlixError extends Error {
   }
 }
 
-// -----------------------------------------------------
-// MewlixObject -> Base object class.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * MewlixObject -> Base object class.
+ * ----------------------------------------------------- */
 Mewlix.MewlixObject = class MewlixObject {
   valueOf() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
@@ -52,9 +52,9 @@ Mewlix.MewlixObject = class MewlixObject {
   }
 };
 
-// -----------------------------------------------------
-// Mewlix.Namespace -> Container for modules.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Mewlix.Namespace -> Container for modules.
+ * ----------------------------------------------------- */
 Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   constructor(name) {
     super();
@@ -91,14 +91,14 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
   }
 };
 
-// -----------------------------------------------------
-// Mewlix.Modules -> Default module container.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Mewlix.Modules -> Default module container.
+ * ----------------------------------------------------- */
 Mewlix.Modules = new Mewlix.Namespace('default');
 
-// -----------------------------------------------------
-// Shelf -> Mewlix's 'list' type.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Shelf -> Stack-like persistent data structure.
+ * ----------------------------------------------------- */
 Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
   constructor() {
     super();
@@ -201,9 +201,9 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
   }
 }
 
-// -----------------------------------------------------
-// Box -> Mewlix's associative array.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Box -> Mewlix's associative array.
+ * ----------------------------------------------------- */
 Mewlix.Box = class Box extends Mewlix.MewlixObject {
   constructor(entries = []) {
     super();
@@ -225,9 +225,9 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
   }
 };
 
-// -----------------------------------------------------
-// Clowder -> Clowder base class.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Clowder -> Clowder base class.
+ * ----------------------------------------------------- */
 /* All clowders should inherit from this class.
  * It provides a default definition for .wake(), too! */
 Mewlix.Clowder = class Clowder extends Mewlix.Box {
@@ -240,9 +240,9 @@ Mewlix.Clowder = class Clowder extends Mewlix.Box {
   }
 }
 
-// -----------------------------------------------------
-// Mewlix.YarnBall  -> Yarn ball export list.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Mewlix.YarnBall  -> Yarn ball export list.
+ * ----------------------------------------------------- */
 Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixObject {
   constructor(moduleKey, exportList = []) {
     super();
@@ -271,9 +271,9 @@ Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixObject {
   }
 }
 
-// -----------------------------------------------------
-// Generate standard yarn ball.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Generate standard yarn ball.
+ * ----------------------------------------------------- */
 Mewlix.library = function(key, object = {}) {
   const yarn = new Mewlix.YarnBall(key);
   for (const key in object) {
@@ -282,9 +282,9 @@ Mewlix.library = function(key, object = {}) {
   return yarn;
 }
 
-// -----------------------------------------------------
-// String utils.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * String utils.
+ * ----------------------------------------------------- */
 Mewlix.purrifyArray = function purrifyArray(arr) {
   const items = arr.map(Mewlix.purrify).join(', ');
   return `[${items}]`;
@@ -308,9 +308,9 @@ Mewlix.purrify = function purrify(value) {
   }
 };
 
-// -----------------------------------------------------
-// Type utils.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Type utils.
+ * ----------------------------------------------------- */
 const ensure = {
   number: x => {
     if (typeof x === 'number') return;
@@ -387,9 +387,9 @@ Mewlix.clamp = clamp;
 Mewlix.isNothing = isNothing;
 Mewlix.opaque = opaque;
 
-// -----------------------------------------------------
-// Comparison: Enum-like class.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Comparison: Enum-like class.
+ * ----------------------------------------------------- */
 Mewlix.Comparison = class Comparison {
   static LessThan    = new Comparison('<'  , -1);
   static EqualTo     = new Comparison('==' ,  0);
@@ -413,9 +413,9 @@ Mewlix.Comparison = class Comparison {
   }
 };
 
-// -----------------------------------------------------
-// Basic operations.
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Basic operations.
+ * ----------------------------------------------------- */
 Mewlix.Arithmetic = {
   add: function add(a, b) {
     ensure.all.number(a, b);
@@ -571,9 +571,9 @@ Mewlix.Conversion = {
   }
 };
 
-// -----------------------------------------------------
-// Statement built-ins
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Statement built-ins
+ * ----------------------------------------------------- */
 Mewlix.Inner = {
   // It's Raining: Type check iterable value.
   rainable: function rainable(iter) {
@@ -601,9 +601,9 @@ Mewlix.Inner = {
   }
 };
 
-// -----------------------------------------------------
-// Deepcopying Utils
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * Deepcopying Utils
+ * ----------------------------------------------------- */
 const deepcopyShelf = function deepcopyShelf(shelf) {
   const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
   return Mewlix.Shelf.fromArray(copy);
@@ -628,9 +628,9 @@ Mewlix.deepcopy = function deepcopy(value) {
     `Invalid object in Mewlix context - object isn't an instance of Mewlix.Box: ${value}`);
 };
 
-// -----------------------------------------------------
-// IO:
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * IO:
+ * ----------------------------------------------------- */
 Mewlix.meow = function meow(_) {
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
     "Core function 'Mewlix.meow' hasn't been implemented!");
@@ -641,9 +641,9 @@ Mewlix.listen = function listen(_) {
     "Core function 'Mewlix.listen' hasn't been implemented!");
 };
 
-// -----------------------------------------------------
-// API:
-// -----------------------------------------------------
+/* -----------------------------------------------------
+ * API:
+ * ----------------------------------------------------- */
 Mewlix.BoxWrapper = class BoxWrapper extends Mewlix.MewlixObject {
   constructor(object) {
     super();
@@ -675,9 +675,9 @@ Mewlix.wrap = function wrap(object) {
   return new Mewlix.BoxWrapper(object);
 };
 
-// -------------------------------------------------------
-// Base library.
-// -------------------------------------------------------
+/* -------------------------------------------------------
+ * Base library.
+ * ------------------------------------------------------- */
 
 /* Note: The functions in the base library use snake-case intentionally.
  * They're visible in Mewlix, and I don't want to do name-mangling. */
@@ -919,8 +919,8 @@ Mewlix.Base = Mewlix.library('std', {
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Base);
 
-// -------------------------------------------------------
-// Final Touches
-// -------------------------------------------------------
+/* -------------------------------------------------------
+ * Final Touches
+ * ------------------------------------------------------- */
 // Add to globalThis -- make it available globally. This is necessary.
 globalThis.Mewlix = Mewlix;
