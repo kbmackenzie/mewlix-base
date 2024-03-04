@@ -137,6 +137,19 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     return Mewlix.Compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
   }
 
+  static concat(a, b) {
+    if (a instanceof Mewlix.ShelfBottom) return b;
+    if (b instanceof Mewlix.ShelfBottom) return a;
+
+    const bucket = b.toArray();
+    let output = a;
+
+    for (const item of bucket) {
+      output = output.push(item);
+    }
+    return output;
+  }
+
   static fromArray(arr) {
     return arr.reduce(
       (tail, value) => new Mewlix.ShelfNode(value, tail),
@@ -757,7 +770,7 @@ Mewlix.Base = Mewlix.library('std', {
 
     switch (typeofA) {
       case 'string': return a + b;
-      case 'shelf' : return null;
+      case 'shelf' : return Mewlix.Shelf.concat(a, b);
       default: throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
         `std.join: Values of type '${typeofA}' can't be concatenated!`);
     }
