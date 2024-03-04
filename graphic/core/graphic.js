@@ -187,6 +187,15 @@ const flushKeyQueue = () => {
 };
 
 /* -----------------------------------
+ * Grid
+ * ----------------------------------- */
+class GridPosition extends Mewlix.Clowder {
+}
+
+const grid = (x, y) => {
+};
+
+/* -----------------------------------
  * Game Loop
  * ----------------------------------- */
 let deltaTime = 0;    // Delta time, in seconds!
@@ -301,13 +310,13 @@ class Animation extends Mewlix.Clowder {
  * It also implements .toColor(), complying with the 'ToColor' interface concept:
  * Any object that implements a .toColor() method can be considered a valid color representation. */
 class Color extends Mewlix.Clowder {
-  constructor(red, green, blue, opacity = 100) {
-    super();
+  wake(red, green, blue, opacity = 100) {
     ensure.all.number(red, green, blue, opacity);
     this.red      = clamp(red, 0, 255);
     this.green    = clamp(green, 0, 255);
     this.blue     = clamp(blue, 0, 255);
     this.opacity  = clamp(opacity, 0, 100);
+    return this;
   }
 
   alpha() { /* alpha byte value! */
@@ -331,7 +340,7 @@ class Color extends Mewlix.Clowder {
       str = str.split('').map(x => x + x).join('');
     }
 
-    return new Color(
+    return new Color().wake(
       parseInt(str.slice(0, 1), 16),
       parseInt(str.slice(2, 3), 16),
       parseInt(str.slice(4, 5), 16),
@@ -342,12 +351,12 @@ class Color extends Mewlix.Clowder {
 /* A pixel canvas for efficiently creating sprites.
  * The .toImage() creates a new sprite and adds it to spriteMap. */
 class PixelCanvas extends Mewlix.Clowder {
-  constructor(width, height) {
-    super();
+  wake(width, height) {
     this.width = width;
     this.height = height;
     this.data = new Uint8ClampedArray(width * height * 4);
     Mewlix.opaque(this.data);
+    return this;
   }
 
   fill(color) {
@@ -386,38 +395,42 @@ class PixelCanvas extends Mewlix.Clowder {
 /* A sprite-specific PixelCanvas, with pre-set sprite width and height.
  * The 'std.graphic' yarn ball will expose this instead of PixelCanvas. */
 class SpriteCanvas extends PixelCanvas {
-  constructor() {
-    super(spriteWidth, spriteHeight);
+  wake() {
+    super.wake(spriteWidth, spriteHeight);
+    return this;
   }
 }
 
 /* A clowder type for a 2-dimensional vector.
  * Can represent a point in a 2D world. */
 class Vector2 extends Mewlix.Clowder {
-  constructor(x, y) {
-    super();
+  wake(x, y) {
     ensure.all.number(x, y);
     this.x = x;
     this.y = y;
+    return this;
   }
 
   add(that) {
-    new Vector2(this.x + that.x, this.y + that.y);
+    return new Vector2().wake(this.x + that.x, this.y + that.y);
   }
 
   mul(that) {
-    new Vector2(this.x * that.x, this.y * that.y);
+    return new Vector2().wake(this.x * that.x, this.y * that.y);
   }
 
   clamp(min, max) {
-    this.x = clamp(this.x, min.x, max.x);
-    this.y = clamp(this.y, min.y, max.y);
+    const x = clamp(this.x, min.x, max.x);
+    const y = clamp(this.y, min.y, max.y);
+    return new Vector2().wake(x, y);
   }
 }
 
 /* A clowder type for a 2-dimensional rectangle.
  * Can represent a region in a 2-dimensional plane. */
 class Rectangle extends Mewlix.Clowder {
+  wake() {
+  }
 }
 
 
