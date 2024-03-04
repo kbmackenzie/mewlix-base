@@ -969,5 +969,14 @@ Object.freeze(Mewlix.Base);
 /* -------------------------------------------------------
  * Final Touches
  * ------------------------------------------------------- */
-// Add to globalThis -- make it available globally. This is necessary.
+/* A default implementation for the Mewlix.run entrypoint function.
+ * The console and graphic templates override this implementation.
+ *
+ * As such, it can be used in `run-mewlix.js` in a template-agnostic way. */
+Mewlix.run = f => f();
+
+/* Add to globalThis -- make it available globally. This is necessary.
+ * All of Mewlix's context is contained in the Mewlix object. */
 globalThis.Mewlix = Mewlix;
+
+

@@ -466,12 +466,12 @@ class DialogueBox extends Mewlix.Clowder {
 
   next_line() {
     const message = this.lines?.peek?.();
-    this.current_line  = message ? Mewlix.wrap({
+    this.current_line  = message ? {
       message: message,
       length: message.length,
       duration: lineDuration(message, this.speed),
       finished: false,
-    }) : null;
+    } : null;
     this.lines = this.lines?.pop();
     this.buffer = '';
 
@@ -607,12 +607,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: box */
   keys: new Mewlix.Box([
-    ["space"  , " "         ]
-    ["enter"  , "Enter"     ]
-    ["left"   , "ArrowLeft" ]
-    ["right"  , "ArrowRight"]
-    ["up"     , "ArrowUp"   ]
-    ["down"   , "ArrowDown" ]
+    ["space"  , " "         ],
+    ["enter"  , "Enter"     ],
+    ["left"   , "ArrowLeft" ],
+    ["right"  , "ArrowRight"],
+    ["up"     , "ArrowUp"   ],
+    ["down"   , "ArrowDown" ],
   ]),
 
 
@@ -684,6 +684,19 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* SpriteCanvas clowder, for creating new sprites! */
   SpriteCanvas: SpriteCanvas,
 });
+
+/* -----------------------------------
+ * Run Console:
+ * ----------------------------------- */
+Mewlix.run = async f => {
+  try {
+    await f();
+  }
+  catch (error) {
+    // add image here.
+    throw error;
+  }
+};
 
 /* -----------------------------------
  * Tests:

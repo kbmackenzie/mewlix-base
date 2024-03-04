@@ -22,7 +22,7 @@ const run = async () => {
   for (const script of data.scripts) {
     await loadScript(script);
   }
-  await Mewlix.Modules.getModule(entrypoint);
+  await Mewlix.run(() => Mewlix.Modules.getModule(entrypoint));
 };
 
 run();

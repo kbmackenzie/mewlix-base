@@ -288,3 +288,17 @@ Mewlix.Console = Mewlix.library('std.console', {
     hidePrompt.checked = hide;
   },
 });
+
+/* -------------------------------------
+ * Run Console:
+ * ------------------------------------- */
+Mewlix.run = async f => {
+  try {
+    await f();
+  }
+  catch (error) {
+    addError(`Exception caught: ${error}`);
+    addError(`See the Javascript console for more information!`);
+    throw error;
+  }
+};
