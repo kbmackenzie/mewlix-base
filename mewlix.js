@@ -314,33 +314,39 @@ Mewlix.purrify = function purrify(value) {
 const ensure = {
   number: x => {
     if (typeof x === 'number') return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected number, got ${typeof x}: ${x}!`);
+      `Expected number, got ${typeOfValue}: ${x}!`);
   },
   string: x => {
     if (typeof x === 'string') return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected string, got ${typeof x}: ${x}!`);
+      `Expected string, got ${typeOfValue}: ${x}!`);
   },
   boolean: x => {
     if (typeof x === 'boolean') return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected boolean, got ${typeof x}: ${x}!`);
+      `Expected boolean, got ${typeOfValue}: ${x}!`);
   },
   shelf: x => {
     if (x instanceof Mewlix.Shelf) return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected shelf, got ${typeof x}: ${x}!`);
+      `Expected shelf, got ${typeOfValue}: ${x}!`);
   },
   box: x => {
     if (x instanceof Mewlix.Box) return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected box, got ${typeof x}: ${x}!`);
+      `Expected box, got ${typeOfValue}: ${x}!`);
   },
   func: x => {
     if (typeof x === 'function') return;
+    const typeOfValue = Mewlix.Reflection.typeOf(x);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected function, got ${typeof x}: ${x}!`);
+      `Expected function, got ${typeOfValue}: ${x}!`);
   },
 
   all: {
@@ -365,8 +371,9 @@ const clamp = function clamp(x, min, max) {
 const opaque = function opaque(x) {
   Object.defineProperty(x, 'box', {
     value: () => {
+      const typeOfValue = Mewlix.Reflection.typeOf(x);
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Can't peek into object: Object "${x}" (type: ${typeof x}) isn't accessible through Mewlix!`);
+        `Can't peek into object: Object "${x}" (type: ${typeOfValue}) isn't accessible through Mewlix!`);
     },
     writable: false,
     enumerable: false,
@@ -506,8 +513,9 @@ Mewlix.Shelves = {
     if (typeof value === 'string') return value.length;
     if (value instanceof Mewlix.Box) return Object.entries(value).length;
 
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Can't calculate length for value of type "${typeof value}": ${value}`);
+      `Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
 };
 
@@ -736,6 +744,23 @@ Mewlix.Base = Mewlix.library('std', {
   empty: function empty(value) {
     ensure.shelf(value);
     return value instanceof Mewlix.ShelfBottom;
+  },
+
+  join: function join(a, b) {
+    const typeofA = Mewlix.Reflection.typeOf(a);
+    const typeofB = Mewlix.Reflection.typeOf(b);
+
+    if (typeofA !== typeofB) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `std.join: Values are of different types!`);
+    }
+
+    switch (typeofA) {
+      case 'string': return a + b;
+      case 'shelf' : return null;
+      default: throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `std.join: Values of type '${typeofA}' can't be concatenated!`);
+    }
   },
 
   /* Converts any value to a number.
