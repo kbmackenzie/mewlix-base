@@ -482,6 +482,12 @@ Mewlix.Compare = {
   },
 };
 
+Mewlix.Strings = {
+  concat: function concat(a, b) {
+    return Mewlix.purrify(a) + Mewlix.purrify(b);
+  },
+};
+
 Mewlix.Shelves = {
   peek: function peek(shelf) {
     ensure.shelf(shelf);
@@ -502,9 +508,6 @@ Mewlix.Shelves = {
 
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `Can't calculate length for value of type "${typeof value}": ${value}`);
-  },
-  concat: function concat(a, b) {
-    return Mewlix.purrify(a) + Mewlix.purrify(b);
   },
 };
 
@@ -678,14 +681,14 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.purrify(value);
   },
 
-  /* The 'trim' function for strings.
+  /* Trims any whitespace at the start and end of a string.
    * type: (string) -> string */
   trim: function trim(str) {
     ensure.string(str);
     return str.trim();
   },
 
-  /* The 'substring' function. Indices are inclusive.
+  /* Gets a substring from a string. Indices are inclusive.
    * type: (string, int, int) -> string */
   tear_apart: function tear_apart(str, start, end) {
     ensure.string(str);
@@ -722,13 +725,20 @@ Mewlix.Base = Mewlix.library('std', {
     return value[index];
   },
 
-  /* Boolean conversion.
+  /* Converts any value to a boolean.
    * type: (any) -> boolean */
   nuzzle: function nuzzle(value) {
     return Mewlix.Conversion.toBool(value);
   },
 
-  /* Number conversion.
+  /* Asks if a shelf is empty.
+   * type: (shelf) -> boolean */
+  empty: function empty(value) {
+    ensure.shelf(value);
+    return value instanceof Mewlix.ShelfBottom;
+  },
+
+  /* Converts any value to a number.
    * type: (any) -> number */
   slap: function slap(value) {
     return Mewlix.Conversion.toNumber(value);
@@ -761,7 +771,7 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(array);
   },
 
-  /* Applies callback to each item in the shelf, returning a new shelf.
+  /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
   map: function map(shelf, callback) {
     ensure.shelf(shelf);
