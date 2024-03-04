@@ -416,7 +416,45 @@ class Color extends Mewlix.Clowder {
   }
 }
 
-class Animation extends Mewlix.Clowder {
+/* A simple animation container. It accepts a shelf of frames and, optionally, a frame rate.
+ * The .draw() method can be called to draw an animation with a position. */
+class SpriteAnimation extends Mewlix.Clowder {
+  wake(frames, frame_rate) {
+    ensure.shelf(frames);
+    this.frames = frames;
+    this.frame_rate = frame_rate ?? 12;
+    this.frame_duration = 1 / this.frame_rate;
+
+    this.timer = 0.0;
+    this.frame_stack = frames.pop();
+    this.current_frame = frames.peek();
+    return this;
+  }
+
+  draw(x, y) {
+    this.timer += deltaTime;
+    if (this.timer >= this.frame_duration) {
+      this.next_frame();
+      this.timer = 0.0;
+    }
+    drawSprite(this.current_frame, x, y);
+  }
+
+  next_frame() {
+    this.current_frame = this.frame_stack?.peek();
+    this.frame_stack = this.frame_stack?.pop();
+
+    if (!this.current_frame) {
+      this.frame_stack = this.frames.pop();
+      this.current_frame = this.frames.peek();
+    }
+  }
+
+  reset() {
+    this.timer = 0.0;
+    this.frame_stack = this.frames.pop();
+    this.current_frame = this.frames.peek();
+  }
 }
 
 /* A pixel canvas for efficiently creating sprites.
@@ -741,10 +779,13 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Color clowder, for representing color values. */
   Color: Color,
 
-  /* SpriteCanvas clowder, for creating new sprites! */
+  /* SpriteCanvas clowder, for creating new sprites. */
   SpriteCanvas: SpriteCanvas,
 
-  /* Dialogue box clowder, for generating dialogue boxes. */
+  /* SpriteAnimation clowder, simple container for animations. */
+  SpriteAnimation: SpriteAnimation,
+
+  /* Dialogue box clowder, simple container for generating dialogue boxes. */
   DialogueBox: DialogueBox,
 });
 
