@@ -978,5 +978,3 @@ Mewlix.run = f => f();
 /* Add to globalThis -- make it available globally. This is necessary.
  * All of Mewlix's context is contained in the Mewlix object. */
 globalThis.Mewlix = Mewlix;
-
-
