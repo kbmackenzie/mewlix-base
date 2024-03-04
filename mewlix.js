@@ -710,7 +710,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Gets a substring from a string. Indices are inclusive.
-   * type: (string, int, int) -> string */
+   * type: (string, number, number) -> string */
   tear: function tear(str, start, end) {
     ensure.string(str);
     ensure.all.number(start, end);
@@ -732,7 +732,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   /* Index into a shelf or string.
-   * type: (shelf | string, int) -> shelf | string */
+   * type: (shelf | string, number) -> shelf | string */
   poke: function poke(value, index = 0) {
     ensure.number(index);
     if (value instanceof Mewlix.Shelf) {
@@ -787,7 +787,7 @@ Mewlix.Base = Mewlix.library('std', {
    * count(1, 3) should give you 1, 2, 3.
    * count(3, 1) should give you 3, 2, 1.
    *
-   * type: (int, int) -> int */
+   * type: (number, number) -> int */
   count: function count(start = 0, end) {
     if (end === undefined) {
       end = start;
