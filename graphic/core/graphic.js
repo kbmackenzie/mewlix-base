@@ -12,31 +12,34 @@ const canvas  = document.getElementById('drawing-canvas');
 const context = canvas.getContext('2d');
 context.textBaseline = 'top';
 
-// premature optimization? maybe...
-// i'm not taking chances!
 const canvasWidth  = canvas.width;
 const canvasHeight = canvas.height;
 
-const sizeModifier = Math.floor(canvas.width / 128);
+const virtualWidth  = 128;
+const virtualHeight = 128;
+
+const sizeModifier = Math.floor(canvas.width / virtualWidth);
 
 const spriteMap = new Map();
 const audioMap  = new Map();
 
 const spriteWidth  = 16;
 const spriteHeight = 16;
+const gridColumns  = Math.floor(virtualWidth  / spriteWidth );
+const gridRows     = Math.floor(virtualHeight / spriteHeight);
 
 /* -----------------------------------
  * Loading Images:
  * ----------------------------------- */
-const loadImage = (key, path, width, height) => fetch(path)
+const loadImage = (key, path, x, y, width, height) => fetch(path)
   .then(response => response.blob())
-  .then(blob => createImageBitmap(blob, 0, 0, width, height))
+  .then(blob => createImageBitmap(blob, x, y, width, height))
   .then(image => {
     spriteMap.set(key, image);
     return image;
   });
 
-const loadSprite = (key, path) => loadImage(key, path, spriteWidth, spriteHeight);
+const loadSprite = (key, path) => loadImage(key, path, 0, 0, spriteWidth, spriteHeight);
 
 /* -----------------------------------
  * Drawing:
@@ -187,15 +190,6 @@ const flushKeyQueue = () => {
 };
 
 /* -----------------------------------
- * Grid
- * ----------------------------------- */
-class GridPosition extends Mewlix.Clowder {
-}
-
-const grid = (x, y) => {
-};
-
-/* -----------------------------------
  * Game Loop
  * ----------------------------------- */
 let deltaTime = 0;    // Delta time, in seconds!
@@ -289,18 +283,92 @@ const loadAny = async (key, path) => {
  * ----------------------------------- */
 const lerp = (start, end, x) => start + (end - start) * x;
 
-const lineDuration = (message, charsPerSecond = 30.0) => {
-  return message.length / charsPerSecond + 0.2;
+/* -----------------------------------
+ * Utility Clowders:
+ * ----------------------------------- */
+/* A clowder type for a 2-dimensional vector.
+ * Can represent a point in a 2D world. */
+class Vector2 extends Mewlix.Clowder {
+  wake(x, y) {
+    ensure.all.number(x, y);
+    this.x = x;
+    this.y = y;
+    return this;
+  }
+
+  add(that) {
+    return new Vector2().wake(this.x + that.x, this.y + that.y);
+  }
+
+  mul(that) {
+    return new Vector2().wake(this.x * that.x, this.y * that.y);
+  }
+
+  distance(that) {
+    return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
+  }
+
+  dot(that) {
+    return this.x * that.x + this.y * that.y;
+  }
+
+  clamp(min, max) {
+    const x = clamp(this.x, min.x, max.x);
+    const y = clamp(this.y, min.y, max.y);
+    return new Vector2().wake(x, y);
+  }
+}
+
+/* A clowder type for a 2-dimensional rectangle.
+ * Can represent a region in a 2-dimensional plane. */
+class Rectangle extends Mewlix.Clowder {
+  wake(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+
+  contains(point) {
+    return (point.x >= this.x)
+      && (point.y >= this.y)
+      && (point.x < this.x + this.width)
+      && (point.y < this.y + this.height);
+  }
+
+  collides(rect) {
+    return (this.x < rect.x + rect.width)
+      && (this.y < rect.y + rect.height)
+      && (this.x + this.width > rect.x)
+      && (this.y + this.height > rect.height);
+  }
+}
+
+/* A clowder to represent a grid slot.
+ * The row and column numbers are clamped in .wake()! */
+class GridSlot extends Mewlix.Clowder {
+  wake(row, column) {
+    this.row    = clamp(row, 0, gridRows - 1);
+    this.column = clamp(column, 0, gridColumns - 1);
+    return this;
+  }
+}
+
+const gridSlot = (x, y) => {
+  const row = Math.min(y / spriteHeight);
+  const col = Math.min(x / spriteWidth);
+  return new GridSlot().wake(row, col);
+};
+
+const slotPosition = (row, col) => {
+  return new Vector2().wake(
+    col * spriteWidth,
+    row * spriteHeight,
+  );
 };
 
 /* -----------------------------------
- * Animation - Utility Class
- * ----------------------------------- */
-class Animation extends Mewlix.Clowder {
-}
-
-/* -----------------------------------
- * Utility Clowders:
+ * Additional Clowders:
  * ----------------------------------- */
 /* All of the clowders in this section use *snake_case* naming for methods and properties.
  * This is because they'll be available inside of Mewlix! */
@@ -346,6 +414,9 @@ class Color extends Mewlix.Clowder {
       parseInt(str.slice(4, 5), 16),
     );
   }
+}
+
+class Animation extends Mewlix.Clowder {
 }
 
 /* A pixel canvas for efficiently creating sprites.
@@ -401,38 +472,10 @@ class SpriteCanvas extends PixelCanvas {
   }
 }
 
-/* A clowder type for a 2-dimensional vector.
- * Can represent a point in a 2D world. */
-class Vector2 extends Mewlix.Clowder {
-  wake(x, y) {
-    ensure.all.number(x, y);
-    this.x = x;
-    this.y = y;
-    return this;
-  }
-
-  add(that) {
-    return new Vector2().wake(this.x + that.x, this.y + that.y);
-  }
-
-  mul(that) {
-    return new Vector2().wake(this.x * that.x, this.y * that.y);
-  }
-
-  clamp(min, max) {
-    const x = clamp(this.x, min.x, max.x);
-    const y = clamp(this.y, min.y, max.y);
-    return new Vector2().wake(x, y);
-  }
-}
-
-/* A clowder type for a 2-dimensional rectangle.
- * Can represent a region in a 2-dimensional plane. */
-class Rectangle extends Mewlix.Clowder {
-  wake() {
-  }
-}
-
+/* Dialogue util. */
+const lineDuration = (message, charsPerSecond = 30.0) => {
+  return message.length / charsPerSecond + 0.2;
+};
 
 /* A class designed to make the creation of dialogue boxes easier.
  * It accepts:
@@ -682,20 +725,27 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return lerp(start, end, x);
   },
 
-
   /* --------- Utility Types ---------- */
-
-  /* Color clowder, for representing color values. */
-  Color: Color,
 
   /* Vector2 clowder. */
   Vector2: Vector2,
 
   /* Rectangle clowder. */
   Rectangle: Rectangle,
+  
+  /* Grid slot clowder. */
+  GridSlot: GridSlot,
+
+  /* --------- Additional Utility ---------- */
+
+  /* Color clowder, for representing color values. */
+  Color: Color,
 
   /* SpriteCanvas clowder, for creating new sprites! */
   SpriteCanvas: SpriteCanvas,
+
+  /* Dialogue box clowder, for generating dialogue boxes. */
+  DialogueBox: DialogueBox,
 });
 
 /* -----------------------------------
