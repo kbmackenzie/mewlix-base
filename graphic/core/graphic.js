@@ -525,6 +525,11 @@ class DialogueBox extends Mewlix.Clowder {
 }
 
 /* -----------------------------------
+ * Meow Expression
+ * ----------------------------------- */
+Mewlix.meow = text => drawText(text);
+
+/* -----------------------------------
  * Standard library:
  * ----------------------------------- */
 
