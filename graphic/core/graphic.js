@@ -61,130 +61,6 @@ const drawSprite = (key, x = 0, y = 0) => {
 };
 
 /* -----------------------------------
- * Types:
- * ----------------------------------- */
-/* Color container, wrapping a RGBA color value.
- *
- * It also implements .toColor(), complying with the 'ToColor' interface concept:
- * Any object that implements a .toColor() method can be considered a valid color representation. */
-class Color extends Mewlix.Clowder {
-  constructor(red, green, blue, opacity = 100) {
-    super();
-    ensure.all.number(red, green, blue, opacity);
-    this.red      = clamp(red, 0, 255);
-    this.green    = clamp(green, 0, 255);
-    this.blue     = clamp(blue, 0, 255);
-    this.opacity  = clamp(opacity, 0, 100);
-  }
-
-  alpha() { /* alpha byte value! */
-    return percentToByte(this.opacity);
-  }
-
-  toColor() {
-    return this;
-  }
-
-  toString() {
-    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
-  }
-
-  static fromHex(str) {
-    ensure.string(str);
-    const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
-
-    if (hex === null) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-        `Couldn't parse string '${str}' as a valid hex code!`);
-    }
-
-    if (str.length === 3) {
-      str = str.split('').map(x => x + x).join('');
-    }
-
-    return new Color(
-      parseInt(str.slice(0, 1), 16),
-      parseInt(str.slice(2, 3), 16),
-      parseInt(str.slice(4, 5), 16),
-    );
-  }
-}
-
-/* A pixel canvas for efficiently creating sprites and sprites.
- *
- * The .toImage() creates a new ImageBitmap object from the pixel data.
- * The generated ImageBitmap object can be used with the HTML5 Canvas .drawImage() method! */
-class PixelCanvas extends Mewlix.Clowder {
-  constructor(width, height) {
-    super();
-    this.width = width;
-    this.height = height;
-    this.data = new Uint8ClampedArray(width * height * 4);
-    Mewlix.opaque(this.data);
-  }
-
-  fill(color) {
-    for (let i = 0; i < this.data.length; i += 4) {
-      this.data[i]     = color.red;
-      this.data[i + 1] = color.green;
-      this.data[i + 2] = color.blue;
-      this.data[i + 3] = color.alpha();
-    }
-  }
-
-  setPixel(x, y, color) {
-    const index = (x * this.width + y) * 4;
-    this.data[index]     = color.red;
-    this.data[index + 1] = color.green;
-    this.data[index + 2] = color.blue;
-    this.data[index + 3] = color.alpha();
-  }
-
-  setTile(x, y, { data }) {
-    const index = (x * this.width + y) * 4;
-    const dataSize = Math.min(this.data.length - index, data.length);
-
-    for (let i = 0; i < dataSize; i++) {
-      this.data[index + i] = data[i];
-    }
-  }
-
-  async toImage(key) {
-    const data  = new ImageData(this.data, this.width, this.height);
-    const image = await createImageBitmap(data);
-    spriteMap.set(key, image);
-  }
-};
-
-class SpriteCanvas extends PixelCanvas {
-  constructor() {
-    super(spriteWidth, spriteHeight);
-  }
-}
-
-class Vector2 extends Mewlix.Clowder {
-  constructor(x, y) {
-    super();
-    ensure.all.number(x, y);
-    this.x = x;
-    this.y = y;
-  }
-
-  add(that) {
-    new Vector2(this.x + that.x, this.y + that.y);
-  }
-
-  mul(that) {
-    new Vector2(this.x * that.x, this.y * that.y);
-  }
-
-  clamp(min, max) {
-    this.x = clamp(this.x, min.x, max.x);
-    this.y = clamp(this.y, min.y, max.y);
-  }
-}
-
-/* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
 const loadFont = (name, url) => new FontFace(name, `url(${url})`)
@@ -409,8 +285,142 @@ const lineDuration = (message, charsPerSecond = 30.0) => {
 };
 
 /* -----------------------------------
- * Dialogue Box - Utility Class
+ * Animation - Utility Class
  * ----------------------------------- */
+class Animation extends Mewlix.Clowder {
+}
+
+/* -----------------------------------
+ * Utility Clowders:
+ * ----------------------------------- */
+/* All of the clowders in this section use *snake_case* naming for methods and properties.
+ * This is because they'll be available inside of Mewlix! */
+
+/* Color container, wrapping a RGBA color value.
+ *
+ * It also implements .toColor(), complying with the 'ToColor' interface concept:
+ * Any object that implements a .toColor() method can be considered a valid color representation. */
+class Color extends Mewlix.Clowder {
+  constructor(red, green, blue, opacity = 100) {
+    super();
+    ensure.all.number(red, green, blue, opacity);
+    this.red      = clamp(red, 0, 255);
+    this.green    = clamp(green, 0, 255);
+    this.blue     = clamp(blue, 0, 255);
+    this.opacity  = clamp(opacity, 0, 100);
+  }
+
+  alpha() { /* alpha byte value! */
+    return percentToByte(this.opacity);
+  }
+
+  toString() {
+    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
+  }
+
+  static from_hex(str) {
+    ensure.string(str);
+    const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
+
+    if (hex === null) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+        `Couldn't parse string '${str}' as a valid hex code!`);
+    }
+
+    if (str.length === 3) {
+      str = str.split('').map(x => x + x).join('');
+    }
+
+    return new Color(
+      parseInt(str.slice(0, 1), 16),
+      parseInt(str.slice(2, 3), 16),
+      parseInt(str.slice(4, 5), 16),
+    );
+  }
+}
+
+/* A pixel canvas for efficiently creating sprites.
+ * The .toImage() creates a new sprite and adds it to spriteMap. */
+class PixelCanvas extends Mewlix.Clowder {
+  constructor(width, height) {
+    super();
+    this.width = width;
+    this.height = height;
+    this.data = new Uint8ClampedArray(width * height * 4);
+    Mewlix.opaque(this.data);
+  }
+
+  fill(color) {
+    for (let i = 0; i < this.data.length; i += 4) {
+      this.data[i]     = color.red;
+      this.data[i + 1] = color.green;
+      this.data[i + 2] = color.blue;
+      this.data[i + 3] = color.alpha();
+    }
+  }
+
+  set_pixel(x, y, color) {
+    const index = (x * this.width + y) * 4;
+    this.data[index]     = color.red;
+    this.data[index + 1] = color.green;
+    this.data[index + 2] = color.blue;
+    this.data[index + 3] = color.alpha();
+  }
+
+  set_tile(x, y, { data }) {
+    const index = (x * this.width + y) * 4;
+    const dataSize = Math.min(this.data.length - index, data.length);
+
+    for (let i = 0; i < dataSize; i++) {
+      this.data[index + i] = data[i];
+    }
+  }
+
+  async toImage(key) {
+    const data  = new ImageData(this.data, this.width, this.height);
+    const image = await createImageBitmap(data);
+    spriteMap.set(key, image);
+  }
+};
+
+/* A sprite-specific PixelCanvas, with pre-set sprite width and height.
+ * The 'std.graphic' yarn ball will expose this instead of PixelCanvas. */
+class SpriteCanvas extends PixelCanvas {
+  constructor() {
+    super(spriteWidth, spriteHeight);
+  }
+}
+
+/* A clowder type for a 2-dimensional vector.
+ * Can represent a point in a 2D world. */
+class Vector2 extends Mewlix.Clowder {
+  constructor(x, y) {
+    super();
+    ensure.all.number(x, y);
+    this.x = x;
+    this.y = y;
+  }
+
+  add(that) {
+    new Vector2(this.x + that.x, this.y + that.y);
+  }
+
+  mul(that) {
+    new Vector2(this.x * that.x, this.y * that.y);
+  }
+
+  clamp(min, max) {
+    this.x = clamp(this.x, min.x, max.x);
+    this.y = clamp(this.y, min.y, max.y);
+  }
+}
+
+/* A clowder type for a 2-dimensional rectangle.
+ * Can represent a region in a 2-dimensional plane. */
+class Rectangle extends Mewlix.Clowder {
+}
+
+
 /* A class designed to make the creation of dialogue boxes easier.
  * It accepts:
  *  1. A shelf of dialogue lines
@@ -422,22 +432,26 @@ const lineDuration = (message, charsPerSecond = 30.0) => {
  *    - Sound speed, in beeps per second (default: 2.0)
  * 
  * All you need to do to start a new dialogue event is call .play()
- * with a new shelf of lines. */
+ * with a new shelf of lines.
+ *
+ * Note: Snake-case is used for all methods and properties in this class.
+ * This is because it'll be accessible inside of Mewlix. */
 class DialogueBox extends Mewlix.Clowder {
   /* The drawCallback parameter should be a function of type (string) -> nothing.
    * It will be called to draw a dialogue line every frame. */
-  wake(drawCallback, options) {
-    this.drawCallback = drawCallback;
+  wake(draw_callback, options) {
+    this.draw_callback = draw_callback;
     this.key = options?.key ?? ' ';
     this.speed = options?.speed ?? 30.0;
 
     // Sound options:
     this.sound = options?.sound;
-    this.soundSpeed = options?.soundSpeed ?? 2.0;
+    this.sound_speed = 1 / (options?.sound_speed ?? 20);
+    console.log(this.sound);
 
     // Timers:
-    this.dialogueTimer = 0.0;
-    this.soundTimer = 0.0;
+    this.dialogue_timer = 0.0;
+    this.sound_timer = 0.0;
     
     return this;
   }
@@ -447,65 +461,65 @@ class DialogueBox extends Mewlix.Clowder {
     this.buffer = '';
     this.lines = lines;
     this.playing = true;
-    this.nextLine();
+    this.next_line();
   }
 
-  nextLine() {
+  next_line() {
     const message = this.lines?.peek?.();
-    this.currentLine  = message ? {
+    this.current_line  = message ? Mewlix.wrap({
       message: message,
       length: message.length,
       duration: lineDuration(message, this.speed),
       finished: false,
-    } : null;
+    }) : null;
     this.lines = this.lines?.pop();
     this.buffer = '';
 
-    this.playing = !!this.currentLine;
+    this.playing = !!this.current_line;
   }
 
-  lineLerp() {
-    const len = this.currentLine.length;
-    const duration = this.currentLine.duration;
-    return Math.floor(lerp(0, len, this.dialogueTimer / duration));
+  line_lerp() {
+    const len = this.current_line.length;
+    const duration = this.current_line.duration;
+    return Math.floor(lerp(0, len, this.dialogue_timer / duration));
   }
 
   draw() {
     if (this.playing && isKeyPressed(this.key)) {
-      if (this.currentLine.finished) {
-        this.nextLine();
-        this.dialogueTimer = 0.0;
-        this.soundTimer = 0.0;
+      if (this.current_line.finished) {
+        this.next_line();
+        this.dialogue_timer = 0.0;
+        this.sound_timer = 0.0;
       }
       else {
-        this.currentLine.finished = true;
+        this.current_line.finished = true;
       }
     }
 
     if (!this.playing) return;
-    this.dialogueTimer += deltaTime;
+    this.dialogue_timer += deltaTime;
 
-    const lineLength = this.currentLine.finished
-      ? this.currentLine.length
-      : clamp(this.lineLerp(), 0, this.currentLine.length);
+    const lineLength = this.current_line.finished
+      ? this.current_line.length
+      : clamp(this.line_lerp(), 0, this.current_line.length);
 
     if (!this.buffer || lineLength > this.buffer.length) {
-      this.buffer = this.currentLine.message.slice(0, lineLength);
+      this.buffer = this.current_line.message.slice(0, lineLength);
     }
 
-    this.drawCallback(this.buffer);
+    this.draw_callback(this.buffer);
 
-    if (this.sound && !this.currentLine.finished) {
-      this.soundTimer += deltaTime;
+    if (this.sound && !this.current_line.finished) {
+      this.sound_timer += deltaTime;
 
-      if (this.soundTimer >= this.soundSpeed) {
-        this.soundTimer = 0.0;
+      if (this.sound_timer >= this.sound_speed) {
+        this.sound_timer = 0.0;
         playSfx(this.sound);
       }
     }
 
-    if (this.dialogueTimer >= this.currentLine.duration) {
-      this.currentLine.finished = true;
+    if (this.dialogue_timer >= this.current_line.duration) {
+      this.current_line.finished = true;
     }
   }
 }
@@ -522,9 +536,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (() -> nothing) -> nothing */
   init: init,
 
-  /* Delta time getter; readonly.
+  /* Delta time getter. If init() hasn't been called yet, this returns 0.
    * type: () -> number */
-  get delta() { return deltaTime },
+  delta: () => deltaTime,
 
   /* Load a resource file. The resource type is determined by the file extension:
    * Image files (.png, .jpg, .bmp) will load a sprite.
@@ -537,6 +551,8 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return loadAny(key, path);
   },
   
+  /* --------- Drawing ---------- */
+
   /* Draw a sprite on the screen at a specified (x, y) position.
    * The sprite should already be loaded!
    *
@@ -560,6 +576,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (string, number, number, box) -> nothing */
   write: drawText,
 
+
+  /* --------- IO ---------- */
+
   /* Asks whether a key has been pressed. Triggers only once for a single key press.
    * 
    * No type-checking is done on this function for performance reasons.
@@ -577,6 +596,22 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (string) -> boolean */
   key_down: isKeyDown,
+
+  /* A few constants for the key values of common keys often used in games.
+   * Meant to be used with the other functions above.
+   *
+   * type: box */
+  keys: new Mewlix.Box([
+    ["space"  , " "         ]
+    ["enter"  , "Enter"     ]
+    ["left"   , "ArrowLeft" ]
+    ["right"  , "ArrowRight"]
+    ["up"     , "ArrowUp"   ]
+    ["down"   , "ArrowDown" ]
+  ]),
+
+
+  /* --------- Music/SFX ---------- */
 
   /* Begin playing an already-loaded music track on loop.
    * type: (string) -> nothing */
@@ -620,14 +655,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: () -> nothing */
   stop_music: stopMusic,
 
-  /* Color clowder, for representing color values. */
-  Color: Color,
-
-  /* Vector2 clowder. */
-  Vector2: Vector2,
-
-  /* SpriteCanvas clowder, for creating new sprites! */
-  SpriteCanvas: SpriteCanvas,
+  /* --------- Animation ---------- */
 
   /* Lerp function.
    * (number, number, number) -> number */
@@ -635,6 +663,21 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     ensure.all.number(start, end, x);
     return lerp(start, end, x);
   },
+
+
+  /* --------- Utility Types ---------- */
+
+  /* Color clowder, for representing color values. */
+  Color: Color,
+
+  /* Vector2 clowder. */
+  Vector2: Vector2,
+
+  /* Rectangle clowder. */
+  Rectangle: Rectangle,
+
+  /* SpriteCanvas clowder, for creating new sprites! */
+  SpriteCanvas: SpriteCanvas,
 });
 
 /* -----------------------------------
