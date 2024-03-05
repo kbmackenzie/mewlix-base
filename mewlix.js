@@ -846,6 +846,25 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.clamp(value, min, max);
   },
 
+  /* Generates a random number x between 0 and 1, where 0 <= x < 1.
+   * type: () -> number */
+  random: function random() {
+    return Math.random();
+  },
+
+  /* Generates a random integer number between min and max, where min <= x <= max.
+   * Thus, 'min' and 'max' are inclusive.
+   * If only one argument 'n' is passed, this function generates a number between 0 and n.
+   * type: (number, number) -> number */
+  random_int: function random_int(min, max) {
+    if (max === undefined) {
+      max = min;
+      min = 0;
+    }
+    ensure.all.number(min, max);
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  },
+
   /* Akin to python's range(). It aims be a little smart:
    * count(3) should give you 0, 1, 2, 3.
    * count(1, 3) should give you 1, 2, 3.
