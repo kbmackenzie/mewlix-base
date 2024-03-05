@@ -219,12 +219,6 @@ const init = async (callback) => {
   await run();
 };
 
-canvas.addEventListener('click', () => {
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-  }
-});
-
 /* -----------------------------------
  * Generic Loading:
  * ----------------------------------- */
@@ -626,9 +620,11 @@ Mewlix.meow = text => drawText(text);
 /* -----------------------------------
  * Standard library:
  * ----------------------------------- */
-
 /* Note: The functions in the base library use snake-case intentionally.
  * They're visible in Mewlix, and I don't want to do name-mangling. */
+
+/* Callback function to generate a thumbnail; set by user through the standard library.*/
+let thumbnail = null;
 
 Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Initialize the canvas, passing your game loop function as argument.
@@ -648,6 +644,11 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   load: (key, path) => {
     ensure.all.string(key, path);
     return loadAny(key, path);
+  },
+
+  thumbnail: func => {
+    ensure.func(func);
+    thumbnail = func;
   },
   
   /* --------- Drawing ---------- */
@@ -792,8 +793,18 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 /* -----------------------------------
  * Run Console:
  * ----------------------------------- */
+const awaitClick = () => new Promise(resolve => {
+  canvas.addEventListener(
+    'click',
+    () => audioContext.resume().then(resolve),
+    { once: true }
+  )
+});
+
 Mewlix.run = async f => {
   try {
+    await thumbnail?.();
+    await awaitClick();
     await f();
   }
   catch (error) {
