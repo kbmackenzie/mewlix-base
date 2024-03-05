@@ -23,10 +23,10 @@ const sizeModifier = Math.floor(canvas.width / virtualWidth);
 const spriteMap = new Map();
 const audioMap  = new Map();
 
-const spriteWidth  = 16;
-const spriteHeight = 16;
-const gridColumns  = Math.floor(virtualWidth  / spriteWidth );
-const gridRows     = Math.floor(virtualHeight / spriteHeight);
+const gridSlotWidth  = 16;
+const gridSlotHeight = 16;
+const gridColumns  = Math.floor(virtualWidth  / gridSlotWidth );
+const gridRows     = Math.floor(virtualHeight / gridSlotHeight);
 
 /* -----------------------------------
  * Loading Images:
@@ -37,7 +37,13 @@ const loadImage = (path, x, y, width, height) => fetch(path)
   .then(blob => createImageBitmap(blob, x, y, width, height));
 
 /* Load an image file as a sprite + add it to spriteMap. */
-const loadSprite = (key, path) => loadImage(path, 0, 0, spriteWidth, spriteHeight)
+const loadSprite = (key, path, rect) => loadImage(
+    path,
+    rect?.x ?? 0,
+    rect?.y ?? 0,
+    rect?.width  ?? gridSlotWidth,
+    rect?.height ?? gridSlotHeight,
+  )
   .then(image => {
     spriteMap.set(key, image);
     return image;
@@ -54,14 +60,12 @@ const getSprite = key => {
   return spriteMap.get(key);
 }
 
-const drawSprite = (key, x = 0, y = 0) => {
+const drawSprite = (key, x, y) => {
   const image = getSprite(key);
   context.drawImage(
     image,
-    Math.floor(x) * sizeModifier,
-    Math.floor(y) * sizeModifier,
-    spriteWidth   * sizeModifier,
-    spriteHeight  * sizeModifier,
+    Math.floor(x ?? 0) * sizeModifier,
+    Math.floor(y ?? 0) * sizeModifier,
   );
 };
 
@@ -278,7 +282,7 @@ const getExtensionOf = path => {
   return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
 };
 
-const loadAny = async (key, path) => {
+const loadAny = async (key, path, options) => {
   const extension = getExtensionOf(path)?.toLowerCase();
   if (!extension) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
@@ -286,7 +290,7 @@ const loadAny = async (key, path) => {
   }
 
   if (imageExtensions.has(extension)) {
-    await loadSprite(key, path);
+    await loadSprite(key, path, options);
     return;
   }
 
@@ -310,7 +314,7 @@ const loadAny = async (key, path) => {
 const lerp = (start, end, x) => start + (end - start) * x;
 
 /* -----------------------------------
- * Utility Clowders:
+ * Core Utility:
  * ----------------------------------- */
 /* A clowder type for a 2-dimensional vector.
  * Can represent a point in a 2D world. */
@@ -381,15 +385,15 @@ class GridSlot extends Mewlix.Clowder {
 }
 
 const gridSlot = (x, y) => {
-  const row = Math.min(y / spriteHeight);
-  const col = Math.min(x / spriteWidth);
+  const row = Math.min(y / gridSlotHeight);
+  const col = Math.min(x / gridSlotWidth);
   return new GridSlot().wake(row, col);
 };
 
-const slotPosition = (row, col) => {
+const slotPoint = (row, col) => {
   return new Vector2().wake(
-    col * spriteWidth,
-    row * spriteHeight,
+    col * gridSlotWidth,
+    row * gridSlotHeight,
   );
 };
 
@@ -400,9 +404,7 @@ const slotPosition = (row, col) => {
  * This is because they'll be available inside of Mewlix! */
 
 /* Color container, wrapping a RGBA color value.
- *
- * It also implements .toColor(), complying with the 'ToColor' interface concept:
- * Any object that implements a .toColor() method can be considered a valid color representation. */
+ * It accepts an opacity value too, in percentage. */
 class Color extends Mewlix.Clowder {
   wake(red, green, blue, opacity = 100) {
     ensure.all.number(red, green, blue, opacity);
@@ -526,15 +528,6 @@ class PixelCanvas extends Mewlix.Clowder {
     spriteMap.set(key, image);
   }
 };
-
-/* A sprite-specific PixelCanvas, with pre-set sprite width and height.
- * The 'std.graphic' yarn ball will expose this instead of PixelCanvas. */
-class SpriteCanvas extends PixelCanvas {
-  wake() {
-    super.wake(spriteWidth, spriteHeight);
-    return this;
-  }
-}
 
 /* Dialogue util. */
 const lineDuration = (message, charsPerSecond = 30.0) => {
@@ -670,9 +663,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * Font files  (.ttf, .otf, .woff, .woff2) will load a new font.
    *
    * type: (string, string) -> nothing */
-  load: (key, path) => {
+  load: (key, path, options) => {
     ensure.all.string(key, path);
-    return loadAny(key, path);
+    return loadAny(key, path, options);
   },
 
   thumbnail: func => {
@@ -794,7 +787,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return lerp(start, end, x);
   },
 
-  /* --------- Utility Types ---------- */
+  /* --------- Core Utility ---------- */
 
   /* Vector2 clowder. */
   Vector2: Vector2,
@@ -805,13 +798,19 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Grid slot clowder. */
   GridSlot: GridSlot,
 
+  /* Convert world point to grid slot. */
+  grid_slot: gridSlot,
+
+  /* Convert grid slot to world point. */
+  slot_point: slotPoint,
+
   /* --------- Additional Utility ---------- */
 
   /* Color clowder, for representing color values. */
   Color: Color,
 
-  /* SpriteCanvas clowder, for creating new sprites. */
-  SpriteCanvas: SpriteCanvas,
+  /* PixelCanvas clowder, for creating new sprites. */
+  PixelCanvas: SpriteCanvas,
 
   /* SpriteAnimation clowder, simple container for animations. */
   SpriteAnimation: SpriteAnimation,
