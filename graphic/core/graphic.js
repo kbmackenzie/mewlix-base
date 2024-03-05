@@ -69,6 +69,17 @@ const drawSprite = (key, x, y) => {
   );
 };
 
+const fromSpritesheet = async (path, dimensions, keyBase, rects) => {
+  const sheet = await loadImage(path, dimensions.x, dimensions.y, dimensions.width, dimensions.height);
+  let counter = 0;
+
+  for (const rect of Mewlix.Shelf.reverse(rects)) {
+    const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
+    const key = `${keyBase}-${counter++}`;
+    spriteMap.set(key, sprite);
+  }
+};
+
 /* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
@@ -662,15 +673,37 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * Audio files (.mp3, .wav, .ogg) will load an audio file.
    * Font files  (.ttf, .otf, .woff, .woff2) will load a new font.
    *
-   * type: (string, string) -> nothing */
+   * When loading images, the 'options' argument should be a Rectangle.
+   * The 'options' parameter is ignored for audio and font files.
+   *
+   * type: (string, string, box?) -> nothing */
   load: (key, path, options) => {
     ensure.all.string(key, path);
     return loadAny(key, path, options);
   },
 
+  /* Accepts a callback function to draw a 'thumbnail' for the game.
+   * The thumbnail will be shown in the 'click to start' screen.
+   *
+   * type: (() -> nothing)) -> nothing */
   thumbnail: func => {
     ensure.func(func);
     thumbnail = func;
+  },
+
+  /* Load an image file and divide it into multiple sprites efficiently.
+   *
+   * It expects the following arguments:
+   * - The path to the spritesheet.
+   * - A Rectangle holding the spritesheet dimensions.
+   * - A 'base key' from which the key for each sprite will be created.
+   * - A shelf of Rectangle boxes holding the regions of the spritesheet to crop.
+   *
+   * type: (string, box, string, shelf) -> nothing */
+  spritesheet: (path, dimensions, key, rects) => {
+    ensure.all.string(path, key);
+    ensure.shelf(rects);
+    return fromSpritesheet(path, dimensions, key, rects);
   },
   
   /* --------- Drawing ---------- */
@@ -686,10 +719,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   draw: drawSprite,
 
   /* Draw text on the screen at a specified (x, y) position.
+   *
    * An additional box argument can be passed iwht additional options:
    *  - font: The key for an already-loaded font family.
    *  - size: The font size.
    *  - color: The text color.
+   *  - align: The text alignment.
    *
    * No type-checking is done on this function for performance reasons.
    * It'll be called multiple times *every single frame*.
@@ -698,6 +733,23 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (string, number, number, box) -> nothing */
   write: (value, x, y, options) => {
     return drawText(Mewlix.purrify(value), x, y, options);
+  },
+
+  /* Measure the width of text in the canvas.
+   *
+   * An additional box argument can be passed with additional options:
+   *  - font: The key for an already-loaded font family.
+   *  - size: The font size.
+   *  - color: The text color.
+   *  - align: The text alignment.
+   *
+   * No type-checking is done on this function for performance reasons.
+   * It'll be called multiple times *every single frame*.
+   * Type-checking input values every time would be an absolute waste.
+   *
+   * type: (string, box) -> nothing */
+  measure_text: (value, options) => {
+    return measureText(Mewlix.purrify(value), options);
   },
 
   /* --------- IO ---------- */
@@ -787,7 +839,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return lerp(start, end, x);
   },
 
-  /* --------- Core Utility ---------- */
+  /* --------- Core Clowders ---------- */
 
   /* Vector2 clowder. */
   Vector2: Vector2,
