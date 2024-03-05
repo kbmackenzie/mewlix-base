@@ -651,7 +651,8 @@ class DialogueBox extends Mewlix.Clowder {
 /* -----------------------------------
  * Meow Expression
  * ----------------------------------- */
-Mewlix.meow = text => drawText(text);
+let meowOptions = null;
+Mewlix.meow = text => drawText(text, meowOptions);
 
 /* -----------------------------------
  * Standard library:
@@ -750,6 +751,13 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (string, box) -> nothing */
   measure_text: (value, options) => {
     return measureText(Mewlix.purrify(value), options);
+  },
+
+  /* Set text options for the 'meow' statement.
+   * type: box -> nothing */
+  meow_options: box => {
+    ensure.box(box);
+    meowOptions = box;
   },
 
   /* --------- IO ---------- */
