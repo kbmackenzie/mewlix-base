@@ -742,7 +742,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * It'll be called multiple times *every single frame*.
    * Type-checking input values every time would be an absolute waste.
    *
-   * type: (string, number, number, box) -> nothing */
+   * type: (any, number, number, box) -> nothing */
   write: (value, x, y, options) => {
     return drawText(Mewlix.purrify(value), x, y, options);
   },
