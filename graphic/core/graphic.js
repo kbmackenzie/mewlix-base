@@ -177,11 +177,11 @@ const keyQueue = new Set();
 window.addEventListener('keydown', event => {
   if (!keysDown.has(event.key)) { keyQueue.add(event.key); }
   keysDown.add(event.key);
-});
+}, { passive: true });
 
 window.addEventListener('keyup', event => {
   keysDown.delete(event.key);
-});
+}, { passive: true });
 
 const isKeyPressed  = key => keyQueue.has(key);
 const isKeyDown     = key => keysDown.has(key);
@@ -197,11 +197,11 @@ const flushKeyQueue = () => {
 let deltaTime = 0;      // Delta time, in seconds!
 let thumbnail = null;   // Callback function to generate a thumbnail;
 
-const awaitKey = () => new Promise(resolve => {
+const awaitClick = () => new Promise(resolve => {
   window.addEventListener(
-    'keydown',
+    'click',
     () => audioContext.resume().then(resolve),
-    { once: true }
+    { passive: true, once: true }
   )
 });
 
@@ -224,7 +224,7 @@ const init = async (callback) => {
 
     await thumbnail?.();
     await drawPlay();
-    await awaitKey();
+    await awaitClick();
     flushKeyQueue();
 
     while (true) {
@@ -822,6 +822,23 @@ Mewlix.run = async f => {
     throw error;
   }
 };
+
+/* -----------------------------------
+ * Prevent arrow-key scrolling:
+ * ----------------------------------- */
+const preventKeys = new Set([
+  'Space',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+]);
+
+window.addEventListener('keydown', event => {
+  if (preventKeys.has(event.code)) {
+    event.preventDefault();
+  }
+}, { passive: false });
 
 /* -----------------------------------
  * Tests:
