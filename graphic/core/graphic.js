@@ -80,19 +80,28 @@ const loadFont = (name, url) => new FontFace(name, `url(${url})`)
 const defaultFont = 'Munro';
 const defaultFontSize = 8;
 
-const drawText = (value, x = 0, y = 0, options = null) => {
-  const text = Mewlix.purrify(value);
+const setupText = options => {
   const font = options?.font ?? defaultFont;
   const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
   context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
   context.fillStyle = options?.color?.toString() ?? 'black';
+  context.textAlign = options?.align ?? 'start';
+};
 
+const drawText = (message, x = 0, y = 0, options = null) => {
+  setupText(options);
   context.fillText(
-    text,
+    message,
     Math.floor(x) * sizeModifier,
     Math.floor(y) * sizeModifier,
   );
+};
+
+const measureText = (message, options) => {
+  setupText(options);
+  const measurement = context.measureText(message);
+  return Math.floor(measurement / sizeModifier);
 };
 
 /* -----------------------------------
@@ -694,8 +703,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * Type-checking input values every time would be an absolute waste.
    *
    * type: (string, number, number, box) -> nothing */
-  write: drawText,
-
+  write: (value, x, y, options) => {
+    return drawText(Mewlix.purrify(value), x, y, options);
+  },
 
   /* --------- IO ---------- */
 
