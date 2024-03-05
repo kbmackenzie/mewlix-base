@@ -818,7 +818,10 @@ Mewlix.run = async f => {
     await f();
   }
   catch (error) {
-    // add image here.
+    const image = await loadImage('assets/mewlix-error.png', 0, 0, 1024, 1024);
+    context.fillStyle = 'rgb(255 0 0 / 50%)';
+    context.fillRect(0, 0, canvasWidth, canvasHeight);
+    context.drawImage(image, 0, 0);
     throw error;
   }
 };
@@ -857,11 +860,26 @@ Mewlix.run(async () => {
   const frames = Mewlix.Shelf.fromArray(['b', 'a']);
   const anim = new SpriteAnimation().wake(frames, 4);
 
-  const dialogue = new DialogueBox().wake(text => drawText(text, 20, 20), { sound: 'voice' });
-  dialogue.play(Mewlix.Shelf.fromArray(["hello", "world"]));
+  const dialogue = new DialogueBox().wake(text => drawText(text), { sound: 'voice' });
+  dialogue.play(Mewlix.Shelf.fromArray([
+    "An example error will follow soon!",
+    "Created with built-in utilities!",
+    "Example dialogue message.",
+  ]));
+
+  thumbnail = () => {
+    context.fillStyle = 'red';
+    context.fillRect(20, 20, 20, 20);
+  };
+
+  let timer = 0.0;
 
   return init(async () => {
     anim.draw(30, 30);
     dialogue.draw();
+    timer += deltaTime;
+    if (timer > 3) {
+      throw new Error('yay!');
+    }
   });
 });
