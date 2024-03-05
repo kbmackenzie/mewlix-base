@@ -31,15 +31,17 @@ const gridRows     = Math.floor(virtualHeight / spriteHeight);
 /* -----------------------------------
  * Loading Images:
  * ----------------------------------- */
-const loadImage = (key, path, x, y, width, height) => fetch(path)
+/* Load an image file as ImageBitmap. */
+const loadImage = (path, x, y, width, height) => fetch(path)
   .then(response => response.blob())
-  .then(blob => createImageBitmap(blob, x, y, width, height))
+  .then(blob => createImageBitmap(blob, x, y, width, height));
+
+/* Load an image file as a sprite + add it to spriteMap. */
+const loadSprite = (key, path) => loadImage(path, 0, 0, spriteWidth, spriteHeight)
   .then(image => {
     spriteMap.set(key, image);
     return image;
   });
-
-const loadSprite = (key, path) => loadImage(key, path, 0, 0, spriteWidth, spriteHeight);
 
 /* -----------------------------------
  * Drawing:
@@ -801,6 +803,9 @@ const awaitClick = () => new Promise(resolve => {
   )
 });
 
+const drawPlay = async () => {
+};
+
 Mewlix.run = async f => {
   try {
     await thumbnail?.();
@@ -816,11 +821,25 @@ Mewlix.run = async f => {
 /* -----------------------------------
  * Tests:
  * ----------------------------------- */
-const d = new DialogueBox().wake(text => drawText(text, 20, 20), { sound: 'voice' });
-d.play(Mewlix.Shelf.fromArray(["hello", "world"]));
+Mewlix.run(async () => {
+  await loadAny('voice', 'assets/voice.wav');
 
-const test = async () => {
-  d.draw();
-}
+  const frameOne = new SpriteCanvas();
+  frameOne.fill(new Color(0, 0, 0));
+  await frameOne.toImage('a');
 
-loadAny('voice', 'assets/voice.wav').init(test);
+  const frameTwo = new SpriteCanvas();
+  frameTwo.fill(new Color(124, 124, 124));
+  await frameTwo.toImage('b');
+
+  const frames = Mewlix.Shelf.fromArray(['b', 'a']);
+  const anim = new SpriteAnimation().wake(frames, 4);
+
+  const dialogue = new DialogueBox().wake(text => drawText(text, 20, 20), { sound: 'voice' });
+  dialogue.play(Mewlix.Shelf.fromArray(["hello", "world"]));
+
+  return init(async () => {
+    anim.draw(30, 30);
+    dialogue.draw();
+  });
+});
