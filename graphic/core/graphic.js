@@ -198,10 +198,10 @@ let deltaTime = 0;      // Delta time, in seconds!
 let thumbnail = null;   // Callback function to generate a thumbnail;
 
 const awaitClick = () => new Promise(resolve => {
-  window.addEventListener(
+  canvas.addEventListener(
     'click',
     () => audioContext.resume().then(resolve),
-    { passive: true, once: true }
+    { once: true }
   )
 });
 
