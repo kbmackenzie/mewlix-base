@@ -194,7 +194,23 @@ const flushKeyQueue = () => {
 /* -----------------------------------
  * Game Loop
  * ----------------------------------- */
-let deltaTime = 0;    // Delta time, in seconds!
+let deltaTime = 0;      // Delta time, in seconds!
+let thumbnail = null;   // Callback function to generate a thumbnail;
+
+const awaitKey = () => new Promise(resolve => {
+  window.addEventListener(
+    'keydown',
+    () => audioContext.resume().then(resolve),
+    { once: true }
+  )
+});
+
+const drawPlay = async () => {
+  const image = await loadImage('assets/mewlix-play.png', 0, 0, 1024, 1024);
+  context.fillStyle = 'rgb(0 0 0 / 50%)';
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
+  context.drawImage(image, 0, 0);
+};
 
 const init = async (callback) => {
   await loadFont('Munro', '/assets/munro.ttf');
@@ -205,6 +221,11 @@ const init = async (callback) => {
 
   const run = async () => {
     let lastFrame; // Last frame's timestamp, in milliseconds.
+
+    await thumbnail?.();
+    await drawPlay();
+    await awaitKey();
+    flushKeyQueue();
 
     while (true) {
       context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -625,9 +646,6 @@ Mewlix.meow = text => drawText(text);
 /* Note: The functions in the base library use snake-case intentionally.
  * They're visible in Mewlix, and I don't want to do name-mangling. */
 
-/* Callback function to generate a thumbnail; set by user through the standard library.*/
-let thumbnail = null;
-
 Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Initialize the canvas, passing your game loop function as argument.
    * type: (() -> nothing) -> nothing */
@@ -795,26 +813,8 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 /* -----------------------------------
  * Run Console:
  * ----------------------------------- */
-const awaitKey = () => new Promise(resolve => {
-  window.addEventListener(
-    'keydown',
-    () => audioContext.resume().then(resolve),
-    { once: true }
-  )
-});
-
-const drawPlay = async () => {
-  const image = await loadImage('assets/mewlix-play.png', 0, 0, 1024, 1024);
-  context.fillStyle = 'rgb(0 0 0 / 50%)';
-  context.fillRect(0, 0, canvasWidth, canvasHeight);
-  context.drawImage(image, 0, 0);
-};
-
 Mewlix.run = async f => {
   try {
-    await thumbnail?.();
-    await drawPlay();
-    await awaitKey();
     await f();
   }
   catch (error) {
