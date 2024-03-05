@@ -150,6 +150,14 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     return output;
   }
 
+  static reverse(a) {
+    let b = new Mewlix.ShelfBottom();
+    for (const value of a) {
+      b = b.push(value);
+    }
+    return b;
+  }
+
   static fromArray(arr) {
     return arr.reduce(
       (tail, value) => new Mewlix.ShelfNode(value, tail),
@@ -741,6 +749,10 @@ Mewlix.Base = Mewlix.library('std', {
    * type: ((shelf | string), number) -> (shelf | string) */
   poke: function poke(value, index = 0) {
     ensure.number(index);
+    if (typeof value === 'string') {
+      return value[index];
+    }
+
     if (value instanceof Mewlix.Shelf) {
       for (let i = 0; i < index; i++) {
         value = value?.pop();
@@ -748,8 +760,9 @@ Mewlix.Base = Mewlix.library('std', {
       return value?.peek();
     }
 
-    ensure.string(value);
-    return value[index];
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
   },
 
   /* Converts any value to a boolean.
@@ -758,11 +771,15 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Conversion.toBool(value);
   },
 
-  /* Asks if a shelf is empty.
-   * type: (shelf) -> boolean */
+  /* Asks if a shelf or string is empty.
+   * type: ((shelf | string)) -> boolean */
   empty: function empty(value) {
-    ensure.shelf(value);
-    return value instanceof Mewlix.ShelfBottom;
+    if (typeof value === 'string') return value === '';
+    if (value instanceof Mewlix.Shelf) return value instanceof Mewlix.ShelfBottom;
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
   /* Concatenates two strings or two shelves. Values must be of the same type.
@@ -782,6 +799,17 @@ Mewlix.Base = Mewlix.library('std', {
       default: throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
         `std.join: Values of type '${typeofA}' can't be concatenated!`);
     }
+  },
+
+  /* Reverses a shelf or a string.
+   * type: ((shelf | string)) -> (shelf | string) */
+  reverse: function reverse(value) {
+    if (typeof value === 'string') return [...value].reverse().join('');
+    if (value instanceof Mewlix.Shelf) return Mewlix.Shelf.reverse(value);
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
   /* Converts a value to a number.
