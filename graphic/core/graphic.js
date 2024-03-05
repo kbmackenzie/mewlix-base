@@ -572,7 +572,7 @@ class DialogueBox extends Mewlix.Clowder {
   play(lines) {
     ensure.shelf(lines);
     this.buffer = '';
-    this.lines = lines;
+    this.lines = Mewlix.Shelf.reverse(lines);
     this.playing = true;
     this.next_line();
   }
