@@ -825,7 +825,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (number) -> nothing */
   volume: value => {
     ensure.number(value);
-    value = clamp(value, 0, 1);
+    value = clamp(value, 0, 100) / 100;
     return setVolumeOf(masterVolume, value / 2);
   },
 
@@ -833,7 +833,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (number) -> nothing */
   music_volume: value => {
     ensure.number(value);
-    value = clamp(value, 0, 1);
+    value = clamp(value, 0, 100) / 100;
     return setVolumeOf(musicVolume, value);
   },
 
@@ -841,7 +841,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * type: (number) -> nothing */
   sfx_volume: value => {
     ensure.number(value);
-    value = clamp(value, 0, 1);
+    value = clamp(value, 0, 100) / 100;
     return setVolumeOf(sfxVolume, value);
   },
 
