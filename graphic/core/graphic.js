@@ -795,21 +795,26 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 /* -----------------------------------
  * Run Console:
  * ----------------------------------- */
-const awaitClick = () => new Promise(resolve => {
-  canvas.addEventListener(
-    'click',
+const awaitKey = () => new Promise(resolve => {
+  window.addEventListener(
+    'keydown',
     () => audioContext.resume().then(resolve),
     { once: true }
   )
 });
 
 const drawPlay = async () => {
+  const image = await loadImage('assets/mewlix-play.png', 0, 0, 1024, 1024);
+  context.fillStyle = 'rgb(0 0 0 / 50%)';
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
+  context.drawImage(image, 0, 0);
 };
 
 Mewlix.run = async f => {
   try {
     await thumbnail?.();
-    await awaitClick();
+    await drawPlay();
+    await awaitKey();
     await f();
   }
   catch (error) {
@@ -824,11 +829,11 @@ Mewlix.run = async f => {
 Mewlix.run(async () => {
   await loadAny('voice', 'assets/voice.wav');
 
-  const frameOne = new SpriteCanvas();
+  const frameOne = new SpriteCanvas().wake();
   frameOne.fill(new Color(0, 0, 0));
   await frameOne.toImage('a');
 
-  const frameTwo = new SpriteCanvas();
+  const frameTwo = new SpriteCanvas().wake();
   frameTwo.fill(new Color(124, 124, 124));
   await frameTwo.toImage('b');
 
