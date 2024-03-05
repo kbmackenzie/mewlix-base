@@ -119,7 +119,7 @@ const drawText = (message, x = 0, y = 0, options = null) => {
 const measureText = (message, options) => {
   setupText(options);
   const measurement = context.measureText(message);
-  return Math.floor(measurement / sizeModifier);
+  return Math.floor(measurement.width / sizeModifier);
 };
 
 /* -----------------------------------
