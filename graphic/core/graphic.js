@@ -32,18 +32,21 @@ const gridRows     = Math.floor(virtualHeight / gridSlotHeight);
  * Loading Images:
  * ----------------------------------- */
 /* Load an image file as ImageBitmap. */
-const loadImage = (path, x, y, width, height) => fetch(path)
+const loadImage = (path, rect) => fetch(path)
   .then(response => response.blob())
-  .then(blob => createImageBitmap(blob, x, y, width, height));
+  .then(blob => {
+    if (!rect) return createImageBitmap(blob);
+    return createImageBitmap(
+      blob,
+      rect?.x ?? 0,
+      rect?.y ?? 0,
+      rect?.width  ?? gridSlotWidth,
+      rect?.height ?? gridSlotHeight,
+    );
+  });
 
 /* Load an image file as a sprite + add it to spriteMap. */
-const loadSprite = (key, path, rect) => loadImage(
-    path,
-    rect?.x ?? 0,
-    rect?.y ?? 0,
-    rect?.width  ?? gridSlotWidth,
-    rect?.height ?? gridSlotHeight,
-  )
+const loadSprite = (key, path, rect) => loadImage(path, rect)
   .then(image => {
     spriteMap.set(key, image);
     return image;
@@ -69,8 +72,8 @@ const drawSprite = (key, x, y) => {
   );
 };
 
-const fromSpritesheet = async (path, dimensions, keyBase, rects) => {
-  const sheet = await loadImage(path, dimensions.x, dimensions.y, dimensions.width, dimensions.height);
+const fromSpritesheet = async (path, keyBase, rects) => {
+  const sheet = await loadImage(path);
   let counter = 0;
 
   for (const rect of Mewlix.Shelf.reverse(rects)) {
@@ -216,6 +219,92 @@ const flushKeyQueue = () => {
 };
 
 /* -----------------------------------
+ * Core Utility:
+ * ----------------------------------- */
+/* A clowder type for a 2-dimensional vector.
+ * Can represent a point in a 2D world. */
+class Vector2 extends Mewlix.Clowder {
+  wake(x, y) {
+    ensure.all.number(x, y);
+    this.x = x;
+    this.y = y;
+    return this;
+  }
+
+  add(that) {
+    return new Vector2().wake(this.x + that.x, this.y + that.y);
+  }
+
+  mul(that) {
+    return new Vector2().wake(this.x * that.x, this.y * that.y);
+  }
+
+  distance(that) {
+    return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
+  }
+
+  dot(that) {
+    return this.x * that.x + this.y * that.y;
+  }
+
+  clamp(min, max) {
+    const x = clamp(this.x, min.x, max.x);
+    const y = clamp(this.y, min.y, max.y);
+    return new Vector2().wake(x, y);
+  }
+}
+
+/* A clowder type for a 2-dimensional rectangle.
+ * Can represent a region in a 2-dimensional plane. */
+class Rectangle extends Mewlix.Clowder {
+  wake(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+
+  contains(point) {
+    return (point.x >= this.x)
+      && (point.y >= this.y)
+      && (point.x < this.x + this.width)
+      && (point.y < this.y + this.height);
+  }
+
+  collides(rect) {
+    return (this.x < rect.x + rect.width)
+      && (this.y < rect.y + rect.height)
+      && (this.x + this.width > rect.x)
+      && (this.y + this.height > rect.height);
+  }
+}
+
+/* A clowder to represent a grid slot.
+ * The row and column numbers are clamped in .wake()! */
+class GridSlot extends Mewlix.Clowder {
+  wake(row, column) {
+    this.row    = clamp(row, 0, gridRows - 1);
+    this.column = clamp(column, 0, gridColumns - 1);
+    return this;
+  }
+}
+
+/* Convert world position to a grid slot. */
+const gridSlot = (x, y) => {
+  const row = Math.min(y / gridSlotHeight);
+  const col = Math.min(x / gridSlotWidth);
+  return new GridSlot().wake(row, col);
+};
+
+/* Convert grid slot to world position. */
+const slotPoint = (row, col) => {
+  return new Vector2().wake(
+    col * gridSlotWidth,
+    row * gridSlotHeight,
+  );
+};
+
+/* -----------------------------------
  * Game Loop
  * ----------------------------------- */
 let deltaTime = 0;      // Delta time, in seconds!
@@ -230,7 +319,10 @@ const awaitClick = () => new Promise(resolve => {
 });
 
 const drawPlay = async () => {
-  const image = await loadImage('assets/mewlix-play.png', 0, 0, 1024, 1024);
+  const image = await loadImage(
+    'assets/mewlix-play.png',
+    new Rectangle(0, 0, 1024, 1024)
+  );
   context.fillStyle = 'rgb(0 0 0 / 50%)';
   context.fillRect(0, 0, canvasWidth, canvasHeight);
   context.drawImage(image, 0, 0);
@@ -323,90 +415,6 @@ const loadAny = async (key, path, options) => {
  * Utility Functions:
  * ----------------------------------- */
 const lerp = (start, end, x) => start + (end - start) * x;
-
-/* -----------------------------------
- * Core Utility:
- * ----------------------------------- */
-/* A clowder type for a 2-dimensional vector.
- * Can represent a point in a 2D world. */
-class Vector2 extends Mewlix.Clowder {
-  wake(x, y) {
-    ensure.all.number(x, y);
-    this.x = x;
-    this.y = y;
-    return this;
-  }
-
-  add(that) {
-    return new Vector2().wake(this.x + that.x, this.y + that.y);
-  }
-
-  mul(that) {
-    return new Vector2().wake(this.x * that.x, this.y * that.y);
-  }
-
-  distance(that) {
-    return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
-  }
-
-  dot(that) {
-    return this.x * that.x + this.y * that.y;
-  }
-
-  clamp(min, max) {
-    const x = clamp(this.x, min.x, max.x);
-    const y = clamp(this.y, min.y, max.y);
-    return new Vector2().wake(x, y);
-  }
-}
-
-/* A clowder type for a 2-dimensional rectangle.
- * Can represent a region in a 2-dimensional plane. */
-class Rectangle extends Mewlix.Clowder {
-  wake(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
-
-  contains(point) {
-    return (point.x >= this.x)
-      && (point.y >= this.y)
-      && (point.x < this.x + this.width)
-      && (point.y < this.y + this.height);
-  }
-
-  collides(rect) {
-    return (this.x < rect.x + rect.width)
-      && (this.y < rect.y + rect.height)
-      && (this.x + this.width > rect.x)
-      && (this.y + this.height > rect.height);
-  }
-}
-
-/* A clowder to represent a grid slot.
- * The row and column numbers are clamped in .wake()! */
-class GridSlot extends Mewlix.Clowder {
-  wake(row, column) {
-    this.row    = clamp(row, 0, gridRows - 1);
-    this.column = clamp(column, 0, gridColumns - 1);
-    return this;
-  }
-}
-
-const gridSlot = (x, y) => {
-  const row = Math.min(y / gridSlotHeight);
-  const col = Math.min(x / gridSlotWidth);
-  return new GridSlot().wake(row, col);
-};
-
-const slotPoint = (row, col) => {
-  return new Vector2().wake(
-    col * gridSlotWidth,
-    row * gridSlotHeight,
-  );
-};
 
 /* -----------------------------------
  * Additional Clowders:
@@ -671,7 +679,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   /* Load a resource file. The resource type is determined by the file extension:
    * Image files (.png, .jpg, .bmp) will load a sprite.
-   * Audio files (.mp3, .wav, .ogg) will load an audio file.
+   * Audio files (.mp3, .wav, .ogg) will load a sound.
    * Font files  (.ttf, .otf, .woff, .woff2) will load a new font.
    *
    * When loading images, the 'options' argument should be a Rectangle.
@@ -696,15 +704,14 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * It expects the following arguments:
    * - The path to the spritesheet.
-   * - A Rectangle holding the spritesheet dimensions.
    * - A 'base key' from which the key for each sprite will be created.
    * - A shelf of Rectangle boxes holding the regions of the spritesheet to crop.
    *
-   * type: (string, box, string, shelf) -> nothing */
-  spritesheet: (path, dimensions, key, rects) => {
+   * type: (string, string, shelf) -> nothing */
+  spritesheet: (path, key, rects) => {
     ensure.all.string(path, key);
     ensure.shelf(rects);
-    return fromSpritesheet(path, dimensions, key, rects);
+    return fromSpritesheet(path, key, rects);
   },
   
   /* --------- Drawing ---------- */
@@ -887,7 +894,10 @@ Mewlix.run = async f => {
     await f();
   }
   catch (error) {
-    const image = await loadImage('assets/mewlix-error.png', 0, 0, 1024, 1024);
+    const image = await loadImage(
+      'assets/mewlix-error.png',
+      new Rectangle().wake(0, 0, 1024, 1024)
+    );
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
