@@ -26,7 +26,7 @@ const paperclipButton   = document.getElementById('console-paperclip');
 // Settings:
 const settingsMenu      = document.getElementById('menu-settings');
 const promptColor       = document.getElementById('select-color');
-const hidePrompt        = document.getElementById('hide-prompt');
+const seePrompt         = document.getElementById('see-prompt');
 const showHighlight     = document.getElementById('show-highlight');
 const consoleOpacity    = document.getElementById('select-opacity');
 const selectBackground  = document.getElementById('select-background');
@@ -55,7 +55,7 @@ const createPrompt = () => {
 const addLine = (text, fromUser = true) => {
   const line = document.createElement('li');
 
-  if (fromUser && !hidePrompt.checked) {
+  if (fromUser && seePrompt.checked) {
     line.appendChild(createPrompt());
   }
 
@@ -285,7 +285,7 @@ Mewlix.Console = Mewlix.library('std.console', {
    * type: (boolean) -> nothing */
   hide_prompt: hide => {
     ensure.boolean(hide);
-    hidePrompt.checked = hide;
+    seePrompt.checked = hide;
   },
 });
 
