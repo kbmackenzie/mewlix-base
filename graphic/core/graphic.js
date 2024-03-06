@@ -10,7 +10,6 @@ const percentToByte = p => Math.floor((255 * p) / 100);
  * ----------------------------------- */
 const canvas  = document.getElementById('drawing-canvas');
 const context = canvas.getContext('2d');
-context.textBaseline = 'top';
 
 const canvasWidth  = canvas.width;
 const canvasHeight = canvas.height;
@@ -105,6 +104,7 @@ const setupText = options => {
   context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
   context.fillStyle = options?.color?.toString() ?? 'black';
   context.textAlign = options?.align ?? 'start';
+  context.textBaseline = options?.base ?? 'top';
 };
 
 const drawText = (message, x = 0, y = 0, options = null) => {
@@ -136,6 +136,7 @@ const sfxVolume   = audioContext.createGain();
 
 musicVolume.connect(masterVolume);
 sfxVolume.connect(masterVolume);
+masterVolume.setValueAtTime(0.5, audioContext.currentTime);
 
 // Mutable state my behated
 let musicSource = null;
