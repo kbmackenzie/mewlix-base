@@ -283,9 +283,9 @@ Mewlix.Console = Mewlix.library('std.console', {
 
   /* Sets whether or not to show the console prompt string before an user message.
    * type: (boolean) -> nothing */
-  hide_prompt: hide => {
-    ensure.boolean(hide);
-    seePrompt.checked = hide;
+  see_prompt: see => {
+    ensure.boolean(see);
+    seePrompt.checked = see;
   },
 });
 
