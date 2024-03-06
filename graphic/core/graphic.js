@@ -228,29 +228,30 @@ class Vector2 extends Mewlix.Clowder {
     ensure.all.number(x, y);
     this.x = x;
     this.y = y;
+
+    this.add = (function add(that) {
+      return new Vector2().wake(this.x + that.x, this.y + that.y);
+    }).bind(this);
+
+    this.mul = (function mul(that) {
+      return new Vector2().wake(this.x + that.x, this.y + that.y);
+    }).bind(this);
+
+    this.distance = (function distance(that) {
+      return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
+    }).bind(this);
+
+    this.dot = (function dot(that) {
+      return this.x * that.x + this.y * that.y;
+    }).bind(this);
+
+    this.clamp = (function clamp(min, max) {
+      const x = clamp(this.x, min.x, max.x);
+      const y = clamp(this.y, min.y, max.y);
+      return new Vector2().wake(x, y);
+    }).bind(this);
+
     return this;
-  }
-
-  add(that) {
-    return new Vector2().wake(this.x + that.x, this.y + that.y);
-  }
-
-  mul(that) {
-    return new Vector2().wake(this.x * that.x, this.y * that.y);
-  }
-
-  distance(that) {
-    return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
-  }
-
-  dot(that) {
-    return this.x * that.x + this.y * that.y;
-  }
-
-  clamp(min, max) {
-    const x = clamp(this.x, min.x, max.x);
-    const y = clamp(this.y, min.y, max.y);
-    return new Vector2().wake(x, y);
   }
 }
 
@@ -262,20 +263,22 @@ class Rectangle extends Mewlix.Clowder {
     this.y = y;
     this.width = width;
     this.height = height;
-  }
 
-  contains(point) {
-    return (point.x >= this.x)
-      && (point.y >= this.y)
-      && (point.x < this.x + this.width)
-      && (point.y < this.y + this.height);
-  }
+    this.contains = (function(point) {
+      return (point.x >= this.x)
+        && (point.y >= this.y)
+        && (point.x < this.x + this.width)
+        && (point.y < this.y + this.height);
+    }).bind(this);
 
-  collides(rect) {
-    return (this.x < rect.x + rect.width)
-      && (this.y < rect.y + rect.height)
-      && (this.x + this.width > rect.x)
-      && (this.y + this.height > rect.height);
+    this.collides = (function collides(rect) {
+      return (this.x < rect.x + rect.width)
+        && (this.y < rect.y + rect.height)
+        && (this.x + this.width > rect.x)
+        && (this.y + this.height > rect.height);
+    }).bind(this);
+
+    return this;
   }
 }
 
@@ -285,6 +288,11 @@ class GridSlot extends Mewlix.Clowder {
   wake(row, column) {
     this.row    = clamp(row, 0, gridRows - 1);
     this.column = clamp(column, 0, gridColumns - 1);
+
+    this.position = (function position() {
+      return slotPoint(this.row, this.column);
+    }).bind(this);
+
     return this;
   }
 }
@@ -431,18 +439,26 @@ class Color extends Mewlix.Clowder {
     this.green    = clamp(green, 0, 255);
     this.blue     = clamp(blue, 0, 255);
     this.opacity  = clamp(opacity, 0, 100);
-    return this;
-  }
 
-  alpha() { /* alpha byte value! */
-    return percentToByte(this.opacity);
+    this.alpha = (function alpha() { /* alpha byte value! */
+      return percentToByte(this.opacity);
+    }).bind(this);
+
+    this.to_hex = (function to_hex() {
+      const r = this.red.toString(16);
+      const g = this.green.toString(16);
+      const b = this.blue.toString(16);
+      return `#${r}${g}${b}`;
+    }).bind(this);
+
+    return this;
   }
 
   toString() {
     return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
   }
 
-  static from_hex(str) {
+  static fromHex(str) {
     ensure.string(str);
     const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
 
@@ -475,76 +491,81 @@ class SpriteAnimation extends Mewlix.Clowder {
     this.timer = 0.0;
     this.frame_stack = frames.pop();
     this.current_frame = frames.peek();
+
+    // Methods:
+    this.draw = (function draw(x, y) {
+      this.timer += deltaTime;
+      if (this.timer >= this.frame_duration) {
+        this.next_frame();
+        this.timer = 0.0;
+      }
+      drawSprite(this.current_frame, x, y);
+    }).bind(this);
+
+    this.next_frame = (function next_frame() {
+      this.current_frame = this.frame_stack?.peek();
+      this.frame_stack = this.frame_stack?.pop();
+
+      if (!this.current_frame) {
+        this.frame_stack = this.frames.pop();
+        this.current_frame = this.frames.peek();
+      }
+    }).bind(this);
+
+    this.reset = (function reset() {
+      this.timer = 0.0;
+      this.frame_stack = this.frames.pop();
+      this.current_frame = this.frames.peek();
+    }).bind(this);
+
     return this;
   }
 
-  draw(x, y) {
-    this.timer += deltaTime;
-    if (this.timer >= this.frame_duration) {
-      this.next_frame();
-      this.timer = 0.0;
-    }
-    drawSprite(this.current_frame, x, y);
-  }
-
-  next_frame() {
-    this.current_frame = this.frame_stack?.peek();
-    this.frame_stack = this.frame_stack?.pop();
-
-    if (!this.current_frame) {
-      this.frame_stack = this.frames.pop();
-      this.current_frame = this.frames.peek();
-    }
-  }
-
-  reset() {
-    this.timer = 0.0;
-    this.frame_stack = this.frames.pop();
-    this.current_frame = this.frames.peek();
-  }
 }
 
 /* A pixel canvas for efficiently creating sprites.
- * The .toImage() creates a new sprite and adds it to spriteMap. */
+ * The .to_image() creates a new sprite and adds it to spriteMap. */
 class PixelCanvas extends Mewlix.Clowder {
   wake(width, height) {
     this.width = width;
     this.height = height;
     this.data = new Uint8ClampedArray(width * height * 4);
     Mewlix.opaque(this.data);
+
+    // Methods:
+    this.fill = (function fill(color) {
+      for (let i = 0; i < this.data.length; i += 4) {
+        this.data[i]     = color.red;
+        this.data[i + 1] = color.green;
+        this.data[i + 2] = color.blue;
+        this.data[i + 3] = color.alpha();
+      }
+    }).bind(this);
+
+    this.set_pixel = (function set_pixel(x, y, color) {
+      const index = (x * this.width + y) * 4;
+      this.data[index]     = color.red;
+      this.data[index + 1] = color.green;
+      this.data[index + 2] = color.blue;
+      this.data[index + 3] = color.alpha();
+    }).bind(this);
+
+    this.set_tile = (function set_tile(x, y, { data }) {
+      const index = (x * this.width + y) * 4;
+      const dataSize = Math.min(this.data.length - index, data.length);
+
+      for (let i = 0; i < dataSize; i++) {
+        this.data[index + i] = data[i];
+      }
+    }).bind(this);
+
+    this.to_image = (async function to_image(key) {
+      const data  = new ImageData(this.data, this.width, this.height);
+      const image = await createImageBitmap(data);
+      spriteMap.set(key, image);
+    }).bind(this);
+
     return this;
-  }
-
-  fill(color) {
-    for (let i = 0; i < this.data.length; i += 4) {
-      this.data[i]     = color.red;
-      this.data[i + 1] = color.green;
-      this.data[i + 2] = color.blue;
-      this.data[i + 3] = color.alpha();
-    }
-  }
-
-  set_pixel(x, y, color) {
-    const index = (x * this.width + y) * 4;
-    this.data[index]     = color.red;
-    this.data[index + 1] = color.green;
-    this.data[index + 2] = color.blue;
-    this.data[index + 3] = color.alpha();
-  }
-
-  set_tile(x, y, { data }) {
-    const index = (x * this.width + y) * 4;
-    const dataSize = Math.min(this.data.length - index, data.length);
-
-    for (let i = 0; i < dataSize; i++) {
-      this.data[index + i] = data[i];
-    }
-  }
-
-  async toImage(key) {
-    const data  = new ImageData(this.data, this.width, this.height);
-    const image = await createImageBitmap(data);
-    spriteMap.set(key, image);
   }
 };
 
@@ -584,75 +605,76 @@ class DialogueBox extends Mewlix.Clowder {
     // Timers:
     this.dialogue_timer = 0.0;
     this.sound_timer = 0.0;
-    
-    return this;
-  }
 
-  play(lines) {
-    ensure.shelf(lines);
-    this.buffer = '';
-    this.lines = Mewlix.Shelf.reverse(lines);
-    this.playing = true;
-    this.next_line();
-  }
+    // Methods:
+    this.play = (function play(lines) {
+      ensure.shelf(lines);
+      this.buffer = '';
+      this.lines = Mewlix.Shelf.reverse(lines);
+      this.playing = true;
+      this.next_line();
+    }).bind(this);
 
-  next_line() {
-    const message = this.lines?.peek?.();
-    this.current_line  = message ? {
-      message: message,
-      length: message.length,
-      duration: lineDuration(message, this.speed),
-      finished: false,
-    } : null;
-    this.lines = this.lines?.pop();
-    this.buffer = '';
+    this.next_line = (function next_line() {
+      const message = this.lines?.peek?.();
+      this.current_line  = message ? {
+        message: message,
+        length: message.length,
+        duration: lineDuration(message, this.speed),
+        finished: false,
+      } : null;
+      this.lines = this.lines?.pop();
+      this.buffer = '';
 
-    this.playing = !!this.current_line;
-  }
+      this.playing = !!this.current_line;
+    }).bind(this);
 
-  line_lerp() {
-    const len = this.current_line.length;
-    const duration = this.current_line.duration;
-    return Math.floor(lerp(0, len, this.dialogue_timer / duration));
-  }
+    this.line_lerp = (function line_lerp() {
+      const len = this.current_line.length;
+      const duration = this.current_line.duration;
+      return Math.floor(lerp(0, len, this.dialogue_timer / duration));
+    }).bind(this);
 
-  draw() {
-    if (this.playing && isKeyPressed(this.key)) {
-      if (this.current_line.finished) {
-        this.next_line();
-        this.dialogue_timer = 0.0;
-        this.sound_timer = 0.0;
+    this.draw = (function draw() {
+      if (this.playing && isKeyPressed(this.key)) {
+        if (this.current_line.finished) {
+          this.next_line();
+          this.dialogue_timer = 0.0;
+          this.sound_timer = 0.0;
+        }
+        else {
+          this.current_line.finished = true;
+        }
       }
-      else {
+
+      if (!this.playing) return;
+      this.dialogue_timer += deltaTime;
+
+      const lineLength = this.current_line.finished
+        ? this.current_line.length
+        : clamp(this.line_lerp(), 0, this.current_line.length);
+
+      if (!this.buffer || lineLength > this.buffer.length) {
+        this.buffer = this.current_line.message.slice(0, lineLength);
+      }
+
+      this.draw_callback(this.buffer);
+
+      if (this.sound && !this.current_line.finished) {
+        this.sound_timer += deltaTime;
+
+        if (this.sound_timer >= this.sound_speed) {
+          this.sound_timer = 0.0;
+          playSfx(this.sound);
+        }
+      }
+
+      if (this.dialogue_timer >= this.current_line.duration) {
         this.current_line.finished = true;
       }
-    }
+    }).bind(this);
 
-    if (!this.playing) return;
-    this.dialogue_timer += deltaTime;
-
-    const lineLength = this.current_line.finished
-      ? this.current_line.length
-      : clamp(this.line_lerp(), 0, this.current_line.length);
-
-    if (!this.buffer || lineLength > this.buffer.length) {
-      this.buffer = this.current_line.message.slice(0, lineLength);
-    }
-
-    this.draw_callback(this.buffer);
-
-    if (this.sound && !this.current_line.finished) {
-      this.sound_timer += deltaTime;
-
-      if (this.sound_timer >= this.sound_speed) {
-        this.sound_timer = 0.0;
-        playSfx(this.sound);
-      }
-    }
-
-    if (this.dialogue_timer >= this.current_line.duration) {
-      this.current_line.finished = true;
-    }
+    return this;
   }
 }
 
@@ -880,6 +902,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Color clowder, for representing color values. */
   Color: Color,
 
+  /* Convert a hex color code string to a Color.
+   * type: (string) -> box */
+  hex: Color.fromHex,
+
   /* PixelCanvas clowder, for creating new sprites. */
   PixelCanvas: SpriteCanvas,
 
@@ -934,11 +960,11 @@ Mewlix.run(async () => {
 
   const frameOne = new SpriteCanvas().wake();
   frameOne.fill(new Color(0, 0, 0));
-  await frameOne.toImage('a');
+  await frameOne.to_image('a');
 
   const frameTwo = new SpriteCanvas().wake();
   frameTwo.fill(new Color(124, 124, 124));
-  await frameTwo.toImage('b');
+  await frameTwo.to_image('b');
 
   const frames = Mewlix.Shelf.fromArray(['b', 'a']);
   const anim = new SpriteAnimation().wake(frames, 4);
