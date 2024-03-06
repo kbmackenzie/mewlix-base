@@ -751,10 +751,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Draw a sprite on the screen at a specified (x, y) position.
    * The sprite should already be loaded!
    *
-   * No type-checking is done on this function for performance reasons.
-   * It'll be called multiple times *every single frame*.
-   * Type-checking input values every time would be an absolute waste.
-   *
    * type: (string, number, number) -> nothing */
   draw: drawSprite,
 
@@ -765,10 +761,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *  - size: The font size.
    *  - color: The text color.
    *  - align: The text alignment.
-   *
-   * No type-checking is done on this function for performance reasons.
-   * It'll be called multiple times *every single frame*.
-   * Type-checking input values every time would be an absolute waste.
    *
    * type: (any, number, number, box) -> nothing */
   write: (value, x, y, options) => {
@@ -782,10 +774,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *  - size: The font size.
    *  - color: The text color.
    *  - align: The text alignment.
-   *
-   * No type-checking is done on this function for performance reasons.
-   * It'll be called multiple times *every single frame*.
-   * Type-checking input values every time would be an absolute waste.
    *
    * type: (string, box) -> nothing */
   measure_text: (value, options) => {
@@ -802,20 +790,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* --------- IO ---------- */
 
   /* Asks whether a key has been pressed. Triggers only once for a single key press.
-   * 
-   * No type-checking is done on this function for performance reasons.
-   * It'll be called multiple times *every single frame*.
-   * Type-checking input values every time would be an absolute waste.
-   *
    * type: (string) -> boolean */
   key_pressed: isKeyPressed,
 
   /* Asks whether a key is down.
-   *
-   * No type-checking is done on this function for performance reasons.
-   * It'll be called multiple times *every single frame*.
-   * Type-checking input values every time would be an absolute waste.
-   *
    * type: (string) -> boolean */
   key_down: isKeyDown,
 
@@ -957,44 +935,3 @@ window.addEventListener('keydown', event => {
     event.preventDefault();
   }
 }, { passive: false });
-
-/* -----------------------------------
- * Tests:
- * ----------------------------------- */
-Mewlix.run(async () => {
-  await loadAny('voice', 'assets/voice.wav');
-
-  const frameOne = new SpriteCanvas().wake();
-  frameOne.fill(new Color(0, 0, 0));
-  await frameOne.to_image('a');
-
-  const frameTwo = new SpriteCanvas().wake();
-  frameTwo.fill(new Color(124, 124, 124));
-  await frameTwo.to_image('b');
-
-  const frames = Mewlix.Shelf.fromArray(['b', 'a']);
-  const anim = new SpriteAnimation().wake(frames, 4);
-
-  const dialogue = new DialogueBox().wake(text => drawText(text), { sound: 'voice' });
-  dialogue.play(Mewlix.Shelf.fromArray([
-    "An example error will follow soon!",
-    "Created with built-in utilities!",
-    "Example dialogue message.",
-  ]));
-
-  thumbnail = () => {
-    context.fillStyle = 'red';
-    context.fillRect(20, 20, 20, 20);
-  };
-
-  let timer = 0.0;
-
-  return init(async () => {
-    anim.draw(30, 30);
-    dialogue.draw();
-    timer += deltaTime;
-    if (timer > 3) {
-      throw new Error('yay!');
-    }
-  });
-});
