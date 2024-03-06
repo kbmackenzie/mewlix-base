@@ -684,7 +684,12 @@ class DialogueBox extends Mewlix.Clowder {
 let meowOptions = null;
 Mewlix.meow = value => {
   const message = Mewlix.purrify(value);
-  drawText(value, meowOptions);
+  drawText(
+    value,
+    meowOptions?.x ?? 0,
+    meowOptions?.y ?? 0,
+    meowOptions
+  );
   return message;
 };
 
