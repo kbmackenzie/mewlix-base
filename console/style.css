@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&display=swap');
-
 * {
   margin: 0;
   padding: 0;
@@ -16,16 +14,30 @@ html, body {
   justify-content: center;
 }
 
+@font-face {
+  font-family: 'Fira Mono';
+  src:
+    local('Fira Mono'),
+    url('font/FiraCode-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Fira Mono';
+  src:
+    local('Fira Mono'),
+    url('font/FiraCode-Bold.ttf') format('truetype');
+  font-weight: bold;
+}
+
 .font-console {
   color: white;
-  font-weight: 400;
   font: 1.1rem 'Fira Mono', 'Courier New', monospace;
 }
 
 .font-console h1 {
   font-size: 1.2rem;
-  font-weight: 500;
   font-style: normal;
+  font-weight: normal;
 }
 
 .white-button {
@@ -133,7 +145,7 @@ html, body {
 
 .console__prompt {
   margin-right: 0.3rem;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .console__settings {
@@ -231,7 +243,7 @@ html, body {
   border-radius: 1rem;
   box-shadow: 1px 3px 3px black;
   background-color: #1f1f1f;
-  padding: 0.5rem;
+  padding: 0.5rem 1.5rem;
   margin: 1rem 0.5rem;
 }
 
