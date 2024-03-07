@@ -329,7 +329,7 @@ const awaitClick = () => new Promise(resolve => {
 
 const drawPlay = async () => {
   const image = await loadImage(
-    'assets/mewlix-play.png',
+    '/core-assets/mewlix-play.png',
     new Rectangle(0, 0, 1024, 1024)
   );
   context.fillStyle = 'rgb(0 0 0 / 50%)';
@@ -338,7 +338,7 @@ const drawPlay = async () => {
 };
 
 const init = async (callback) => {
-  await loadFont('Munro', '/assets/munro.ttf');
+  await loadFont('Munro', '/core-assets/munro.ttf');
 
   const nextFrame = () => new Promise(resolve => {
     window.requestAnimationFrame(resolve);
@@ -909,7 +909,7 @@ Mewlix.run = async f => {
   }
   catch (error) {
     const image = await loadImage(
-      'assets/mewlix-error.png',
+      '/core-assets/mewlix-error.png',
       new Rectangle().wake(0, 0, 1024, 1024)
     );
     context.fillStyle = 'rgb(255 0 0 / 50%)';
