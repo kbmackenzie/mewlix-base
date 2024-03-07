@@ -900,6 +900,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   DialogueBox: DialogueBox,
 });
 
+/* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
+Object.freeze(Mewlix.Graphic);
+
 /* -----------------------------------
  * Run Console:
  * ----------------------------------- */

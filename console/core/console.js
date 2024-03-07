@@ -289,6 +289,9 @@ Mewlix.Console = Mewlix.library('std.console', {
   },
 });
 
+/* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
+Object.freeze(Mewlix.Console);
+
 /* -------------------------------------
  * Run Console:
  * ------------------------------------- */
