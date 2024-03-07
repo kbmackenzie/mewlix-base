@@ -225,10 +225,13 @@ const flushKeyQueue = () => {
 /* A clowder type for a 2-dimensional vector.
  * Can represent a point in a 2D world. */
 class Vector2 extends Mewlix.Clowder {
-  wake(x, y) {
-    ensure.all.number(x, y);
-    this.x = x;
-    this.y = y;
+  constructor() {
+    this.wake = (function wake(x, y) {
+      ensure.all.number(x, y);
+      this.x = x;
+      this.y = y;
+      return this;
+    }).bind(this);
 
     this.add = (function add(that) {
       return new Vector2().wake(this.x + that.x, this.y + that.y);
@@ -251,19 +254,20 @@ class Vector2 extends Mewlix.Clowder {
       const y = clamp(this.y, min.y, max.y);
       return new Vector2().wake(x, y);
     }).bind(this);
-
-    return this;
   }
 }
 
 /* A clowder type for a 2-dimensional rectangle.
  * Can represent a region in a 2-dimensional plane. */
 class Rectangle extends Mewlix.Clowder {
-  wake(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+  constructor() {
+    this.wake = (function wake(x, y, width, height) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+      return this;
+    }).bind(this);
 
     this.contains = (function(point) {
       return (point.x >= this.x)
@@ -278,23 +282,22 @@ class Rectangle extends Mewlix.Clowder {
         && (this.x + this.width > rect.x)
         && (this.y + this.height > rect.height);
     }).bind(this);
-
-    return this;
   }
 }
 
 /* A clowder to represent a grid slot.
  * The row and column numbers are clamped in .wake()! */
 class GridSlot extends Mewlix.Clowder {
-  wake(row, column) {
-    this.row    = clamp(row, 0, gridRows - 1);
-    this.column = clamp(column, 0, gridColumns - 1);
+  constructor() {
+    this.wake = (function wake(row, column) {
+      this.row    = clamp(row,    0, gridRows - 1);
+      this.column = clamp(column, 0, gridColumns - 1);
+      return this;
+    }).bind(this);
 
     this.position = (function position() {
       return slotPoint(this.row, this.column);
     }).bind(this);
-
-    return this;
   }
 }
 
@@ -434,13 +437,19 @@ const lerp = (start, end, x) => start + (end - start) * x;
 /* Color container, wrapping a RGBA color value.
  * It accepts an opacity value too, in percentage. */
 class Color extends Mewlix.Clowder {
-  wake(red, green, blue, opacity = 100) {
-    ensure.all.number(red, green, blue, opacity);
-    this.red      = clamp(red, 0, 255);
-    this.green    = clamp(green, 0, 255);
-    this.blue     = clamp(blue, 0, 255);
-    this.opacity  = clamp(opacity, 0, 100);
+  constructor() {
+    this.wake = (function wake(red, green, blue, opacity = 100) {
+      ensure.all.number(red, green, blue, opacity);
+      this.red      = clamp(red, 0, 255);
+      this.green    = clamp(green, 0, 255);
+      this.blue     = clamp(blue, 0, 255);
+      this.opacity  = clamp(opacity, 0, 100);
+      return this;
+    }).bind(this);
 
+    /* ------------------------------
+     * Methods:
+     * ------------------------------ */
     this.alpha = (function alpha() { /* alpha byte value! */
       return percentToByte(this.opacity);
     }).bind(this);
@@ -451,8 +460,6 @@ class Color extends Mewlix.Clowder {
       const b = this.blue.toString(16);
       return `#${r}${g}${b}`;
     }).bind(this);
-
-    return this;
   }
 
   toString() {
@@ -483,17 +490,22 @@ class Color extends Mewlix.Clowder {
 /* A simple animation container. It accepts a shelf of frames and, optionally, a frame rate.
  * The .draw() method can be called to draw an animation with a position. */
 class SpriteAnimation extends Mewlix.Clowder {
-  wake(frames, frame_rate) {
-    ensure.shelf(frames);
-    this.frames = frames;
-    this.frame_rate = frame_rate ?? 12;
-    this.frame_duration = 1 / this.frame_rate;
+  constructor() {
+    this.wake = (function wake(frames, frame_rate) {
+      ensure.shelf(frames);
+      this.frames = frames;
+      this.frame_rate = frame_rate ?? 12;
+      this.frame_duration = 1 / this.frame_rate;
 
-    this.timer = 0.0;
-    this.frame_stack = frames.pop();
-    this.current_frame = frames.peek();
+      this.timer = 0.0;
+      this.frame_stack = frames.pop();
+      this.current_frame = frames.peek();
+      return this;
+    }).bind(this);
 
-    // Methods:
+    /* ------------------------------
+     * Methods:
+     * ------------------------------ */
     this.draw = (function draw(x, y) {
       this.timer += deltaTime;
       if (this.timer >= this.frame_duration) {
@@ -518,8 +530,6 @@ class SpriteAnimation extends Mewlix.Clowder {
       this.frame_stack = this.frames.pop();
       this.current_frame = this.frames.peek();
     }).bind(this);
-
-    return this;
   }
 
 }
@@ -527,13 +537,18 @@ class SpriteAnimation extends Mewlix.Clowder {
 /* A pixel canvas for efficiently creating sprites.
  * The .to_image() creates a new sprite and adds it to spriteMap. */
 class PixelCanvas extends Mewlix.Clowder {
-  wake(width, height) {
-    this.width = width;
-    this.height = height;
-    this.data = new Uint8ClampedArray(width * height * 4);
-    Mewlix.opaque(this.data);
+  constructor() {
+    this.wake = (function wake(width, height) {
+      this.width = width;
+      this.height = height;
+      this.data = new Uint8ClampedArray(width * height * 4);
+      Mewlix.opaque(this.data);
+      return this;
+    }).bind(this);
 
-    // Methods:
+    /* ------------------------------
+     * Methods:
+     * ------------------------------ */
     this.fill = (function fill(color) {
       for (let i = 0; i < this.data.length; i += 4) {
         this.data[i]     = color.red;
@@ -565,8 +580,6 @@ class PixelCanvas extends Mewlix.Clowder {
       const image = await createImageBitmap(data);
       spriteMap.set(key, image);
     }).bind(this);
-
-    return this;
   }
 };
 
@@ -593,21 +606,26 @@ const lineDuration = (message, charsPerSecond = 30.0) => {
 class DialogueBox extends Mewlix.Clowder {
   /* The drawCallback parameter should be a function of type (string) -> nothing.
    * It will be called to draw a dialogue line every frame. */
-  wake(draw_callback, options) {
-    this.draw_callback = draw_callback;
-    this.key = options?.key ?? ' ';
-    this.speed = options?.speed ?? 30.0;
+  constructor() {
+    this.wake = (function wake(draw_callback, options) {
+      this.draw_callback = draw_callback;
+      this.key = options?.key ?? ' ';
+      this.speed = options?.speed ?? 30.0;
 
-    // Sound options:
-    this.sound = options?.sound;
-    this.sound_speed = 1 / (options?.sound_speed ?? 20);
-    console.log(this.sound);
+      // Sound options:
+      this.sound = options?.sound;
+      this.sound_speed = 1 / (options?.sound_speed ?? 20);
+      console.log(this.sound);
 
-    // Timers:
-    this.dialogue_timer = 0.0;
-    this.sound_timer = 0.0;
+      // Timers:
+      this.dialogue_timer = 0.0;
+      this.sound_timer = 0.0;
+      return this;
+    }).bind(this);
 
-    // Methods:
+    /* ------------------------------
+     * Methods:
+     * ------------------------------ */
     this.play = (function play(lines) {
       ensure.shelf(lines);
       this.buffer = '';
@@ -674,8 +692,6 @@ class DialogueBox extends Mewlix.Clowder {
         this.current_line.finished = true;
       }
     }).bind(this);
-
-    return this;
   }
 }
 
