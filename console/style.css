@@ -18,14 +18,14 @@ html, body {
   font-family: 'Fira Mono';
   src:
     local('Fira Mono'),
-    url('font/FiraCode-Regular.ttf') format('truetype');
+    url('core-assets/FiraCode-Regular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Fira Mono';
   src:
     local('Fira Mono'),
-    url('font/FiraCode-Bold.ttf') format('truetype');
+    url('core-assets/FiraCode-Bold.ttf') format('truetype');
   font-weight: bold;
 }
 
