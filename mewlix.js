@@ -256,10 +256,9 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
 Mewlix.Clowder = class Clowder extends Mewlix.Box {
   constructor() {
     super();
-  }
-
-  wake() {
-    return this;
+    this.wake = (function wake() {
+      return this;
+    }).bind(this);
   }
 }
 
