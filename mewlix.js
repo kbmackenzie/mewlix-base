@@ -169,6 +169,7 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
 Mewlix.ShelfBottom = class ShelfBottom extends Mewlix.Shelf {
   constructor() {
     super();
+    Object.freeze(this);
   }
 
   peek() {
@@ -197,6 +198,7 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
     super();
     this.value = value;
     this.next  = tail || new Mewlix.ShelfBottom();
+    Object.freeze(this);
   }
 
   peek() {
