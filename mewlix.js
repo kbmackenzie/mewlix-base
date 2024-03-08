@@ -243,12 +243,12 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
     }
     
     this.to_string = (function to_string() {
-      return this.toString();
-    });
+      return Mewlix.purrifyObject(this);
+    }).bind(this);
   }
 
   toString() {
-    return Mewlix.purrifyObject(this);
+    return this.to_string();
   }
 };
 
