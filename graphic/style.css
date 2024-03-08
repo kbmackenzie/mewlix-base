@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-html, body {
+.full-height {
   height: 100%;
 }
 
@@ -26,10 +26,6 @@ html, body {
   font-size: 1.2rem;
   font-weight: 500;
   font-style: normal;
-}
-
-.screen-overlay {
-  height: 100%;
 }
 
 .drawing-canvas {
