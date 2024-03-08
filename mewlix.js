@@ -324,18 +324,6 @@ Mewlix.library = function(key, object = {}) {
 /* -----------------------------------------------------
  * String utils.
  * ----------------------------------------------------- */
-Mewlix.purrifyArray = function purrifyArray(arr) {
-  const items = arr.map(Mewlix.purrify).join(', ');
-  return `[${items}]`;
-};
-
-Mewlix.purrifyObject = function purrifyObject(obj) {
-  const entries = Object.entries(obj).map(
-    ([key, value]) => `${key}: ${Mewlix.purrify(value)}`
-  ).join(', ');
-  return `=^-x-^= [ ${entries} ]`;
-}
-
 Mewlix.purrify = function purrify(value) {
   if (typeof value === 'string') return value;
   if (value === null || value === undefined) {
@@ -346,6 +334,23 @@ Mewlix.purrify = function purrify(value) {
     default: return value.toString();
   }
 };
+
+Mewlix.purrifyItem = function purrifyItem(value) {
+  if (typeof value === 'string') return JSON.stringify(value);
+  return Mewlix.purrify(value);
+};
+
+Mewlix.purrifyArray = function purrifyArray(arr) {
+  const items = arr.map(Mewlix.purrifyItem).join(', ');
+  return `[${items}]`;
+};
+
+Mewlix.purrifyObject = function purrifyObject(obj) {
+  const entries = Object.entries(obj).map(
+    ([key, value]) => `${key}: ${Mewlix.purrifyItem(value)}`
+  ).join(', ');
+  return `=^-x-^= [ ${entries} ]`;
+}
 
 /* -----------------------------------------------------
  * Type utils.
@@ -723,8 +728,8 @@ Mewlix.wrap = function wrap(object) {
 /* Mewlix's API functions. */
 Mewlix.API = {
   arrayToShelf: Mewlix.Shelf.fromArray,
-  createShelf: (...items) => Mewlix.Shelf.fromArray(items),
-  createBox: box => new Mewlix.Box(Object.entries(box ?? {})),
+  shelf: (...items) => Mewlix.Shelf.fromArray(items),
+  createBox: object => new Mewlix.Box(Object.entries(object ?? {})),
   inject: (key, object) => Mewlix.Modules.injectModule(key, object),
 };
 
