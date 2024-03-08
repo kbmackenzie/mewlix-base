@@ -136,7 +136,7 @@ const sfxVolume   = audioContext.createGain();
 
 musicVolume.connect(masterVolume);
 sfxVolume.connect(masterVolume);
-masterVolume.setValueAtTime(0.5, audioContext.currentTime);
+masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
 
 // Mutable state my behated
 let musicSource = null;
@@ -907,7 +907,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   hex: Color.fromHex,
 
   /* PixelCanvas clowder, for creating new sprites. */
-  PixelCanvas: SpriteCanvas,
+  PixelCanvas: PixelCanvas,
 
   /* SpriteAnimation clowder, simple container for animations. */
   SpriteAnimation: SpriteAnimation,
