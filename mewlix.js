@@ -714,8 +714,9 @@ Mewlix.wrap = function wrap(object) {
 
 /* Mewlix's API functions. */
 Mewlix.API = {
-  createShelf: Mewlix.Shelf.fromArray,
-  createBox: (box) => new Mewlix.Box(Object.entries(box ?? {})),
+  arrayToShelf: Mewlix.Shelf.fromArray,
+  createShelf: (...items) => Mewlix.Shelf.fromArray(items),
+  createBox: box => new Mewlix.Box(Object.entries(box ?? {})),
 };
 
 /* -------------------------------------------------------
