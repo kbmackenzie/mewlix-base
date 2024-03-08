@@ -89,6 +89,14 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     this.cache.set(key, yarnball);
     return yarnball;
   }
+
+  /* Inject object as a valid Mewlix module.
+   * The key should be a non-empty string. */
+  injectModule(key, object) {
+    const wrapped = Mewlix.wrap(object);
+    this.cache.set(key, wrapped);
+    this.modules.set(key, () => wrapped);
+  }
 };
 
 /* -----------------------------------------------------
@@ -717,6 +725,7 @@ Mewlix.API = {
   arrayToShelf: Mewlix.Shelf.fromArray,
   createShelf: (...items) => Mewlix.Shelf.fromArray(items),
   createBox: box => new Mewlix.Box(Object.entries(box ?? {})),
+  inject: (key, object) => Mewlix.Modules.injectModule(key, object),
 };
 
 /* -------------------------------------------------------
