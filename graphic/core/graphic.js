@@ -269,7 +269,7 @@ class Rectangle extends Mewlix.Clowder {
       return this;
     }).bind(this);
 
-    this.contains = (function(point) {
+    this.contains = (function contains(point) {
       return (point.x >= this.x)
         && (point.y >= this.y)
         && (point.x < this.x + this.width)
