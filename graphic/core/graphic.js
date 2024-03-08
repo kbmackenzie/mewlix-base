@@ -226,6 +226,8 @@ const flushKeyQueue = () => {
  * Can represent a point in a 2D world. */
 class Vector2 extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(x, y) {
       ensure.all.number(x, y);
       this.x = x;
@@ -261,6 +263,8 @@ class Vector2 extends Mewlix.Clowder {
  * Can represent a region in a 2-dimensional plane. */
 class Rectangle extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(x, y, width, height) {
       this.x = x;
       this.y = y;
@@ -289,6 +293,8 @@ class Rectangle extends Mewlix.Clowder {
  * The row and column numbers are clamped in .wake()! */
 class GridSlot extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(row, column) {
       this.row    = clamp(row,    0, gridRows - 1);
       this.column = clamp(column, 0, gridColumns - 1);
@@ -438,6 +444,8 @@ const lerp = (start, end, x) => start + (end - start) * x;
  * It accepts an opacity value too, in percentage. */
 class Color extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(red, green, blue, opacity = 100) {
       ensure.all.number(red, green, blue, opacity);
       this.red      = clamp(red, 0, 255);
@@ -491,6 +499,8 @@ class Color extends Mewlix.Clowder {
  * The .draw() method can be called to draw an animation with a position. */
 class SpriteAnimation extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(frames, frame_rate) {
       ensure.shelf(frames);
       this.frames = frames;
@@ -538,6 +548,8 @@ class SpriteAnimation extends Mewlix.Clowder {
  * The .to_image() creates a new sprite and adds it to spriteMap. */
 class PixelCanvas extends Mewlix.Clowder {
   constructor() {
+    super();
+
     this.wake = (function wake(width, height) {
       this.width = width;
       this.height = height;
@@ -607,6 +619,8 @@ class DialogueBox extends Mewlix.Clowder {
   /* The drawCallback parameter should be a function of type (string) -> nothing.
    * It will be called to draw a dialogue line every frame. */
   constructor() {
+    super();
+
     this.wake = (function wake(draw_callback, options) {
       this.draw_callback = draw_callback;
       this.key = options?.key ?? ' ';
