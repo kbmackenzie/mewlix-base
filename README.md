@@ -1,4 +1,6 @@
-The base library and project templates for [Mewlix](https://github.com/KBMackenzie/mewlix), a cat-themed esoteric programming language that compiles to vanilla Javascript.
+The base library + project templates for [Mewlix](https://github.com/KBMackenzie/mewlix), a cat-themed esoteric programming language that compiles to vanilla Javascript, with templates for making little web applications and little HTML5 games.
+
+Mewlix's base library defines the **Mewlix namespace**, containing all functions, classes and state needed by Mewlix to function. You can read more about it [in the documentation](https://github.com/KBMackenzie/mewlix/wiki/API).
 
 The `package.sh` script can be used to generate the `.zip` files for each project template required by the compiler.
 
