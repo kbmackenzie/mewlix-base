@@ -887,13 +887,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   mouse_down: isMouseDown,
 
   /* Asks the mouse position relative to the canvas.
-   * Returns a box with an 'x' and 'y' field.
+   * Returns a Vector2 instance.
    *
    * type: () -> box */
-  mouse_position: () => new Mewlix.Box([
-    ["x" , mouseX],
-    ["y" , mouseY],
-  ]),
+  mouse_position: () => new Vector2().wake(mouseX, mouseY),
 
   /* --------- Music/SFX ---------- */
 
