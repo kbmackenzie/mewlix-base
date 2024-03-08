@@ -241,6 +241,10 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
     for (const [key, value] of entries) {
       this[key] = value;
     }
+    
+    this.to_string = (function to_string() {
+      return this.toString();
+    });
   }
 
   toString() {
