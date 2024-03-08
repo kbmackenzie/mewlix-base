@@ -712,6 +712,12 @@ Mewlix.wrap = function wrap(object) {
   return new Mewlix.BoxWrapper(object);
 };
 
+/* Mewlix's API functions. */
+Mewlix.API = {
+  createShelf: Mewlix.Shelf.fromArray,
+  createBox: (box) => new Mewlix.Box(Object.entries(box ?? {})),
+};
+
 /* -------------------------------------------------------
  * Base library.
  * ------------------------------------------------------- */
