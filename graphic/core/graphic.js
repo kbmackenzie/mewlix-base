@@ -220,6 +220,42 @@ const flushKeyQueue = () => {
 };
 
 /* -----------------------------------
+ * Mouse Events:
+ * ----------------------------------- */
+let mouseX = 0;
+let mouseY = 0;
+
+let mouseClick = false;
+let mouseDown  = false;
+
+/* A big thanks to this StackOverflow answer for saving my life:
+ * https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas/17130415#17130415 */
+
+canvas.addEventListener('mousemove', event => {
+  const rect = canvas.getBoundingClientRect();
+  mouseX = (event.clientX - rect.left) * (virtualWidth / rect.width);
+  mouseY = (event.clientY - rect.top) * (virtualHeight / rect.height);
+});
+
+canvas.addEventListener('mousedown', event => {
+  if (event.button !== 0) return;
+
+  if (!mouseDown) { mouseClick = true; }
+  mouseDown = true;
+});
+
+canvas.addEventListener('mouseup', event => {
+  if (event.button !== 0) return;
+  mouseDown = false;
+  mouseClick = false;
+});
+
+const isMousePressed  = () => mouseClick;
+const isMouseDown     = () => mouseDown;
+
+const flushClick = () => { mouseClick = false; };
+
+/* -----------------------------------
  * Core Utility:
  * ----------------------------------- */
 /* A clowder type for a 2-dimensional vector.
@@ -359,12 +395,12 @@ const init = async (callback) => {
     await thumbnail?.();
     await drawPlay();
     await awaitClick();
-    flushKeyQueue();
+    flushKeyQueue(); flushClick();
 
     while (true) {
       context.clearRect(0, 0, canvasWidth, canvasHeight);
       await callback();
-      flushKeyQueue();
+      flushKeyQueue(); flushClick();
       const now = await nextFrame();
       lastFrame ??= now;
 
@@ -817,7 +853,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     meowOptions = box;
   },
 
-  /* --------- IO ---------- */
+  /* --------- Keyboard IO ---------- */
 
   /* Asks whether a key has been pressed. Triggers only once for a single key press.
    * type: (string) -> boolean */
@@ -840,6 +876,24 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     ["down"   , "ArrowDown" ],
   ]),
 
+  /* --------- Mouse IO ---------- */
+
+  /* Asks whether the left mouse button has been pressed. Triggers only once for every click.
+   * type: () -> boolean */
+  mouse_click: isMousePressed,
+
+  /* Asks whether the left mouse button is down.
+   * type: () -> boolean */
+  mouse_down: isMouseDown,
+
+  /* Asks the mouse position relative to the canvas.
+   * Returns a box with an 'x' and 'y' field.
+   *
+   * type: () -> box */
+  mouse_position: () => new Mewlix.Box([
+    ["x" , mouseX],
+    ["y" , mouseY],
+  ]),
 
   /* --------- Music/SFX ---------- */
 
