@@ -1,9 +1,4 @@
 *.txt
 txt/
 test/
-*.png
-*.jpg
-*.mp3
-*.ttf
-*.wav
 build/
