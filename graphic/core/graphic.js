@@ -460,10 +460,10 @@ class Color extends Mewlix.Clowder {
       const b = this.blue.toString(16);
       return `#${r}${g}${b}`;
     }).bind(this);
-  }
 
-  toString() {
-    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
+    this.to_string = (function to_string() {
+      return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
+    }).bind(this);
   }
 
   static fromHex(str) {
