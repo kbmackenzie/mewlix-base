@@ -384,10 +384,7 @@ const awaitClick = () => new Promise(resolve => {
 });
 
 const drawPlay = async () => {
-  const image = await loadImage(
-    '/core-assets/mewlix-play.png',
-    new Rectangle(0, 0, 1024, 1024)
-  );
+  const image = await loadImage('/core-assets/mewlix-play.png');
   context.fillStyle = 'rgb(0 0 0 / 50%)';
   context.fillRect(0, 0, canvasWidth, canvasHeight);
   context.drawImage(image, 0, 0);
@@ -1009,10 +1006,7 @@ Mewlix.run = async f => {
     await f();
   }
   catch (error) {
-    const image = await loadImage(
-      '/core-assets/mewlix-error.png',
-      new Rectangle().wake(0, 0, 1024, 1024)
-    );
+    const image = await loadImage('/core-assets/mewlix-error.png');
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
