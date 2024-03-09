@@ -140,6 +140,26 @@ const setProjectName = name => {
   projectName.textContent = name;
 };
 
+/* -------------------------------------
+ * Paperclip:
+ * ------------------------------------- */
+const nub = array => {
+  const set = new Set();
+  return array.filter(x => {
+    if (set.has(x)) return false;
+    set.add(x);
+    return true;
+  });
+};
+
+const setAccepted = keys => {
+  paperclipInput.accept = nub(keys).join(', ')
+};
+
+/* -------------------------------------
+ * Background:
+ * ------------------------------------- */
+
 // Set console background to an image in the server, asynchronously.
 const setBackground = path => fetch(path)
   .then(response => response.blob())
@@ -286,6 +306,13 @@ Mewlix.Console = Mewlix.library('std.console', {
   see_prompt: see => {
     ensure.boolean(see);
     seePrompt.checked = see;
+  },
+
+  /* Sets accepted file extensions for paperclip input box.
+   * type: (shelf) -> nothing */
+  accepted_files: accepted => {
+    ensure.shelf(accepted);
+    setAccepted(accepted.toArray());
   },
 });
 
