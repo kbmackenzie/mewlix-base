@@ -61,12 +61,11 @@ const addError = text => {
   line.appendChild(document.createTextNode(`[Console] ${text}`));
 
   lines.appendChild(line);
-  fixScroll();
+  fixScroll(lines.parentNode);
 };
 
-const fixScroll = () => {
-  const parent = lines.parentNode;
-  parent.scrollTop = parent.scrollHeight;
+const fixScroll = elem => {
+  elem.scrollTop = elem.scrollHeight;
 };
 
 const enableButtons = enable => {
