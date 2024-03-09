@@ -51,6 +51,18 @@ const loadSprite = (key, path, rect) => loadImage(path, rect)
     return image;
   });
 
+/* Load a spritesheet image and divide it into sprites. */
+const fromSpritesheet = async (path, keyBase, rects) => {
+  const sheet = await loadImage(path);
+  let counter = 0;
+
+  for (const rect of Mewlix.Shelf.reverse(rects)) {
+    const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
+    const key = `${keyBase}-${counter++}`;
+    spriteMap.set(key, sprite);
+  }
+};
+
 /* -----------------------------------
  * Drawing:
  * ----------------------------------- */
@@ -69,17 +81,6 @@ const drawSprite = (key, x, y) => {
     Math.floor(x ?? 0) * sizeModifier,
     Math.floor(y ?? 0) * sizeModifier,
   );
-};
-
-const fromSpritesheet = async (path, keyBase, rects) => {
-  const sheet = await loadImage(path);
-  let counter = 0;
-
-  for (const rect of Mewlix.Shelf.reverse(rects)) {
-    const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
-    const key = `${keyBase}-${counter++}`;
-    spriteMap.set(key, sprite);
-  }
 };
 
 /* -----------------------------------
