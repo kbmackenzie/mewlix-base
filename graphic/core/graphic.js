@@ -83,6 +83,16 @@ const drawSprite = (key, x, y) => {
   );
 };
 
+const drawRect = (rect, color) => {
+  context.fillStyle = color?.toString() ?? 'black';
+  context.fillRect(
+    rect.x      * sizeModifier,
+    rect.y      * sizeModifier,
+    rect.width  * sizeModifier,
+    rect.height * sizeModifier,
+  );
+};
+
 /* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
@@ -820,6 +830,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (string, number, number) -> nothing */
   draw: drawSprite,
+
+  /* Draw a rectangle on the screen from a Rectangle instance.
+   * The color can be defined with the second argument.
+   *
+   * type: (box, (box | string)) -> nothing */
+  rect: drawRect,
 
   /* Draw text on the screen at a specified (x, y) position.
    *
