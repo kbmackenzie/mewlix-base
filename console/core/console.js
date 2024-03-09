@@ -34,15 +34,6 @@ const selectBackground  = document.getElementById('select-background');
 /* -------------------------------------
  * Console functionality:
  * ------------------------------------- */
-const createBackground = () => {
-  const catBackground = document.createElement('div');
-  catBackground.id = 'cat-background';
-  catBackground.classList.add('cat-background');
-
-  document.body.appendChild(catBackground);
-  return catBackground;
-};
-
 const createPrompt = () => {
   const span = document.createElement('span');
   span.style.color = promptColor.value;
@@ -159,6 +150,13 @@ const setAccepted = keys => {
 /* -------------------------------------
  * Background:
  * ------------------------------------- */
+// Create console background element.
+const createBackground = () => {
+  const catBackground = document.createElement('div');
+  catBackground.id = 'cat-background';
+  catBackground.classList.add('cat-background');
+  return catBackground;
+};
 
 // Set console background to an image in the server, asynchronously.
 const setBackground = path => fetch(path)
@@ -174,6 +172,7 @@ const setBackgroundLocal = file => {
   catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
 };
 
+// Create dark overlay covering page content.
 const obscureOverlay = () => {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
@@ -224,7 +223,7 @@ selectBackground.addEventListener('change', () => {
 /* -------------------------------------
  * Initialization (electric boogaloo):
  * ------------------------------------- */
-createBackground();
+document.body.appendChild(createBackground());
 setOpacity(consoleOpacity.value);
 toggleHighlight(showHighlight.checked);
 
