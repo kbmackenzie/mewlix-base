@@ -52,7 +52,7 @@ const addLine = (text, fromUser = true) => {
 
   line.appendChild(document.createTextNode(text));
   lines.appendChild(line);
-  fixScroll();
+  scrollDown(lines.parentNode);
 };
 
 const addError = text => {
@@ -61,10 +61,10 @@ const addError = text => {
   line.appendChild(document.createTextNode(`[Console] ${text}`));
 
   lines.appendChild(line);
-  fixScroll(lines.parentNode);
+  scrollDown(lines.parentNode);
 };
 
-const fixScroll = elem => {
+const scrollDown = elem => {
   elem.scrollTop = elem.scrollHeight;
 };
 
