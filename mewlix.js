@@ -843,6 +843,41 @@ Mewlix.Base = Mewlix.library('std', {
       `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
+  /* Takes n items from a shelf or a string.
+   * type: ((shelf | string)) -> (shelf | string) */
+  take: function take(value, amount) {
+    ensure.number(amount);
+    if (typeof value === 'string') return value.slice(0, amount);
+    if (value instanceof Mewlix.Shelf) {
+      const output = [];
+      let counter = amount;
+      for (const item of value) {
+        output.push(item);
+        if (--counter <= 0) break;
+      }
+      return Mewlix.Shelf.fromArray(output.reverse());
+    }
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
+  },
+
+  drop: function drop(value, amount) {
+    if (typeof value === 'string') return value.slice(amount);
+    if (value instanceof Mewlix.Shelf) {
+      let output = value;
+      for (let i = amount; i > 0; i--) {
+        output = output?.pop();
+      }
+      return output ?? new Mewlix.ShelfBottom();;
+    }
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
+  },
+
   /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
   map: function map(shelf, callback) {
