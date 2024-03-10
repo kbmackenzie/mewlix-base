@@ -243,6 +243,7 @@ Mewlix.listen = question => {
 };
 
 const ensure = Mewlix.ensure;
+const where  = Mewlix.where;
 
 /* Note: The functions in the base library use snake-case intentionally.
  * They're visible in Mewlix, and I don't want to do name-mangling. */
@@ -255,7 +256,7 @@ Mewlix.Console = Mewlix.library('std.console', {
   /* Set console project name.
    * type: (string) -> nothing */
   name: name => {
-    ensure.string(name);
+    where('std.console.name')(ensure.string(name));
     setProjectName(name);
   },
 
@@ -264,7 +265,7 @@ Mewlix.Console = Mewlix.library('std.console', {
    *
    * type: (string) -> nothing */
   background: async path => {
-    ensure.string(path);
+    where('std.console.background')(ensure.string(path));
     await setBackground(path);
   },
 
@@ -295,21 +296,21 @@ Mewlix.Console = Mewlix.library('std.console', {
   /* Set console prompt color. This function expects a valid hex code as argument.
    * type: (string) -> nothing */
   prompt_color: color => {
-    ensure.string(color);
+    where('std.console.prompt_color')(ensure.string(color));
     promptColor.value = color;
   },
 
   /* Sets whether or not to show the console prompt string before an user message.
    * type: (boolean) -> nothing */
   see_prompt: see => {
-    ensure.boolean(see);
+    where('std.console.see_prompt')(ensure.boolean(see));
     seePrompt.checked = see;
   },
 
   /* Sets accepted file extensions for paperclip input box.
    * type: (shelf) -> nothing */
   accepted_files: accepted => {
-    ensure.shelf(accepted);
+    where('std.console.accepted_files')(ensure.shelf(accepted));
     setAccepted(accepted.toArray());
   },
 });
