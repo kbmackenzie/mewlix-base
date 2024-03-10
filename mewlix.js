@@ -399,9 +399,6 @@ const isNothing = function isNothing(x) {
 };
 
 const clamp = function clamp(value, min, max) {
-  where('clamp')(
-    ensure.all.number(value, min, max)
-  );
   return value < min ? min : (value > max ? max : value);
 };
 
@@ -485,7 +482,7 @@ Mewlix.Arithmetic = {
     return a ** b;
   },
   negate: function negate(a) {
-    where('-')([ensure.number(a)]);
+    where('-')(ensure.number(a));
     return -a;
   },
 };
@@ -549,15 +546,15 @@ Mewlix.Strings = {
 
 Mewlix.Shelves = {
   peek: function peek(shelf) {
-    where('peek')([ensure.shelf(shelf)]);
+    where('peek')(ensure.shelf(shelf));
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    where('pop')([ensure.shelf(shelf)]);
+    where('pop')(ensure.shelf(shelf));
     return shelf.pop();
   },
   push: function push(shelf, value = null) {
-    where('push')([ensure.shelf(shelf)]);
+    where('push')(ensure.shelf(shelf));
     return shelf.push(value);
   },
   length: function length(value) {
@@ -567,7 +564,7 @@ Mewlix.Shelves = {
 
     const typeOfValue = Mewlix.Reflection.typeOf(value);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Can't calculate length for value of type "${typeOfValue}": ${value}`);
+      `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
 };
 
@@ -590,14 +587,14 @@ Mewlix.Reflection = {
   },
 
   instanceOf: function instanceOf(a, b) {
-    ensure.all.box(a, b);
+    where('is')(ensure.all.box(a, b));
     return a instanceof b;
   },
 };
 
 Mewlix.Boxes = {
   pairs: function pairs(value) {
-    ensure.box(value);
+    where('claw at')(ensure.box(value));
     return Mewlix.Shelf.fromArray(Object.entries(value).map(
       ([key, value]) => new Mewlix.Box([["key", key], ["value", value]])
     ));
@@ -758,36 +755,39 @@ Mewlix.Base = Mewlix.library('std', {
   /* Trims any whitespace at the start and end of a string.
    * type: (string) -> string */
   trim: function trim(str) {
-    ensure.string(str);
+    where('std.trim')(ensure.string(str));
     return str.trim();
   },
 
   /* Gets a substring from a string.
    * type: (string, number, number) -> string */
   tear: function tear(str, start, end) {
-    ensure.string(str);
-    ensure.all.number(start, end);
+    where('std.tear')(
+      ensure.string(str),
+      ensure.all.number(start, end),
+    );
     return str.substring(start, end);
   },
 
   /* Converts a string to lowercase.
    * type: (string) -> string */
   push_down: function push_down(str) {
-    ensure.string(str);
+    where('std.push_down')(ensure.string(str));
     return str.toLowerCase();
   },
 
   /* Converts a string to full upper-case.
    * type: (string) -> string */
   push_up: function push_up(str) {
-    ensure.string(str);
+    where('std.push_up')(ensure.string(str));
     return str.toUpperCase();
   },
 
   /* Index into a shelf or string.
    * type: ((shelf | string), number) -> (shelf | string) */
   poke: function poke(value, index = 0) {
-    ensure.number(index);
+    where('std.poke')(ensure.number(index));
+
     if (typeof value === 'string') {
       if (index < 0) {
         index = Math.max(0, value.length + index);
@@ -849,7 +849,8 @@ Mewlix.Base = Mewlix.library('std', {
   /* Takes n items from a shelf or a string.
    * type: ((shelf | string)) -> (shelf | string) */
   take: function take(value, amount) {
-    ensure.number(amount);
+    where('std.take')(ensure.number(amount));
+
     if (typeof value === 'string') return value.slice(0, amount);
     if (value instanceof Mewlix.Shelf) {
       const output = [];
@@ -869,6 +870,8 @@ Mewlix.Base = Mewlix.library('std', {
   /* Drops n items from a shelf or a string.
    * type: ((shelf | string)) -> (shelf | string) */
   drop: function drop(value, amount) {
+    where('std.take')(ensure.number(amount));
+
     if (typeof value === 'string') return value.slice(amount);
     if (value instanceof Mewlix.Shelf) {
       let output = value;
@@ -897,7 +900,7 @@ Mewlix.Base = Mewlix.library('std', {
   /* Sorts a shelf. All items must be of the same type.
    * type: shelf -> shelf */
   sort: function sort(shelf) {
-    ensure.shelf(shelf);
+    where('std.sort')(ensure.shelf(shelf));
     return Mewlix.Shelf.fromArray(shelf
       .toArray()
       .sort((a, b) => Mewlix.Compare.compare(a, b).id)
@@ -907,7 +910,7 @@ Mewlix.Base = Mewlix.library('std', {
   /* Shuffles the items in a shelf. O(n).
    * type: shelf -> shelf */
   shuffle: function shuffle(shelf) {
-    ensure.shelf(shelf);
+    where('std.shuffle')(ensure.shelf(shelf));
     const output = shelf.toArray();
 
     for (let i = output.length - 1; i > 0; i--) {
@@ -923,8 +926,10 @@ Mewlix.Base = Mewlix.library('std', {
   /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
   map: function map(shelf, callback) {
-    ensure.shelf(shelf);
-    ensure.func(callback);
+    where('std.map')(
+      ensure.shelf(shelf),
+      ensure.func(callback),
+    );
 
     let accumulator = [];
     for (const value of shelf) {
@@ -936,8 +941,10 @@ Mewlix.Base = Mewlix.library('std', {
   /* Filters element in the shelf by a predicate. Returns a new shelf.
    * type: (shelf, (any) -> boolean) -> shelf */
   filter: function filter(shelf, predicate) {
-    ensure.shelf(shelf);
-    ensure.func(predicate);
+    where('std.filter')(
+      ensure.shelf(shelf),
+      ensure.func(predicate),
+    );
 
     let accumulator = [];
     for (const value of shelf) {
@@ -951,8 +958,10 @@ Mewlix.Base = Mewlix.library('std', {
   /* Folds over a shelf.
    * type: (shelf, any, (any, any) -> any) -> shelf */
   fold: function fold(shelf, initial, callback) {
-    ensure.shelf(shelf);
-    ensure.func(callback);
+    where('std.fold')(
+      ensure.shelf(shelf),
+      ensure.func(callback),
+    );
 
     let accumulator = initial;
     for (const value of shelf) {
@@ -964,7 +973,7 @@ Mewlix.Base = Mewlix.library('std', {
   /* Zip two shelves into a shelf of tuples.
    * type: (shelf, shelf) -> shelf */
   zip: function zip(a, b) {
-    ensure.all.shelf(a, b);
+    where('std.zip')(ensure.all.shelf(a, b));
     const accumulator = [];
     while (a instanceof Mewlix.ShelfNode && b instanceof Mewlix.ShelfNode) {
       accumulator.push(new Mewlix.Box([
@@ -980,7 +989,11 @@ Mewlix.Base = Mewlix.library('std', {
   /* Inserts a value into a shelf at an index. O(n)!
    * type: (shelf, any, number) -> shelf */
   insert: function insert(shelf, value, index = 0) {
-    ensure.shelf(shelf);
+    where('std.insert')(
+      ensure.shelf(shelf),
+      ensure.number(index),
+    );
+
     const bucket = [];
     let tail = shelf;
 
@@ -1003,13 +1016,13 @@ Mewlix.Base = Mewlix.library('std', {
   /* Removes a value from a shelf at an index. O(n)!
    * type: (shelf, number) -> shelf */
   remove: function remove(shelf, index = 0) {
-    ensure.shelf(shelf);
+    where('std.reverse')(
+      ensure.shelf(shelf),
+      ensure.number(index),
+    );
+
     const bucket = [];
     let tail = shelf;
-
-    if (index < 0) {
-      index = Math.max(0, shelf.length() + index);
-    }
 
     let count = index;
     for (const item of shelf) {
@@ -1092,28 +1105,28 @@ Mewlix.Base = Mewlix.library('std', {
   /* Rounds a number to its nearest integer.
    * type: (number) -> number */
   round: function round(value) {
-    ensure.number(value);
+    where('std.round')(ensure.number(value));
     return Math.round(value);
   },
 
   /* Rounds down a number.
    * type: (number) -> number */
   floor: function floor(value) {
-    ensure.number(value);
+    where('std.floor')(ensure.number(value));
     return Math.floor(value);
   },
 
   /* Rounds up a number.
    * type: (number) -> number */
   ceiling: function ceiling(value) {
-    ensure.number(value);
+    where('std.ceiling')(ensure.number(value));
     return Math.ceil(value);
   },
 
   /* Clamps a number to a minimum and a maximum value.
    * type: (number, number, number) -> number */
   clamp: function clamp(value, min, max) {
-    ensure.all.number(value, min, max);
+    where('std.clamp')(ensure.all.number(value, min, max));
     return Mewlix.clamp(value, min, max);
   },
 
@@ -1132,7 +1145,7 @@ Mewlix.Base = Mewlix.library('std', {
       max = min;
       min = 0;
     }
-    ensure.all.number(min, max);
+    where('std.random_int')(ensure.all.number(min, max));
     return Math.floor(Math.random() * (max - min + 1) + min);
   },
 
@@ -1147,7 +1160,7 @@ Mewlix.Base = Mewlix.library('std', {
       end = start;
       start = 0;
     }
-    ensure.all.number(start, end);
+    where('std.count')(ensure.all.number(start, end));
 
     const array = [];
     if (start < end) {
