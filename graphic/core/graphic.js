@@ -1,5 +1,6 @@
 'use strict';
 const ensure = Mewlix.ensure;
+const where  = Mewlix.where;
 const clamp  = Mewlix.clamp;
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -276,7 +277,7 @@ class Vector2 extends Mewlix.Clowder {
     super();
 
     this.wake = (function wake(x, y) {
-      ensure.all.number(x, y);
+      where('Vector2.wake')(ensure.all.number(x, y));
       this.x = x;
       this.y = y;
       return this;
@@ -313,6 +314,9 @@ class Rectangle extends Mewlix.Clowder {
     super();
 
     this.wake = (function wake(x, y, width, height) {
+      where('Rectangle.wake')(
+        ensure.all.number(x, y, width, height)
+      );
       this.x = x;
       this.y = y;
       this.width = width;
@@ -491,7 +495,9 @@ class Color extends Mewlix.Clowder {
     super();
 
     this.wake = (function wake(red, green, blue, opacity = 100) {
-      ensure.all.number(red, green, blue, opacity);
+      where('Color.wake')(
+        ensure.all.number(red, green, blue, opacity)
+      );
       this.red      = clamp(red, 0, 255);
       this.green    = clamp(green, 0, 255);
       this.blue     = clamp(blue, 0, 255);
@@ -519,7 +525,6 @@ class Color extends Mewlix.Clowder {
   }
 
   static fromHex(str) {
-    ensure.string(str);
     const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
 
     if (hex === null) {
@@ -546,7 +551,9 @@ class SpriteAnimation extends Mewlix.Clowder {
     super();
 
     this.wake = (function wake(frames, frame_rate) {
-      ensure.shelf(frames);
+      where('SpriteAnimation.wake')(
+        ensure.shelf(frames)
+      );
       this.frames = frames;
       this.frame_rate = frame_rate ?? 12;
       this.frame_duration = 1 / this.frame_rate;
@@ -685,7 +692,9 @@ class DialogueBox extends Mewlix.Clowder {
      * Methods:
      * ------------------------------ */
     this.play = (function play(lines) {
-      ensure.shelf(lines);
+      where('SpriteAnimation.play')(
+        ensure.shelf(lines)
+      );
       this.buffer = '';
       this.lines = Mewlix.Shelf.reverse(lines);
       this.playing = true;
@@ -793,7 +802,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (string, string, box?) -> nothing */
   load: (key, path, options) => {
-    ensure.all.string(key, path);
+    where('graphic.load')(
+      ensure.all.string(key, path)
+    );
     return loadAny(key, path, options);
   },
 
@@ -802,7 +813,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (() -> nothing)) -> nothing */
   thumbnail: func => {
-    ensure.func(func);
+    where('graphic.thumbnail')(ensure.func(func));
     thumbnail = func;
   },
 
@@ -815,8 +826,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (string, string, shelf) -> nothing */
   spritesheet: (path, key, rects) => {
-    ensure.all.string(path, key);
-    ensure.shelf(rects);
+    where('graphic.spritesheet')(
+      ensure.all.string(path, key),
+      ensure.shelf(rects),
+    );
     return fromSpritesheet(path, key, rects);
   },
   
@@ -826,13 +839,22 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    * The sprite should already be loaded!
    *
    * type: (string, number, number) -> nothing */
-  draw: drawSprite,
+  draw: (key, x, y) => {
+    where('graphic.draw')(
+      ensure.string(key),
+      ensure.all.number(x, y),
+    );
+    return drawSprite(key, x, y);
+  },
 
   /* Draw a rectangle on the screen from a Rectangle instance.
    * The color can be defined with the second argument.
    *
    * type: (box, (box | string)) -> nothing */
-  rect: drawRect,
+  rect: (rect, color) => {
+    where('graphic.rect')(ensure.box(rect));
+    return drawRect(rect, color);
+  },
 
   /* Draw text on the screen at a specified (x, y) position.
    *
@@ -844,6 +866,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * type: (any, number, number, box) -> nothing */
   write: (value, x, y, options) => {
+    where('graphic.write')(ensure.all.number(x, y));
     return drawText(Mewlix.purrify(value), x, y, options);
   },
 
@@ -855,7 +878,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *  - color: The text color.
    *  - align: The text alignment.
    *
-   * type: (string, box) -> nothing */
+   * type: (any, box) -> nothing */
   measure_text: (value, options) => {
     return measureText(Mewlix.purrify(value), options);
   },
@@ -863,7 +886,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Set text options for the 'meow' statement.
    * type: box -> nothing */
   meow_options: box => {
-    ensure.box(box);
+    where('graphic.meow_options')(ensure.box(box));
     meowOptions = box;
   },
 
@@ -871,11 +894,17 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   /* Asks whether a key has been pressed. Triggers only once for a single key press.
    * type: (string) -> boolean */
-  key_pressed: isKeyPressed,
+  key_pressed: key => {
+    where('graphic.key_pressed')(ensure.string(key));
+    return isKeyPressed(key);
+  },
 
   /* Asks whether a key is down.
    * type: (string) -> boolean */
-  key_down: isKeyDown,
+  key_down: key => {
+    where('graphic.key_down')(ensure.string(key));
+    return isKeyDown(key);
+  },
 
   /* A few constants for the key values of common keys often used in games.
    * Meant to be used with the other functions above.
@@ -911,21 +940,21 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Begin playing an already-loaded music track on loop.
    * type: (string) -> nothing */
   play_music: key => {
-    ensure.string(key);
+    where('graphic.play_music')(ensure.string(key));
     return playMusic(key);
   },
 
   /* Play an already-loaded soundbyte once.
    * type: (string) -> nothing */
   play_sfx: key => {
-    ensure.string(key);
+    where('graphic.play_sfx')(ensure.string(key));
     return playSfx(key);
   },
 
   /* Set the master volume.
    * type: (number) -> nothing */
   volume: value => {
-    ensure.number(value);
+    where('graphic.volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(masterVolume, value / 2);
   },
@@ -933,7 +962,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Set the music volume.
    * type: (number) -> nothing */
   music_volume: value => {
-    ensure.number(value);
+    where('graphic.music_volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(musicVolume, value);
   },
@@ -941,7 +970,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Set the SFX volume.
    * type: (number) -> nothing */
   sfx_volume: value => {
-    ensure.number(value);
+    where('graphic.sfx_volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(sfxVolume, value);
   },
@@ -955,7 +984,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Lerp function.
    * (number, number, number) -> number */
   lerp: (start, end, x) => {
-    ensure.all.number(start, end, x);
+    where('graphic.lerp')(ensure.all.number(start, end, x));
     return lerp(start, end, x);
   },
 
