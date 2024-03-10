@@ -832,17 +832,6 @@ Mewlix.Base = Mewlix.library('std', {
     }
   },
 
-  /* Reverses a shelf or a string.
-   * type: ((shelf | string)) -> (shelf | string) */
-  reverse: function reverse(value) {
-    if (typeof value === 'string') return [...value].reverse().join('');
-    if (value instanceof Mewlix.Shelf) return Mewlix.Shelf.reverse(value);
-
-    const typeOfValue = Mewlix.Reflection.typeOf(value);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
-  },
-
   /* Takes n items from a shelf or a string.
    * type: ((shelf | string)) -> (shelf | string) */
   take: function take(value, amount) {
@@ -878,6 +867,17 @@ Mewlix.Base = Mewlix.library('std', {
     const typeOfValue = Mewlix.Reflection.typeOf(value);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
+  },
+
+  /* Reverses a shelf or a string.
+   * type: ((shelf | string)) -> (shelf | string) */
+  reverse: function reverse(value) {
+    if (typeof value === 'string') return [...value].reverse().join('');
+    if (value instanceof Mewlix.Shelf) return Mewlix.Shelf.reverse(value);
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
   /* Applies a function to each item in the shelf, returning a new shelf.
