@@ -355,11 +355,11 @@ Mewlix.purrifyObject = function purrifyObject(obj) {
 /* -----------------------------------------------------
  * Type Checking
  * ----------------------------------------------------- */
-const typecheck = (predicate) => (value) => (source) => {
+const typecheck = (predicate) => (expected) => (value) => (source) => {
   if (predicate(value)) return;
   const typeOfValue = Mewlix.Reflection.typeOf(value);
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-    `${source}: Expected number, got ${typeOfValue}: ${value}!`);
+    `${source}: Expected ${expected}, got ${typeOfValue}: ${value}!`);
 };
 
 const typecheckAll = typechecker => (...values) => source => {
@@ -367,12 +367,12 @@ const typecheckAll = typechecker => (...values) => source => {
 };
 
 const ensure = {
-  number:   typecheck(x => typeof x === 'number'),
-  string:   typecheck(x => typeof x === 'string'),
-  boolean:  typecheck(x => typeof x === 'boolean'),
-  shelf:    typecheck(x => x instanceof Mewlix.Shelf),
-  box:      typecheck(x => x instanceof Mewlix.Box),
-  func:     typecheck(x => typeof x === 'function'),
+  number:   typecheck(x => typeof x === 'number')('number'),
+  string:   typecheck(x => typeof x === 'string')('string'),
+  boolean:  typecheck(x => typeof x === 'boolean')('boolean'),
+  shelf:    typecheck(x => x instanceof Mewlix.Shelf)('shelf'),
+  box:      typecheck(x => x instanceof Mewlix.Box)('box'),
+  func:     typecheck(x => typeof x === 'function')('func'),
 };
 
 ensure.all = {
