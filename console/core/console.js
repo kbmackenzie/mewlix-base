@@ -256,7 +256,7 @@ Mewlix.Console = Mewlix.library('std.console', {
   /* Set console project name.
    * type: (string) -> nothing */
   name: name => {
-    where('std.console.name')(ensure.string(name));
+    where('console.name')(ensure.string(name));
     setProjectName(name);
   },
 
@@ -265,7 +265,7 @@ Mewlix.Console = Mewlix.library('std.console', {
    *
    * type: (string) -> nothing */
   background: async path => {
-    where('std.console.background')(ensure.string(path));
+    where('console.background')(ensure.string(path));
     await setBackground(path);
   },
 
@@ -296,21 +296,21 @@ Mewlix.Console = Mewlix.library('std.console', {
   /* Set console prompt color. This function expects a valid hex code as argument.
    * type: (string) -> nothing */
   prompt_color: color => {
-    where('std.console.prompt_color')(ensure.string(color));
+    where('console.prompt_color')(ensure.string(color));
     promptColor.value = color;
   },
 
   /* Sets whether or not to show the console prompt string before an user message.
    * type: (boolean) -> nothing */
   see_prompt: see => {
-    where('std.console.see_prompt')(ensure.boolean(see));
+    where('console.see_prompt')(ensure.boolean(see));
     seePrompt.checked = see;
   },
 
   /* Sets accepted file extensions for paperclip input box.
    * type: (shelf) -> nothing */
   accepted_files: accepted => {
-    where('std.console.accepted_files')(ensure.shelf(accepted));
+    where('console.accepted_files')(ensure.shelf(accepted));
     setAccepted(accepted.toArray());
   },
 });
