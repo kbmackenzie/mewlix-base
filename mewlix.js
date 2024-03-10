@@ -1114,6 +1114,13 @@ Mewlix.Base = Mewlix.library('std', {
     }
     return Mewlix.Shelf.fromArray(array);
   },
+
+  /* Log a message to the Web Console, if it exists.
+   * type: (any) -> nothing */
+  log: function log(value) {
+    const message = Mewlix.purrify(value);
+    console?.log(`[Mewlix] ${message}`);
+  },
 });
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
