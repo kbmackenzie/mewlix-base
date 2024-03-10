@@ -781,10 +781,16 @@ Mewlix.Base = Mewlix.library('std', {
   poke: function poke(value, index = 0) {
     ensure.number(index);
     if (typeof value === 'string') {
+      if (index < 0) {
+        index = Math.max(0, value.length + index);
+      }
       return value[index];
     }
 
     if (value instanceof Mewlix.Shelf) {
+      if (index < 0) {
+        index = Math.max(0, value.length() + index);
+      }
       for (let i = 0; i < index; i++) {
         value = value?.pop();
       }
