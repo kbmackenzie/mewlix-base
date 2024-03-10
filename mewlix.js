@@ -353,56 +353,42 @@ Mewlix.purrifyObject = function purrifyObject(obj) {
 }
 
 /* -----------------------------------------------------
- * Type utils.
+ * Type Checking
  * ----------------------------------------------------- */
-const ensure = {
-  number: x => {
-    if (typeof x === 'number') return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected number, got ${typeOfValue}: ${x}!`);
-  },
-  string: x => {
-    if (typeof x === 'string') return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected string, got ${typeOfValue}: ${x}!`);
-  },
-  boolean: x => {
-    if (typeof x === 'boolean') return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected boolean, got ${typeOfValue}: ${x}!`);
-  },
-  shelf: x => {
-    if (x instanceof Mewlix.Shelf) return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected shelf, got ${typeOfValue}: ${x}!`);
-  },
-  box: x => {
-    if (x instanceof Mewlix.Box) return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected box, got ${typeOfValue}: ${x}!`);
-  },
-  func: x => {
-    if (typeof x === 'function') return;
-    const typeOfValue = Mewlix.Reflection.typeOf(x);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `Expected function, got ${typeOfValue}: ${x}!`);
-  },
+const typeChecker = (predicate) => (value) => (source) => {
+  if (predicate(value)) return;
+  const typeOfValue = Mewlix.Reflection.typeOf(value);
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+    `${source}: Expected number, got ${typeOfValue}: ${value}!`);
+};
 
+const ensure = {
+  number:   typeChecker(x => typeof x === 'number'),
+  string:   typeChecker(x => typeof x === 'string'),
+  boolean:  typeChecker(x => typeof x === 'boolean'),
+  shelf:    typeChecker(x => x instanceof Mewlix.Shelf),
+  box:      typeChecker(x => x instanceof Mewlix.Box),
+  func:     typeChecker(x => typeof x === 'function'),
   all: {
-    number:  (...values) => values.forEach(ensure.number),
-    string:  (...values) => values.forEach(ensure.string),
-    boolean: (...values) => values.forEach(ensure.boolean),
-    shelf:   (...values) => values.forEach(ensure.shelf),
-    box:     (...values) => values.forEach(ensure.box),
-    func:    (...values) => values.forEach(ensure.func),
+    number:  (...values) => values.map(ensure.number),
+    string:  (...values) => values.map(ensure.string),
+    boolean: (...values) => values.map(ensure.boolean),
+    shelf:   (...values) => values.map(ensure.shelf),
+    box:     (...values) => values.map(ensure.box),
+    func:    (...values) => values.map(ensure.func),
   },
 };
 
+const where = source => assertions => {
+  assertions.forEach(x => x(source));
+}
+
+Mewlix.ensure = ensure;
+Mewlix.where = where;
+
+/* -----------------------------------------------------
+ * Value Utils 
+ * ----------------------------------------------------- */
 const isNothing = function isNothing(x) {
   return x === null || x === undefined;
 };
@@ -425,10 +411,8 @@ const opaque = function opaque(x) {
   });
 };
 
-// Adding utils to Mewlix object for convenience:
-Mewlix.ensure = ensure;
-Mewlix.clamp = clamp;
 Mewlix.isNothing = isNothing;
+Mewlix.clamp = clamp;
 Mewlix.opaque = opaque;
 
 /* -----------------------------------------------------
