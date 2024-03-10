@@ -355,31 +355,36 @@ Mewlix.purrifyObject = function purrifyObject(obj) {
 /* -----------------------------------------------------
  * Type Checking
  * ----------------------------------------------------- */
-const typeChecker = (predicate) => (value) => (source) => {
+const typecheck = (predicate) => (value) => (source) => {
   if (predicate(value)) return;
   const typeOfValue = Mewlix.Reflection.typeOf(value);
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
     `${source}: Expected number, got ${typeOfValue}: ${value}!`);
 };
 
-const ensure = {
-  number:   typeChecker(x => typeof x === 'number'),
-  string:   typeChecker(x => typeof x === 'string'),
-  boolean:  typeChecker(x => typeof x === 'boolean'),
-  shelf:    typeChecker(x => x instanceof Mewlix.Shelf),
-  box:      typeChecker(x => x instanceof Mewlix.Box),
-  func:     typeChecker(x => typeof x === 'function'),
-  all: {
-    number:  (...values) => values.map(ensure.number),
-    string:  (...values) => values.map(ensure.string),
-    boolean: (...values) => values.map(ensure.boolean),
-    shelf:   (...values) => values.map(ensure.shelf),
-    box:     (...values) => values.map(ensure.box),
-    func:    (...values) => values.map(ensure.func),
-  },
+const typecheckAll = typechecker => (...values) => source => {
+  values.map(typechecker).forEach(fn => fn(source));
 };
 
-const where = source => assertions => {
+const ensure = {
+  number:   typecheck(x => typeof x === 'number'),
+  string:   typecheck(x => typeof x === 'string'),
+  boolean:  typecheck(x => typeof x === 'boolean'),
+  shelf:    typecheck(x => x instanceof Mewlix.Shelf),
+  box:      typecheck(x => x instanceof Mewlix.Box),
+  func:     typecheck(x => typeof x === 'function'),
+};
+
+ensure.all = {
+  number:   typecheckAll(ensure.number),
+  string:   typecheckAll(ensure.string),
+  boolean:  typecheckAll(ensure.boolean),
+  shelf:    typecheckAll(ensure.shelf),
+  box:      typecheckAll(ensure.box),
+  func:     typecheckAll(ensure.func),
+};
+
+const where = source => (...assertions) => {
   assertions.forEach(x => x(source));
 }
 
@@ -393,9 +398,11 @@ const isNothing = function isNothing(x) {
   return x === null || x === undefined;
 };
 
-const clamp = function clamp(x, min, max) {
-  ensure.all.number(x, min, max);
-  return x < min ? min : (x > max ? max : x);
+const clamp = function clamp(value, min, max) {
+  where('clamp')(
+    ensure.all.number(value, min, max)
+  );
+  return value < min ? min : (value > max ? max : value);
 };
 
 const opaque = function opaque(x) {
@@ -446,19 +453,19 @@ Mewlix.Comparison = class Comparison {
  * ----------------------------------------------------- */
 Mewlix.Arithmetic = {
   add: function add(a, b) {
-    ensure.all.number(a, b);
+    where('+')(ensure.all.number(a, b));
     return a + b;
   },
   sub: function sub(a, b) {
-    ensure.all.number(a, b);
+    where('-')(ensure.all.number(a, b));
     return a - b;
   },
   mul: function mul(a, b) {
-    ensure.all.number(a, b);
+    where('*')(ensure.all.number(a, b));
     return a * b;
   },
   div: function div(a, b) {
-    ensure.all.number(a, b);
+    where('/')(ensure.all.number(a, b));
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -466,7 +473,7 @@ Mewlix.Arithmetic = {
     return a / b;
   },
   mod: function mod(a, b) {
-    ensure.all.number(a, b);
+    where('%')(ensure.all.number(a, b));
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -474,11 +481,11 @@ Mewlix.Arithmetic = {
     return a % b;
   },
   pow: function pow(a, b) {
-    ensure.all.number(a, b);
+    where('^')(ensure.all.number(a, b));
     return a ** b;
   },
   negate: function negate(a) {
-    ensure.all.number(a, b);
+    where('-')([ensure.number(a)]);
     return -a;
   },
 };
@@ -542,15 +549,15 @@ Mewlix.Strings = {
 
 Mewlix.Shelves = {
   peek: function peek(shelf) {
-    ensure.shelf(shelf);
+    where('peek')([ensure.shelf(shelf)]);
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    ensure.shelf(shelf);
+    where('pop')([ensure.shelf(shelf)]);
     return shelf.pop();
   },
   push: function push(shelf, value = null) {
-    ensure.shelf(shelf);
+    where('push')([ensure.shelf(shelf)]);
     return shelf.push(value);
   },
   length: function length(value) {
