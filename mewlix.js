@@ -527,9 +527,26 @@ Mewlix.Compare = {
 
   // -- Numeric comparison:
   compare: function compare(a, b) {
-    ensure.all.number(a, b);
-    if (a === b) return Mewlix.Comparison.EqualTo;
-    return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
+    if (typeof a !== typeof b) {
+      const typeofA = Mewlix.Reflection.typeOf(a);
+      const typeofB = Mewlix.Reflection.typeOf(b);
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `compare: Cannot compare values of different types: "${typeofA}" and "${typeofB}"!`);
+    }
+
+    switch (typeof a) {
+      case 'number':
+      case 'string':
+      case 'boolean':
+        if (a === b) return Mewlix.Comparison.EqualTo;
+        return (a < b) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
+      default:
+        break;
+    }
+
+    const typeOfValue = Mewlix.Reflection.typeOf(a);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `compare: Cannot compare values of type "${typeOfValue}"!`);
   },
 };
 
@@ -827,7 +844,7 @@ Mewlix.Base = Mewlix.library('std', {
 
     if (typeofA !== typeofB) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `std.join: Values are of different types!`);
+        `std.join: Values are of different types: "${typeofA}" and "${typeofB}"!`);
     }
 
     switch (typeofA) {
