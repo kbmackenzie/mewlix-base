@@ -880,7 +880,7 @@ Mewlix.Base = Mewlix.library('std', {
       `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
-  /* Inserts a value into a shelf at a specified integer index. O(n)!
+  /* Inserts a value into a shelf at an index n. O(n)!
    * type: (shelf, any, number) -> shelf */
   insert: function insert(shelf, value, index = 0) {
     ensure.shelf(shelf);
@@ -895,6 +895,25 @@ Mewlix.Base = Mewlix.library('std', {
     }
     bucket.push(value);
 
+    const init = Mewlix.Shelf.fromArray(bucket.reverse());
+    return Mewlix.Shelf.concat(tail, init);
+  },
+
+  /* Removes a value from a shelf at an index n. O(n)!
+   * type: (shelf, number) -> shelf */
+  remove: function remove(shelf, index = 0) {
+    ensure.shelf(shelf);
+    const bucket = [];
+    let tail = shelf;
+
+    let count = index;
+    for (const item of shelf) {
+      if (count-- < 0) break;
+      bucket.push(item);
+      tail = tail.pop();
+    }
+    if (count >= 0) return shelf;
+    bucket.pop();
     const init = Mewlix.Shelf.fromArray(bucket.reverse());
     return Mewlix.Shelf.concat(tail, init);
   },
