@@ -863,6 +863,8 @@ Mewlix.Base = Mewlix.library('std', {
       `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
   },
 
+  /* Drops n items from a shelf or a string.
+   * type: ((shelf | string)) -> (shelf | string) */
   drop: function drop(value, amount) {
     if (typeof value === 'string') return value.slice(amount);
     if (value instanceof Mewlix.Shelf) {
