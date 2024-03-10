@@ -902,6 +902,32 @@ Mewlix.Base = Mewlix.library('std', {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
+  
+  /* Sorts a shelf. All items must be of the same type.
+   * type: shelf -> shelf */
+  sort: function sort(shelf) {
+    ensure.shelf(shelf);
+    return Mewlix.Shelf.fromArray(shelf
+      .toArray()
+      .sort((a, b) => Mewlix.Compare.compare(a, b).id)
+    );
+  },
+
+  /* Shuffles the items in a shelf. O(n).
+   * type: shelf -> shelf */
+  shuffle: function shuffle(shelf) {
+    ensure.shelf(shelf);
+    const output = shelf.toArray();
+
+    for (let i = output.length - 1; i > 0; i--) {
+      const j = Mewlix.Base.random_int(0, i);
+
+      const temp = output[i];
+      output[i] = output[j];
+      output[j] = temp;
+    }
+    return Mewlix.Shelf.fromArray(output);
+  },
 
   /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
