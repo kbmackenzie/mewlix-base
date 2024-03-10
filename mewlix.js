@@ -880,44 +880,6 @@ Mewlix.Base = Mewlix.library('std', {
       `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   },
 
-  /* Inserts a value into a shelf at an index. O(n)!
-   * type: (shelf, any, number) -> shelf */
-  insert: function insert(shelf, value, index = 0) {
-    ensure.shelf(shelf);
-    const bucket = [];
-    let tail = shelf;
-
-    let count = index;
-    for (const item of shelf) {
-      if (count-- <= 0) break;
-      bucket.push(item);
-      tail = tail.pop();
-    }
-    bucket.push(value);
-
-    const init = Mewlix.Shelf.fromArray(bucket.reverse());
-    return Mewlix.Shelf.concat(tail, init);
-  },
-
-  /* Removes a value from a shelf at an index. O(n)!
-   * type: (shelf, number) -> shelf */
-  remove: function remove(shelf, index = 0) {
-    ensure.shelf(shelf);
-    const bucket = [];
-    let tail = shelf;
-
-    let count = index;
-    for (const item of shelf) {
-      if (count-- < 0) break;
-      bucket.push(item);
-      tail = tail.pop();
-    }
-    if (count >= 0) return shelf;
-    bucket.pop();
-    const init = Mewlix.Shelf.fromArray(bucket.reverse());
-    return Mewlix.Shelf.concat(tail, init);
-  },
-
   /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
   map: function map(shelf, callback) {
@@ -973,6 +935,52 @@ Mewlix.Base = Mewlix.library('std', {
       b = b.pop();
     }
     return Mewlix.Shelf.fromArray(accumulator.reverse());
+  },
+
+  /* Inserts a value into a shelf at an index. O(n)!
+   * type: (shelf, any, number) -> shelf */
+  insert: function insert(shelf, value, index = 0) {
+    ensure.shelf(shelf);
+    const bucket = [];
+    let tail = shelf;
+
+    if (index < 0) {
+      index = Math.max(0, shelf.length() + index + 1);
+    }
+
+    let count = index;
+    for (const item of shelf) {
+      if (count-- <= 0) break;
+      bucket.push(item);
+      tail = tail.pop();
+    }
+    bucket.push(value);
+
+    const init = Mewlix.Shelf.fromArray(bucket.reverse());
+    return Mewlix.Shelf.concat(tail, init);
+  },
+
+  /* Removes a value from a shelf at an index. O(n)!
+   * type: (shelf, number) -> shelf */
+  remove: function remove(shelf, index = 0) {
+    ensure.shelf(shelf);
+    const bucket = [];
+    let tail = shelf;
+
+    if (index < 0) {
+      index = Math.max(0, shelf.length() + index);
+    }
+
+    let count = index;
+    for (const item of shelf) {
+      if (count-- < 0) break;
+      bucket.push(item);
+      tail = tail.pop();
+    }
+    if (count >= 0) return shelf;
+    bucket.pop();
+    const init = Mewlix.Shelf.fromArray(bucket.reverse());
+    return Mewlix.Shelf.concat(tail, init);
   },
 
   /* Create a tuple box.
