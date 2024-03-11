@@ -53,13 +53,11 @@ const loadSprite = (key, path, rect) => loadImage(path, rect)
   });
 
 /* Load a spritesheet image and divide it into sprites. */
-const fromSpritesheet = async (path, keyBase, rects) => {
+const fromSpritesheet = async (path, frames) => {
   const sheet = await loadImage(path);
-  let counter = 0;
-
-  for (const rect of Mewlix.Shelf.reverse(rects)) {
+  for (const frame of frames) {
+    const { key, rect } = frame;
     const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
-    const key = `${keyBase}-${counter++}`;
     spriteMap.set(key, sprite);
   }
 };
@@ -821,16 +819,18 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *
    * It expects the following arguments:
    * - The path to the spritesheet.
-   * - A 'base key' from which the key for each sprite will be created.
-   * - A shelf of Rectangle boxes holding the regions of the spritesheet to crop.
+   * - A shelf of boxes for each sprite, where each holds:
+   *   - A key for the sprite.
+   *   - A Rectangle box defining the region of the spritesheet to crop.
+   * The order of the frames do not matter.
    *
    * type: (string, string, shelf) -> nothing */
-  spritesheet: (path, key, rects) => {
+  spritesheet: (path, frames) => {
     where('graphic.spritesheet')(
-      ensure.all.string(path, key),
-      ensure.shelf(rects),
+      ensure.string(path),
+      ensure.shelf(frames),
     );
-    return fromSpritesheet(path, key, rects);
+    return fromSpritesheet(path, frames);
   },
   
   /* --------- Drawing ---------- */
