@@ -393,6 +393,7 @@ const drawPlay = async () => {
 };
 
 const init = async (callback) => {
+  where('graphic.init')(ensure.func(callback));
   await loadFont('Munro', '/core-assets/fonts/Munro/munro.ttf');
 
   const nextFrame = () => new Promise(resolve => {
