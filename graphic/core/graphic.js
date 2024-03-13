@@ -200,6 +200,11 @@ const stopMusic = () => {
   musicSource = null;
 };
 
+const stopSfx = () => {
+  sfxSource?.stop();
+  sfxSource = null;
+};
+
 const setVolumeOf = (node, volume) => {
   node.gain.cancelScheduledValues(audioContext.currentTime);
   node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
@@ -979,6 +984,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   /* Stop all music.
    * type: () -> nothing */
   stop_music: stopMusic,
+
+  /* Stop all SFX.
+   * type: () -> nothing */
+  stop_sfx: stopSfx,
 
   /* --------- Animation ---------- */
 
