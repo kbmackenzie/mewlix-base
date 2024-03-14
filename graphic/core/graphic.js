@@ -867,9 +867,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return drawRect(rect, color);
   },
 
-  /* Fill canvas with a given color.
+  /* Paints the canvas with a given color.
    * type: ((box | string)) -> nothing */
-  fill: fillCanvas,
+  paint: fillCanvas,
 
   /* Draw text on the screen at a specified (x, y) position.
    *
