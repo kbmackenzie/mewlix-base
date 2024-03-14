@@ -92,7 +92,7 @@ const drawRect = (rect, color) => {
   );
 };
 
-const drawBackground = (color) => {
+const fillCanvas = (color) => {
   context.fillStyle = color?.toString() ?? 'black';
   context.fillRect(0, 0, canvasWidth, canvasHeight);
 };
