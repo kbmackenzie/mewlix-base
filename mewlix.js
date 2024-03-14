@@ -925,7 +925,7 @@ Mewlix.Base = Mewlix.library('std', {
 
   /* Applies a function to each item in the shelf, returning a new shelf.
    * type: (shelf, (any) -> any) -> shelf */
-  map: function map(shelf, callback) {
+  map: async function map(shelf, callback) {
     where('std.map')(
       ensure.shelf(shelf),
       ensure.func(callback),
@@ -933,14 +933,14 @@ Mewlix.Base = Mewlix.library('std', {
 
     let accumulator = [];
     for (const value of shelf) {
-      accumulator.push(callback(value));
+      accumulator.push(await callback(value));
     }
     return Mewlix.Shelf.fromArray(accumulator.reverse());
   },
 
   /* Filters element in the shelf by a predicate. Returns a new shelf.
    * type: (shelf, (any) -> boolean) -> shelf */
-  filter: function filter(shelf, predicate) {
+  filter: async function filter(shelf, predicate) {
     where('std.filter')(
       ensure.shelf(shelf),
       ensure.func(predicate),
@@ -948,7 +948,7 @@ Mewlix.Base = Mewlix.library('std', {
 
     let accumulator = [];
     for (const value of shelf) {
-      if (predicate(value)) {
+      if (await predicate(value)) {
         accumulator.push(value);
       }
     }
@@ -957,7 +957,7 @@ Mewlix.Base = Mewlix.library('std', {
 
   /* Folds over a shelf.
    * type: (shelf, any, (any, any) -> any) -> shelf */
-  fold: function fold(shelf, initial, callback) {
+  fold: async function fold(shelf, initial, callback) {
     where('std.fold')(
       ensure.shelf(shelf),
       ensure.func(callback),
@@ -965,7 +965,7 @@ Mewlix.Base = Mewlix.library('std', {
 
     let accumulator = initial;
     for (const value of shelf) {
-      accumulator = callback(accumulator, value);
+      accumulator = await callback(accumulator, value);
     }
     return accumulator;
   },
