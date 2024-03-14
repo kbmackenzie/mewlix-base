@@ -491,13 +491,13 @@ Mewlix.Boolean = {
   not: function not(a) {
     return !Mewlix.Conversion.toBool(a);
   },
-  or: function or(a, fb) {
+  or: async function or(a, fb) {
     return Mewlix.Conversion.toBool(a) ? a : fb();
   },
-  and: function and(a, fb) {
+  and: async function and(a, fb) {
     return Mewlix.Conversion.toBool(a) ? fb() : a;
   },
-  ternary: function ternary(condition, fa, fb) {
+  ternary: async function ternary(condition, fa, fb) {
     return Mewlix.Conversion.toBool(condition) ? fa() : fb();
   },
 };
