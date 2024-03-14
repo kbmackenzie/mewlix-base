@@ -867,6 +867,10 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return drawRect(rect, color);
   },
 
+  /* Fill canvas with a given color.
+   * type: ((box | string)) -> nothing */
+  fill: fillCanvas,
+
   /* Draw text on the screen at a specified (x, y) position.
    *
    * An additional box argument can be passed iwht additional options:
