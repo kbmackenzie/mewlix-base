@@ -92,6 +92,11 @@ const drawRect = (rect, color) => {
   );
 };
 
+const drawBackground = (color) => {
+  context.fillStyle = color?.toString() ?? 'black';
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
+};
+
 /* -----------------------------------
  * Loading Fonts:
  * ----------------------------------- */
