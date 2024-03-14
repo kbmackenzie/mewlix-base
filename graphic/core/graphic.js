@@ -79,6 +79,8 @@ const drawSprite = (key, x, y) => {
     image,
     Math.floor(x ?? 0) * sizeModifier,
     Math.floor(y ?? 0) * sizeModifier,
+    image.width  * sizeModifier,
+    image.height * sizeModifier,
   );
 };
 
