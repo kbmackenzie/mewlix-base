@@ -657,33 +657,6 @@ Mewlix.Inner = {
 };
 
 /* -----------------------------------------------------
- * Deepcopying Utils
- * ----------------------------------------------------- */
-const deepcopyShelf = function deepcopyShelf(shelf) {
-  const copy = shelf.toArray().map(x => Mewlix.deepcopy(x));
-  return Mewlix.Shelf.fromArray(copy);
-};
-
-const deepcopyBox = function deepcopyBox(box) {
-  if (box instanceof Mewlix.Clowder && deepcopy in box) {
-    return box.deepcopy();
-  }
-  return Mewlix.Box(Object.entries(box).map(
-    ([key, value]) => [key, Mewlix.deepcopy(value)]
-  ));
-};
-
-Mewlix.deepcopy = function deepcopy(value) {
-  if (typeof value !== 'object') return value;
-
-  if (value instanceof Mewlix.Shelf) { return deepcopyShelf(value); }
-  if (value instanceof Mewlix.Box)   { return deepcopyBox(value);   }
-
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-    `Invalid object in Mewlix context - object isn't an instance of Mewlix.Box: ${value}`);
-};
-
-/* -----------------------------------------------------
  * IO:
  * ----------------------------------------------------- */
 Mewlix.meow = function meow(_) {
