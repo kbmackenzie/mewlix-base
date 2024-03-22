@@ -868,6 +868,16 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return drawSprite(key, x, y);
   },
 
+  /* Ask the dimensions of a loaded sprite.
+   * type: (string) -> box */
+  measure: key => {
+    const image = getSprite(key);
+    return new Mewlix.Box([
+      ["width"  , image.width ]
+      ["height" , image.height]
+    ]);
+  },
+
   /* Draw a rectangle on the screen from a Rectangle instance.
    * The color can be defined with the second argument.
    *
