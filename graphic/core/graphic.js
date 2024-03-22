@@ -377,20 +377,18 @@ class GridSlot extends Mewlix.Clowder {
     }).bind(this);
 
     this.position = (function position() {
-      return slotPoint(this.row, this.column);
+      return gridSlotToPosition(this.row, this.column);
     }).bind(this);
   }
 }
 
-/* Convert world position to a grid slot. */
-const gridSlot = (x, y) => {
+const positionToGridSlot = (x, y) => {
   const row = Math.min(y / gridSlotHeight);
   const col = Math.min(x / gridSlotWidth);
   return new GridSlot().wake(row, col);
 };
 
-/* Convert grid slot to world position. */
-const slotPoint = (row, col) => {
+const gridSlotToPosition = (row, col) => {
   return new Vector2().wake(
     col * gridSlotWidth,
     row * gridSlotHeight,
@@ -774,9 +772,9 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   
   GridSlot: GridSlot,
 
-  grid_slot: gridSlot,
+  grid_slot: positionToGridSlot,
 
-  slot_point: slotPoint,
+  slot_point: gridSlotToPosition,
 
   Color: Color,
 
