@@ -4,7 +4,7 @@
  * Learn more at:
  * > https://github.com/KBMackenzie/mewlix <
  *
- * This file is released under the MIT license. 
+ * Copyright 2024 KBMackenzie. Released under the MIT License.
  * The full license details can be found at:
  * > https://github.com/KBMackenzie/mewlix-base/blob/main/LICENSE < */
 
