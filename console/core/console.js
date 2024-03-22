@@ -251,7 +251,7 @@ Mewlix.listen = question => {
 const ensure = Mewlix.ensure;
 const where  = Mewlix.where;
 
-/* The std library documentation can be found on the wiki:
+/* The std.console library documentation can be found on the wiki:
  * > https://github.com/KBMackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
  *
  * It won't be included in this source file to avoid clutter.
