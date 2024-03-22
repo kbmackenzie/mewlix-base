@@ -563,57 +563,6 @@ class Color extends Mewlix.Clowder {
   }
 }
 
-/* A simple animation container. It accepts a shelf of frames and, optionally, a frame rate.
- * The .draw() method can be called to draw an animation with a position. */
-class SpriteAnimation extends Mewlix.Clowder {
-  constructor() {
-    super();
-
-    this.wake = (function wake(frames, frame_rate) {
-      where('SpriteAnimation.wake')(
-        ensure.shelf(frames)
-      );
-      this.frames = frames;
-      this.frame_rate = frame_rate ?? 12;
-      this.frame_duration = 1 / this.frame_rate;
-
-      this.timer = 0.0;
-      this.frame_stack = frames.pop();
-      this.current_frame = frames.peek();
-      return this;
-    }).bind(this);
-
-    /* ------------------------------
-     * Methods:
-     * ------------------------------ */
-    this.draw = (function draw(x, y) {
-      this.timer += deltaTime;
-      if (this.timer >= this.frame_duration) {
-        this.next_frame();
-        this.timer = 0.0;
-      }
-      drawSprite(this.current_frame, x, y);
-    }).bind(this);
-
-    this.next_frame = (function next_frame() {
-      this.current_frame = this.frame_stack?.peek();
-      this.frame_stack = this.frame_stack?.pop();
-
-      if (!this.current_frame) {
-        this.frame_stack = this.frames.pop();
-        this.current_frame = this.frames.peek();
-      }
-    }).bind(this);
-
-    this.reset = (function reset() {
-      this.timer = 0.0;
-      this.frame_stack = this.frames.pop();
-      this.current_frame = this.frames.peek();
-    }).bind(this);
-  }
-
-}
-
 /* A pixel canvas for efficiently creating sprites.
  * The .to_image() creates a new sprite and adds it to spriteMap. */
 class PixelCanvas extends Mewlix.Clowder {
@@ -664,122 +613,6 @@ class PixelCanvas extends Mewlix.Clowder {
     }).bind(this);
   }
 };
-
-/* Dialogue util. */
-const lineDuration = (message, charsPerSecond = 30.0) => {
-  return message.length / charsPerSecond + 0.2;
-};
-
-/* A class designed to make the creation of dialogue boxes easier.
- * It accepts:
- *  1. A shelf of dialogue lines
- *  2. A 'draw' callback that controls how dialogue is drawn
- *  3. A box of additional options and parameters for the dialogue box:
- *    - A key to listen to to advance dialogue. (default: Space)
- *    - Character speed, in characters per second (default: 30.0)
- *    - Key of audio file to use as a sound (default: none)
- *    - Sound speed, in beeps per second (default: 2.0)
- * 
- * All you need to do to start a new dialogue event is call .play()
- * with a new shelf of lines.
- *
- * Note: Snake-case is used for all methods and properties in this class.
- * This is because it'll be accessible inside of Mewlix. */
-class DialogueBox extends Mewlix.Clowder {
-  /* The drawCallback parameter should be a function of type (string) -> nothing.
-   * It will be called to draw a dialogue line every frame. */
-  constructor() {
-    super();
-
-    this.wake = (function wake(draw_callback, options) {
-      this.draw_callback = draw_callback;
-      this.key = options?.key ?? ' ';
-      this.speed = options?.speed ?? 30.0;
-
-      // Sound options:
-      this.sound = options?.sound;
-      this.sound_speed = 1 / (options?.sound_speed ?? 20);
-      console.log(this.sound);
-
-      // Timers:
-      this.dialogue_timer = 0.0;
-      this.sound_timer = 0.0;
-      return this;
-    }).bind(this);
-
-    /* ------------------------------
-     * Methods:
-     * ------------------------------ */
-    this.play = (function play(lines) {
-      where('SpriteAnimation.play')(
-        ensure.shelf(lines)
-      );
-      this.buffer = '';
-      this.lines = Mewlix.Shelf.reverse(lines);
-      this.playing = true;
-      this.next_line();
-    }).bind(this);
-
-    this.next_line = (function next_line() {
-      const message = this.lines?.peek?.();
-      this.current_line  = message ? {
-        message: message,
-        length: message.length,
-        duration: lineDuration(message, this.speed),
-        finished: false,
-      } : null;
-      this.lines = this.lines?.pop();
-      this.buffer = '';
-
-      this.playing = !!this.current_line;
-    }).bind(this);
-
-    this.line_lerp = (function line_lerp() {
-      const len = this.current_line.length;
-      const duration = this.current_line.duration;
-      return Math.floor(lerp(0, len, this.dialogue_timer / duration));
-    }).bind(this);
-
-    this.draw = (function draw() {
-      if (this.playing && isKeyPressed(this.key)) {
-        if (this.current_line.finished) {
-          this.next_line();
-          this.dialogue_timer = 0.0;
-          this.sound_timer = 0.0;
-        }
-        else {
-          this.current_line.finished = true;
-        }
-      }
-
-      if (!this.playing) return;
-      this.dialogue_timer += deltaTime;
-
-      const lineLength = this.current_line.finished
-        ? this.current_line.length
-        : clamp(this.line_lerp(), 0, this.current_line.length);
-
-      if (!this.buffer || lineLength > this.buffer.length) {
-        this.buffer = this.current_line.message.slice(0, lineLength);
-      }
-
-      this.draw_callback(this.buffer);
-
-      if (this.sound && !this.current_line.finished) {
-        this.sound_timer += deltaTime;
-
-        if (this.sound_timer >= this.sound_speed) {
-          this.sound_timer = 0.0;
-          playSfx(this.sound);
-        }
-      }
-
-      if (this.dialogue_timer >= this.current_line.duration) {
-        this.current_line.finished = true;
-      }
-    }).bind(this);
-  }
-}
 
 /* -----------------------------------
  * Meow Expression
@@ -1053,12 +886,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   /* PixelCanvas clowder, for creating new sprites. */
   PixelCanvas: PixelCanvas,
-
-  /* SpriteAnimation clowder, simple container for animations. */
-  SpriteAnimation: SpriteAnimation,
-
-  /* Dialogue box clowder, simple container for generating dialogue boxes. */
-  DialogueBox: DialogueBox,
 });
 
 /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
