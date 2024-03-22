@@ -608,7 +608,7 @@ class PixelCanvas extends Mewlix.Clowder {
       );
     }).bind(this);
 
-    this.to_image = (async function to_image(key) {
+    this.to_sprite = (async function to_image(key) {
       const data  = new ImageData(this.data, this.width, this.height);
       const image = await createImageBitmap(data);
       spriteMap.set(key, image);
