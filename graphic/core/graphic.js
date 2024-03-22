@@ -4,8 +4,8 @@ const where  = Mewlix.where;
 const clamp  = Mewlix.clamp;
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
-const percentToByte = p => Math.floor((255 * p) / 100);
-const byteToPercent = b => Math.floor((100 * b) / 255);
+const percentageToByte = p => Math.floor((255 * p) / 100);
+const byteToPercentage = b => Math.floor((100 * b) / 255);
 
 /* -----------------------------------
  * Initializing Canvas:
@@ -529,7 +529,7 @@ class Color extends Mewlix.Clowder {
      * Methods:
      * ------------------------------ */
     this.alpha = (function alpha() { /* alpha byte value! */
-      return percentToByte(this.opacity);
+      return percentageToByte(this.opacity);
     }).bind(this);
 
     this.to_hex = (function to_hex() {
