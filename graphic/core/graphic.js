@@ -136,8 +136,15 @@ const drawText = (message, x = 0, y = 0, options = null) => {
 
 const measureText = (message, options) => {
   setupText(options);
-  const measurement = context.measureText(message);
-  return Math.floor(measurement.width / sizeModifier);
+  const metrics = context.measureText(message);
+
+  const width  = metrics.width / sizeModifier;
+  const height = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / sizeModifier;
+
+  return new Mewlix.Box([
+    ["width"  , Math.round(width)  ],
+    ["height" , Math.round(height) ],
+  ]);
 };
 
 /* -----------------------------------
