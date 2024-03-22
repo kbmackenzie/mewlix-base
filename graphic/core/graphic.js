@@ -597,15 +597,6 @@ class PixelCanvas extends Mewlix.Clowder {
       this.data[index + 3] = color.alpha();
     }).bind(this);
 
-    this.set_tile = (function set_tile(x, y, { data }) {
-      const index = (x * this.width + y) * 4;
-      const dataSize = Math.min(this.data.length - index, data.length);
-
-      for (let i = 0; i < dataSize; i++) {
-        this.data[index + i] = data[i];
-      }
-    }).bind(this);
-
     this.to_image = (async function to_image(key) {
       const data  = new ImageData(this.data, this.width, this.height);
       const image = await createImageBitmap(data);
