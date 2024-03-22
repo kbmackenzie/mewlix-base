@@ -299,8 +299,7 @@ const flushClick = () => { mouseClick = false; };
 /* -----------------------------------
  * Core Utility:
  * ----------------------------------- */
-/* A clowder type for a 2-dimensional vector.
- * Can represent a point in a 2D world. */
+
 class Vector2 extends Mewlix.Clowder {
   constructor() {
     super();
@@ -336,8 +335,6 @@ class Vector2 extends Mewlix.Clowder {
   }
 }
 
-/* A clowder type for a 2-dimensional rectangle.
- * Can represent a region in a 2-dimensional plane. */
 class Rectangle extends Mewlix.Clowder {
   constructor() {
     super();
@@ -369,8 +366,6 @@ class Rectangle extends Mewlix.Clowder {
   }
 }
 
-/* A clowder to represent a grid slot.
- * The row and column numbers are clamped in .wake()! */
 class GridSlot extends Mewlix.Clowder {
   constructor() {
     super();
@@ -535,9 +530,6 @@ class Color extends Mewlix.Clowder {
       return this;
     }).bind(this);
 
-    /* ------------------------------
-     * Methods:
-     * ------------------------------ */
     this.alpha = (function alpha() { /* alpha byte value! */
       return percentageToByte(this.opacity);
     }).bind(this);
@@ -644,27 +636,19 @@ Mewlix.meow = value => {
 /* -----------------------------------
  * Standard library:
  * ----------------------------------- */
-/* Note: The functions in the base library use snake-case intentionally.
- * They're visible in Mewlix, and I don't want to do name-mangling. */
+
+/* The std.graphic library documentation can be found on the wiki:
+ * > https://github.com/KBMackenzie/mewlix/wiki/Graphic#the-stdgraphic-yarn-ball <
+ *
+ * It won't be included in this source file to avoid clutter.
+ *
+ * All standard library functions *should use snake_case*, as
+ * they're going to be accessible from within Mewlix. */
 
 Mewlix.Graphic = Mewlix.library('std.graphic', {
-  /* Initialize the canvas, passing your game loop function as argument.
-   * type: (() -> nothing) -> nothing */
   init: init,
-
-  /* Delta time getter. If init() hasn't been called yet, this returns 0.
-   * type: () -> number */
   delta: () => deltaTime,
 
-  /* Load a resource file. The resource type is determined by the file extension:
-   * Image files (.png, .jpg, .bmp) will load a sprite.
-   * Audio files (.mp3, .wav, .ogg) will load a sound.
-   * Font files  (.ttf, .otf, .woff, .woff2) will load a new font.
-   *
-   * When loading images, the 'options' argument should be a Rectangle.
-   * The 'options' parameter is ignored for audio and font files.
-   *
-   * type: (string, string, box?) -> nothing */
   load: (key, path, options) => {
     where('graphic.load')(
       ensure.all.string(key, path)
@@ -672,25 +656,11 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return loadAny(key, path, options);
   },
 
-  /* Accepts a callback function to draw a 'thumbnail' for the game.
-   * The thumbnail will be shown in the 'click to start' screen.
-   *
-   * type: (() -> nothing)) -> nothing */
   thumbnail: func => {
     where('graphic.thumbnail')(ensure.func(func));
     thumbnail = func;
   },
 
-  /* Load an image file and divide it into multiple sprites efficiently.
-   *
-   * It expects the following arguments:
-   * - The path to the spritesheet.
-   * - A shelf of boxes for each sprite, where each holds:
-   *   - A key for the sprite.
-   *   - A Rectangle box defining the region of the spritesheet to crop.
-   * The order of the frames do not matter.
-   *
-   * type: (string, string, shelf) -> nothing */
   spritesheet: (path, frames) => {
     where('graphic.spritesheet')(
       ensure.string(path),
@@ -699,12 +669,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return fromSpritesheet(path, frames);
   },
   
-  /* --------- Drawing ---------- */
-
-  /* Draw a sprite on the screen at a specified (x, y) position.
-   * The sprite should already be loaded!
-   *
-   * type: (string, number, number) -> nothing */
   draw: (key, x, y) => {
     where('graphic.draw')(
       ensure.string(key),
@@ -713,8 +677,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return drawSprite(key, x, y);
   },
 
-  /* Ask the dimensions of a loaded sprite.
-   * type: (string) -> box */
   measure: key => {
     const image = getSprite(key);
     return new Mewlix.Box([
@@ -723,71 +685,37 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     ]);
   },
 
-  /* Draw a rectangle on the screen from a Rectangle instance.
-   * The color can be defined with the second argument.
-   *
-   * type: (box, (box | string)) -> nothing */
   rect: (rect, color) => {
     where('graphic.rect')(ensure.box(rect));
     return drawRect(rect, color);
   },
 
-  /* Paints the canvas with a given color.
-   * type: ((box | string)) -> nothing */
   paint: fillCanvas,
 
-  /* Draw text on the screen at a specified (x, y) position.
-   *
-   * An additional box argument can be passed iwht additional options:
-   *  - font: The key for an already-loaded font family.
-   *  - size: The font size.
-   *  - color: The text color.
-   *
-   * type: (any, number, number, box) -> nothing */
   write: (value, x, y, options) => {
     where('graphic.write')(ensure.all.number(x, y));
     return drawText(Mewlix.purrify(value), x, y, options);
   },
 
-  /* Measure the width of text in the canvas.
-   *
-   * An additional box argument can be passed with additional options:
-   *  - font: The key for an already-loaded font family.
-   *  - size: The font size.
-   *  - color: The text color.
-   *
-   * type: (any, box) -> nothing */
   measure_text: (value, options) => {
     return measureText(Mewlix.purrify(value), options);
   },
 
-  /* Set text options for the 'meow' statement.
-   * type: box -> nothing */
   meow_options: box => {
     where('graphic.meow_options')(ensure.box(box));
     meowOptions = box;
   },
 
-  /* --------- Keyboard IO ---------- */
-
-  /* Asks whether a key has been pressed. Triggers only once for a single key press.
-   * type: (string) -> boolean */
   key_pressed: key => {
     where('graphic.key_pressed')(ensure.string(key));
     return isKeyPressed(key);
   },
 
-  /* Asks whether a key is down.
-   * type: (string) -> boolean */
   key_down: key => {
     where('graphic.key_down')(ensure.string(key));
     return isKeyDown(key);
   },
 
-  /* A few constants for the key values of common keys often used in games.
-   * Meant to be used with the other functions above.
-   *
-   * type: box */
   keys: new Mewlix.Box([
     ["space"  , " "         ],
     ["enter"  , "Enter"     ],
@@ -797,106 +725,63 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     ["down"   , "ArrowDown" ],
   ]),
 
-  /* --------- Mouse IO ---------- */
-
-  /* Asks whether the left mouse button has been pressed. Triggers only once for every click.
-   * type: () -> boolean */
   mouse_click: isMousePressed,
 
-  /* Asks whether the left mouse button is down.
-   * type: () -> boolean */
   mouse_down: isMouseDown,
 
-  /* Asks the mouse position relative to the canvas.
-   * Returns a Vector2 instance.
-   *
-   * type: () -> box */
   mouse_position: () => new Vector2().wake(mouseX, mouseY),
 
-  /* --------- Music/SFX ---------- */
-
-  /* Begin playing an already-loaded music track on loop.
-   * type: (string) -> nothing */
   play_music: key => {
     where('graphic.play_music')(ensure.string(key));
     return playMusic(key);
   },
 
-  /* Play an already-loaded soundbyte once.
-   * type: (string) -> nothing */
   play_sfx: key => {
     where('graphic.play_sfx')(ensure.string(key));
     return playSfx(key);
   },
 
-  /* Set the master volume.
-   * type: (number) -> nothing */
   volume: value => {
     where('graphic.volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(masterVolume, value / 2);
   },
 
-  /* Set the music volume.
-   * type: (number) -> nothing */
   music_volume: value => {
     where('graphic.music_volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(musicVolume, value);
   },
 
-  /* Set the SFX volume.
-   * type: (number) -> nothing */
   sfx_volume: value => {
     where('graphic.sfx_volume')(ensure.number(value));
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(sfxVolume, value);
   },
 
-  /* Stop all music.
-   * type: () -> nothing */
   stop_music: stopMusic,
 
-  /* Stop all SFX.
-   * type: () -> nothing */
   stop_sfx: stopSfx,
 
-  /* --------- Animation ---------- */
-
-  /* Lerp function.
-   * (number, number, number) -> number */
   lerp: (start, end, x) => {
     where('graphic.lerp')(ensure.all.number(start, end, x));
     return lerp(start, end, x);
   },
 
-  /* --------- Core Clowders ---------- */
-
-  /* Vector2 clowder. */
   Vector2: Vector2,
 
-  /* Rectangle clowder. */
   Rectangle: Rectangle,
   
-  /* Grid slot clowder. */
   GridSlot: GridSlot,
 
-  /* Convert world point to grid slot. */
   grid_slot: gridSlot,
 
-  /* Convert grid slot to world point. */
   slot_point: slotPoint,
 
-  /* --------- Additional Utility ---------- */
-
-  /* Color clowder, for representing color values. */
   Color: Color,
 
-  /* Convert a hex color code string to a Color.
-   * type: (string) -> box */
   hex: Color.fromHex,
 
-  /* PixelCanvas clowder, for creating new sprites. */
   PixelCanvas: PixelCanvas,
 });
 
