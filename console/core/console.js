@@ -149,7 +149,7 @@ const nub = array => {
   });
 };
 
-const setAccepted = keys => {
+const setAcceptedFiles = keys => {
   paperclipInput.accept = nub(keys).join(', ')
 };
 
@@ -295,7 +295,7 @@ Mewlix.Console = Mewlix.library('std.console', {
 
   accepted_files: accepted => {
     where('console.accepted_files')(ensure.shelf(accepted));
-    setAccepted(accepted.toArray());
+    setAcceptedFiles(accepted.toArray());
   },
 });
 
