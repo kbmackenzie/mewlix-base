@@ -604,7 +604,7 @@ class PixelCanvas extends Mewlix.Clowder {
         this.data[index],
         this.data[index + 1],
         this.data[index + 2],
-        undefined //todo
+        byteToPercentage(this.data[index + 3])
       );
     }).bind(this);
 
