@@ -170,12 +170,12 @@ const setBackground = path => fetch(path)
     catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
   });
 
-const setBackgroundLocal = file => {
+const setBackgroundLocalFile = file => {
   const catBackground = document.getElementById('cat-background');
   catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
 };
 
-const obscureOverlay = () => {
+const createDarkOverlay = () => {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
   return div;
@@ -201,7 +201,7 @@ paperclipInput.addEventListener('change', () => {
 
 document.getElementById('show-settings').addEventListener('click', () => {
   settingsMenu.classList.remove('hide');
-  document.body.appendChild(obscureOverlay());
+  document.body.appendChild(createDarkOverlay());
 });
 
 document.getElementById('hide-settings').addEventListener('click', () => {
@@ -219,7 +219,7 @@ showHighlight.addEventListener('change', () => {
 
 selectBackground.addEventListener('change', () => {
   if (selectBackground.files.length === 0) return;
-  setBackgroundLocal(selectBackground.files[0]);
+  setBackgroundLocalFile(selectBackground.files[0]);
 });
 
 /* -------------------------------------
