@@ -121,8 +121,8 @@ const setupText = options => {
 
   context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
   context.fillStyle = options?.color?.toString() ?? 'black';
-  context.textAlign = options?.align ?? 'start';
-  context.textBaseline = options?.base ?? 'top';
+  context.textAlign = 'start';
+  context.textBaseline = 'top';
 };
 
 const drawText = (message, x = 0, y = 0, options = null) => {
@@ -880,7 +880,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *  - font: The key for an already-loaded font family.
    *  - size: The font size.
    *  - color: The text color.
-   *  - align: The text alignment.
    *
    * type: (any, number, number, box) -> nothing */
   write: (value, x, y, options) => {
@@ -894,7 +893,6 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
    *  - font: The key for an already-loaded font family.
    *  - size: The font size.
    *  - color: The text color.
-   *  - align: The text alignment.
    *
    * type: (any, box) -> nothing */
   measure_text: (value, options) => {
