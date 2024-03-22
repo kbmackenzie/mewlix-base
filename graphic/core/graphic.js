@@ -5,6 +5,7 @@ const clamp  = Mewlix.clamp;
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
 const percentToByte = p => Math.floor((255 * p) / 100);
+const byteToPercent = b => Math.floor((100 * b) / 255);
 
 /* -----------------------------------
  * Initializing Canvas:
