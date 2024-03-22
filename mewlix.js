@@ -726,8 +726,8 @@ Mewlix.API = {
  *
  * It won't be included in this source file to avoid clutter.
  *
- * All std library functions *should use snake_case*. That's
- * why the functions below use snake_case. */
+ * All standard library functions *should use snake_case*, as
+ * they're going to be accessible from within Mewlix. */
 
 Mewlix.Base = Mewlix.library('std', {
   purr: function purr(value) {
