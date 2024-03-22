@@ -21,10 +21,8 @@ const inputReceived = file => new CustomEvent('input-received', {
 /* -------------------------------------
  * Constants:
  * ------------------------------------- */
-// The console prompt string:
 const promptMessage = '=^-x-^= $ ';
 
-// Console:
 const consoleBox        = document.getElementById('console');
 const input             = document.getElementById('console-input');
 const lines             = document.getElementById('console-lines');
@@ -33,7 +31,6 @@ const arrowButton       = document.getElementById('console-arrow');
 const paperclipInput    = document.getElementById('paperclip-input');
 const paperclipButton   = document.getElementById('console-paperclip');
 
-// Settings:
 const settingsMenu      = document.getElementById('menu-settings');
 const promptColor       = document.getElementById('select-color');
 const seePrompt         = document.getElementById('see-prompt');
@@ -141,7 +138,7 @@ const setProjectName = name => {
 };
 
 /* -------------------------------------
- * Paperclip:
+ * Paperclip Button:
  * ------------------------------------- */
 const nub = array => {
   const set = new Set();
@@ -159,7 +156,6 @@ const setAccepted = keys => {
 /* -------------------------------------
  * Background:
  * ------------------------------------- */
-// Create console background element.
 const createBackground = () => {
   const catBackground = document.createElement('div');
   catBackground.id = 'cat-background';
@@ -167,7 +163,6 @@ const createBackground = () => {
   return catBackground;
 };
 
-// Set console background to an image in the server, asynchronously.
 const setBackground = path => fetch(path)
   .then(response => response.blob())
   .then(blob => {
@@ -175,13 +170,11 @@ const setBackground = path => fetch(path)
     catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
   });
 
-// Set console background to an image in the local filesystem.
 const setBackgroundLocal = file => {
   const catBackground = document.getElementById('cat-background');
   catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
 };
 
-// Create dark overlay covering page content.
 const obscureOverlay = () => {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
@@ -237,7 +230,7 @@ setOpacity(consoleOpacity.value);
 toggleHighlight(showHighlight.checked);
 
 /* -------------------------------------
- * Standard library:
+ * Statements:
  * ------------------------------------- */
 Mewlix.meow = message => {
   const str = Mewlix.purrify(message);
@@ -252,73 +245,54 @@ Mewlix.listen = question => {
   return getInput();
 };
 
+/* -------------------------------------
+ * Standard library:
+ * ------------------------------------- */
 const ensure = Mewlix.ensure;
 const where  = Mewlix.where;
 
-/* Note: The functions in the base library use snake-case intentionally.
- * They're visible in Mewlix, and I don't want to do name-mangling. */
+/* The std library documentation can be found on the wiki:
+ * > https://github.com/KBMackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
+ *
+ * It won't be included in this source file to avoid clutter.
+ *
+ * All standard library functions *should use snake_case*, as
+ * they're going to be accessible from within Mewlix. */
 
 Mewlix.Console = Mewlix.library('std.console', {
-  /* Clear console.
-   * type: () -> nothing */
   clear: clearConsole,
 
-  /* Set console project name.
-   * type: (string) -> nothing */
   name: name => {
     where('console.name')(ensure.string(name));
     setProjectName(name);
   },
 
-  /* Set console background image.
-   * This function expects a valid path to an image file.
-   *
-   * type: (string) -> nothing */
   background: async path => {
     where('console.background')(ensure.string(path));
     await setBackground(path);
   },
 
-  /* Set console opacity level. Integer values expected: floats will be floored.
-   *
-   * Only numeric values between 0 and 100 are accepted.
-   * Any value outside of the accepted range will be clamped.
-   *
-   * type: (number) -> nothing */
   opacity: value => {
     const clamped = Mewlix.clamp(Math.floor(value), 0, 100);
     consoleOpacity.value = clamped.toString();
     setOpacity(clamped);
   },
 
-  /* Toggle the console input box's 'highlight' option. This is an accessibility feature.
-   * When enabled, the input box will change color when focused on.
-   *
-   * The reason why:
-   * https://stackoverflow.com/a/9274994/19764270
-   * 
-   * type: (boolean) -> nothing */
   highlight: enable => {
     showHighlight.checked = enable;
     toggleHighlight(enable);
   },
 
-  /* Set console prompt color. This function expects a valid hex code as argument.
-   * type: (string) -> nothing */
   prompt_color: color => {
     where('console.prompt_color')(ensure.string(color));
     promptColor.value = color;
   },
 
-  /* Sets whether or not to show the console prompt string before an user message.
-   * type: (boolean) -> nothing */
   see_prompt: see => {
     where('console.see_prompt')(ensure.boolean(see));
     seePrompt.checked = see;
   },
 
-  /* Sets accepted file extensions for paperclip input box.
-   * type: (shelf) -> nothing */
   accepted_files: accepted => {
     where('console.accepted_files')(ensure.shelf(accepted));
     setAccepted(accepted.toArray());
