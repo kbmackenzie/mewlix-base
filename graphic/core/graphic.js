@@ -113,7 +113,7 @@ const drawSprite = (key, x, y) => {
 };
 
 const drawRect = (rect, color) => {
-  context.fillStyle = color?.toString() ?? 'black';
+  context.fillStyle = withColor(color ?? 'black');
   context.fillRect(
     rect.x      * sizeModifier,
     rect.y      * sizeModifier,
@@ -123,7 +123,7 @@ const drawRect = (rect, color) => {
 };
 
 const fillCanvas = (color) => {
-  context.fillStyle = color?.toString() ?? 'black';
+  context.fillStyle = withColor(color ?? 'black');
   context.fillRect(0, 0, canvasWidth, canvasHeight);
 };
 
@@ -147,7 +147,7 @@ const setupText = options => {
   const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
   context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
-  context.fillStyle = options?.color?.toString() ?? 'black';
+  context.fillStyle = withColor(options?.color ?? 'black');
   context.textAlign = 'start';
   context.textBaseline = 'top';
 };
