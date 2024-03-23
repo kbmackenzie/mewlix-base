@@ -764,9 +764,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return playMusic(key);
   },
 
-  play_sfx: key => {
-    where('graphic.play_sfx')(ensure.string(key));
-    return playSfx(key);
+  play_sfx: (key, channel = 0) => {
+    where('graphic.play_sfx')(
+      ensure.string(key),
+      ensure.number(channel),
+    );
+    return playSfx(key, channel);
   },
 
   volume: value => {
@@ -789,7 +792,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   stop_music: stopMusic,
 
-  stop_sfx: stopSfx,
+  stop_sfx: channel => {
+    where('graphic.stop_sfx')(ensure.number(channel));
+    return stopSfx(channel);
+  },
+
+  stop_all_sfx: stopAllSfx,
 
   lerp: (start, end, x) => {
     where('graphic.lerp')(ensure.all.number(start, end, x));
