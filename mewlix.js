@@ -278,14 +278,6 @@ Mewlix.Clowder = class Clowder extends Mewlix.Box {
     this.wake = (function wake() {
       return this;
     }).bind(this);
-
-    this.to_string = (function to_string() {
-      return Mewlix.purrifyObject(this);
-    }).bind(this);
-  }
-
-  toString() {
-    return this.to_string();
   }
 }
 
