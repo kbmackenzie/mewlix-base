@@ -75,6 +75,22 @@ const fromSpritesheet = async (path, frames) => {
 };
 
 /* -----------------------------------
+ * Colors:
+ * ----------------------------------- */
+const toColor = Symbol('toColor');
+
+const withColor = value => {
+  if (typeof value === 'string') return value;    
+  if (typeof value === 'object' && toColor in value) {
+    return value[toColor]();
+  }
+
+  const typeOfValue = Mewlix.Reflection.typeOf(value);
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    `Expected color value, received value of type "${typeOfValue}": ${value}`);
+};
+
+/* -----------------------------------
  * Drawing:
  * ----------------------------------- */
 const getSprite = key => {
