@@ -274,7 +274,7 @@ const wakeSymbol = Symbol('wake');
 Mewlix.wake = wakeSymbol;
 
 /* All clowders should inherit from this class.
- * It provides a default definition for .wake(), too! */
+ * It has a default definition for wake(), too. */
 Mewlix.Clowder = class Clowder extends Mewlix.Box {
   constructor() {
     super();
