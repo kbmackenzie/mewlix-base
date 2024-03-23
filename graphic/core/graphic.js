@@ -350,7 +350,7 @@ class Vector2 extends Mewlix.Clowder {
   constructor() {
     super();
 
-    this.wake = (function wake(x, y) {
+    this[Mewlix.wake] = (function wake(x, y) {
       where('Vector2.wake')(ensure.all.number(x, y));
       this.x = x;
       this.y = y;
@@ -358,11 +358,11 @@ class Vector2 extends Mewlix.Clowder {
     }).bind(this);
 
     this.add = (function add(that) {
-      return new Vector2().wake(this.x + that.x, this.y + that.y);
+      return new Vector2()[Mewlix.wake](this.x + that.x, this.y + that.y);
     }).bind(this);
 
     this.mul = (function mul(that) {
-      return new Vector2().wake(this.x + that.x, this.y + that.y);
+      return new Vector2()[Mewlix.wake](this.x + that.x, this.y + that.y);
     }).bind(this);
 
     this.distance = (function distance(that) {
@@ -376,7 +376,7 @@ class Vector2 extends Mewlix.Clowder {
     this.clamp = (function clamp(min, max) {
       const x = clamp(this.x, min.x, max.x);
       const y = clamp(this.y, min.y, max.y);
-      return new Vector2().wake(x, y);
+      return new Vector2()[Mewlix.wake](x, y);
     }).bind(this);
   }
 }
@@ -385,7 +385,7 @@ class Rectangle extends Mewlix.Clowder {
   constructor() {
     super();
 
-    this.wake = (function wake(x, y, width, height) {
+    this[Mewlix.wake] = (function wake(x, y, width, height) {
       where('Rectangle.wake')(
         ensure.all.number(x, y, width, height)
       );
@@ -416,7 +416,7 @@ class GridSlot extends Mewlix.Clowder {
   constructor() {
     super();
 
-    this.wake = (function wake(row, column) {
+    this[Mewlix.wake] = (function wake(row, column) {
       this.row    = clamp(row,    0, gridRows - 1);
       this.column = clamp(column, 0, gridColumns - 1);
       return this;
@@ -431,11 +431,11 @@ class GridSlot extends Mewlix.Clowder {
 const positionToGridSlot = (x, y) => {
   const row = Math.min(y / gridSlotHeight);
   const col = Math.min(x / gridSlotWidth);
-  return new GridSlot().wake(row, col);
+  return new GridSlot()[Mewlix.wake](row, col);
 };
 
 const gridSlotToPosition = (row, col) => {
-  return new Vector2().wake(
+  return new Vector2()[Mewlix.wake](
     col * gridSlotWidth,
     row * gridSlotHeight,
   );
@@ -563,7 +563,7 @@ class Color extends Mewlix.Clowder {
   constructor() {
     super();
 
-    this.wake = (function wake(red, green, blue, opacity = 100) {
+    this[Mewlix.wake] = (function wake(red, green, blue, opacity = 100) {
       where('Color.wake')(
         ensure.all.number(red, green, blue, opacity)
       );
@@ -602,7 +602,7 @@ class Color extends Mewlix.Clowder {
       str = str.split('').map(x => x + x).join('');
     }
 
-    return new Color().wake(
+    return new Color()[Mewlix.wake](
       parseInt(str.slice(0, 1), 16),
       parseInt(str.slice(2, 3), 16),
       parseInt(str.slice(4, 5), 16),
@@ -616,7 +616,7 @@ class PixelCanvas extends Mewlix.Clowder {
   constructor() {
     super();
 
-    this.wake = (function wake(width, height) {
+    this[Mewlix.wake] = (function wake(width, height) {
       this.width = width;
       this.height = height;
       this.data = new Uint8ClampedArray(width * height * 4);
@@ -646,7 +646,7 @@ class PixelCanvas extends Mewlix.Clowder {
 
     this.get_pixel = (function get_pixel(x, y) {
       const index = (x * this.width + y) * 4;
-      return new Color().wake(
+      return new Color()[Mewlix.wake](
         this.data[index],
         this.data[index + 1],
         this.data[index + 2],
@@ -773,7 +773,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   mouse_down: isMouseDown,
 
-  mouse_position: () => new Vector2().wake(mouseX, mouseY),
+  mouse_position: () => new Vector2()[Mewlix.wake](mouseX, mouseY),
 
   play_music: key => {
     where('graphic.play_music')(ensure.string(key));
