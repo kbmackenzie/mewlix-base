@@ -174,10 +174,6 @@ musicVolume.connect(masterVolume);
 sfxVolume.connect(masterVolume);
 masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
 
-// Mutable state my behated
-let musicSource = null;
-let sfxSource   = null;
-
 /* -----------------------------------
  * Loading Audio:
  * ----------------------------------- */
@@ -198,39 +194,73 @@ const getBuffer = key => {
 };
 
 /* -----------------------------------
- * Playing Audio:
+ * Playing Music:
  * ----------------------------------- */
-const playMusic = key => {
-  musicSource?.stop();
-  const buffer = getBuffer(key);
-
-  musicSource = audioContext.createBufferSource();
-  musicSource.buffer = buffer; 
-  musicSource.loop = true;
-  musicSource.connect(musicVolume);
-  musicSource.start();
+const musicChannel = {
+  track: null,
 };
 
-const playSfx = key => {
-  sfxSource?.stop();
+const playMusic = key => {
+  musicChannel.track?.stop();
   const buffer = getBuffer(key);
 
-  sfxSource = audioContext.createBufferSource();
-  sfxSource.buffer = buffer; 
-  sfxSource.connect(sfxVolume);
-  sfxSource.start();
+  const track = audioContext.createBufferSource();
+  track.buffer = buffer; 
+  track.loop = true;
+  track.connect(musicVolume);
+  track.start();
+
+  musicChannel.track = track;
 };
 
 const stopMusic = () => {
-  musicSource?.stop();
-  musicSource = null;
+  musicChannel.track?.stop();
+  musicChannel.track = null;
 };
 
-const stopSfx = () => {
-  sfxSource?.stop();
-  sfxSource = null;
+/* -----------------------------------
+ * Playing Music:
+ * ----------------------------------- */
+const soundChannelCount = 8;
+const soundChannels = new Array(soundChannelCount).fill(null);
+
+const withSoundChannel = (index, callback) => {
+  if (index < 0 || index >= soundChannelCount) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `Invalid sound channel index: ${index}`);
+  }
+  soundChannels[index] = callback(soundChannels[index]);
 };
 
+const playSfx = (key, index = 0) => {
+  withSoundChannel(index, channel => {
+    channel?.stop();
+    const buffer = getBuffer(key);
+
+    const sound = audioContext.createBufferSource();
+    sound.buffer = buffer; 
+    sound.connect(sfxVolume);
+    sound.start();
+
+    return sound;
+  });
+};
+
+const stopSfx = (index = 0) => {
+  withSoundChannel(index, channel => {
+    channel?.stop();
+    return null;
+  });
+};
+
+const stopAllSfx = () => {
+  soundChannels.forEach(channel => channel?.stop());
+  soundChannels.fill(null);
+};
+
+/* -----------------------------------
+ * Adjusting Volume:
+ * ----------------------------------- */
 const setVolumeOf = (node, volume) => {
   node.gain.cancelScheduledValues(audioContext.currentTime);
   node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
