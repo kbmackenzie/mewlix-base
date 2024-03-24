@@ -249,7 +249,6 @@ Mewlix.listen = question => {
  * Standard library:
  * ------------------------------------- */
 const ensure = Mewlix.ensure;
-const where  = Mewlix.where;
 
 /* The std.console library documentation can be found on the wiki:
  * > https://github.com/KBMackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
@@ -263,12 +262,12 @@ Mewlix.Console = Mewlix.library('std.console', {
   clear: clearConsole,
 
   name: name => {
-    where('console.name')(ensure.string(name));
+    ensure.string('console.name', name);
     setProjectName(name);
   },
 
   background: async path => {
-    where('console.background')(ensure.string(path));
+    ensure.string('console.background', path);
     await setBackground(path);
   },
 
@@ -284,17 +283,17 @@ Mewlix.Console = Mewlix.library('std.console', {
   },
 
   prompt_color: color => {
-    where('console.prompt_color')(ensure.string(color));
+    ensure.string('console.prompt_color', color);
     promptColor.value = color;
   },
 
   see_prompt: see => {
-    where('console.see_prompt')(ensure.boolean(see));
+    ensure.boolean('console.see_prompt', see);
     seePrompt.checked = see;
   },
 
   accepted_files: accepted => {
-    where('console.accepted_files')(ensure.shelf(accepted));
+    ensure.shelf('console.accepted_files', accepted);
     setAcceptedFiles(accepted.toArray());
   },
 });
