@@ -48,8 +48,16 @@ const createPrompt = () => {
   return span;
 };
 
+const removeTrailingNewline = text => {
+  return text.replace(/\n$/, '');
+};
+
+const splitLines = text => {
+  return removeTrailingNewline(text).split('\n');
+};
+
 const addLines = (text, fromUser = true) => {
-  for (const line of text.split('\n').filter(x => x !== '')) {
+  for (const line of splitLines(text)) {
     const li = document.createElement('li');
 
     if (fromUser) {
