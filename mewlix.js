@@ -591,7 +591,6 @@ Mewlix.Reflection = {
 
   instanceOf: function instanceOf(a, b) {
     ensure.box('is', a);
-    ensure.box('is', b);
     return a instanceof b;
   },
 };
