@@ -49,7 +49,7 @@ const createPrompt = () => {
 };
 
 const addLine = (text, fromUser = true) => {
-  for (const line of text.split('\n')) {
+  for (const line of text.split('\n').filter(x => x !== '')) {
     const li = document.createElement('li');
 
     if (fromUser) {
