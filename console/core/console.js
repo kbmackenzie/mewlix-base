@@ -49,15 +49,17 @@ const createPrompt = () => {
 };
 
 const addLine = (text, fromUser = true) => {
-  const line = document.createElement('li');
+  for (const line of text.split('\n')) {
+    const li = document.createElement('li');
 
-  if (fromUser) {
-    line.appendChild(createPrompt());
+    if (fromUser) {
+      li.appendChild(createPrompt());
+    }
+
+    li.appendChild(document.createTextNode(line));
+    lines.appendChild(li);
+    scrollDown(lines.parentNode);
   }
-
-  line.appendChild(document.createTextNode(text));
-  lines.appendChild(line);
-  scrollDown(lines.parentNode);
 };
 
 const addError = text => {
