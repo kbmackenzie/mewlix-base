@@ -233,9 +233,8 @@ toggleHighlight(showHighlight.checked);
  * Statements:
  * ------------------------------------- */
 Mewlix.meow = message => {
-  const str = Mewlix.purrify(message);
-  addLine(str, false);
-  return str;
+  addLine(message, false);
+  return message;
 };
 
 Mewlix.listen = question => {
