@@ -21,7 +21,7 @@ const inputReceived = file => new CustomEvent('input-received', {
 /* -------------------------------------
  * Constants:
  * ------------------------------------- */
-const promptMessage = '=^-x-^= $ ';
+const promptMessage = '>> ';
 
 const consoleBox        = document.getElementById('console');
 const input             = document.getElementById('console-input');
