@@ -632,7 +632,7 @@ Mewlix.Conversion = {
 /* -----------------------------------------------------
  * Statement built-ins
  * ----------------------------------------------------- */
-Mewlix.Inner = {
+Mewlix.Internal = {
   rainable: function rainable(iter) {
     if (typeof iter !== 'string' || !(iter instanceof Mewlix.Shelf)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
