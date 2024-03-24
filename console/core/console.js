@@ -48,7 +48,7 @@ const createPrompt = () => {
   return span;
 };
 
-const addLine = (text, fromUser = true) => {
+const addLines = (text, fromUser = true) => {
   for (const line of text.split('\n').filter(x => x !== '')) {
     const li = document.createElement('li');
 
@@ -109,7 +109,7 @@ const getInput = () => {
           ? `<Read file: "${event.detail.file.name}">`
           : text;
 
-        addLine(line);
+        addLines(line);
         resolve(text);
       }, 
       { once: true }
@@ -199,13 +199,13 @@ toggleHighlight(showHighlight.checked);
  * Statements:
  * ------------------------------------- */
 Mewlix.meow = message => {
-  addLine(message, false);
+  addLines(message, false);
   return message;
 };
 
 Mewlix.listen = question => {
   if (!Mewlix.isNothing(question)) {
-    addLine(Mewlix.purrify(question), false);
+    addLines(Mewlix.purrify(question), false);
   }
   return getInput();
 };
