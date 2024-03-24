@@ -361,41 +361,32 @@ Mewlix.purrifyObject = function purrifyObject(obj) {
 /* -----------------------------------------------------
  * Type Checking
  * ----------------------------------------------------- */
-const typecheck = (predicate) => (expected) => (value) => (source) => {
+const typecheck = (predicate, expected) => (source, value) => {
   if (predicate(value)) return;
   const typeOfValue = Mewlix.Reflection.typeOf(value);
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
     `${source}: Expected ${expected}, got ${typeOfValue}: ${value}!`);
 };
 
-const typecheckAll = typechecker => (...values) => source => {
-  values.map(typechecker).forEach(fn => fn(source));
-};
-
 const ensure = {
-  number:   typecheck(x => typeof x === 'number')('number'),
-  string:   typecheck(x => typeof x === 'string')('string'),
-  boolean:  typecheck(x => typeof x === 'boolean')('boolean'),
-  shelf:    typecheck(x => x instanceof Mewlix.Shelf)('shelf'),
-  box:      typecheck(x => x instanceof Mewlix.Box)('box'),
-  func:     typecheck(x => typeof x === 'function')('func'),
+  number:   typecheck(x => typeof x === 'number',     'number' ),
+  string:   typecheck(x => typeof x === 'string',     'string' ),
+  boolean:  typecheck(x => typeof x === 'boolean',    'boolean'),
+  shelf:    typecheck(x => x instanceof Mewlix.Shelf, 'shelf'  ),
+  box:      typecheck(x => x instanceof Mewlix.Box,   'box'    ),
+  func:     typecheck(x => typeof x === 'function',   'func'   ),
 };
 
 ensure.all = {
-  number:   typecheckAll(ensure.number),
-  string:   typecheckAll(ensure.string),
-  boolean:  typecheckAll(ensure.boolean),
-  shelf:    typecheckAll(ensure.shelf),
-  box:      typecheckAll(ensure.box),
-  func:     typecheckAll(ensure.func),
+  number:   (source, ...values) => values.forEach(x => ensure.number(source, x) ),
+  string:   (source, ...values) => values.forEach(x => ensure.string(source, x) ),
+  boolean:  (source, ...values) => values.forEach(x => ensure.boolean(source, x)),
+  shelf:    (source, ...values) => values.forEach(x => ensure.shelf(source, x)  ),
+  box:      (source, ...values) => values.forEach(x => ensure.box(source, x)    ),
+  func:     (source, ...values) => values.forEach(x => ensure.func(source, x)   ),
 };
 
-const where = source => (...assertions) => {
-  assertions.forEach(x => x(source));
-}
-
 Mewlix.ensure = ensure;
-Mewlix.where = where;
 
 /* -----------------------------------------------------
  * Value Utils 
@@ -456,19 +447,23 @@ Mewlix.Comparison = class Comparison {
  * ----------------------------------------------------- */
 Mewlix.Arithmetic = {
   add: function add(a, b) {
-    where('+')(ensure.all.number(a, b));
+    ensure.number('+', a);
+    ensure.number('+', b);
     return a + b;
   },
   sub: function sub(a, b) {
-    where('-')(ensure.all.number(a, b));
+    ensure.number('-', a);
+    ensure.number('-', b);
     return a - b;
   },
   mul: function mul(a, b) {
-    where('*')(ensure.all.number(a, b));
+    ensure.number('*', a);
+    ensure.number('*', b);
     return a * b;
   },
   div: function div(a, b) {
-    where('/')(ensure.all.number(a, b));
+    ensure.number('/', a);
+    ensure.number('/', b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -476,7 +471,8 @@ Mewlix.Arithmetic = {
     return a / b;
   },
   mod: function mod(a, b) {
-    where('%')(ensure.all.number(a, b));
+    ensure.number('%', a);
+    ensure.number('%', b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
         `Attempted to divide ${a} by ${b}!`);
@@ -484,11 +480,12 @@ Mewlix.Arithmetic = {
     return a % b;
   },
   pow: function pow(a, b) {
-    where('^')(ensure.all.number(a, b));
+    ensure.number('^', a);
+    ensure.number('^', b);
     return a ** b;
   },
   negate: function negate(a) {
-    where('-')(ensure.number(a));
+    ensure.number('-', a);
     return -a;
   },
 };
@@ -552,15 +549,15 @@ Mewlix.Strings = {
 
 Mewlix.Shelves = {
   peek: function peek(shelf) {
-    where('peek')(ensure.shelf(shelf));
+    ensure.shelf('peek', shelf);
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    where('pop')(ensure.shelf(shelf));
+    ensure.shelf('pop', shelf);
     return shelf.pop();
   },
-  push: function push(shelf, value = null) {
-    where('push')(ensure.shelf(shelf));
+  push: function push(shelf) {
+    ensure.shelf('push', shelf);
     return shelf.push(value);
   },
   length: function length(value) {
@@ -593,14 +590,15 @@ Mewlix.Reflection = {
   },
 
   instanceOf: function instanceOf(a, b) {
-    where('is')(ensure.all.box(a, b));
+    ensure.box('is', a);
+    ensure.box('is', b);
     return a instanceof b;
   },
 };
 
 Mewlix.Boxes = {
   pairs: function pairs(value) {
-    where('claw at')(ensure.box(value));
+    ensure.box('claw at', value);
     return Mewlix.Shelf.fromArray(Object.entries(value).map(
       ([key, value]) => new Mewlix.Box([["key", key], ["value", value]])
     ));
@@ -731,30 +729,30 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   trim: function trim(str) {
-    where('std.trim')(ensure.string(str));
+    ensure.string('std.trim', str)
     return str.trim();
   },
 
   tear: function tear(str, start, end) {
-    where('std.tear')(
-      ensure.string(str),
-      ensure.all.number(start, end),
-    );
+    ensure.string('std.tear', str);
+    ensure.number('std.tear', start);
+    ensure.number('std.tear', end);
+
     return str.substring(start, end);
   },
 
   push_down: function push_down(str) {
-    where('std.push_down')(ensure.string(str));
+    ensure.string('std.push_down', str);
     return str.toLowerCase();
   },
 
   push_up: function push_up(str) {
-    where('std.push_up')(ensure.string(str));
+    ensure.string('std.push_up', str);
     return str.toUpperCase();
   },
 
   poke: function poke(value, index = 0) {
-    where('std.poke')(ensure.number(index));
+    ensure.number('std.poke', index);
 
     if (typeof value === 'string') {
       if (index < 0) {
@@ -809,7 +807,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   take: function take(value, amount) {
-    where('std.take')(ensure.number(amount));
+    ensure.number('std.take', amount);
 
     if (typeof value === 'string') return value.slice(0, amount);
     if (value instanceof Mewlix.Shelf) {
@@ -828,7 +826,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   drop: function drop(value, amount) {
-    where('std.take')(ensure.number(amount));
+    ensure.number('std.take', amount);
 
     if (typeof value === 'string') return value.slice(amount);
     if (value instanceof Mewlix.Shelf) {
@@ -854,7 +852,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
   
   sort: function sort(shelf) {
-    where('std.sort')(ensure.shelf(shelf));
+    ensure.shelf('std.sort', shelf);
     return Mewlix.Shelf.fromArray(shelf
       .toArray()
       .sort((a, b) => Mewlix.Compare.compare(a, b).id)
@@ -862,7 +860,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   shuffle: function shuffle(shelf) {
-    where('std.shuffle')(ensure.shelf(shelf));
+    ensure.shelf('std.shuffle', shelf);
     const output = shelf.toArray();
 
     for (let i = output.length - 1; i > 0; i--) {
@@ -876,10 +874,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   map: async function map(shelf, callback) {
-    where('std.map')(
-      ensure.shelf(shelf),
-      ensure.func(callback),
-    );
+    ensure.shelf('std.map', shelf);
+    ensure.func('std.map', callback);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -889,10 +885,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   filter: async function filter(shelf, predicate) {
-    where('std.filter')(
-      ensure.shelf(shelf),
-      ensure.func(predicate),
-    );
+    ensure.shelf('std.filter', shelf);
+    ensure.func('std.filter', predicate);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -904,10 +898,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   fold: async function fold(shelf, initial, callback) {
-    where('std.fold')(
-      ensure.shelf(shelf),
-      ensure.func(callback),
-    );
+    ensure.shelf('std.fold', shelf);
+    ensure.func('std.fold', callback);
 
     let accumulator = initial;
     for (const value of shelf) {
@@ -917,7 +909,9 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   zip: function zip(a, b) {
-    where('std.zip')(ensure.all.shelf(a, b));
+    ensure.shelf('std.zip', a);
+    ensure.shelf('std.zip', b);
+
     const accumulator = [];
     while (a instanceof Mewlix.ShelfNode && b instanceof Mewlix.ShelfNode) {
       accumulator.push(new Mewlix.Box([
@@ -931,10 +925,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   insert: function insert(shelf, value, index = 0) {
-    where('std.insert')(
-      ensure.shelf(shelf),
-      ensure.number(index),
-    );
+    ensure.shelf('std.insert', shelf);
+    ensure.number('std.insert', index);
 
     const bucket = [];
     let tail = shelf;
@@ -956,10 +948,8 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   remove: function remove(shelf, index = 0) {
-    where('std.reverse')(
-      ensure.shelf(shelf),
-      ensure.number(index),
-    );
+    ensure.shelf('std.remove', shelf);
+    ensure.number('std.remove', index);
 
     const bucket = [];
     let tail = shelf;
@@ -1035,22 +1025,25 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   round: function round(value) {
-    where('std.round')(ensure.number(value));
+    ensure.number('std.round', value);
     return Math.round(value);
   },
 
   floor: function floor(value) {
-    where('std.floor')(ensure.number(value));
+    ensure.number('std.floor', value);
     return Math.floor(value);
   },
 
   ceiling: function ceiling(value) {
-    where('std.ceiling')(ensure.number(value));
+    ensure.number('std.ceiling', value);
     return Math.ceil(value);
   },
 
   clamp: function clamp(value, min, max) {
-    where('std.clamp')(ensure.all.number(value, min, max));
+    ensure.number('std.clamp', value);
+    ensure.number('std.clamp', min);
+    ensure.number('std.clamp', max);
+
     return Mewlix.clamp(value, min, max);
   },
 
@@ -1063,7 +1056,8 @@ Mewlix.Base = Mewlix.library('std', {
       max = min;
       min = 0;
     }
-    where('std.random_int')(ensure.all.number(min, max));
+    ensure.number('std.random_int', min);
+    ensure.number('std.random_int', max);
     return Math.floor(Math.random() * (max - min + 1) + min);
   },
 
@@ -1072,7 +1066,8 @@ Mewlix.Base = Mewlix.library('std', {
       end = start;
       start = 0;
     }
-    where('std.count')(ensure.all.number(start, end));
+    ensure.number('std.count', start);
+    ensure.number('std.count', end);
 
     const array = [];
     if (start < end) {
