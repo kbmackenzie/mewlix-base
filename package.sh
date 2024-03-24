@@ -23,6 +23,5 @@ for TEMPLATE in $TEMPLATES; do
     echo "Zipping '$TEMPLATE':"
     cd "$BUILD_FOLDER"
     zip -r "../$TEMPLATE" .
-    cd ..
-    cd ..
+    cd .. && cd ..
 done
