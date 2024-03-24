@@ -553,7 +553,7 @@ Mewlix.Shelves = {
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    ensure.shelf('pop', shelf);
+    ensure.shelf('knock off', shelf);
     return shelf.pop();
   },
   push: function push(shelf) {
@@ -826,7 +826,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   drop: function drop(value, amount) {
-    ensure.number('std.take', amount);
+    ensure.number('std.drop', amount);
 
     if (typeof value === 'string') return value.slice(amount);
     if (value instanceof Mewlix.Shelf) {
