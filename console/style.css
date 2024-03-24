@@ -245,10 +245,6 @@ html, body {
   width: 1.5rem;
 }
 
-.settings__options li > input[type='range'] {
-  max-width: 6rem;
-}
-
 .settings__options li > label {
   text-align: center;
 }

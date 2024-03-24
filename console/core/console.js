@@ -32,18 +32,16 @@ const paperclipInput    = document.getElementById('paperclip-input');
 const paperclipButton   = document.getElementById('console-paperclip');
 
 const settingsMenu      = document.getElementById('menu-settings');
-const promptColor       = document.getElementById('select-color');
-const seePrompt         = document.getElementById('see-prompt');
+const setColor          = document.getElementById('select-color');
+const setErrorColor     = document.getElementById('select-color');
 const showHighlight     = document.getElementById('show-highlight');
-const consoleOpacity    = document.getElementById('select-opacity');
-const selectBackground  = document.getElementById('select-background');
 
 /* -------------------------------------
  * Console functionality:
  * ------------------------------------- */
 const createPrompt = () => {
   const span = document.createElement('span');
-  span.style.color = promptColor.value;
+  span.style.color = setColor.value;
   span.classList.add('console__prompt');
 
   span.appendChild(document.createTextNode(promptMessage));
@@ -53,7 +51,7 @@ const createPrompt = () => {
 const addLine = (text, fromUser = true) => {
   const line = document.createElement('li');
 
-  if (fromUser && seePrompt.checked) {
+  if (fromUser) {
     line.appendChild(createPrompt());
   }
 
@@ -64,7 +62,7 @@ const addLine = (text, fromUser = true) => {
 
 const addError = text => {
   const line = document.createElement('li');
-  line.style.color = '#c90e17';
+  line.style.color = setErrorColor.value;
   line.appendChild(document.createTextNode(`[Console] ${text}`));
 
   lines.appendChild(line);
@@ -128,10 +126,6 @@ const toggleHighlight = highlight => {
     input.classList.remove('console__input--highlight');
 };
 
-const setOpacity = value => {
-  consoleBox.style.opacity = `${value}%`;
-};
-
 const setProjectName = name => {
   if (name === '') return;
   projectName.textContent = name;
@@ -154,27 +148,8 @@ const setAcceptedFiles = keys => {
 };
 
 /* -------------------------------------
- * Background:
+ * Screen Overlay
  * ------------------------------------- */
-const createBackground = () => {
-  const catBackground = document.createElement('div');
-  catBackground.id = 'cat-background';
-  catBackground.classList.add('cat-background');
-  return catBackground;
-};
-
-const setBackground = path => fetch(path)
-  .then(response => response.blob())
-  .then(blob => {
-    const catBackground = document.getElementById('cat-background');
-    catBackground.style.backgroundImage = `url('${URL.createObjectURL(blob)}')`;
-  });
-
-const setBackgroundLocalFile = file => {
-  const catBackground = document.getElementById('cat-background');
-  catBackground.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
-};
-
 const createDarkOverlay = () => {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
@@ -209,24 +184,13 @@ document.getElementById('hide-settings').addEventListener('click', () => {
   Array.from(document.getElementsByClassName('obscure')).forEach(x => x.remove());
 });
 
-consoleOpacity.addEventListener('change', () => {
-  setOpacity(consoleOpacity.value);
-});
-
 showHighlight.addEventListener('change', () => {
   toggleHighlight(showHighlight.checked);
-});
-
-selectBackground.addEventListener('change', () => {
-  if (selectBackground.files.length === 0) return;
-  setBackgroundLocalFile(selectBackground.files[0]);
 });
 
 /* -------------------------------------
  * Initialization (electric boogaloo):
  * ------------------------------------- */
-document.body.appendChild(createBackground());
-setOpacity(consoleOpacity.value);
 toggleHighlight(showHighlight.checked);
 
 /* -------------------------------------
@@ -265,30 +229,19 @@ Mewlix.Console = Mewlix.library('std.console', {
     setProjectName(name);
   },
 
-  background: async path => {
-    ensure.string('console.background', path);
-    await setBackground(path);
-  },
-
-  opacity: value => {
-    const clamped = Mewlix.clamp(Math.floor(value), 0, 100);
-    consoleOpacity.value = clamped.toString();
-    setOpacity(clamped);
-  },
-
   highlight: enable => {
     showHighlight.checked = enable;
     toggleHighlight(enable);
   },
 
-  prompt_color: color => {
-    ensure.string('console.prompt_color', color);
-    promptColor.value = color;
+  set_color: color => {
+    ensure.string('console.set_color', color);
+    setColor.value = color;
   },
 
-  see_prompt: see => {
-    ensure.boolean('console.see_prompt', see);
-    seePrompt.checked = see;
+  set_error_color: color => {
+    ensure.string('console.set_error_color', color);
+    setErrorColor.value = color;
   },
 
   accepted_files: accepted => {
