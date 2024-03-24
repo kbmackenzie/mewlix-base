@@ -10,7 +10,6 @@
 
 'use strict';
 const ensure = Mewlix.ensure;
-const where  = Mewlix.where;
 const clamp  = Mewlix.clamp;
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -351,7 +350,8 @@ class Vector2 extends Mewlix.Clowder {
     super();
 
     this[Mewlix.wake] = (function wake(x, y) {
-      where('Vector2.wake')(ensure.all.number(x, y));
+      ensure.number('Vector2.wake', x);
+      ensure.number('Vector2.wake', y);
       this.x = x;
       this.y = y;
       return this;
@@ -386,8 +386,8 @@ class Rectangle extends Mewlix.Clowder {
     super();
 
     this[Mewlix.wake] = (function wake(x, y, width, height) {
-      where('Rectangle.wake')(
-        ensure.all.number(x, y, width, height)
+      [x, y, width, height].forEach(
+        value => ensure.number('Rectangle.wake', value)
       );
       this.x = x;
       this.y = y;
@@ -463,7 +463,7 @@ const drawPlay = async () => {
 };
 
 const init = async (callback) => {
-  where('graphic.init')(ensure.func(callback));
+  ensure.func('graphic.init', callback);
   await loadFont('Munro', '/core-assets/fonts/Munro/munro.ttf');
 
   const nextFrame = () => new Promise(resolve => {
@@ -564,8 +564,8 @@ class Color extends Mewlix.Clowder {
     super();
 
     this[Mewlix.wake] = (function wake(red, green, blue, opacity = 100) {
-      where('Color.wake')(
-        ensure.all.number(red, green, blue, opacity)
+      [red, green, blue, opacity].forEach(
+        value => ensure.number('Color.wake', value)
       );
       this.red      = clamp(red, 0, 255);
       this.green    = clamp(green, 0, 255);
@@ -694,30 +694,26 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   delta: () => deltaTime,
 
   load: (key, path, options) => {
-    where('graphic.load')(
-      ensure.all.string(key, path)
-    );
+    ensure.string('graphic.load', key);
+    ensure.string('graphic.load', path);
     return loadAny(key, path, options);
   },
 
   thumbnail: func => {
-    where('graphic.thumbnail')(ensure.func(func));
+    ensure.func('graphic.thumbnail', func);
     thumbnail = func;
   },
 
   spritesheet: (path, frames) => {
-    where('graphic.spritesheet')(
-      ensure.string(path),
-      ensure.shelf(frames),
-    );
+    ensure.string('graphic.spritesheet', path);
+    ensure.shelf('graphic.spritesheet', frames);
     return fromSpritesheet(path, frames);
   },
   
   draw: (key, x, y) => {
-    where('graphic.draw')(
-      ensure.string(key),
-      ensure.all.number(x, y),
-    );
+    ensure.string('graphic.draw', key);
+    ensure.number('graphic.draw', x);
+    ensure.number('graphic.draw', y);
     return drawSprite(key, x, y);
   },
 
@@ -730,14 +726,15 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   },
 
   rect: (rect, color) => {
-    where('graphic.rect')(ensure.box(rect));
+    ensure.box('graphic.rect', rect);
     return drawRect(rect, color);
   },
 
   paint: fillCanvas,
 
   write: (value, x, y, options) => {
-    where('graphic.write')(ensure.all.number(x, y));
+    ensure.number('graphic.write', x);
+    ensure.number('graphic.write', y);
     return drawText(Mewlix.purrify(value), x, y, options);
   },
 
@@ -746,17 +743,17 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   },
 
   meow_options: box => {
-    where('graphic.meow_options')(ensure.box(box));
+    ensure.box('graphic.meow_options', box);
     meowOptions = box;
   },
 
   key_pressed: key => {
-    where('graphic.key_pressed')(ensure.string(key));
+    ensure.string('graphic.key_pressed', key);
     return isKeyPressed(key);
   },
 
   key_down: key => {
-    where('graphic.key_down')(ensure.string(key));
+    ensure.string('graphic.key_down', key);
     return isKeyDown(key);
   },
 
@@ -776,32 +773,30 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   mouse_position: () => new Vector2()[Mewlix.wake](mouseX, mouseY),
 
   play_music: key => {
-    where('graphic.play_music')(ensure.string(key));
+    ensure.string('graphic.play_music', key);
     return playMusic(key);
   },
 
   play_sfx: (key, channel = 0) => {
-    where('graphic.play_sfx')(
-      ensure.string(key),
-      ensure.number(channel),
-    );
+    ensure.string('graphic.play_sfx', key);
+    ensure.number('graphic.play_sfx', channel);
     return playSfx(key, channel);
   },
 
   volume: value => {
-    where('graphic.volume')(ensure.number(value));
+    ensure.number('graphic.volume', value);
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(masterVolume, value / 2);
   },
 
   music_volume: value => {
-    where('graphic.music_volume')(ensure.number(value));
+    ensure.number('graphic.music_volume', value);
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(musicVolume, value);
   },
 
   sfx_volume: value => {
-    where('graphic.sfx_volume')(ensure.number(value));
+    ensure.number('graphic.sfx_volume', value);
     value = clamp(value, 0, 100) / 100;
     return setVolumeOf(sfxVolume, value);
   },
@@ -809,14 +804,16 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   stop_music: stopMusic,
 
   stop_sfx: channel => {
-    where('graphic.stop_sfx')(ensure.number(channel));
+    ensure.number('graphic.stop_sfx', channel);
     return stopSfx(channel);
   },
 
   stop_all_sfx: stopAllSfx,
 
   lerp: (start, end, x) => {
-    where('graphic.lerp')(ensure.all.number(start, end, x));
+    ensure.number('graphic.lerp', start);
+    ensure.number('graphic.lerp', end);
+    ensure.number('graphic.lerp', x);
     return lerp(start, end, x);
   },
 
