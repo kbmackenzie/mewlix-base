@@ -17,16 +17,17 @@
   <body class="center-items">
     <!-- Console Window -->
     <main id="console" class="console">
-      <section class="font-console center-items console__title">
+      <header class="font-console center-items console__title">
         <h1>mewlix
           <span class="translucent"> - </span>
           <span id="project-name" class="translucent">untitled</span>
         </h1>
-      </section>
+      </header>
 
-      <section class="font-console console__content">
+      <!-- I'm choosing to use a <div> because nothing else fits semantically. -->
+      <div class="font-console console__content">
         <ul id="console-lines"></ul>
-      </section>
+      </div>
 
       <textarea
           id="console-input"
@@ -35,7 +36,7 @@
           class="font-console console__input"
           disabled></textarea>
 
-      <section id="console-paperclip" class="white-button center-items console__paperclip">
+      <button id="console-paperclip" class="white-button center-items console__paperclip" disabled>
         <label for="paperclip-input" class="center-items">
           <!-- The SVG icon below is from: https://heroicons.dev/ -->
           <svg
@@ -59,9 +60,9 @@
             id="paperclip-input"
             name="paperclip-input"
             disabled />
-      </section>
+      </button>
 
-      <section id="console-arrow" class="white-button center-items console__arrow">
+      <button id="console-arrow" class="white-button center-items console__arrow" disabled>
         <!-- The SVG icon below is from: https://heroicons.dev/ -->
         <svg
             data-slot="icon"
@@ -76,9 +77,9 @@
               stroke-linecap="round"
               stroke-linejoin="round"></path>
         </svg>
-      </section>
+      </button>
 
-      <nav id="show-settings" class="white-button enabled center-items console__settings">
+      <button id="show-settings" class="white-button center-items console__settings">
         <!-- The SVG icon below is from: https://heroicons.dev/ -->
         <svg
             data-slot="icon" 
@@ -93,12 +94,12 @@
             stroke-linecap="round"
             stroke-linejoin="round"></path>
         </svg>
-      </nav>
+      </button>
     </main>
 
     <!-- Settings Menu -->
     <aside id="menu-settings" class="settings hide">
-      <nav id="hide-settings" class="white-button enabled center-items settings__exit">
+      <button id="hide-settings" class="white-button center-items settings__exit">
         <!-- The SVG icon below is from: https://heroicons.dev/ -->
         <svg
             data-slot="icon"
@@ -113,7 +114,7 @@
               stroke-linecap="round" 
               stroke-linejoin="round"></path>
         </svg>
-      </nav>
+      </button>
 
       <section class="font-console settings__options">
         <ul>
