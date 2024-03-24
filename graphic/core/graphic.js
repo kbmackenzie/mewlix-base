@@ -666,10 +666,9 @@ class PixelCanvas extends Mewlix.Clowder {
  * Meow Expression
  * ----------------------------------- */
 let meowOptions = null;
-Mewlix.meow = value => {
-  const message = Mewlix.purrify(value);
+Mewlix.meow = message => {
   drawText(
-    value,
+    message,
     meowOptions?.x ?? 0,
     meowOptions?.y ?? 0,
     meowOptions
