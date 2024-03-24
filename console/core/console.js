@@ -84,16 +84,9 @@ const scrollDown = elem => {
 };
 
 const enableButtons = enable => {
-  if (enable) {
-    arrowButton.classList.add('enabled');
-    paperclipInput.disabled = false;
-    paperclipButton.classList.add('enabled');
-  }
-  else {
-    arrowButton.classList.remove('enabled');
-    paperclipInput.disabled = true;
-    paperclipButton.classList.remove('enabled');
-  }
+  arrowButton.disabled = !enable; 
+  paperclipInput.disabled = !enable;
+  paperclipButton.disabled = !enable; 
 };
 
 const getInput = () => {
