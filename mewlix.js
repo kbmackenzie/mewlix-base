@@ -445,7 +445,7 @@ Mewlix.Comparison = class Comparison {
 /* -----------------------------------------------------
  * Basic operations.
  * ----------------------------------------------------- */
-Mewlix.Arithmetic = {
+Mewlix.Numbers = {
   add: function add(a, b) {
     ensure.number('+', a);
     ensure.number('+', b);
