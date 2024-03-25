@@ -18,7 +18,7 @@ const setTitle = name => {
   document.title = name;
 };
 
-const run = async () => {
+export default async () => {
   const data = await scriptList();
   setTitle(data.title);
   const entrypoint = data.entrypoint || 'main';
@@ -28,5 +28,3 @@ const run = async () => {
   }
   await Mewlix.run(() => Mewlix.Modules.getModule(entrypoint));
 };
-
-run();
