@@ -9,9 +9,12 @@
     <link href="style.css" rel="stylesheet">
     <link rel="icon" href="favicon.svg" type="image/x-icon">
 
-    <script type="module" src="core/mewlix.js"></script>
-    <script type="module" src="core/graphic.js"></script>
-    <script type="module" src="core/run-mewlix.js"></script>
+    <script type="module">
+      import 'core/mewlix.js';
+      import 'core/graphic.js';
+      import run from 'core/run-mewlix.js';
+      run();
+    </script>
   </head>
   <body class="full-height center-items">
     <main class="full-height">
