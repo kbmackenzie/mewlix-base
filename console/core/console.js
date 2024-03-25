@@ -171,6 +171,11 @@ arrowButton.addEventListener('click', () => {
   input.dispatchEvent(inputReceived());
 });
 
+paperclipButton.addEventListener('click', event => {
+  event.preventDefault();
+  paperclipInput.click();
+});
+
 paperclipInput.addEventListener('change', () => {
   if (paperclipInput.files.length === 0) return;
   input.dispatchEvent(inputReceived(paperclipInput.files[0]));
