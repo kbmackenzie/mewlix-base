@@ -727,6 +727,14 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.purrify(value);
   },
 
+  cat: function cat(shelf) {
+    let acc = '';
+    for (const value of shelf) {
+      acc = Mewlix.purrify(value) + acc;
+    }
+    return acc;
+  },
+
   trim: function trim(str) {
     ensure.string('std.trim', str)
     return str.trim();
