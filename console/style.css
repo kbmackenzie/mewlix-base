@@ -160,8 +160,8 @@ html, body {
   background-color: inherit;
 }
 
-.console__paperclip svg,
-.console__arrow svg {
+.console__paperclip > svg,
+.console__arrow > svg {
   width: 60%;
   height: 60%;
 }
