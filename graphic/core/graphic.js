@@ -456,7 +456,7 @@ const awaitClick = () => new Promise(resolve => {
 });
 
 const drawPlay = async () => {
-  const image = await loadImage('/core-assets/mewlix-play.png');
+  const image = await loadImage('core-assets/mewlix-play.png');
   context.fillStyle = 'rgb(0 0 0 / 50%)';
   context.fillRect(0, 0, canvasWidth, canvasHeight);
   context.drawImage(image, 0, 0);
@@ -464,7 +464,7 @@ const drawPlay = async () => {
 
 const init = async (callback) => {
   ensure.func('graphic.init', callback);
-  await loadFont('Munro', '/core-assets/fonts/Munro/munro.ttf');
+  await loadFont('Munro', 'core-assets/fonts/Munro/munro.ttf');
 
   const nextFrame = () => new Promise(resolve => {
     window.requestAnimationFrame(resolve);
@@ -844,7 +844,7 @@ Mewlix.run = async f => {
     await f();
   }
   catch (error) {
-    const image = await loadImage('/core-assets/mewlix-error.png');
+    const image = await loadImage('core-assets/mewlix-error.png');
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
