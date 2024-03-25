@@ -10,7 +10,7 @@
 
 'use strict';
 
-const scriptList = () => fetch('/core/script-list.json')
+const scriptList = () => fetch('core/script-list.json')
   .then(response => response.json());
 
 const loadScript = function loadScript(src) {
