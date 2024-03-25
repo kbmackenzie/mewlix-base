@@ -8,9 +8,7 @@ export default async (options = {}) => {
   if (listen) { Mewlix.listen = listen; }
   await before?.();
 
-  Mewlix.run = async f => {
-    await f();
-    if (cleanUp) { delete globalThis.Mewlix; }
-  };
-  await import('./core/run-mewlix.js');
+  const run = await import('./core/run-mewlix.js');
+  await run();
+  if (cleanUp) { delete globalThis.Mewlix; }
 };
