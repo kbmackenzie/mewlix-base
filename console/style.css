@@ -40,6 +40,10 @@ html, body {
   font-weight: normal;
 }
 
+.preserve {
+  white-space: pre;
+}
+
 .white-button {
   opacity: 30%;
   transition: 1s;
