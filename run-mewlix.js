@@ -25,8 +25,14 @@ const loadScript = function loadScript(src) {
   });
 };
 
+const setTitle = name => {
+  if (!name) return;
+  document.title = name;
+};
+
 const run = async () => {
   const data = await scriptList();
+  setTitle(data.title);
   const entrypoint = data.entrypoint || 'main';
   
   for (const script of data.scripts) {
