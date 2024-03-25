@@ -23,7 +23,6 @@ const inputReceived = file => new CustomEvent('input-received', {
  * ------------------------------------- */
 const promptMessage = '>> ';
 
-const consoleBox        = document.getElementById('console');
 const input             = document.getElementById('console-input');
 const lines             = document.getElementById('console-lines');
 const projectName       = document.getElementById('project-name');
