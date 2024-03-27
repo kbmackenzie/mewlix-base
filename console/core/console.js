@@ -51,28 +51,23 @@ const removeTrailingNewline = text => {
   return text.replace(/\n$/, '');
 };
 
-const splitLines = text => {
-  return removeTrailingNewline(text).split('\n');
-};
+const addLines = (str, fromUser = true) => {
+  const message = removeTrailingNewline(str);
 
-const addLines = (text, fromUser = true) => {
-  for (const line of splitLines(text)) {
-    const li = document.createElement('li');
-
-    if (fromUser) {
-      li.appendChild(createPrompt());
-    }
-
-    li.appendChild(document.createTextNode(line));
-    lines.appendChild(li);
-    scrollDown(lines.parentNode);
+  const line = document.createElement('li');
+  if (fromUser) {
+    line.appendChild(createPrompt());
   }
+  line.appendChild(document.createTextNode(message));
+
+  lines.appendChild(line);
+  scrollDown(lines.parentNode);
 };
 
-const addError = text => {
+const addError = str => {
   const line = document.createElement('li');
   line.style.color = setErrorColor.value;
-  line.appendChild(document.createTextNode(`[Console] ${text}`));
+  line.appendChild(document.createTextNode(`[Console] ${str}`));
 
   lines.appendChild(line);
   scrollDown(lines.parentNode);
