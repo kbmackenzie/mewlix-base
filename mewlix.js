@@ -1066,6 +1066,8 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.clamp(value, min, max);
   },
 
+  pi: Math.PI,
+
   sqrt: function sqrt(value) {
     ensure.number('std.sqrt', value);
     if (value < 0) {
