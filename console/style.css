@@ -133,6 +133,7 @@ html, body {
 
 .console__content li {
   display: block;
+  white-space: pre;
   margin-bottom: 1rem;
 }
 
