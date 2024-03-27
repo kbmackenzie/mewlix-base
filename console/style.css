@@ -193,23 +193,18 @@ html, body {
   position: fixed;
   display: grid;
   grid-template-areas:
-    "settings-header  settings-buttons"
+    ".                settings-exit"
     "settings-options settings-options";
   grid-template-columns: auto 5rem;
   grid-template-rows: 2rem auto;
-  background-color: #1f1f1f;
+  background-color: #121212;
   overflow: hidden;
-  border-radius: 2rem;
+  border-radius: 1rem;
   z-index: 20;
-  width: 90%;
-}
-
-.settings__header {
-  grid-area: settings-header;
 }
 
 .settings__exit {
-  grid-area: settings-buttons;
+  grid-area: settings-exit;
 }
 
 .settings__exit > svg {
@@ -219,10 +214,11 @@ html, body {
 
 .settings__options {
   grid-area: settings-options;
-  background-color: #262626;
   display: flex;
+  background-color: #1f1f1f;
   flex-flow: column nowrap;
   justify-content: center;
+  padding: 0.5rem 2rem;
   align-items: center;
 }
 
@@ -231,14 +227,14 @@ html, body {
 }
 
 .settings__options li {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 1rem;
-  box-shadow: 1px 3px 3px black;
-  background-color: #1f1f1f;
-  padding: 0.5rem 1.5rem;
-  margin: 1rem 0.5rem;
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr;
+  margin: 0.5rem;
+}
+
+.settings__options li > label {
+  text-align: right;
+  margin: auto 0;
 }
 
 .settings__options li > input {
@@ -253,19 +249,8 @@ html, body {
   width: 1.5rem;
 }
 
-.settings__options li > label {
-  text-align: center;
-}
-
 /* -----------------------------------------
  * Media Queries:
  * ----------------------------------------- */
 @media (min-width: 40rem) {
-  .settings {
-    width: auto;
-  }
-
-  .settings__options {
-    padding: 1rem 2rem;
-  }
 }
