@@ -51,7 +51,7 @@ const removeTrailingNewline = text => {
   return text.replace(/\n$/, '');
 };
 
-const addLines = (str, fromUser = true) => {
+const addLine = (str, fromUser = true) => {
   const message = removeTrailingNewline(str);
 
   const line = document.createElement('li');
@@ -104,7 +104,7 @@ const getInput = () => {
           ? `<Read file: "${event.detail.file.name}">`
           : text;
 
-        addLines(line);
+        addLine(line);
         resolve(text);
       }, 
       { once: true }
@@ -201,13 +201,13 @@ toggleHighlight(showHighlight.checked);
  * Statements:
  * ------------------------------------- */
 Mewlix.meow = message => {
-  addLines(message, false);
+  addLine(message, false);
   return message;
 };
 
 Mewlix.listen = question => {
   if (!Mewlix.isNothing(question)) {
-    addLines(question, false);
+    addLine(question, false);
   }
   return getInput();
 };
