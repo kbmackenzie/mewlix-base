@@ -1067,6 +1067,7 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   pi: Math.PI,
+  e: Math.E,
 
   sqrt: function sqrt(value) {
     ensure.number('std.sqrt', value);
