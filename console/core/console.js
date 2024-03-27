@@ -207,7 +207,7 @@ Mewlix.meow = message => {
 
 Mewlix.listen = question => {
   if (!Mewlix.isNothing(question)) {
-    addLines(Mewlix.purrify(question), false);
+    addLines(question, false);
   }
   return getInput();
 };
