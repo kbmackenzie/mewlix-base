@@ -1066,6 +1066,15 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.clamp(value, min, max);
   },
 
+  sqrt: function sqrt(value) {
+    ensure.number('std.sqrt', value);
+    if (value < 0) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `Cannot calculate square root of negative number ${value}!`);
+    }
+    return Math.sqrt(value);
+  },
+
   random: function random() {
     return Math.random();
   },
