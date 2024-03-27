@@ -117,10 +117,12 @@ const clearConsole = () => {
 };
 
 const toggleHighlight = highlight => {
-  if (highlight)
+  if (highlight) {
     input.classList.add('console__input--highlight');
-  else
+  }
+  else {
     input.classList.remove('console__input--highlight');
+  }
 };
 
 const setProjectName = name => {
