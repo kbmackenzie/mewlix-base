@@ -1075,6 +1075,26 @@ Mewlix.Base = Mewlix.library('std', {
     return Math.sqrt(value);
   },
 
+  logn: function logn(value, base) {
+    ensure.number('std.logn', value);
+    if (value <= 0) {
+      const logType = Mewlix.isNothing(base)
+        ? 'natural logarithm'
+        : `logarithm to base ${base}`;
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `Cannot calculate ${logType} of ${value}!`);
+    }
+    if (base === undefined) {
+      return Math.log(value);
+    }
+    ensure.number('std.logn', base);
+    if (base <= 0) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `Invalid base for logarithm: ${base}!`);
+    }
+    return Math.log(value) / Math.log(base);
+  },
+
   random: function random() {
     return Math.random();
   },
