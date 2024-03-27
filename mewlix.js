@@ -16,15 +16,15 @@ const Mewlix = {};
  * MewlixError -> Custom error type.
  * ----------------------------------------------------- */
 Mewlix.ErrorCode = class ErrorCode {
-  static TypeMismatch   = new ErrorCode('TypeMismatch'  , 1);
-  static DivideByZero   = new ErrorCode('DivideByZero'  , 2);
-  static BadConversion  = new ErrorCode('BadConversion' , 3);
-  static CatOnComputer  = new ErrorCode('CatOnComputer' , 4);
-  static Console        = new ErrorCode('Console'       , 5);
-  static Graphic        = new ErrorCode('Graphic'       , 6);
-  static InvalidImport  = new ErrorCode('InvalidImport' , 7);
-  static CriticalError  = new ErrorCode('CriticalError' , 8);
-  static ExternalError  = new ErrorCode('ExternalError' , 9);
+  static TypeMismatch       = new ErrorCode('TypeMismatch'      , 0);
+  static InvalidOperation   = new ErrorCode('InvalidOperation'  , 1);
+  static InvalidConversion  = new ErrorCode('InvalidConversion' , 2);
+  static CatOnComputer      = new ErrorCode('CatOnComputer'     , 3);
+  static Console            = new ErrorCode('Console'           , 4);
+  static Graphic            = new ErrorCode('Graphic'           , 5);
+  static InvalidImport      = new ErrorCode('InvalidImport'     , 6);
+  static CriticalError      = new ErrorCode('CriticalError'     , 7);
+  static ExternalError      = new ErrorCode('ExternalError'     , 8);
 
   constructor(name, id) {
     this.name = name;
@@ -465,7 +465,7 @@ Mewlix.Numbers = {
     ensure.number('/', a);
     ensure.number('/', b);
     if (b === 0) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
         `Attempted to divide ${a} by ${b}!`);
     }
     return a / b;
@@ -474,7 +474,7 @@ Mewlix.Numbers = {
     ensure.number('%', a);
     ensure.number('%', b);
     if (b === 0) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.DivideByZero,
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
         `Attempted to divide ${a} by ${b}!`);
     }
     return a % b;
@@ -624,7 +624,7 @@ Mewlix.Conversion = {
       }
       default: break;
     }
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.BadConversion,
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidConversion,
       `Value cannot be converted to a number: ${x}`);
   }
 };
