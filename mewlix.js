@@ -1046,6 +1046,18 @@ Mewlix.Base = Mewlix.library('std', {
     return Math.ceil(value);
   },
 
+  min: function min(a, b) {
+    ensure.number('std.min', a);
+    ensure.number('std.min', b);
+    return Math.min(a, b);
+  },
+
+  max: function max(a, b) {
+    ensure.number('std.max', a);
+    ensure.number('std.max', b);
+    return Math.max(a, b);
+  },
+
   clamp: function clamp(value, min, max) {
     ensure.number('std.clamp', value);
     ensure.number('std.clamp', min);
