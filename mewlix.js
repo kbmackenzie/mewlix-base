@@ -633,12 +633,13 @@ Mewlix.Conversion = {
  * Statement built-ins
  * ----------------------------------------------------- */
 Mewlix.Internal = {
-  rainable: function rainable(iter) {
-    if (typeof iter !== 'string' || !(iter instanceof Mewlix.Shelf)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-        `Expected 'rainable' value; received "${iter}"!`);
+  rainable: function rainable(value) {
+    if (typeof value === 'string' || value instanceof Mewlix.Shelf) {
+      return value;
     }
-    return rainable;
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `Expected string or shelf; received value of type '${typeOfValue}': ${value}`);
   },
   pounceError: function pounceError(error) {
     const errorCode = (error instanceof Mewlix.MewlixError)
