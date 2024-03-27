@@ -157,8 +157,7 @@ const createDarkOverlay = () => {
  * Initialization:
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
-  if (event.key !== 'Enter' || input.value === '') return;
-  if (event.shiftKey) return;
+  if (event.key !== 'Enter' || event.shiftKey || input.value === '') return;
   input.dispatchEvent(inputReceived());
 });
 
