@@ -1066,6 +1066,11 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.clamp(value, min, max);
   },
 
+  abs: function abs(value) {
+    ensure.number('std.abs', value);
+    return Math.abs(value);
+  },
+
   pi: Math.PI,
   e: Math.E,
 
