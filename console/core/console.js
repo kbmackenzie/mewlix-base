@@ -147,6 +147,13 @@ const setAcceptedFiles = keys => {
 };
 
 /* -------------------------------------
+ * Saving Data:
+ * ------------------------------------- */
+const getLines = () => Array.from(lines.getElementsByTagName('li'))
+  .map(li => li.innerText)
+  .join('\n');
+
+/* -------------------------------------
  * Screen Overlay
  * ------------------------------------- */
 const createDarkOverlay = () => {
