@@ -881,9 +881,9 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(output);
   },
 
-  map: async function map(shelf, callback) {
-    ensure.shelf('std.map', shelf);
+  map: async function map(callback, shelf) {
     ensure.func('std.map', callback);
+    ensure.shelf('std.map', shelf);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -892,9 +892,9 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(accumulator.reverse());
   },
 
-  filter: async function filter(shelf, predicate) {
-    ensure.shelf('std.filter', shelf);
+  filter: async function filter(predicate, shelf) {
     ensure.func('std.filter', predicate);
+    ensure.shelf('std.filter', shelf);
 
     let accumulator = [];
     for (const value of shelf) {
@@ -905,9 +905,9 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(accumulator.reverse());
   },
 
-  fold: async function fold(shelf, initial, callback) {
-    ensure.shelf('std.fold', shelf);
+  fold: async function fold(callback, initial, shelf) {
     ensure.func('std.fold', callback);
+    ensure.shelf('std.fold', shelf);
 
     let accumulator = initial;
     for (const value of shelf) {
