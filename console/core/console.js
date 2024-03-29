@@ -36,6 +36,13 @@ const setErrorColor     = document.getElementById('select-color');
 const showHighlight     = document.getElementById('show-highlight');
 
 /* -------------------------------------
+ * Utils:
+ * ------------------------------------- */
+const removeTrailingNewline = text => {
+  return text.replace(/\n$/, '');
+};
+
+/* -------------------------------------
  * Console functionality:
  * ------------------------------------- */
 const createPrompt = () => {
@@ -47,34 +54,32 @@ const createPrompt = () => {
   return span;
 };
 
-const removeTrailingNewline = text => {
-  return text.replace(/\n$/, '');
-};
-
-const addLine = (str, fromUser = true) => {
-  const message = removeTrailingNewline(str);
-
+const newLine = callback => {
   const line = document.createElement('li');
-  if (fromUser) {
-    line.appendChild(createPrompt());
-  }
-  line.appendChild(document.createTextNode(message));
-
-  lines.appendChild(line);
-  scrollDown(lines.parentNode);
-};
-
-const addError = str => {
-  const line = document.createElement('li');
-  line.style.color = setErrorColor.value;
-  line.appendChild(document.createTextNode(`[Console] ${str}`));
-
+  callback(line);
   lines.appendChild(line);
   scrollDown(lines.parentNode);
 };
 
 const scrollDown = elem => {
   elem.scrollTop = elem.scrollHeight;
+};
+
+const addMessage = (str, fromUser = true) => {
+  const message = removeTrailingNewline(str);
+  newLine(line => {
+    if (fromUser) {
+      line.appendChild(createPrompt());
+    }
+    line.appendChild(document.createTextNode(message));
+  });
+};
+
+const addError = str => {
+  newLine(line => {
+    line.style.color = setErrorColor.value;
+    line.appendChild(document.createTextNode(`[Console] ${str}`));
+  });
 };
 
 const enableButtons = enable => {
@@ -104,7 +109,7 @@ const getInput = () => {
           ? `<Read file: "${event.detail.file.name}">`
           : text;
 
-        addLine(line);
+        addMessage(line);
         resolve(text);
       }, 
       { once: true }
@@ -208,13 +213,13 @@ toggleHighlight(showHighlight.checked);
  * Statements:
  * ------------------------------------- */
 Mewlix.meow = message => {
-  addLine(message, false);
+  addMessage(message, false);
   return message;
 };
 
 Mewlix.listen = question => {
   if (!Mewlix.isNothing(question)) {
-    addLine(question, false);
+    addMessage(question, false);
   }
   return getInput();
 };
