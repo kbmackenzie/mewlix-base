@@ -58,7 +58,7 @@ const newLine = callback => {
   const line = document.createElement('li');
   callback(line);
   lines.appendChild(line);
-  scrollDown(lines.parentNode);
+  scrollDown(lines);
 };
 
 const scrollDown = elem => {
