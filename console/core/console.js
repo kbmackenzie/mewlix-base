@@ -42,6 +42,10 @@ const removeTrailingNewline = text => {
   return text.replace(/\n$/, '');
 };
 
+const dateString = () => {
+  return new Date().toJSON().slice(0, 10);
+};
+
 /* -------------------------------------
  * Console functionality:
  * ------------------------------------- */
@@ -81,6 +85,13 @@ const addError = str => {
     line.style.color = setErrorColor.value;
     line.appendChild(document.createTextNode(`[Console] ${str}`));
   });
+};
+
+const createLineButton = (contents, name) => {
+  const btn = document.createElement('a');
+  btn.href = contents;
+  btn.download = name ?? `mewlix-${dateString()}.txt`;
+  return btn;
 };
 
 const enableButtons = enable => {
