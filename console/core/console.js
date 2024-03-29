@@ -118,8 +118,6 @@ const addDownloadButton = (contents, name) => {
   });
 };
 
-window.addDownloadButton = addDownloadButton;
-
 /* -------------------------------------
  * Console input:
  * ------------------------------------- */
