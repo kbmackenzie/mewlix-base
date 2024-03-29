@@ -60,7 +60,7 @@ const createPrompt = () => {
 
 const newLine = callback => {
   const line = document.createElement('li');
-  line.classList.add('console-line');
+  line.classList.add('console_line');
   callback(line);
   lines.appendChild(line);
   scrollDown(lines);
@@ -100,11 +100,25 @@ const textBlob = text => {
 };
 
 const createLineButton = (contents, name) => {
-  const btn = document.createElement('a');
-  btn.href = contents;
-  btn.download = name ?? `mewlix-${dateString()}.txt`;
-  return btn;
+  const filename = name ?? `mewlix-${dateString()}.txt`;
+  const message = `Download ${JSON.stringify(filename)}`;
+
+  const button = document.createElement('a');
+  button.href = textBlob(contents);
+  button.download = filename;
+  button.appendChild(document.createTextNode(message));
+  return button;
 };
+
+const addDownloadButton = (contents, name) => {
+  newLine(line => {
+    const button = createLineButton(contents, name);
+    line.appendChild(button);
+    line.classList.add('button-line');
+  });
+};
+
+window.addDownloadButton = addDownloadButton;
 
 /* -------------------------------------
  * Console input:
