@@ -44,6 +44,10 @@ html, body {
   white-space: pre;
 }
 
+.undecorated-list {
+  list-style: none;
+}
+
 .white-button {
   opacity: 30%;
   transition: 1s;
@@ -125,7 +129,6 @@ html, body {
   background-color: #121212;
   padding: 1rem 2rem;
   word-wrap: break-word;
-  list-style: none;
 }
 
 .console_line {
@@ -242,7 +245,6 @@ html, body {
   justify-content: center;
   padding: 0.5rem 2rem;
   align-items: center;
-  list-style: none;
 }
 
 .settings_options li {
