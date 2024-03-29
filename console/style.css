@@ -118,7 +118,7 @@ html, body {
   overflow-x: hidden;
 }
 
-.console_content {
+.console_lines {
   grid-area: console-lines;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -127,11 +127,11 @@ html, body {
   word-wrap: break-word;
 }
 
-.console_content ul {
+.console_lines ul {
   list-style: none;
 }
 
-.console_content li {
+.console_lines li {
   display: block;
   white-space: pre;
   margin-bottom: 1rem;
