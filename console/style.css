@@ -134,6 +134,13 @@ html, body {
   margin-bottom: 1rem;
 }
 
+.console_line.button-line a {
+  padding: 1rem;
+  color: inherit;
+  background-color: inherit;
+  border: 2px solid white;
+}
+
 .console_prompt {
   margin-right: 0.3rem;
   font-weight: bold;
