@@ -87,6 +87,18 @@ const addError = str => {
   });
 };
 
+const clearConsole = () => {
+  lines.replaceChildren();
+};
+
+/* -------------------------------------
+ * Downloading:
+ * ------------------------------------- */
+const textBlob = text => {
+  const blob = new Blob([text], { type: 'text/plain' });
+  return URL.createObjectURL(blob);
+};
+
 const createLineButton = (contents, name) => {
   const btn = document.createElement('a');
   btn.href = contents;
@@ -94,6 +106,9 @@ const createLineButton = (contents, name) => {
   return btn;
 };
 
+/* -------------------------------------
+ * Console input:
+ * ------------------------------------- */
 const enableButtons = enable => {
   arrowButton.disabled = !enable; 
   paperclipInput.disabled = !enable;
@@ -129,10 +144,9 @@ const getInput = () => {
   });
 };
 
-const clearConsole = () => {
-  lines.replaceChildren();
-};
-
+/* -------------------------------------
+ * Additional utils:
+ * ------------------------------------- */
 const toggleHighlight = highlight => {
   if (highlight) {
     input.classList.add('highlight');
