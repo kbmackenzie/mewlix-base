@@ -56,6 +56,7 @@ const createPrompt = () => {
 
 const newLine = callback => {
   const line = document.createElement('li');
+  line.classList.add('console-line');
   callback(line);
   lines.appendChild(line);
   scrollDown(lines);

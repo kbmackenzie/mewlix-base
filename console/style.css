@@ -131,7 +131,7 @@ html, body {
   list-style: none;
 }
 
-.console_lines li {
+.console_line {
   display: block;
   white-space: pre;
   margin-bottom: 1rem;
