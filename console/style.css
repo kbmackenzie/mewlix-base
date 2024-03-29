@@ -125,9 +125,6 @@ html, body {
   background-color: #121212;
   padding: 1rem 2rem;
   word-wrap: break-word;
-}
-
-.console_lines ul {
   list-style: none;
 }
 
