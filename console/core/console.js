@@ -155,6 +155,7 @@ const setAcceptedFiles = keys => {
  * Saving Data:
  * ------------------------------------- */
 const getLines = () => Array.from(lines.getElementsByTagName('li'))
+  .filter(li => !li.classList.has('button-line'))
   .map(li => li.innerText)
   .join('\n');
 
