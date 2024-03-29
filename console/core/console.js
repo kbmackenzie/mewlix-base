@@ -104,7 +104,7 @@ const createLineButton = (contents, name) => {
   const message = `Download ${JSON.stringify(filename)}`;
 
   const button = document.createElement('a');
-  button.href = textBlob(contents);
+  button.href = textBlob(contents + '\n');
   button.download = filename;
   button.appendChild(document.createTextNode(message));
   return button;
