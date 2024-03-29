@@ -47,7 +47,7 @@ const dateString = () => {
 };
 
 /* -------------------------------------
- * Console functionality:
+ * Console lines:
  * ------------------------------------- */
 const createPrompt = () => {
   const span = document.createElement('span');
@@ -92,7 +92,7 @@ const clearConsole = () => {
 };
 
 /* -------------------------------------
- * Downloading:
+ * File downloads:
  * ------------------------------------- */
 const textBlob = text => {
   const blob = new Blob([text], { type: 'text/plain' });
@@ -304,6 +304,12 @@ Mewlix.Console = Mewlix.library('std.console', {
   accepted_files: accepted => {
     ensure.shelf('console.accepted_files', accepted);
     setAcceptedFiles(accepted.toArray());
+  },
+
+  write_file: (text, name) => {
+    ensure.string('console.write_file', text);
+    if (name) { ensure.string('console.write_file', name); }
+    addDownloadButton(text, name);
   },
 });
 
