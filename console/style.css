@@ -111,14 +111,14 @@ html, body {
   background-color: black;
 }
 
-.console__title {
+.console_title {
   grid-area: console-title;
   text-align: center;
   white-space: nowrap;
   overflow-x: hidden;
 }
 
-.console__content {
+.console_content {
   grid-area: console-lines;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -127,47 +127,47 @@ html, body {
   word-wrap: break-word;
 }
 
-.console__content ul {
+.console_content ul {
   list-style: none;
 }
 
-.console__content li {
+.console_content li {
   display: block;
   white-space: pre;
   margin-bottom: 1rem;
 }
 
-.console__prompt {
+.console_prompt {
   margin-right: 0.3rem;
   font-weight: bold;
 }
 
-.console__settings {
+.console_settings {
   grid-area: show-settings;
 }
 
-.console__settings > svg {
+.console_settings > svg {
   width: 80%;
   height: 80%;
 }
 
-.console__paperclip {
+.console_paperclip {
   grid-area: console-clip;
   background-color: inherit;
 }
 
-.console__arrow {
+.console_arrow {
   grid-area: console-arrow;
   background-color: inherit;
 }
 
-.console__paperclip > svg,
-.console__arrow > svg {
+.console_paperclip > svg,
+.console_arrow > svg {
   width: 60%;
   height: 60%;
 }
 
-.console__input {
+.console_input {
   grid-area: console-input;
   border: none;
   padding: 1rem 2rem;
@@ -176,11 +176,11 @@ html, body {
   background-color: inherit;
 }
 
-.console__input:focus {
+.console_input:focus {
   outline: none;
 }
 
-.console__input--highlight:focus:enabled {
+.console_input.highlight:focus:enabled {
   background-color: white;
   color: black;
   transition: 1s;
@@ -203,16 +203,16 @@ html, body {
   z-index: 20;
 }
 
-.settings__exit {
+.settings_exit {
   grid-area: settings-exit;
 }
 
-.settings__exit > svg {
+.settings_exit > svg {
   width: 90%;
   height: 90%;
 }
 
-.settings__options {
+.settings_options {
   grid-area: settings-options;
   display: flex;
   background-color: #1f1f1f;
@@ -222,29 +222,29 @@ html, body {
   align-items: center;
 }
 
-.settings__options ul {
+.settings_options ul {
   list-style: none;
 }
 
-.settings__options li {
+.settings_options li {
   display: grid;
   grid-template-columns: 2.5fr 1.5fr;
   margin: 0.5rem;
 }
 
-.settings__options li > label {
+.settings_options li > label {
   text-align: right;
   margin: auto 0;
 }
 
-.settings__options li > input {
+.settings_options li > input {
   margin-left: 1rem;
   padding: 0.2rem;
   min-height: 1rem;
   min-width: 1rem;
 }
 
-.settings__options li > input[type='checkbox'] {
+.settings_options li > input[type='checkbox'] {
   height: 1.5rem;
   width: 1.5rem;
 }

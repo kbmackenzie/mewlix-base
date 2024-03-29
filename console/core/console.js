@@ -48,7 +48,7 @@ const removeTrailingNewline = text => {
 const createPrompt = () => {
   const span = document.createElement('span');
   span.style.color = setColor.value;
-  span.classList.add('console__prompt');
+  span.classList.add('console_prompt');
 
   span.appendChild(document.createTextNode(promptMessage));
   return span;
@@ -123,10 +123,10 @@ const clearConsole = () => {
 
 const toggleHighlight = highlight => {
   if (highlight) {
-    input.classList.add('console__input--highlight');
+    input.classList.add('highlight');
   }
   else {
-    input.classList.remove('console__input--highlight');
+    input.classList.remove('highlight');
   }
 };
 
