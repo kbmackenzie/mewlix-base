@@ -211,7 +211,8 @@ html, body {
   display: grid;
   grid-template-areas:
     ".                settings-exit"
-    "settings-options settings-options";
+    "settings-options settings-options"
+    "settings-savelog settings-savelog";
   grid-template-columns: auto 5rem;
   grid-template-rows: 2rem auto;
   background-color: #121212;
@@ -227,6 +228,10 @@ html, body {
 .settings_exit > svg {
   width: 90%;
   height: 90%;
+}
+
+.settings_savelog {
+  grid-area: settings-savelog;
 }
 
 .settings_options {
