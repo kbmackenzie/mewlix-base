@@ -114,7 +114,7 @@ const addDownloadButton = (contents, name) => {
   newLine(line => {
     const button = createLineButton(contents, name);
     line.appendChild(button);
-    line.classList.add('button-line');
+    line.classList.add('file-download');
   });
 };
 
@@ -195,7 +195,7 @@ const setAcceptedFiles = keys => {
  * Saving Data:
  * ------------------------------------- */
 const getLines = () => Array.from(lines.getElementsByTagName('li'))
-  .filter(li => !li.classList.has('button-line'))
+  .filter(li => !li.classList.has('file-download'))
   .map(li => li.innerText)
   .join('\n');
 
