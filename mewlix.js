@@ -427,6 +427,24 @@ Mewlix.clamp = clamp;
 Mewlix.opaque = opaque;
 
 /* -----------------------------------------------------
+ * JSON utils
+ * ----------------------------------------------------- */
+Mewlix.JSON = {
+  fromObject: object => new Mewlix.Box(
+    Object.entries(object)
+      .map(([key, value]) => [key, Mewlix.JSON.fromAny(value)])
+  ),
+  fromArray: Mewlix.Shelf.fromArray,
+  fromAny: value => {
+    if (typeof value !== 'object') return value;
+    if (Array.isArray(value)) {
+      return Mewlix.JSON.fromArray(value);
+    }
+    return Mewlix.JSON.fromObject(value);
+  },
+}
+
+/* -----------------------------------------------------
  * Comparison: Enum-like class.
  * ----------------------------------------------------- */
 Mewlix.Comparison = class Comparison {
