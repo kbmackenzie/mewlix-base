@@ -144,6 +144,10 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     return Mewlix.purrifyArray(this.toArray());
   }
 
+  toJSON() {
+    return this.toArray();
+  }
+
   *[Symbol.iterator]() {
     let node = this;
     while (node instanceof Mewlix.ShelfNode) {
