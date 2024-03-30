@@ -1163,6 +1163,22 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(array);
   },
 
+  read_file: async function read_file(path) {
+    ensure.string('std.read_file', path);
+    return fetch(path).then(response => response.text());
+  },
+
+  read: function read(key) {
+    ensure.string('std.read', key);
+    return localStorage.getItem(key);
+  },
+
+  save: function save(key, contents) {
+    ensure.string('std.save', key);
+    ensure.string('std.save', contents);
+    localStorage.setItem(key, contents);
+  },
+
   log: function log(value) {
     const message = Mewlix.purrify(value);
     console?.log(`[Mewlix] ${message}`);
