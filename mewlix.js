@@ -437,8 +437,9 @@ Mewlix.JSON = {
     );
   },
   fromArray: array => {
-    return Mewlix.Shelf.fromArray(array)
-      .map(Mewlix.JSON.fromAny);
+    return Mewlix.Shelf.fromArray(
+      array.map(Mewlix.JSON.fromAny)
+    );
   },
   fromAny: value => {
     if (typeof value !== 'object') return value;
