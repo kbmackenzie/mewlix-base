@@ -578,7 +578,13 @@ Mewlix.Shelves = {
   contains: function contains(a, b) {
     if (b instanceof Mewlix.Shelf) { return b.contains(a); }
 
-    ensure.string('in', a);
+    if (typeof a !== 'string') {
+      const typeOfA = Mewlix.Reflection.typeOf(a);
+      const typeOfB = Mewlix.Reflection.typeOf(b);
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+        `in: Expected string for lookup in "${typeOfB}"; got "${typeOfA}": ${a}`);
+    }
+
     if (typeof b === 'string') { return b.includes(a); }
     if (b instanceof Mewlix.Box) { return a in b; }
 
