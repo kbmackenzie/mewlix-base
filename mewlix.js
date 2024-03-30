@@ -556,7 +556,7 @@ Mewlix.Shelves = {
     ensure.shelf('knock off', shelf);
     return shelf.pop();
   },
-  push: function push(shelf) {
+  push: function push(shelf, value) {
     ensure.shelf('push', shelf);
     return shelf.push(value);
   },
