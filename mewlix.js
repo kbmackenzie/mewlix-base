@@ -430,11 +430,16 @@ Mewlix.opaque = opaque;
  * JSON utils
  * ----------------------------------------------------- */
 Mewlix.JSON = {
-  fromObject: object => new Mewlix.Box(
-    Object.entries(object)
-      .map(([key, value]) => [key, Mewlix.JSON.fromAny(value)])
-  ),
-  fromArray: Mewlix.Shelf.fromArray,
+  fromObject: object => {
+    return new Mewlix.Box(
+      Object.entries(object)
+        .map(([key, value]) => [key, Mewlix.JSON.fromAny(value)])
+    );
+  },
+  fromArray: array => {
+    return Mewlix.Shelf.fromArray(array)
+      .map(Mewlix.JSON.fromAny);
+  },
   fromAny: value => {
     if (typeof value !== 'object') return value;
     if (Array.isArray(value)) {
