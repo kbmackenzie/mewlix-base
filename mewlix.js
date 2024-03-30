@@ -131,6 +131,10 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     });
   }
 
+  push(value) {
+    return new ShelfNode(value, this);
+  }
+
   toArray() {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
       "Shelf error: 'toArray()' method not implemented!");
@@ -198,12 +202,12 @@ Mewlix.ShelfBottom = class ShelfBottom extends Mewlix.Shelf {
     return this;
   }
 
-  push(value) {
-    return new Mewlix.ShelfNode(value, this);
-  }
-
   length() {
     return 0;
+  }
+
+  contains(_) {
+    return false;
   }
 
   toArray() {
@@ -227,12 +231,14 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
     return this.next;
   }
 
-  push(value) {
-    return new ShelfNode(value, this);
-  }
-
   length() {
     return 1 + this.next.length();
+  }
+
+  contains(value) {
+    return Mewlix.Compare.isEqual(value, this.value)
+      ? true
+      : this.next.contains(value);
   }
 
   toArray() {
@@ -568,6 +574,8 @@ Mewlix.Shelves = {
     const typeOfValue = Mewlix.Reflection.typeOf(value);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
+  },
+  contains: function contains(a, b) {
   },
 };
 
