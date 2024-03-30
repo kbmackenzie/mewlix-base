@@ -576,6 +576,15 @@ Mewlix.Shelves = {
       `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
   contains: function contains(a, b) {
+    if (b instanceof Mewlix.Shelf) { return b.contains(a); }
+
+    ensure.string('in', a);
+    if (typeof b === 'string') { return b.includes(a); }
+    if (b instanceof Mewlix.Box) { return a in b; }
+
+    const typeOfB = Mewlix.Reflection.typeOf(b);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `in: Cannot perform lookup in value of type "${typeOfB}": ${b}`);
   },
 };
 
