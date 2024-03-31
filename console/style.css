@@ -48,6 +48,10 @@ html, body {
   list-style: none;
 }
 
+.clickable:enabled:hover {
+  cursor: pointer;
+}
+
 .white-button {
   opacity: 30%;
   transition: 1s;
