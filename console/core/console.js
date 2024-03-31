@@ -34,6 +34,7 @@ const settingsMenu      = document.getElementById('settings');
 const setColor          = document.getElementById('select-color');
 const setErrorColor     = document.getElementById('select-color');
 const showHighlight     = document.getElementById('show-highlight');
+const saveLogButton     = document.getElementById('save-log');
 
 /* -------------------------------------
  * Utils:
@@ -197,6 +198,22 @@ const getLines = () => Array.from(lines.getElementsByTagName('li'))
   .map(li => li.innerText)
   .join('\n');
 
+const createLogDownload = () => {
+  const filename = `mewlix-console-log-${dateString()}.txt`;
+  const content = getLines() + '\n';
+
+  const button = document.createElement('a');
+  button.href = textBlob(content);
+  button.download = filename;
+  button.classList.add('hide');
+  document.body.appendChild(button);
+
+  return () => {
+    button.click();
+    button.remove();
+  };
+};
+
 /* -------------------------------------
  * Screen Overlay
  * ------------------------------------- */
@@ -241,6 +258,10 @@ document.getElementById('hide-settings').addEventListener('click', () => {
 
 showHighlight.addEventListener('change', () => {
   toggleHighlight(showHighlight.checked);
+});
+
+saveLogButton.addEventListener('click', () => {
+  createLogDownload()();
 });
 
 /* -------------------------------------
