@@ -340,7 +340,7 @@ Object.freeze(Mewlix.Console);
 /* -------------------------------------
  * Standard library - Curry:
  * ------------------------------------- */
-Mewlix.ConsoleCurry = Mewlix.curryLibrary('std.console.curry', Mewlix.Console, {
+Mewlix.ConsoleCurry = Mewlix.curryLibrary('std.curry.console', Mewlix.Console, {
   write_file: text => name => Mewlix.Console.write_file(text, name),
 });
 
