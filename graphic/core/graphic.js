@@ -679,7 +679,6 @@ Mewlix.meow = message => {
 /* -----------------------------------
  * Standard library:
  * ----------------------------------- */
-
 /* The std.graphic library documentation can be found on the wiki:
  * > https://github.com/KBMackenzie/mewlix/wiki/Graphic#the-stdgraphic-yarn-ball <
  *
@@ -835,6 +834,30 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
 /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Graphic);
+
+/* -----------------------------------
+ * Standard library - Curry:
+ * ----------------------------------- */
+Mewlix.GraphicCurry = (() => {
+  const graphic = Mewlix.Graphic;
+
+  return Mewlix.curryLibrary('std.curry.graphic', Mewlix.Graphic, {
+    load: key => path => options => graphic.load(key, path, options),
+    spritesheet: path => frames => graphic.spritesheet(path, frames),
+
+    draw: key => x => y => graphic.draw(key, x, y),
+    rect: rect => color => graphic.rect(rect, color),
+    write: value => x => y => options => graphic.write(value, x, y, options),
+    measure_text: value => options => graphic.measure_text(value, options),
+  
+    play_sfx: key => channel => graphic.play_sfx(key, channel),
+
+    lerp: start => end => x => graphic.lerp(start, end, x),
+  });
+})();
+
+/* Freezing the curry library, as it's going to be accessible inside Mewlix. */
+Object.freeze(Mewlix.GraphicCurry);
 
 /* -----------------------------------
  * Run Console:
