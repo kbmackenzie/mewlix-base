@@ -1202,6 +1202,22 @@ Mewlix.Base = Mewlix.library('std', {
     localStorage.setItem(key, contents);
   },
 
+  date: function date() {
+    const now = new Date();
+    return new Mewlix.Box([
+      [ "day"    , now.getDay() + 1   ],
+      [ "month"  , now.getMonth() + 1 ],
+      [ "year"   , now.getFullYear()  ],
+      [ "hours"  , now.getHours(),    ],
+      [ "minutes", now.getMinutes()   ],
+      [ "seconds", now.getSeconds()   ],
+    ]);
+  },
+
+  time: function time() {
+    return Date.now();
+  },
+
   read_file: async function read_file(path) {
     ensure.string('std.read_file', path);
     return fetch(path).then(response => response.text());
