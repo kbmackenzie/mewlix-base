@@ -1161,6 +1161,17 @@ Mewlix.Base = Mewlix.library('std', {
     return Math.atan2(y, x);
   },
 
+  truncate: function truncate(value, places = 0) {
+    ensure.number('std.truncate', value);
+    ensure.number('std.truncate', places);
+    if (places < 0) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `std.truncate: Value of places should be greater than 0; received ${places}`);
+    }
+    const modifier = 10 ** places;
+    return Math.trunc(value * modifier) / modifier;
+  },
+
   random: function random() {
     return Math.random();
   },
