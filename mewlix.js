@@ -1155,6 +1155,36 @@ Mewlix.Base = Mewlix.library('std', {
     return Math.log(value) / Math.log(base);
   },
 
+  acos: function acos(value) {
+    ensure.number('std.acos', value);
+    return Math.acos(value);
+  },
+
+  asin: function asin(value) {
+    ensure.number('std.asin', value);
+    return Math.asin(value);
+  },
+
+  atan: function atan(value) {
+    ensure.number('std.atan', value);
+    return Math.atan(value);
+  },
+
+  cos: function cos(value) {
+    ensure.number('std.cos', value);
+    return Math.cos(value);
+  },
+
+  sin: function sin(value) {
+    ensure.number('std.sin', value);
+    return Math.sin(value);
+  },
+
+  tan: function tan(value) {
+    ensure.number('std.tan', value);
+    return Math.tan(value);
+  },
+
   atan2: function atan2(y, x) {
     ensure.number('std.atan2', y);
     ensure.number('std.atan2', x);
