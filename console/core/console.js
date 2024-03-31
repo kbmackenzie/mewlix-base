@@ -194,7 +194,7 @@ const setAcceptedFiles = keys => {
  * Saving Data:
  * ------------------------------------- */
 const getLines = () => Array.from(lines.getElementsByTagName('li'))
-  .filter(li => !li.classList.has('file-download'))
+  .filter(li => !li.classList.contains('file-download'))
   .map(li => li.innerText)
   .join('\n');
 
