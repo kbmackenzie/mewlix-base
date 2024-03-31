@@ -1155,6 +1155,12 @@ Mewlix.Base = Mewlix.library('std', {
     return Math.log(value) / Math.log(base);
   },
 
+  atan2: function atan2(y, x) {
+    ensure.number('std.atan2', y);
+    ensure.number('std.atan2', x);
+    return Math.atan2(y, x);
+  },
+
   random: function random() {
     return Math.random();
   },
