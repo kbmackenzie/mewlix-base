@@ -329,13 +329,28 @@ Mewlix.YarnBall = class YarnBall extends Mewlix.MewlixObject {
 /* -----------------------------------------------------
  * Generate standard yarn ball.
  * ----------------------------------------------------- */
-Mewlix.library = function(key, object = {}) {
-  const yarn = new Mewlix.YarnBall(key);
-  for (const key in object) {
-    yarn[key] = object[key];
+Mewlix.library = function(libkey, libobj = {}) {
+  const yarn = new Mewlix.YarnBall(libkey);
+  for (const key in libobj) {
+    yarn[key] = libobj[key];
   }
   return yarn;
-}
+};
+
+/* -----------------------------------------------------
+ * Generate curried yarn ball.
+ * ----------------------------------------------------- */
+Mewlix.curryLibrary = function(libkey, base, libobj = {}) {
+  const yarn = new Mewlix.YarnBall(libkey);
+  for (const key in libobj) {
+    yarn[key] = libobj[key];
+  }
+  for (const key in base) {
+    if (key in yarn) continue;
+    yarn[key] = base[key];
+  }
+  return yarn;
+};
 
 /* -----------------------------------------------------
  * String utils.
@@ -1287,6 +1302,44 @@ Mewlix.Base = Mewlix.library('std', {
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Base);
+
+/* ------------------------------------------
+ * Standard Library - Currying
+ * ------------------------------------------ */
+Mewlix.Curry = (() => {
+  const std = Mewlix.Base;
+
+  return Mewlix.curryLibrary('std.curry', Mewlix.Base, {
+    tear: str => start => end => std.tear(str, start, end),
+    poke: value => index => std.poke(value, index),
+    join: a => b => std.join(a, b),
+    take: value => amount => std.take(value, amount),
+    drop: value => amount => std.drop(value, amount),
+
+    map: callback => shelf => std.map(callback, shelf),
+    filter: predicate => shelf => std.filter(predicate, shelf),
+    fold: callback => initial => shelf => std.fold(callback, initial, shelf),
+    zip: a => b => std.zip(a, b),
+    insert: shelf => value => index => std.insert(shelf, value, index),
+    remove: shelf => index => std.remove(shelf, index),
+
+    tuple: a => b => std.tuple(a, b),
+
+    min: a => b => std.min(a, b),
+    max: a => b => std.max(a, b),
+    clamp: value => min => max => std.clamp(value, min, max),
+    logn: value => base => std.logn(value, base),
+    atan: y => x => std.atan2(y, x),
+    truncate: value => places => std.truncate(value, places),
+    random_int: min => max => std.random_int(min, max),
+    count: start => end => std.count(start, end),
+
+    save: key => contents => std.save(key, contents),
+  });
+})();
+
+/* Freezing the curry library, as it's going to be accessible inside Mewlix. */
+Object.freeze(Mewlix.Curry);
 
 /* -------------------------------------------------------
  * Final Touches
