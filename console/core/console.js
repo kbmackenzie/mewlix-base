@@ -325,15 +325,27 @@ Mewlix.Console = Mewlix.library('std.console', {
     setAcceptedFiles(accepted.toArray());
   },
 
-  write_file: (text, name) => {
-    ensure.string('console.write_file', text);
-    if (name) { ensure.string('console.write_file', name); }
-    addDownloadButton(text, name);
+  write_file: (contents, filename) => {
+    ensure.string('console.write_file', contents);
+    if (filename) {
+      ensure.string('console.write_file', filename);
+    }
+    addDownloadButton(contents, filename);
   },
 });
 
 /* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
 Object.freeze(Mewlix.Console);
+
+/* -------------------------------------
+ * Standard library - Curry:
+ * ------------------------------------- */
+Mewlix.ConsoleCurry = Mewlix.curryLibrary('std.console.curry', Mewlix.Console, {
+  write_file: text => name => Mewlix.Console.write_file(text, name),
+});
+
+/* Freezing the curry library, as it's going to be accessible inside Mewlix. */
+Object.freeze(Mewlix.ConsoleCurry);
 
 /* -------------------------------------
  * Run Console:
