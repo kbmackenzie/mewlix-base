@@ -1,3 +1,13 @@
+/* Mewlix is a cat-themed esoteric programming language. 🐱
+ * THis is a core file from Mewlix's base library.
+ * 
+ * Learn more at:
+ * > https://github.com/KBMackenzie/mewlix <
+ *
+ * Copyright 2024 KBMackenzie. Released under the MIT License.
+ * The full license details can be found at:
+ * > https://github.com/KBMackenzie/mewlix-base/blob/main/LICENSE < */
+
 'use strict';
 
 export default async (options = {}) => {
