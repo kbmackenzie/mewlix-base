@@ -30,7 +30,7 @@ const arrowButton       = document.getElementById('console-arrow');
 const paperclipInput    = document.getElementById('paperclip-input');
 const paperclipButton   = document.getElementById('console-paperclip');
 
-const settingsMenu      = document.getElementById('menu-settings');
+const settingsMenu      = document.getElementById('settings');
 const setColor          = document.getElementById('select-color');
 const setErrorColor     = document.getElementById('select-color');
 const showHighlight     = document.getElementById('show-highlight');
