@@ -214,8 +214,7 @@ html, body {
   display: grid;
   grid-template-areas:
     ".                settings-exit"
-    "settings-options settings-options"
-    "settings-savelog settings-savelog";
+    "settings-options settings-options";
   grid-template-columns: auto 5rem;
   grid-template-rows: 2rem auto;
   background-color: #121212;
@@ -233,39 +232,57 @@ html, body {
   height: 90%;
 }
 
-.settings_savelog {
-  grid-area: settings-savelog;
-}
-
 .settings_options {
   grid-area: settings-options;
   display: flex;
   background-color: #1f1f1f;
   flex-flow: column nowrap;
   justify-content: center;
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 1.5rem;
   align-items: center;
 }
 
-.settings_options li {
+.settings_option {
+  width: 100%;
   display: grid;
   grid-template-columns: 2.5fr 1.5fr;
   margin: 0.5rem;
 }
 
-.settings_options li > label {
+.settings_option > label {
   text-align: right;
   margin: auto 0;
 }
 
-.settings_options li > input {
+.settings_option > input {
   margin-left: 1rem;
   padding: 0.2rem;
   min-height: 1rem;
   min-width: 1rem;
 }
 
-.settings_options li > input[type='checkbox'] {
+.settings_option > input[type='checkbox'] {
   height: 1.5rem;
   width: 1.5rem;
+}
+
+.settings_savelog {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.settings_savelog > button {
+  width: 80%;
+  height: 100%;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 2px solid white;
+  background-color: inherit;
+  transition: 0.6s;
+}
+
+.settings_savelog > button:hover {
+  background-color: white;
+  color: #1f1f1f;
+  transition: 0.6s;
 }
