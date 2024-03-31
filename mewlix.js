@@ -132,7 +132,7 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
   }
 
   push(value) {
-    return new ShelfNode(value, this);
+    return new Mewlix.ShelfNode(value, this);
   }
 
   toArray() {
