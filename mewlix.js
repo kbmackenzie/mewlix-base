@@ -1130,7 +1130,7 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.number('std.sqrt', value);
     if (value < 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Cannot calculate square root of negative number ${value}!`);
+        `std.sqrt: Cannot calculate square root of negative number ${value}!`);
     }
     return Math.sqrt(value);
   },
@@ -1142,7 +1142,7 @@ Mewlix.Base = Mewlix.library('std', {
         ? 'natural logarithm'
         : `logarithm to base ${base}`;
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Cannot calculate ${logType} of ${value}!`);
+        `std.logn: Cannot calculate ${logType} of ${value}!`);
     }
     if (base === undefined) {
       return Math.log(value);
@@ -1150,7 +1150,7 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.number('std.logn', base);
     if (base <= 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Invalid base for logarithm: ${base}!`);
+        `std.logn: Invalid base for logarithm: ${base}!`);
     }
     return Math.log(value) / Math.log(base);
   },
