@@ -325,7 +325,7 @@ Mewlix.Console = Mewlix.library('std.console', {
     setAcceptedFiles(accepted.toArray());
   },
 
-  write_file: (contents, filename) => {
+  write_file: (filename, contents) => {
     ensure.string('console.write_file', contents);
     if (filename) {
       ensure.string('console.write_file', filename);
@@ -341,7 +341,7 @@ Object.freeze(Mewlix.Console);
  * Standard library - Curry:
  * ------------------------------------- */
 Mewlix.ConsoleCurry = Mewlix.curryLibrary('std.curry.console', Mewlix.Console, {
-  write_file: text => name => Mewlix.Console.write_file(text, name),
+  write_file: filename => contents => Mewlix.Console.write_file(filename, contents),
 });
 
 /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
