@@ -1280,6 +1280,14 @@ Mewlix.Base = Mewlix.library('std', {
     return Date.now();
   },
 
+  meowf: function meowf(str) {
+    return Mewlix.meow(str);
+  },
+
+  listenf: function listenf(str) {
+    return Mewlix.listen(str);
+  },
+
   read_file: async function read_file(path) {
     ensure.string('std.read_file', path);
     return fetch(path).then(response => response.text());
