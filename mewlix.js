@@ -1306,7 +1306,7 @@ Object.freeze(Mewlix.Base);
 /* ------------------------------------------
  * Standard Library - Currying
  * ------------------------------------------ */
-Mewlix.Curry = (() => {
+Mewlix.BaseCurry = (() => {
   const std = Mewlix.Base;
 
   return Mewlix.curryLibrary('std.curry', Mewlix.Base, {
@@ -1339,7 +1339,7 @@ Mewlix.Curry = (() => {
 })();
 
 /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-Object.freeze(Mewlix.Curry);
+Object.freeze(Mewlix.BaseCurry);
 
 /* -------------------------------------------------------
  * Final Touches
