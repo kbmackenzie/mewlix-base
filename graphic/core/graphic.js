@@ -841,7 +841,7 @@ Object.freeze(Mewlix.Graphic);
 Mewlix.GraphicCurry = (() => {
   const graphic = Mewlix.Graphic;
 
-  return Mewlix.curryLibrary('std.curry.graphic', Mewlix.Graphic, {
+  return Mewlix.curryLibrary('std.graphic.curry', Mewlix.Graphic, {
     load: key => path => options => graphic.load(key, path, options),
     spritesheet: path => frames => graphic.spritesheet(path, frames),
 
