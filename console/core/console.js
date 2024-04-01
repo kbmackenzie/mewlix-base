@@ -32,7 +32,7 @@ const paperclipButton   = document.getElementById('console-paperclip');
 
 const settingsMenu      = document.getElementById('settings');
 const setColor          = document.getElementById('select-color');
-const setErrorColor     = document.getElementById('select-color');
+const setErrorColor     = document.getElementById('select-error-color');
 const showHighlight     = document.getElementById('show-highlight');
 const saveLogButton     = document.getElementById('save-log');
 
