@@ -851,15 +851,12 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   char: function char(value) {
-    switch (typeof value) {
-      case 'number': return String.fromCharCode(value);
-      case 'string': return value[0] ?? '\0';
-      default: break;
+    ensure.number('std.char', value);
+    if (value < 0 || value > 127) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `std.char: Value outside of ASCII character range`);
     }
-
-    const typeOfValue = Mewlix.Reflection.typeOf(value);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-      `std.char: Cannot convert value of type "${typeOfValue}" to char: ${value}`);
+    return String.fromCharCode(value);
   },
 
   bap: function bap(value) {
@@ -868,7 +865,13 @@ Mewlix.Base = Mewlix.library('std', {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
         'std.bap: Expected character; received empty string!');
     }
-    return value.charCodeAt(0);
+
+    const code = value.charCodeAt(0);
+    if (code < 0 || code > 127) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `std.bap: Character isn't a valid ASCII character: '${value[0]}'`);
+    }
+    return code;
   },
 
   nuzzle: function nuzzle(value) {
