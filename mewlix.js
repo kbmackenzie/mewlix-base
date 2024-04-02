@@ -526,7 +526,7 @@ Mewlix.Numbers = {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
         `Attempted to divide ${a} by ${b}!`);
     }
-    return a % b;
+    return ((a % b) + b) % b;
   },
   pow: function pow(a, b) {
     ensure.number('^', a);
