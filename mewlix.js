@@ -1281,11 +1281,11 @@ Mewlix.Base = Mewlix.library('std', {
   },
 
   meowf: function meowf(str) {
-    return Mewlix.meow(str);
+    return Mewlix.meow(Mewlix.purrify(str));
   },
 
   listenf: function listenf(str) {
-    return Mewlix.listen(str);
+    return Mewlix.listen(Mewlix.purrify(str));
   },
 
   read_file: async function read_file(path) {
