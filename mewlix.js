@@ -850,6 +850,27 @@ Mewlix.Base = Mewlix.library('std', {
       `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
   },
 
+  char: function char(value) {
+    switch (typeof value) {
+      case 'number': return String.fromCharCode(value);
+      case 'string': return value[0] ?? '\0';
+      default: break;
+    }
+
+    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
+      `std.char: Cannot convert value of type "${typeOfValue}" to char: ${value}`);
+  },
+
+  bap: function bap(value) {
+    ensure.string('std.bap', value);
+    if (value.length === 0) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        'std.bap: Expected character; received empty string!');
+    }
+    return value.charCodeAt(0);
+  },
+
   nuzzle: function nuzzle(value) {
     return Mewlix.Conversion.toBool(value);
   },
