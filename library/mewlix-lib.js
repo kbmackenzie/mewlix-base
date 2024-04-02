@@ -2,11 +2,11 @@
  * THis is a core file from Mewlix's base library.
  * 
  * Learn more at:
- * > https://github.com/KBMackenzie/mewlix <
+ * > https://github.com/kbmackenzie/mewlix <
  *
- * Copyright 2024 KBMackenzie. Released under the MIT License.
+ * Copyright 2024 kbmackenzie. Released under the MIT License.
  * The full license details can be found at:
- * > https://github.com/KBMackenzie/mewlix-base/blob/main/LICENSE < */
+ * > https://github.com/kbmackenzie/mewlix-base/blob/main/LICENSE < */
 
 'use strict';
 
