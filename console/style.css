@@ -136,8 +136,8 @@ html, body {
 }
 
 .console_line {
+  white-space: pre-wrap;
   display: block;
-  white-space: pre;
   margin-bottom: 1rem;
 }
 
