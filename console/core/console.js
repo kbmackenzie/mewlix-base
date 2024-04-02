@@ -356,7 +356,7 @@ Mewlix.run = async f => {
   }
   catch (error) {
     addError(`Exception caught: ${error}`);
-    addError(`See the Javascript console for more information!`);
+    addError('See the debugging console for more information!');
     throw error;
   }
 };
