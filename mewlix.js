@@ -852,9 +852,9 @@ Mewlix.Base = Mewlix.library('std', {
 
   char: function char(value) {
     ensure.number('std.char', value);
-    if (value < 0 || value > 127) {
+    if (value < 0 || value > 65535) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `std.char: Value outside of ASCII character range`);
+        `std.char: Value outside of valid character range: ${value}`);
     }
     return String.fromCharCode(value);
   },
@@ -867,9 +867,9 @@ Mewlix.Base = Mewlix.library('std', {
     }
 
     const code = value.charCodeAt(0);
-    if (code < 0 || code > 127) {
+    if (code < 0 || code > 65535) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `std.bap: Character isn't a valid ASCII character: '${value[0]}'`);
+        `std.bap: Character code out of valid range: '${code}'`);
     }
     return code;
   },
