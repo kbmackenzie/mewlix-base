@@ -26,6 +26,7 @@ const promptMessage = '>> ';
 const input             = document.getElementById('console-input');
 const lines             = document.getElementById('console-lines');
 const projectName       = document.getElementById('project-name');
+const projectStatus     = document.getElementById('project-status');
 const arrowButton       = document.getElementById('console-arrow');
 const paperclipInput    = document.getElementById('paperclip-input');
 const paperclipButton   = document.getElementById('console-paperclip');
@@ -93,6 +94,10 @@ const addError = str => {
 
 const clearConsole = () => {
   lines.replaceChildren();
+};
+
+const setStatus = status => {
+  projectStatus.textContent = status;
 };
 
 /* -------------------------------------
