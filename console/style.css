@@ -217,14 +217,18 @@ html, body {
   position: fixed;
   display: grid;
   grid-template-areas:
-    ".                settings-exit"
-    "settings-options settings-options";
-  grid-template-columns: auto 5rem;
+    ".                  settings-title    settings-exit"
+    "settings-options   settings-options  settings-options";
+  grid-template-columns: 3rem auto 3rem;
   grid-template-rows: 2rem auto;
   background-color: #121212;
   overflow: hidden;
   border-radius: 1rem;
   z-index: 20;
+}
+
+.settings_title {
+  grid-area: settings-title;
 }
 
 .settings_exit {
