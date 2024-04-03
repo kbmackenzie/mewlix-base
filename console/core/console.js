@@ -43,6 +43,10 @@ const removeTrailingNewline = text => {
   return text.replace(/\n$/, '');
 };
 
+const isEmptyLine = line => {
+  return /^\n?$/.test(line);
+};
+
 const dateString = () => {
   return new Date().toJSON().slice(0, 10);
 };
