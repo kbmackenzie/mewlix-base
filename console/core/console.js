@@ -358,8 +358,14 @@ Object.freeze(Mewlix.ConsoleCurry);
 /* -------------------------------------
  * Run Console:
  * ------------------------------------- */
+const setRunning = () => {
+  setStatus('running: ');
+  projectName.classList.remove('hide');
+};
+
 Mewlix.run = async f => {
   try {
+    setRunning();
     await f();
   }
   catch (error) {
