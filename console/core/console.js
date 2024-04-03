@@ -71,8 +71,7 @@ const scrollDown = elem => {
   elem.scrollTop = elem.scrollHeight;
 };
 
-const addMessage = (str, fromUser = true) => {
-  const message = removeTrailingNewline(str);
+const addMessage = (message, fromUser = true) => {
   newLine(line => {
     if (fromUser) {
       line.appendChild(createPrompt());
@@ -142,7 +141,7 @@ const getInput = () => {
 
         const text = (event.detail.fromFile)
           ? await event.detail.file.text()
-          : input.value;
+          : removeTrailingNewline(input.value);
         input.value = '';
 
         const line = (event.detail.fromFile)
