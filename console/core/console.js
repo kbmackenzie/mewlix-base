@@ -230,12 +230,12 @@ const createDarkOverlay = () => {
  * Initialization:
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
-  if (event.key !== 'Enter' || event.shiftKey || input.value === '') return;
+  if (event.key !== 'Enter' || event.shiftKey || isEmptyLine(input.value)) return;
   input.dispatchEvent(inputReceived());
 });
 
 arrowButton.addEventListener('click', () => {
-  if (input.disabled || input.value === '') return;
+  if (input.disabled || isEmptyLine(input.value)) return;
   input.dispatchEvent(inputReceived());
 });
 
