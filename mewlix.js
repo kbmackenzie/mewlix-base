@@ -123,7 +123,7 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     Object.defineProperty(this, 'box', {
       value: () => {
         throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
-          "Can't peek properties of a shelf!");
+          "Can't access properties in a value of type 'shelf'!");
       },
       writable: false,
       enumerable: false,
