@@ -474,6 +474,7 @@ const init = async (callback) => {
   const run = async () => {
     let lastFrame; // Last frame's timestamp, in milliseconds.
 
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
     await thumbnail?.();
     await drawPlay();
     await awaitClick();
