@@ -456,6 +456,10 @@ const awaitClick = () => new Promise(resolve => {
   )
 });
 
+const removeLoadingOverlay = () => {
+  document.getElementById('loading-overlay')?.remove();
+};
+
 const drawPlay = async () => {
   const image = await loadImage('core-assets/mewlix-play.png');
   context.fillStyle = 'rgb(0 0 0 / 50%)';
@@ -474,7 +478,9 @@ const init = async (callback) => {
   const run = async () => {
     let lastFrame; // Last frame's timestamp, in milliseconds.
 
+    removeLoadingOverlay();
     context.clearRect(0, 0, canvasWidth, canvasHeight);
+
     await thumbnail?.();
     await drawPlay();
     await awaitClick();
