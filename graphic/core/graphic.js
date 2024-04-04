@@ -289,7 +289,8 @@ const keysDown = new Set();
 const keyQueue = new Set();
 
 window.addEventListener('keydown', event => {
-  if (!keysDown.has(event.key)) { keyQueue.add(event.key); }
+  if (event.repeat) return;
+  keyQueue.add(event.key);
   keysDown.add(event.key);
 }, { passive: true });
 
