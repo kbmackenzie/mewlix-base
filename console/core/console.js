@@ -40,10 +40,6 @@ const saveLogButton     = document.getElementById('save-log');
 /* -------------------------------------
  * Utils:
  * ------------------------------------- */
-const removeTrailingNewline = text => {
-  return text.replace(/\n$/, '');
-};
-
 const isEmptyLine = line => {
   return /^\n?$/.test(line);
 };
@@ -150,7 +146,7 @@ const getInput = () => {
 
         const text = (event.detail.fromFile)
           ? await event.detail.file.text()
-          : removeTrailingNewline(input.value);
+          : input.value;
         input.value = '';
 
         const line = (event.detail.fromFile)
