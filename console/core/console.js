@@ -232,6 +232,7 @@ const createDarkOverlay = () => {
  * ------------------------------------- */
 input.addEventListener('keyup', event => {
   if (event.key !== 'Enter' || event.shiftKey || isEmptyLine(input.value)) return;
+  event.preventDefault();
   input.dispatchEvent(inputReceived());
 });
 
