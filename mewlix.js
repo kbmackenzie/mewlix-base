@@ -1055,19 +1055,21 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.shelf('std.remove', shelf);
     ensure.number('std.remove', index);
 
-    const bucket = [];
-    let tail = shelf;
+    let top = new Mewlix.ShelfBottom();
+    let bottom = shelf;
+    let counter = (index >= 0) ? index : (shelf.length() + index);
 
-    let count = index;
-    for (const item of shelf) {
-      if (count-- < 0) break;
-      bucket.push(item);
-      tail = tail.pop();
+    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
+      top = top.push(bottom.peek());
+      bottom = bottom.pop();
     }
-    if (count >= 0) return shelf;
-    bucket.pop();
-    const init = Mewlix.Shelf.fromArray(bucket.reverse());
-    return Mewlix.Shelf.concat(tail, init);
+
+    bottom = bottom.pop();
+
+    for (const item of top) {
+      bottom = bottom.push(item);
+    }
+    return bottom;
   },
 
   tuple: function tuple(a, b) {
