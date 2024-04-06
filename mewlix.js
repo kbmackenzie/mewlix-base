@@ -613,7 +613,6 @@ Mewlix.Shelves = {
   length: function length(value) {
     if (value instanceof Mewlix.Shelf) return value.length();
     if (typeof value === 'string') return value.length;
-    if (value instanceof Mewlix.Box) return Object.entries(value).length;
 
     const typeOfValue = Mewlix.Reflection.typeOf(value);
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.TypeMismatch,
