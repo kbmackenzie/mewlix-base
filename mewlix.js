@@ -975,11 +975,13 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.func('std.map', callback);
     ensure.shelf('std.map', shelf);
 
-    let accumulator = [];
+    const output = new Array(shelf.length());
+
+    let i = shelf.length() - 1;
     for (const value of shelf) {
-      accumulator.push(await callback(value));
+      output[i--] = await callback(value);
     }
-    return Mewlix.Shelf.fromArray(accumulator.reverse());
+    return Mewlix.Shelf.fromArray(output);
   },
 
   filter: async function filter(predicate, shelf) {
