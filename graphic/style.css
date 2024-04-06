@@ -22,3 +22,7 @@
   position: absolute;
   height: 100%;
 }
+
+.canvas-container {
+  width: auto;
+}
