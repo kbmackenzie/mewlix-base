@@ -991,13 +991,14 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.func('std.filter', predicate);
     ensure.shelf('std.filter', shelf);
 
-    let accumulator = [];
+    let bucket = new Mewlix.ShelfBottom();
+
     for (const value of shelf) {
       if (await predicate(value)) {
-        accumulator.push(value);
+        bucket = bucket.push(value);
       }
     }
-    return Mewlix.Shelf.fromArray(accumulator.reverse());
+    return Mewlix.Shelf.reverse(bucket);
   },
 
   fold: async function fold(callback, initial, shelf) {
