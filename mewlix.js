@@ -1263,18 +1263,18 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.number('std.count', start);
     ensure.number('std.count', end);
 
-    const array = [];
-    if (start < end) {
-      for (let count = start; count <= end; count++) {
-        array.push(count);
-      }
+    start = Math.floor(start);
+    end   = Math.floor(end);
+    
+    const step = (start < end) ? 1 : -1;
+    const stop = start - step;
+
+    let output = new Mewlix.ShelfBottom();
+
+    for (let i = end; i != stop; i -= step) {
+      output = output.push(i);
     }
-    else {
-      for (let count = start; count >= end; count--) {
-        array.push(count);
-      }
-    }
-    return Mewlix.Shelf.fromArray(array);
+    return output;
   },
 
   read: function read(key) {
