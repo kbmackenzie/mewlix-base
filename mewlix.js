@@ -135,11 +135,6 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
     return new Mewlix.ShelfNode(value, this);
   }
 
-  toArray() {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-      "Shelf error: 'toArray()' method not implemented!");
-  }
-
   toString() {
     return Mewlix.purrifyArray(this.toArray());
   }
@@ -154,6 +149,17 @@ Mewlix.Shelf = class Shelf extends Mewlix.MewlixObject {
       yield node.peek();
       node = node.pop();
     }
+  }
+
+  toArray() {
+    const len = this.length();
+    const output = new Array(len);
+
+    let i = len - 1;
+    for (const item of this) {
+      output[i--] = item;
+    }
+    return output;
   }
 
   static isEqual(a, b) {
@@ -243,12 +249,6 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
     return Mewlix.Compare.isEqual(value, this.value)
       ? true
       : this.next.contains(value);
-  }
-
-  toArray() {
-    const arr = this.next.toArray();
-    arr.push(this.value);
-    return arr;
   }
 }
 
