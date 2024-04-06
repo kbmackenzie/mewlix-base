@@ -229,7 +229,8 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
   constructor(value, tail) {
     super();
     this.value = value;
-    this.next  = tail ?? new Mewlix.ShelfBottom();
+    this.next  = tail;
+    this.len   = tail.length() + 1;
     Object.freeze(this);
   }
 
@@ -242,7 +243,7 @@ Mewlix.ShelfNode = class ShelfNode extends Mewlix.Shelf {
   }
 
   length() {
-    return 1 + this.next.length();
+    return this.len;
   }
 
   contains(value) {
