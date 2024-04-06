@@ -909,13 +909,16 @@ Mewlix.Base = Mewlix.library('std', {
 
     if (typeof value === 'string') return value.slice(0, amount);
     if (value instanceof Mewlix.Shelf) {
-      const output = [];
+      const len = Math.min(value.length(), amount);
+      const output = new Array(len);
+
       let counter = amount;
+      let i = len - 1;
       for (const item of value) {
         if (counter-- <= 0) break;
-        output.push(item);
+        output[i--] = item;
       }
-      return Mewlix.Shelf.fromArray(output.reverse());
+      return Mewlix.Shelf.fromArray(output);
     }
 
     const typeOfValue = Mewlix.Reflection.typeOf(value);
