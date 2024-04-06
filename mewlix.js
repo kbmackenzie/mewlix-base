@@ -1012,16 +1012,19 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.shelf('std.zip', a);
     ensure.shelf('std.zip', b);
 
-    const accumulator = [];
+    const length = Math.min(a.length(), b.length());
+    const output = new Array(length);
+
+    let i = length - 1;
     while (a instanceof Mewlix.ShelfNode && b instanceof Mewlix.ShelfNode) {
-      accumulator.push(new Mewlix.Box([
+      output[i--] = new Mewlix.Box([
         ["first",  a.peek()],
         ["second", b.peek()],
-      ]));
+      ]);
       a = a.pop();
       b = b.pop();
     }
-    return Mewlix.Shelf.fromArray(accumulator.reverse());
+    return Mewlix.Shelf.fromArray(output);
   },
 
   insert: function insert(shelf, value, index = 0) {
