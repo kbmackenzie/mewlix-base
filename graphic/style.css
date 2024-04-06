@@ -17,3 +17,8 @@
 .drawing-canvas {
   image-rendering: pixelated;
 }
+
+.loading-overlay {
+  position: absolute;
+  height: 100%;
+}
