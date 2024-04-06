@@ -1034,23 +1034,21 @@ Mewlix.Base = Mewlix.library('std', {
     ensure.shelf('std.insert', shelf);
     ensure.number('std.insert', index);
 
-    const bucket = [];
-    let tail = shelf;
+    let top = new Mewlix.ShelfBottom();
+    let bottom = shelf;
+    let counter = (index >= 0) ? index : (shelf.length() + index + 1);
 
-    if (index < 0) {
-      index = Math.max(0, shelf.length() + index + 1);
+    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
+      top = top.push(bottom.peek());
+      bottom = bottom.pop();
     }
 
-    let count = index;
-    for (const item of shelf) {
-      if (count-- <= 0) break;
-      bucket.push(item);
-      tail = tail.pop();
-    }
-    bucket.push(value);
+    bottom = bottom.push(value);
 
-    const init = Mewlix.Shelf.fromArray(bucket.reverse());
-    return Mewlix.Shelf.concat(tail, init);
+    for (const item of top) {
+      bottom = bottom.push(item);
+    }
+    return bottom;
   },
 
   remove: function remove(shelf, index = 0) {
