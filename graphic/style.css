@@ -15,12 +15,11 @@ body {
 }
 
 .game {
-  aspect-ratio: 1 / 1;
-  max-width: 100%;
-  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: 100vmin;
+  height: 100vmin;
 }
 
 .game_canvas {
@@ -36,10 +35,12 @@ body {
 }
 
 .game_sound img {
-  width: 4rem;
-  height: 4rem;
+  max-width: 4rem;
+  max-height: 4rem;
 }
 
 .loading-overlay {
+  width: 100vmin;
+  height: 100vmin;
   position: absolute;
 }
