@@ -19,7 +19,7 @@ const byteToPercentage = b => Math.floor((100 * b) / 255);
 /* -----------------------------------
  * Initializing Canvas:
  * ----------------------------------- */
-const canvas  = document.getElementById('drawing-canvas');
+const canvas  = document.getElementById('game-canvas');
 const context = canvas.getContext('2d');
 context.imageSmoothingEnabled = false;
 

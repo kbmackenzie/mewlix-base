@@ -14,15 +14,15 @@
   justify-content: center;
 }
 
-.drawing-canvas {
+.game {
+  width: auto;
+}
+
+.game_canvas {
   image-rendering: pixelated;
 }
 
 .loading-overlay {
   position: absolute;
   height: 100%;
-}
-
-.canvas-container {
-  width: auto;
 }
