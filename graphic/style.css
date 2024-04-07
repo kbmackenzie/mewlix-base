@@ -16,10 +16,25 @@
 
 .game {
   width: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .game_canvas {
   image-rendering: pixelated;
+}
+
+.game_sound {
+  position: absolute;
+  border: none;
+  background-color: transparent;
+  margin: 0.5rem;
+}
+
+.game_sound img {
+  width: 4rem;
+  height: 4rem;
 }
 
 .loading-overlay {
