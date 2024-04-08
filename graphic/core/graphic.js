@@ -274,12 +274,43 @@ const stopAllSfx = () => {
 };
 
 /* -----------------------------------
- * Adjusting Volume:
+ * Volume Control:
  * ----------------------------------- */
+const gameVolume = {
+  mute: false
+};
+
 const setVolumeOf = (node, volume) => {
   node.gain.cancelScheduledValues(audioContext.currentTime);
   node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
   node.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.5);
+};
+
+class VolumeControl {
+  constructor(node) {
+    this.node = node;
+    this.volume = node.volume;
+  }
+
+  set(volume) {
+    this.volume = volume;
+    this.update();
+  }
+
+  update() {
+    const value = this.volume * gameVolume.mute;
+    setVolumeOf(this.node, value);
+  }
+}
+
+gameVolume.master = new VolumeControl(masterVolume);
+gameVolume.music  = new VolumeControl(musicVolume);
+gameVolume.sfx    = new VolumeControl(sfxVolume);
+
+gameVolume.update = function() {
+  this.master.update();
+  this.music.update();
+  this.sfx.update();
 };
 
 /* -----------------------------------
