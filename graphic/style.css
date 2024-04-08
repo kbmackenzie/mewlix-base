@@ -29,14 +29,20 @@ body {
 
 .game_sound {
   position: absolute;
+  width: 4rem;
+  height: 4rem;
   border: none;
-  background-color: transparent;
   margin: 0.5rem;
+  opacity: 60%;
+  background: no-repeat center/contain url('./core-assets/icons/speaker-00.png'), transparent;
 }
 
-.game_sound img {
-  max-width: 4rem;
-  max-height: 4rem;
+.game_sound:hover {
+  opacity: 100%;
+}
+
+.game_sound.muted {
+  background-image: url('./core-assets/icons/speaker-01.png');
 }
 
 .loading-overlay {
