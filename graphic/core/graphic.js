@@ -289,7 +289,7 @@ const setVolumeOf = (node, volume) => {
 class VolumeControl {
   constructor(node) {
     this.node = node;
-    this.volume = node.volume;
+    this.volume = node.gain.value;
   }
 
   set(volume) {
@@ -298,7 +298,7 @@ class VolumeControl {
   }
 
   update() {
-    const value = this.volume * gameVolume.mute;
+    const value = this.volume * !gameVolume.mute;
     setVolumeOf(this.node, value);
   }
 }
@@ -312,6 +312,24 @@ gameVolume.update = function() {
   this.music.update();
   this.sfx.update();
 };
+
+/* -----------------------------------
+ * Sound Button:
+ * ----------------------------------- */
+const soundButton = document.getElementById('game-sound');
+
+soundButton.addEventListener('click', () => {
+  gameVolume.mute = !gameVolume.mute;
+
+  if (gameVolume.mute) {
+    soundButton.classList.add('muted');
+  }
+  else {
+    soundButton.classList.remove('muted');
+  }
+
+  gameVolume.update();
+});
 
 /* -----------------------------------
  * Keyboard Events
