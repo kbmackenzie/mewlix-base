@@ -823,19 +823,19 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   volume: value => {
     ensure.number('graphic.volume', value);
     value = clamp(value, 0, 100) / 100;
-    return setVolumeOf(masterVolume, value / 2);
+    gameVolume.master.set(value);
   },
 
   music_volume: value => {
     ensure.number('graphic.music_volume', value);
     value = clamp(value, 0, 100) / 100;
-    return setVolumeOf(musicVolume, value);
+    gameVolume.music.set(value);
   },
 
   sfx_volume: value => {
     ensure.number('graphic.sfx_volume', value);
     value = clamp(value, 0, 100) / 100;
-    return setVolumeOf(sfxVolume, value);
+    gameVolume.sfx.set(value);
   },
 
   stop_music: stopMusic,
