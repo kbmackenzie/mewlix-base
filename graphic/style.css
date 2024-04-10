@@ -39,6 +39,7 @@ body {
 
 .game_sound:hover {
   opacity: 100%;
+  cursor: pointer;
 }
 
 .game_sound.muted {
