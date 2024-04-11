@@ -599,11 +599,11 @@ Mewlix.Strings = {
 
 Mewlix.Shelves = {
   peek: function peek(shelf) {
-    ensure.shelf('peek', shelf);
+    ensure.shelf('paw at', shelf);
     return shelf.peek();
   },
   pop: function pop(shelf) {
-    ensure.shelf('knock off', shelf);
+    ensure.shelf('knock over', shelf);
     return shelf.pop();
   },
   push: function push(value, shelf) {
