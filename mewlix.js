@@ -1012,6 +1012,14 @@ Mewlix.Base = Mewlix.library('std', {
     return accumulator;
   },
 
+  repeat: async function repeat(number, callback) {
+    ensure.number('std.repeat', number);
+    ensure.func('std.repeat', callback);
+    for (let i = 0; i < number; i++) {
+      await callback();
+    }
+  },
+
   zip: function zip(a, b) {
     ensure.shelf('std.zip', a);
     ensure.shelf('std.zip', b);
