@@ -974,6 +974,22 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(output);
   },
 
+  repeat: async function repeat(number, callback) {
+    ensure.number('std.repeat', number);
+    ensure.func('std.repeat', callback);
+    for (let i = 0; i < number; i++) {
+      await callback();
+    }
+  },
+
+  foreach: async function foreach(callback, shelf) {
+    ensure.func('std.foreach', callback);
+    ensure.shelf('std.foreach', shelf);
+    for (const value of shelf) {
+      await callback(value);
+    }
+  },
+
   map: async function map(callback, shelf) {
     ensure.func('std.map', callback);
     ensure.shelf('std.map', shelf);
@@ -1028,14 +1044,6 @@ Mewlix.Base = Mewlix.library('std', {
       if (!(await predicate(value))) { return false; }
     }
     return true;
-  },
-
-  repeat: async function repeat(number, callback) {
-    ensure.number('std.repeat', number);
-    ensure.func('std.repeat', callback);
-    for (let i = 0; i < number; i++) {
-      await callback();
-    }
   },
 
   zip: function zip(a, b) {
