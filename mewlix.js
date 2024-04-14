@@ -699,7 +699,7 @@ Mewlix.Conversion = {
  * Statement built-ins
  * ----------------------------------------------------- */
 Mewlix.Internal = {
-  rainable: function rainable(value) {
+  canChase: function canChase(value) {
     if (typeof value === 'string' || value instanceof Mewlix.Shelf) {
       return value;
     }
