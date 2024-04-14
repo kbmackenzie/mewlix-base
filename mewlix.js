@@ -1396,7 +1396,11 @@ Mewlix.BaseCurry = (() => {
     map: callback => shelf => std.map(callback, shelf),
     filter: predicate => shelf => std.filter(predicate, shelf),
     fold: callback => initial => shelf => std.fold(callback, initial, shelf),
+    any: predicate => shelf => std.any(predicate, shelf),
+    all: predicate => shelf => std.all(predicate, shelf),
     zip: a => b => std.zip(a, b),
+    repeat: number => callback => std.repeat(number, callback),
+    foreach: callback => shelf => std.foreach(callback, shelf),
 
     tuple: a => b => std.tuple(a, b),
 
