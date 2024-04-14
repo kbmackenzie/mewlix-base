@@ -974,20 +974,46 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(output);
   },
 
-  repeat: async function repeat(number, callback) {
-    ensure.number('std.repeat', number);
-    ensure.func('std.repeat', callback);
-    for (let i = 0; i < number; i++) {
-      await callback();
+  insert: function insert(shelf, value, index = 0) {
+    ensure.shelf('std.insert', shelf);
+    ensure.number('std.insert', index);
+
+    let top = new Mewlix.ShelfBottom();
+    let bottom = shelf;
+    let counter = (index >= 0) ? index : (shelf.length() + index + 1);
+
+    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
+      top = top.push(bottom.peek());
+      bottom = bottom.pop();
     }
+
+    bottom = bottom.push(value);
+
+    for (const item of top) {
+      bottom = bottom.push(item);
+    }
+    return bottom;
   },
 
-  foreach: async function foreach(callback, shelf) {
-    ensure.func('std.foreach', callback);
-    ensure.shelf('std.foreach', shelf);
-    for (const value of shelf) {
-      await callback(value);
+  remove: function remove(shelf, index = 0) {
+    ensure.shelf('std.remove', shelf);
+    ensure.number('std.remove', index);
+
+    let top = new Mewlix.ShelfBottom();
+    let bottom = shelf;
+    let counter = (index >= 0) ? index : (shelf.length() + index);
+
+    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
+      top = top.push(bottom.peek());
+      bottom = bottom.pop();
     }
+
+    bottom = bottom.pop();
+
+    for (const item of top) {
+      bottom = bottom.push(item);
+    }
+    return bottom;
   },
 
   map: async function map(callback, shelf) {
@@ -1065,46 +1091,20 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(output);
   },
 
-  insert: function insert(shelf, value, index = 0) {
-    ensure.shelf('std.insert', shelf);
-    ensure.number('std.insert', index);
-
-    let top = new Mewlix.ShelfBottom();
-    let bottom = shelf;
-    let counter = (index >= 0) ? index : (shelf.length() + index + 1);
-
-    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
-      top = top.push(bottom.peek());
-      bottom = bottom.pop();
+  repeat: async function repeat(number, callback) {
+    ensure.number('std.repeat', number);
+    ensure.func('std.repeat', callback);
+    for (let i = 0; i < number; i++) {
+      await callback();
     }
-
-    bottom = bottom.push(value);
-
-    for (const item of top) {
-      bottom = bottom.push(item);
-    }
-    return bottom;
   },
 
-  remove: function remove(shelf, index = 0) {
-    ensure.shelf('std.remove', shelf);
-    ensure.number('std.remove', index);
-
-    let top = new Mewlix.ShelfBottom();
-    let bottom = shelf;
-    let counter = (index >= 0) ? index : (shelf.length() + index);
-
-    while (counter-- > 0 && bottom instanceof Mewlix.ShelfNode) {
-      top = top.push(bottom.peek());
-      bottom = bottom.pop();
+  foreach: async function foreach(callback, shelf) {
+    ensure.func('std.foreach', callback);
+    ensure.shelf('std.foreach', shelf);
+    for (const value of shelf) {
+      await callback(value);
     }
-
-    bottom = bottom.pop();
-
-    for (const item of top) {
-      bottom = bottom.push(item);
-    }
-    return bottom;
   },
 
   tuple: function tuple(a, b) {
@@ -1390,13 +1390,13 @@ Mewlix.BaseCurry = (() => {
     join: a => b => std.join(a, b),
     take: value => amount => std.take(value, amount),
     drop: value => amount => std.drop(value, amount),
+    insert: shelf => value => index => std.insert(shelf, value, index),
+    remove: shelf => index => std.remove(shelf, index),
 
     map: callback => shelf => std.map(callback, shelf),
     filter: predicate => shelf => std.filter(predicate, shelf),
     fold: callback => initial => shelf => std.fold(callback, initial, shelf),
     zip: a => b => std.zip(a, b),
-    insert: shelf => value => index => std.insert(shelf, value, index),
-    remove: shelf => index => std.remove(shelf, index),
 
     tuple: a => b => std.tuple(a, b),
 
