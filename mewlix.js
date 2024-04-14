@@ -1021,6 +1021,15 @@ Mewlix.Base = Mewlix.library('std', {
     return false;
   },
 
+  all: async function all(predicate, shelf) {
+    ensure.func('std.all', predicate);
+    ensure.shelf('std.all', shelf);
+    for (const value of shelf) {
+      if (!(await predicate(value))) { return false; }
+    }
+    return true;
+  },
+
   repeat: async function repeat(number, callback) {
     ensure.number('std.repeat', number);
     ensure.func('std.repeat', callback);
