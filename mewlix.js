@@ -520,6 +520,15 @@ Mewlix.Numbers = {
     }
     return a / b;
   },
+  floordiv: function floordiv(a, b) {
+    ensure.number('//', a);
+    ensure.number('//', b);
+    if (b == 0) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+        `Attempted to divide ${a} by ${b}!`);
+    }
+    return Math.floor(a / b);
+  },
   mod: function mod(a, b) {
     ensure.number('%', a);
     ensure.number('%', b);
