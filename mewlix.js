@@ -516,7 +516,7 @@ Mewlix.Numbers = {
     ensure.number('/', b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Attempted to divide ${a} by ${b}!`);
+        `/: Attempted to divide ${a} by ${b}!`);
     }
     return a / b;
   },
@@ -525,7 +525,7 @@ Mewlix.Numbers = {
     ensure.number('//', b);
     if (b == 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Attempted to divide ${a} by ${b}!`);
+        `//: Attempted to divide ${a} by ${b}!`);
     }
     return Math.floor(a / b);
   },
@@ -534,7 +534,7 @@ Mewlix.Numbers = {
     ensure.number('%', b);
     if (b === 0) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
-        `Attempted to divide ${a} by ${b}!`);
+        `%: Attempted to divide ${a} by ${b}!`);
     }
     return ((a % b) + b) % b;
   },
