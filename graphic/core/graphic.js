@@ -454,10 +454,10 @@ class Rectangle extends Mewlix.Clowder {
     }).bind(this);
 
     this.collides = (function collides(rect) {
-      return (this.x < rect.x + rect.width)
-        && (this.y < rect.y + rect.height)
-        && (this.x + this.width > rect.x)
-        && (this.y + this.height > rect.height);
+      return (rect.x < this.x + this.width)
+        && (rect.x + rect.width > this.x)
+        && (rect.y < this.y + this.height)
+        && (rect.y + rect.height > this.y)
     }).bind(this);
   }
 }
