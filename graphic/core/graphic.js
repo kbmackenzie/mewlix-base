@@ -145,7 +145,7 @@ const setupText = options => {
   const font = options?.font ?? defaultFont;
   const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
-  context.font = `${fontSize * sizeModifier}px ${font}, monospace`;
+  context.font = `${fontSize * sizeModifier}px "${font}", monospace`;
   context.fillStyle = withColor(options?.color ?? 'black');
   context.textAlign = 'start';
   context.textBaseline = 'top';
