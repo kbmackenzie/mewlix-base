@@ -644,7 +644,7 @@ class Color extends Mewlix.Clowder {
   }
 
   [toColor]() {
-      return `rgb(${this.red} ${this.green} ${this.blue} / ${this.alpha()}%)`;
+    return `rgb(${this.red} ${this.green} ${this.blue} / ${this.opacity}%)`;
   }
 
   static fromHex(str) {
