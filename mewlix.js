@@ -281,13 +281,13 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
  * Mewlix.Enum -> Base for all enums.
  * ----------------------------------------------------- */
 class EnumValue extends Mewlix.Box {
-  constructor(key, value) {
+  constructor(name, value) {
     super();
-    this.key   = key;
+    this.name = name;
     this.value = value;
   }
   toString() {
-    return this.key;
+    return this.name;
   }
 }
 
@@ -302,7 +302,7 @@ Mewlix.Enum = class Enum extends Mewlix.Box {
   toString() {
     const enumKeys = Object.values(this)
       .filter(x => x instanceof EnumValue)
-      .map(x => x.key);
+      .map(x => x.name);
     return `cat tree { ${enumKeys.join(', ')} }`;
   }
 }
