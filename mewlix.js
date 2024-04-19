@@ -303,7 +303,7 @@ Mewlix.Enum = class Enum extends Mewlix.Box {
     const enumKeys = Object.values(this)
       .filter(x => x instanceof EnumValue)
       .map(x => x.name);
-    return `cat tree { ${enumKeys.join(', ')} }`;
+    return `cat tree [ ${enumKeys.join(', ')} ]`;
   }
 }
 
