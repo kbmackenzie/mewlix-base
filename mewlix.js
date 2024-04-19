@@ -1412,6 +1412,18 @@ Mewlix.Base = Mewlix.library('std', {
     const message = Mewlix.purrify(value);
     console?.log(`[Mewlix] ${message}`);
   },
+
+  error: new Mewlix.Enum([
+    Mewlix.ErrorCode.TypeMismatch,
+    Mewlix.ErrorCode.InvalidOperation,
+    Mewlix.ErrorCode.InvalidConversion,
+    Mewlix.ErrorCode.CatOnComputer,
+    Mewlix.ErrorCode.Console,
+    Mewlix.ErrorCode.Graphic,
+    Mewlix.ErrorCode.InvalidImport,
+    Mewlix.ErrorCode.CriticalError,
+    Mewlix.ErrorCode.ExternalError,
+  ].map(x => x.name)),
 });
 
 /* Freezing the base library, as it's going to be accessible inside Mewlix. */
