@@ -278,6 +278,36 @@ Mewlix.Box = class Box extends Mewlix.MewlixObject {
 };
 
 /* -----------------------------------------------------
+ * Mewlix.Enum -> Base for all enums.
+ * ----------------------------------------------------- */
+class EnumValue extends Mewlix.Box {
+  constructor(key, value) {
+    super();
+    this.key   = key;
+    this.value = value;
+  }
+  toString() {
+    return this.key;
+  }
+}
+
+Mewlix.Enum = class Enum extends Mewlix.Box {
+  constructor(keys = []) {
+    super();
+    let count = 0;
+    for (const key of keys) {
+      this[key] = new EnumValue(key, count++);
+    }
+  }
+  toString() {
+    const enumKeys = Object.values(this)
+      .filter(x => x instanceof EnumValue)
+      .map(x => x.key);
+    return `cat tree { ${enumKeys.join(', ')} }`;
+  }
+}
+
+/* -----------------------------------------------------
  * Mewlix.Clowder -> Base for all clowders.
  * ----------------------------------------------------- */
 /* The clowder constructor symbol. */
