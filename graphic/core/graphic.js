@@ -748,7 +748,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   init: init,
   delta: () => deltaTime,
 
-  load: (key, path, options) => {
+  load: (key, path, options = null) => {
     ensure.string('graphic.load', key);
     ensure.string('graphic.load', path);
     return loadAny(key, path, options);
@@ -765,7 +765,7 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
     return fromSpritesheet(path, frames);
   },
   
-  draw: (key, x, y) => {
+  draw: (key, x = 0, y = 0) => {
     ensure.string('graphic.draw', key);
     ensure.number('graphic.draw', x);
     ensure.number('graphic.draw', y);
@@ -787,13 +787,13 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
 
   paint: fillCanvas,
 
-  write: (value, x, y, options) => {
+  write: (value, x = 0, y = 0, options = null) => {
     ensure.number('graphic.write', x);
     ensure.number('graphic.write', y);
     return drawText(Mewlix.purrify(value), x, y, options);
   },
 
-  measure_text: (value, options) => {
+  measure_text: (value, options = null) => {
     return measureText(Mewlix.purrify(value), options);
   },
 
