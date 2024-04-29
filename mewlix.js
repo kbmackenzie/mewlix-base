@@ -299,7 +299,12 @@ Mewlix.Enum = class Enum extends Mewlix.Box {
     for (const key of keys) {
       this[key] = new EnumValue(key, count++, name);
     }
-    this.name = name;
+    Object.defineProperty(this, 'name', {
+      value: name,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    });
   }
   toString() {
     const enumKeys = Object.values(this)
