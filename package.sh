@@ -1,5 +1,9 @@
 #!/bin/sh
 
+print_error() {
+  echo "$1" 1>&2
+}
+
 # The ever-feared 'rm -rf'.
 rm -rf './build'
 mkdir  './build'
@@ -9,8 +13,9 @@ TEMPLATES='console graphic library'
 
 # Package templates:
 for TEMPLATE in $TEMPLATES; do
-    echo "Copying '$TEMPLATE' template..."
     BUILD_FOLDER="./build/$TEMPLATE-build"
+
+    echo "Copying '$TEMPLATE' template..."
 
     cp -r "./$TEMPLATE" "$BUILD_FOLDER"
     cp -n './mewlix.js' "$BUILD_FOLDER/core/mewlix.js"
@@ -21,7 +26,16 @@ for TEMPLATE in $TEMPLATES; do
     fi
 
     echo "Zipping '$TEMPLATE':"
-    cd "$BUILD_FOLDER"
-    zip -r "../$TEMPLATE" .
+
+    cd "$BUILD_FOLDER" || {
+      print_error "Couldn't cd into folder '$BUILD_FOLDER'!"
+      exit 1
+    }
+
+    zip -r "../$TEMPLATE" . || {
+      print_error "Couldn't zip '$TEMPLATE' template!"
+      exit 1
+    }
+
     cd .. && cd ..
 done
