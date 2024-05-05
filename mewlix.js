@@ -584,7 +584,7 @@ Mewlix.Numbers = {
     ensure.number('+', a);
     return +a;
   },
-  negate: function negate(a) {
+  minus: function minus(a) {
     ensure.number('-', a);
     return -a;
   },
