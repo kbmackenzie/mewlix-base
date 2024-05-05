@@ -580,6 +580,10 @@ Mewlix.Numbers = {
     ensure.number('^', b);
     return a ** b;
   },
+  plus: function plus(a) {
+    ensure.number('+', a);
+    return +a;
+  },
   negate: function negate(a) {
     ensure.number('-', a);
     return -a;
