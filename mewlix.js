@@ -781,11 +781,6 @@ Mewlix.meow = function meow(_) {
     "Core function 'Mewlix.meow' hasn't been implemented!");
 };
 
-Mewlix.listen = function listen(_) {
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.CriticalError,
-    "Core function 'Mewlix.listen' hasn't been implemented!");
-};
-
 /* -----------------------------------------------------
  * API:
  * ----------------------------------------------------- */
@@ -1399,10 +1394,6 @@ Mewlix.Base = Mewlix.library('std', {
 
   meowf: function meowf(str) {
     return Mewlix.meow(Mewlix.purrify(str));
-  },
-
-  listenf: function listenf(str) {
-    return Mewlix.listen(Mewlix.purrify(str));
   },
 
   to_json: function to_json(value) {
