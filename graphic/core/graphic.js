@@ -485,6 +485,7 @@ async function loadResources() {
   for (const resource of resourceQueue) {
     await loadResource(resource);
   }
+  resourceQueue.length = 0;
 }
 
 /* -----------------------------------
