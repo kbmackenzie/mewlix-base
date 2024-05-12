@@ -1,3 +1,4 @@
 test/
 utils/
 build/
+node_modules/

@@ -2,14 +2,14 @@
   "name": "mewlix",
   "version": "1.0.0",
   "description": "The base library + project templates for [Mewlix](https://github.com/kbmackenzie/mewlix), a cat-themed esoteric programming language that compiles to vanilla Javascript, with templates for making little web applications and little HTML5 games.",
-  "main": "mewlix.js",
-  "directories": {
-    "test": "test"
-  },
+  "main": "build.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "KBMackenzie <kelly.a.betty@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "terser": "^5.31.0",
+    "typescript": "^5.4.5"
+  }
 }
