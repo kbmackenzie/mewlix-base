@@ -64,21 +64,21 @@ const loadSprite = (key, path, rect) => loadImage(path, rect)
   });
 
 /* Load a spritesheet image and divide it into sprites. */
-const fromSpritesheet = async (path, frames) => {
+async function fromSpritesheet(path, frames) {
   const sheet = await loadImage(path);
   for (const frame of frames) {
     const { key, rect } = frame;
     const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
     spriteMap.set(key, sprite);
   }
-};
+}
 
 /* -----------------------------------
  * Colors:
  * ----------------------------------- */
 const toColor = Symbol('toColor');
 
-const withColor = value => {
+function withColor(value) {
   if (typeof value === 'string') return value;    
   if (typeof value === 'object' && toColor in value) {
     return value[toColor]();
@@ -87,12 +87,12 @@ const withColor = value => {
   const typeOfValue = Mewlix.Reflection.typeOf(value);
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
     `Expected color value, received value of type "${typeOfValue}": ${value}`);
-};
+}
 
 /* -----------------------------------
  * Drawing:
  * ----------------------------------- */
-const getSprite = key => {
+function getSprite(key) {
   if (!spriteMap.has(key)) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
       `No loaded image resource associated with key "${key}"!`);
@@ -100,7 +100,7 @@ const getSprite = key => {
   return spriteMap.get(key);
 }
 
-const drawSprite = (key, x, y) => {
+function drawSprite(key, x, y) {
   const image = getSprite(key);
   context.drawImage(
     image,
@@ -109,9 +109,9 @@ const drawSprite = (key, x, y) => {
     image.width  * sizeModifier,
     image.height * sizeModifier,
   );
-};
+}
 
-const drawRect = (rect, color) => {
+function drawRect(rect, color) {
   context.fillStyle = withColor(color ?? 'black');
   context.fillRect(
     rect.x      * sizeModifier,
@@ -119,12 +119,12 @@ const drawRect = (rect, color) => {
     rect.width  * sizeModifier,
     rect.height * sizeModifier,
   );
-};
+}
 
-const fillCanvas = (color) => {
+function fillCanvas(color) {
   context.fillStyle = withColor(color ?? 'black');
   context.fillRect(0, 0, canvasWidth, canvasHeight);
-};
+}
 
 /* -----------------------------------
  * Loading Fonts:
@@ -141,7 +141,7 @@ const loadFont = (name, url) => new FontFace(name, `url(${url})`)
 const defaultFont = 'Munro';
 const defaultFontSize = 8;
 
-const setupText = options => {
+function setupText(options) {
   const font = options?.font ?? defaultFont;
   const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
@@ -149,18 +149,18 @@ const setupText = options => {
   context.fillStyle = withColor(options?.color ?? 'black');
   context.textAlign = 'start';
   context.textBaseline = 'top';
-};
+}
 
-const drawText = (message, x = 0, y = 0, options = null) => {
+function drawText(message, x = 0, y = 0, options = null) {
   setupText(options);
   context.fillText(
     message,
     Math.floor(x) * sizeModifier,
     Math.floor(y) * sizeModifier,
   );
-};
+}
 
-const measureText = (message, options) => {
+function measureText(message, options) {
   setupText(options);
   const metrics = context.measureText(message);
 
@@ -171,7 +171,7 @@ const measureText = (message, options) => {
     ["width"  , Math.round(width)  ],
     ["height" , Math.round(height) ],
   ]);
-};
+}
 
 /* -----------------------------------
  * Initializing Audio:
@@ -200,13 +200,13 @@ const loadAudio = (key, path) => fetch(path)
     return audio;
   });
 
-const getBuffer = key => {
+function getBuffer(key) {
   if (!audioMap.has(key)) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
       `No existing audio track is associated with the key ${key}!`);
   }
   return audioMap.get(key);
-};
+}
 
 /* -----------------------------------
  * Playing Music:
@@ -215,7 +215,7 @@ const musicChannel = {
   track: null,
 };
 
-const playMusic = key => {
+function playMusic(key) {
   musicChannel.track?.stop();
   const buffer = getBuffer(key);
 
@@ -226,12 +226,12 @@ const playMusic = key => {
   track.start();
 
   musicChannel.track = track;
-};
+}
 
-const stopMusic = () => {
+function stopMusic() {
   musicChannel.track?.stop();
   musicChannel.track = null;
-};
+}
 
 /* -----------------------------------
  * Playing Music:
@@ -239,15 +239,15 @@ const stopMusic = () => {
 const soundChannelCount = 8;
 const soundChannels = new Array(soundChannelCount).fill(null);
 
-const withSoundChannel = (index, callback) => {
+function withSoundChannel(index, callback) {
   if (index < 0 || index >= soundChannelCount) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
       `Invalid sound channel index: ${index}`);
   }
   soundChannels[index] = callback(soundChannels[index]);
-};
+}
 
-const playSfx = (key, index = 0) => {
+function playSfx(key, index = 0) {
   withSoundChannel(index, channel => {
     channel?.stop();
     const buffer = getBuffer(key);
@@ -259,19 +259,19 @@ const playSfx = (key, index = 0) => {
 
     return sound;
   });
-};
+}
 
-const stopSfx = (index = 0) => {
+function stopSfx(index = 0) {
   withSoundChannel(index, channel => {
     channel?.stop();
     return null;
   });
-};
+}
 
-const stopAllSfx = () => {
+function stopAllSfx() {
   soundChannels.forEach(channel => channel?.stop());
   soundChannels.fill(null);
-};
+}
 
 /* -----------------------------------
  * Volume Control:
@@ -280,11 +280,11 @@ const gameVolume = {
   mute: false
 };
 
-const setVolumeOf = (node, volume) => {
+function setVolumeOf(node, volume) {
   node.gain.cancelScheduledValues(audioContext.currentTime);
   node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
   node.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.5);
-};
+}
 
 class VolumeControl {
   constructor(node) {
@@ -351,9 +351,9 @@ const isKeyPressed  = key => keyQueue.has(key);
 const isKeyDown     = key => keysDown.has(key);
 const isKeyUp       = key => !keysDown.has(key);
 
-const flushKeyQueue = () => {
+function flushKeyQueue() {
   keyQueue.clear();
-};
+}
 
 /* -----------------------------------
  * Mouse Events:
@@ -386,10 +386,12 @@ canvas.addEventListener('mouseup', event => {
   mouseClick = false;
 });
 
-const isMousePressed  = () => mouseClick;
-const isMouseDown     = () => mouseDown;
+const isMousePressed = () => mouseClick;
+const isMouseDown    = () => mouseDown;
 
-const flushClick = () => { mouseClick = false; };
+function flushClick() {
+  mouseClick = false;
+}
 
 /* -----------------------------------
  * Generic Loading:
@@ -414,11 +416,11 @@ const fontExtensions = new Set([
   'woff2',
 ]);
 
-const getExtensionOf = path => {
+function getExtensionOf(path) {
   return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
-};
+}
 
-const loadAny = async (key, path, options) => {
+async function loadAny(key, path, options) {
   const extension = getExtensionOf(path)?.toLowerCase();
   if (!extension) {
     throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
@@ -442,7 +444,7 @@ const loadAny = async (key, path, options) => {
 
   throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
     `Unrecognized file format "${extension}" in 'load' function!`);
-};
+}
 
 /* -----------------------------------
  * Utility Functions:
@@ -574,18 +576,18 @@ class GridSlot extends Mewlix.Clowder {
   }
 }
 
-const positionToGridSlot = (x, y) => {
+function positionToGridSlot(x, y) {
   const row = Math.min(y / gridSlotHeight);
   const col = Math.min(x / gridSlotWidth);
   return new GridSlot()[Mewlix.wake](row, col);
-};
+}
 
-const gridSlotToPosition = (row, col) => {
+function gridSlotToPosition(row, col) {
   return new Vector2()[Mewlix.wake](
     col * gridSlotWidth,
     row * gridSlotHeight,
   );
-};
+}
 
 /* -----------------------------------
  * Additional Clowders:
@@ -699,7 +701,7 @@ class PixelCanvas extends Mewlix.Clowder {
       });
     }).bind(this);
   }
-};
+}
 
 /* -----------------------------------
  * Game Loop
@@ -735,7 +737,7 @@ async function init(callback) {
     window.requestAnimationFrame(resolve);
   });
 
-  const run = async () => {
+  async function run() {
     let lastFrame; // Last frame's timestamp, in milliseconds.
 
     removeLoadingOverlay();
@@ -756,7 +758,7 @@ async function init(callback) {
       deltaTime = (now - lastFrame) / 1000;
       lastFrame = now;
     }
-  };
+  }
 
   await run();
 }
@@ -970,9 +972,9 @@ Object.freeze(Mewlix.GraphicCurry);
 /* -----------------------------------
  * Run Console:
  * ----------------------------------- */
-Mewlix.run = async f => {
+Mewlix.run = async func => {
   try {
-    await f();
+    await func();
   }
   catch (error) {
     const image = await loadImage('./core-assets/mewlix-error.png');
