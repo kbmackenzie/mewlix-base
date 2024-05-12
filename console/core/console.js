@@ -40,71 +40,71 @@ const saveLogButton     = document.getElementById('save-log');
 /* -------------------------------------
  * Utils:
  * ------------------------------------- */
-const isEmptyLine = line => {
+function isEmptyLine(line) {
   return /^\n?$/.test(line);
-};
+}
 
-const dateString = () => {
+function dateString() {
   return new Date().toJSON().slice(0, 10);
-};
+}
 
 /* -------------------------------------
  * Console lines:
  * ------------------------------------- */
-const createPrompt = () => {
+function createPrompt() {
   const span = document.createElement('span');
   span.style.color = setColor.value;
   span.classList.add('console_prompt');
 
   span.appendChild(document.createTextNode(promptMessage));
   return span;
-};
+}
 
-const newLine = callback => {
+function newLine(callback) {
   const line = document.createElement('li');
   line.classList.add('console_line');
   callback(line);
   lines.appendChild(line);
   scrollDown(lines);
-};
+}
 
-const scrollDown = elem => {
+function scrollDown(elem) {
   elem.scrollTop = elem.scrollHeight;
-};
+}
 
-const addMessage = (message, fromUser = true) => {
+function addMessage(message, fromUser = true) {
   newLine(line => {
     if (fromUser) {
       line.appendChild(createPrompt());
     }
     line.appendChild(document.createTextNode(message));
   });
-};
+}
 
-const addError = str => {
+function addError(str) {
   newLine(line => {
     line.style.color = setErrorColor.value;
     line.appendChild(document.createTextNode(`[Console] ${str}`));
   });
-};
+}
 
-const clearConsole = () => {
+function clearConsole() {
   lines.replaceChildren();
-};
+}
 
-const setStatus = status => {
+function setStatus(status) {
   projectStatus.textContent = status;
-};
+}
 
 /* -------------------------------------
  * File downloads:
  * ------------------------------------- */
-const textBlob = text => {
+function textBlob(text) {
   const blob = new Blob([text], { type: 'text/plain' });
   return URL.createObjectURL(blob);
-};
+}
 
-const createLineButton = (contents, name) => {
+function createLineButton(contents, name) {
   const filename = name ?? `mewlix-${dateString()}.txt`;
   const message = `Download ${JSON.stringify(filename)}`;
 
@@ -113,26 +113,26 @@ const createLineButton = (contents, name) => {
   button.download = filename;
   button.appendChild(document.createTextNode(message));
   return button;
-};
+}
 
-const addDownloadButton = (contents, name) => {
+function addDownloadButton(contents, name) {
   newLine(line => {
     const button = createLineButton(contents, name);
     line.appendChild(button);
     line.classList.add('file-download');
   });
-};
+}
 
 /* -------------------------------------
  * Console input:
  * ------------------------------------- */
-const enableButtons = enable => {
+function enableButtons(enable) {
   arrowButton.disabled = !enable; 
   paperclipInput.disabled = !enable;
   paperclipButton.disabled = !enable; 
-};
+}
 
-const getInput = () => {
+function getInput() {
   input.disabled = false;
   input.focus();
   enableButtons(true);
@@ -159,40 +159,40 @@ const getInput = () => {
       { once: true }
     );
   });
-};
+}
 
 /* -------------------------------------
  * Additional utils:
  * ------------------------------------- */
-const toggleHighlight = highlight => {
+function toggleHighlight(highlight) {
   if (highlight) {
     input.classList.add('highlight');
   }
   else {
     input.classList.remove('highlight');
   }
-};
+}
 
-const setProjectName = name => {
+function setProjectName(name) {
   if (name === '') return;
   projectName.textContent = name;
-};
+}
 
 /* -------------------------------------
  * Paperclip Button:
  * ------------------------------------- */
-const nub = array => {
+function nub(array) {
   const set = new Set();
   return array.filter(x => {
     if (set.has(x)) return false;
     set.add(x);
     return true;
   });
-};
+}
 
-const setAcceptedFiles = keys => {
+function setAcceptedFiles(keys) {
   paperclipInput.accept = nub(keys).join(', ')
-};
+}
 
 /* -------------------------------------
  * Saving Data:
@@ -202,7 +202,7 @@ const getLines = () => Array.from(lines.getElementsByTagName('li'))
   .map(li => li.innerText)
   .join('\n');
 
-const createLogDownload = () => {
+function createLogDownload() {
   const filename = `mewlix-console-log-${dateString()}.txt`;
   const content = getLines() + '\n';
 
@@ -216,16 +216,16 @@ const createLogDownload = () => {
     button.click();
     button.remove();
   };
-};
+}
 
 /* -------------------------------------
  * Screen Overlay
  * ------------------------------------- */
-const createDarkOverlay = () => {
+function createDarkOverlay() {
   const div = document.createElement('div');
   div.classList.add('screen-overlay', 'obscure');
   return div;
-};
+}
 
 /* -------------------------------------
  * Initialization:
@@ -357,10 +357,10 @@ Object.freeze(Mewlix.ConsoleCurry);
 /* -------------------------------------
  * Run Console:
  * ------------------------------------- */
-const setRunning = () => {
+function setRunning() {
   setStatus('running: ');
   projectName.classList.remove('hide');
-};
+}
 
 Mewlix.run = func => {
   try {
