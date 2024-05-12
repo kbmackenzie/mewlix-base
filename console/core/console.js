@@ -282,13 +282,6 @@ Mewlix.meow = message => {
   return message;
 };
 
-Mewlix.listen = question => {
-  if (!Mewlix.isNothing(question)) {
-    addMessage(question, false);
-  }
-  return getInput();
-};
-
 /* -------------------------------------
  * Standard library:
  * ------------------------------------- */
@@ -304,6 +297,15 @@ const ensure = Mewlix.ensure;
 
 Mewlix.Console = Mewlix.library('std.console', {
   clear: clearConsole,
+
+  run: async func => {
+    ensure.func('console.run', func);
+    while (true) {
+      const input = await getInput();
+      const output = func(input);
+      addMessage(Mewlix.purrify(output), false);
+    }
+  },
 
   name: name => {
     ensure.string('console.name', name);
@@ -360,10 +362,10 @@ const setRunning = () => {
   projectName.classList.remove('hide');
 };
 
-Mewlix.run = async f => {
+Mewlix.run = func => {
   try {
     setRunning();
-    await f();
+    func();
   }
   catch (error) {
     addError(`Exception caught: ${error}`);
