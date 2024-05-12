@@ -690,11 +690,11 @@ class PixelCanvas extends Mewlix.Clowder {
     }).bind(this);
 
     this.to_sprite = (function to_image(key) {
-      const data  = new ImageData(this.data, this.width, this.height);
+      const copy = new Uint8ClampedArray(this.data);
       resourceQueue.push({
         type: 'canvas',
         key: key,
-        data: data
+        data: new ImageData(copy, this.width, this.height),
       });
     }).bind(this);
   }
