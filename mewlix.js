@@ -85,7 +85,7 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
     this.modules.set(key, func);
   }
 
-  async getModule(key) {
+  getModule(key) {
     if (!this.modules.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidImport,
         `The module "${key}" doesn't exist or hasn't been properly loaded!`);
@@ -95,7 +95,7 @@ Mewlix.Namespace = class Namespace extends Mewlix.MewlixObject {
       return this.cache.get(key);
     }
 
-    const yarnball = await this.modules.get(key)();
+    const yarnball = this.modules.get(key)();
     this.cache.set(key, yarnball);
     return yarnball;
   }
@@ -594,13 +594,13 @@ Mewlix.Boolean = {
   not: function not(a) {
     return !Mewlix.Conversion.toBool(a);
   },
-  or: async function or(a, fb) {
+  or: function or(a, fb) {
     return Mewlix.Conversion.toBool(a) ? a : fb();
   },
-  and: async function and(a, fb) {
+  and: function and(a, fb) {
     return Mewlix.Conversion.toBool(a) ? fb() : a;
   },
-  ternary: async function ternary(condition, fa, fb) {
+  ternary: function ternary(condition, fa, fb) {
     return Mewlix.Conversion.toBool(condition) ? fa() : fb();
   },
 };
@@ -1066,7 +1066,7 @@ Mewlix.Base = Mewlix.library('std', {
     return bottom;
   },
 
-  map: async function map(callback, shelf) {
+  map: function map(callback, shelf) {
     ensure.func('std.map', callback);
     ensure.shelf('std.map', shelf);
 
@@ -1074,50 +1074,50 @@ Mewlix.Base = Mewlix.library('std', {
 
     let i = shelf.length() - 1;
     for (const value of shelf) {
-      output[i--] = await callback(value);
+      output[i--] = callback(value);
     }
     return Mewlix.Shelf.fromArray(output);
   },
 
-  filter: async function filter(predicate, shelf) {
+  filter: function filter(predicate, shelf) {
     ensure.func('std.filter', predicate);
     ensure.shelf('std.filter', shelf);
 
     let bucket = new Mewlix.ShelfBottom();
 
     for (const value of shelf) {
-      if (await predicate(value)) {
+      if (predicate(value)) {
         bucket = bucket.push(value);
       }
     }
     return Mewlix.Shelf.reverse(bucket);
   },
 
-  fold: async function fold(callback, initial, shelf) {
+  fold: function fold(callback, initial, shelf) {
     ensure.func('std.fold', callback);
     ensure.shelf('std.fold', shelf);
 
     let accumulator = initial;
     for (const value of shelf) {
-      accumulator = await callback(accumulator, value);
+      accumulator = callback(accumulator, value);
     }
     return accumulator;
   },
 
-  any: async function any(predicate, shelf) {
+  any: function any(predicate, shelf) {
     ensure.func('std.any', predicate);
     ensure.shelf('std.any', shelf);
     for (const value of shelf) {
-      if (await predicate(value)) { return true; }
+      if (predicate(value)) { return true; }
     }
     return false;
   },
 
-  all: async function all(predicate, shelf) {
+  all: function all(predicate, shelf) {
     ensure.func('std.all', predicate);
     ensure.shelf('std.all', shelf);
     for (const value of shelf) {
-      if (!(await predicate(value))) { return false; }
+      if (!(predicate(value))) { return false; }
     }
     return true;
   },
@@ -1141,19 +1141,19 @@ Mewlix.Base = Mewlix.library('std', {
     return Mewlix.Shelf.fromArray(output);
   },
 
-  repeat: async function repeat(number, callback) {
+  repeat: function repeat(number, callback) {
     ensure.number('std.repeat', number);
     ensure.func('std.repeat', callback);
     for (let i = 0; i < number; i++) {
-      await callback();
+      callback();
     }
   },
 
-  foreach: async function foreach(callback, shelf) {
+  foreach: function foreach(callback, shelf) {
     ensure.func('std.foreach', callback);
     ensure.shelf('std.foreach', shelf);
     for (const value of shelf) {
-      await callback(value);
+      callback(value);
     }
   },
 
@@ -1403,11 +1403,6 @@ Mewlix.Base = Mewlix.library('std', {
 
   listenf: function listenf(str) {
     return Mewlix.listen(Mewlix.purrify(str));
-  },
-
-  read_file: async function read_file(path) {
-    ensure.string('std.read_file', path);
-    return fetch(path).then(response => response.text());
   },
 
   to_json: function to_json(value) {
