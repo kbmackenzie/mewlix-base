@@ -392,9 +392,104 @@ const isMouseDown     = () => mouseDown;
 const flushClick = () => { mouseClick = false; };
 
 /* -----------------------------------
- * Core Utility:
+ * Generic Loading:
+ * ----------------------------------- */
+let imageExtensions = new Set([
+  'png',
+  'jpg',
+  'bmp',
+  'jpeg',
+]);
+
+let audioExtensions = new Set([
+  'mp3',
+  'wav',
+  'ogg',
+]);
+
+const fontExtensions = new Set([
+  'ttf',
+  'otf',
+  'woff',
+  'woff2',
+]);
+
+const getExtensionOf = path => {
+  return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
+};
+
+const loadAny = async (key, path, options) => {
+  const extension = getExtensionOf(path)?.toLowerCase();
+  if (!extension) {
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `Couldn't parse file extension in filepath "${path}"!`);
+  }
+
+  if (imageExtensions.has(extension)) {
+    await loadSprite(key, path, options);
+    return;
+  }
+
+  if (audioExtensions.has(extension)) {
+    await loadAudio(key, path);
+    return;
+  }
+
+  if (fontExtensions.has(extension)) {
+    await loadFont(key, path);
+    return;
+  }
+
+  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    `Unrecognized file format "${extension}" in 'load' function!`);
+};
+
+/* -----------------------------------
+ * Utility Functions:
+ * ----------------------------------- */
+const lerp = (start, end, x) => start + (end - start) * x;
+
+/* -----------------------------------
+ * Resource Queue:
  * ----------------------------------- */
 
+/* A queue to store data about resources to be loaded.
+ * Items queued will be loaded when graphic.init() is called!
+ *
+ * The queue stores data about three tpyes of resources:
+ * - Generic (images, audio, fonts)
+ * - Spritesheet sprites
+ * - PixelCanvas sprite rendering
+ *
+ * The 'type' attribute in each object stored in the queue
+ * indicates the type of resource it represents. */
+const resourceQueue = [];
+
+async function loadResource(resource) {
+  if (resource.type === 'generic') {
+    const { key, path, options } = resource;
+    await loadAny(key, path, options);
+  }
+  else if (resource.type === 'canvas') {
+    const { key, data } = resource;
+    const image = await createImageBitmap(data);
+    spriteMap.set(key, image);
+  }
+  else if (resource.type === 'spritesheet') {
+    const { path, frames } = resource;
+    await fromSpritesheet(path, frames);
+  }
+}
+
+async function loadResources() {
+  for (const resource of resourceQueue) {
+    await loadResource(resource);
+  }
+}
+
+/* -----------------------------------
+ * Core Utility:
+ * ----------------------------------- */
 class Vector2 extends Mewlix.Clowder {
   constructor() {
     super();
@@ -490,123 +585,6 @@ const gridSlotToPosition = (row, col) => {
     row * gridSlotHeight,
   );
 };
-
-/* -----------------------------------
- * Game Loop
- * ----------------------------------- */
-let deltaTime = 0;      // Delta time, in seconds!
-let thumbnail = null;   // Callback function to generate a thumbnail;
-
-const awaitClick = () => new Promise(resolve => {
-  canvas.addEventListener(
-    'click',
-    () => audioContext.resume().then(resolve),
-    { once: true }
-  )
-});
-
-const removeLoadingOverlay = () => {
-  document.getElementById('loading-overlay')?.remove();
-};
-
-const drawPlay = async () => {
-  const image = await loadImage('./core-assets/mewlix-play.png');
-  context.fillStyle = 'rgb(0 0 0 / 50%)';
-  context.fillRect(0, 0, canvasWidth, canvasHeight);
-  context.drawImage(image, 0, 0);
-};
-
-const init = async (callback) => {
-  ensure.func('graphic.init', callback);
-  await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
-
-  const nextFrame = () => new Promise(resolve => {
-    window.requestAnimationFrame(resolve);
-  });
-
-  const run = async () => {
-    let lastFrame; // Last frame's timestamp, in milliseconds.
-
-    removeLoadingOverlay();
-    context.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    await thumbnail?.();
-    await drawPlay();
-    await awaitClick();
-    flushKeyQueue(); flushClick();
-
-    while (true) {
-      context.clearRect(0, 0, canvasWidth, canvasHeight);
-      await callback();
-      flushKeyQueue(); flushClick();
-      const now = await nextFrame();
-      lastFrame ??= now;
-
-      deltaTime = (now - lastFrame) / 1000;
-      lastFrame = now;
-    }
-  };
-
-  await run();
-};
-
-/* -----------------------------------
- * Generic Loading:
- * ----------------------------------- */
-let imageExtensions = new Set([
-  'png',
-  'jpg',
-  'bmp',
-  'jpeg',
-]);
-
-let audioExtensions = new Set([
-  'mp3',
-  'wav',
-  'ogg',
-]);
-
-const fontExtensions = new Set([
-  'ttf',
-  'otf',
-  'woff',
-  'woff2',
-]);
-
-const getExtensionOf = path => {
-  return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
-};
-
-const loadAny = async (key, path, options) => {
-  const extension = getExtensionOf(path)?.toLowerCase();
-  if (!extension) {
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-      `Couldn't parse file extension in filepath "${path}"!`);
-  }
-
-  if (imageExtensions.has(extension)) {
-    await loadSprite(key, path, options);
-    return;
-  }
-
-  if (audioExtensions.has(extension)) {
-    await loadAudio(key, path);
-    return;
-  }
-
-  if (fontExtensions.has(extension)) {
-    await loadFont(key, path);
-    return;
-  }
-
-  throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-    `Unrecognized file format "${extension}" in 'load' function!`);
-};
-
-/* -----------------------------------
- * Utility Functions:
- * ----------------------------------- */
-const lerp = (start, end, x) => start + (end - start) * x;
 
 /* -----------------------------------
  * Additional Clowders:
@@ -711,13 +689,76 @@ class PixelCanvas extends Mewlix.Clowder {
       );
     }).bind(this);
 
-    this.to_sprite = (async function to_image(key) {
+    this.to_sprite = (function to_image(key) {
       const data  = new ImageData(this.data, this.width, this.height);
-      const image = await createImageBitmap(data);
-      spriteMap.set(key, image);
+      resourceQueue.push({
+        type: 'canvas',
+        key: key,
+        data: data
+      });
     }).bind(this);
   }
 };
+
+/* -----------------------------------
+ * Game Loop
+ * ----------------------------------- */
+let deltaTime = 0;      // Delta time, in seconds!
+let thumbnail = null;   // Callback function to generate a thumbnail;
+
+const awaitClick = () => new Promise(resolve => {
+  canvas.addEventListener(
+    'click',
+    () => audioContext.resume().then(resolve),
+    { once: true }
+  )
+});
+
+function removeLoadingOverlay() {
+  document.getElementById('loading-overlay')?.remove();
+}
+
+async function drawPlay() {
+  const image = await loadImage('./core-assets/mewlix-play.png');
+  context.fillStyle = 'rgb(0 0 0 / 50%)';
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
+  context.drawImage(image, 0, 0);
+}
+
+async function init(callback) {
+  ensure.func('graphic.init', callback);
+  await loadResources();
+  await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
+
+  const nextFrame = () => new Promise(resolve => {
+    window.requestAnimationFrame(resolve);
+  });
+
+  const run = async () => {
+    let lastFrame; // Last frame's timestamp, in milliseconds.
+
+    removeLoadingOverlay();
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    await thumbnail?.();
+    await drawPlay();
+    await awaitClick();
+    flushKeyQueue(); flushClick();
+
+    while (true) {
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+      await callback();
+      flushKeyQueue(); flushClick();
+      const now = await nextFrame();
+      lastFrame ??= now;
+
+      deltaTime = (now - lastFrame) / 1000;
+      lastFrame = now;
+    }
+  };
+
+  await run();
+}
 
 /* -----------------------------------
  * Meow Expression
@@ -751,7 +792,12 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   load: (key, path, options = null) => {
     ensure.string('graphic.load', key);
     ensure.string('graphic.load', path);
-    return loadAny(key, path, options);
+    resourceQueue.push({
+      type: 'generic',
+      key: key,
+      path: path, 
+      options: options,
+    });
   },
 
   thumbnail: func => {
@@ -762,7 +808,11 @@ Mewlix.Graphic = Mewlix.library('std.graphic', {
   spritesheet: (path, frames) => {
     ensure.string('graphic.spritesheet', path);
     ensure.shelf('graphic.spritesheet', frames);
-    return fromSpritesheet(path, frames);
+    resourceQueue.push({
+      type: 'spritesheet',
+      path: path,
+      frames: frames,
+    });
   },
   
   draw: (key, x = 0, y = 0) => {
