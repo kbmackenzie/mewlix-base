@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2016",                                  
+    "module": "es2016",
+    "rootDir": "./src/",
+    "removeComments": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
