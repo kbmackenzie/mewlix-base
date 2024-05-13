@@ -1,12 +1,13 @@
 {
-  "name": "mewlix",
+  "name": "mewlix-base",
   "version": "1.0.0",
-  "description": "The base library + project templates for [Mewlix](https://github.com/kbmackenzie/mewlix), a cat-themed esoteric programming language that compiles to vanilla Javascript, with templates for making little web applications and little HTML5 games.",
-  "main": "build.js",
+  "description": "The base library and templates for Mewlix, a cat-themed esoteric language.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo \"todo\" && exit 1",
+    "test": "echo \"todo\" && exit 1",
+    "clean": "echo \"todo\" && exit 1"
   },
-  "author": "KBMackenzie <kelly.a.betty@gmail.com>",
+  "author": "kbmackenzie <kelly.a.betty@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "terser": "^5.31.0",
