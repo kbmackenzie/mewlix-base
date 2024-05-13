@@ -1,0 +1,15 @@
+{
+  "parse": {},
+  "compress": {},
+  "mangle": false,
+  "format": null,
+  "sourceMap": false,
+  "enclose": false,
+  "keep_classnames": true,
+  "keep_fnames": true,
+  "ie8": false,
+  "module": false,
+  "nameCache": null,
+  "safari10": false,
+  "toplevel": false
+}
