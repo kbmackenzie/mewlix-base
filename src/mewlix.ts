@@ -78,7 +78,7 @@ export default function() {
    * ----------------------------------------------------- */
   type ModuleFunction = () => MewlixObject
 
-  Mewlix.Namespace = class Namespace extends MewlixObject {
+  class Namespace extends MewlixObject {
     name: string;
     modules: Map<string, ModuleFunction>;
     cache: Map<string, MewlixObject>;
@@ -114,12 +114,13 @@ export default function() {
 
     /* Inject object as a valid Mewlix module.
      * The key should be a non-empty string. */
-    injectModule(key: string, object: MewlixObject): void {
-      const wrapped = Mewlix.wrap(object);
+    injectModule(key: string, object: object): void {
+      const wrapped = Mewlix.wrap(object) as MewlixObject;
       this.cache.set(key, wrapped);
       this.modules.set(key, () => wrapped);
     }
   };
+  Mewlix.Namespace = Namespace;
 
   /* -----------------------------------------------------
    * Mewlix.Modules -> Default module container.
