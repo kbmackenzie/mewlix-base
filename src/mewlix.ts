@@ -768,7 +768,7 @@ export default function() {
     pairs: function pairs(value: Box): Shelf {
       ensure.box('claw at', value);
       return Shelf.fromArray(getEntries(value).map(
-        ([key, value]) => new Mewlix([["key", key], ["value", value]])
+        ([key, value]) => new Box([["key", key], ["value", value]])
       ));
     },
   };
@@ -872,7 +872,7 @@ export default function() {
   const API = {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
-    createBox: (object: StringIndexable) => new Mewlix(getEntries(object ?? {})),
+    createBox: (object: StringIndexable) => new Box(getEntries(object ?? {})),
     inject: (key: string, object: StringIndexable) => Modules.injectModule(key, object),
   };
 
@@ -1176,7 +1176,7 @@ export default function() {
 
       let i = length - 1;
       while (a instanceof ShelfNode && b instanceof ShelfNode) {
-        output[i--] = new Mewlix([
+        output[i--] = new Box([
           ["first",  a.peek()],
           ["second", b.peek()],
         ]);
@@ -1203,7 +1203,7 @@ export default function() {
     },
 
     tuple: function tuple(a: MewlixValue, b: MewlixValue) {
-      return new Mewlix([
+      return new Box([
         ["first",  a],
         ["second", b],
       ]);
