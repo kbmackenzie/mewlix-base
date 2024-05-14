@@ -117,7 +117,7 @@ export default function() {
   };
 
   /* -----------------------------------------------------
-   * Mewlix.Namespace -> Container for modules.
+   * Namespace -> Container for modules.
    * ----------------------------------------------------- */
   type ModuleFunction = () => MewlixObject
 
@@ -165,7 +165,7 @@ export default function() {
   };
 
   /* -----------------------------------------------------
-   * Mewlix.Modules -> Default module container.
+   * Modules -> Default module container.
    * ----------------------------------------------------- */
   const Modules = new Namespace('default');
 
@@ -361,7 +361,7 @@ export default function() {
   };
 
   /* -----------------------------------------------------
-   * Mewlix.Enum -> Base for all enums.
+   * Enum -> Base for all enums.
    * ----------------------------------------------------- */
   class EnumValue extends Box {
     key: string;
@@ -404,7 +404,7 @@ export default function() {
   }
 
   /* -----------------------------------------------------
-   * Mewlix.Clowder -> Base for all clowders.
+   * Clowder -> Base for all clowders.
    * ----------------------------------------------------- */
   /* The clowder constructor symbol. */
   const wakeSymbol: unique symbol = Symbol('wake');
@@ -423,7 +423,7 @@ export default function() {
   }
 
   /* -----------------------------------------------------
-   * Mewlix.YarnBall  -> Yarn ball export list.
+   * YarnBall -> Yarn ball export list.
    * ----------------------------------------------------- */
   class YarnBall extends MewlixObject {
     key: string;
@@ -1598,7 +1598,7 @@ export default function() {
   /* -------------------------------------------------------
    * Final Touches
    * ------------------------------------------------------- */
-  /* A default implementation for the Mewlix.run entrypoint function.
+  /* A default implementation for the 'run' entrypoint function.
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
