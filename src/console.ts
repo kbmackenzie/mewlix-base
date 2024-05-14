@@ -308,10 +308,12 @@ export default function() {
   const Console = {
     clear: clearConsole,
 
-    run: async (func: (x: string) => string) => {
+    run: async (func: (x: string) => string, message?: any): void => {
       ensure.func('console.run', func);
+      const opener = message ? Mewlix.purrify(message) : message;
       try { 
         while (true) {
+          if (opener) { addMessage(opener, false) };
           const input = await getInput();
           const output = func(input);
           addMessage(Mewlix.purrify(output), false);
@@ -323,32 +325,32 @@ export default function() {
       }
     },
 
-    name: (name: string) => {
+    name: (name: string): void => {
       ensure.string('console.name', name);
       setProjectName(name);
     },
 
-    highlight: (enable: boolean) => {
+    highlight: (enable: boolean): void => {
       showHighlight.checked = enable;
       toggleHighlight(enable);
     },
 
-    set_color: (color: string) => {
+    set_color: (color: string): void => {
       ensure.string('console.set_color', color);
       setColor.value = color;
     },
 
-    set_error_color: (color: string) => {
+    set_error_color: (color: string): void => {
       ensure.string('console.set_error_color', color);
       setErrorColor.value = color;
     },
 
-    accepted_files: (accepted: any) => {
+    accepted_files: (accepted: any): void => {
       ensure.shelf('console.accepted_files', accepted);
       setAcceptedFiles(accepted.toArray());
     },
 
-    write_file: (filename: string | null, contents: string) => {
+    write_file: (filename: string | null, contents: string): void => {
       ensure.string('console.write_file', contents);
       if (filename) {
         ensure.string('console.write_file', filename);
@@ -365,6 +367,10 @@ export default function() {
    * Standard library - Curry:
    * ------------------------------------- */
   const ConsoleCurry = {
+    run: (func: (x: string) => string) =>
+      (message?: any) =>
+        Console.run(func, message),
+
     write_file: (filename: string | null) =>
       (contents: string) =>
         Console.write_file(filename, contents),
