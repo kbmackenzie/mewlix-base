@@ -1,3 +1,4 @@
 build/
 scraps/
 node_modules/
+dist/
