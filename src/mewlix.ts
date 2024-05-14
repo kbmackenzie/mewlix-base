@@ -1640,7 +1640,7 @@ const createMewlix = function() {
     Compare: Compare,
     Strings: Strings,
     Shelves: Shelves,
-    Relection: Reflection,
+    Reflection: Reflection,
     Boxes: Boxes,
     Conversion: Conversion,
     Internal: Internal,
