@@ -308,12 +308,13 @@ export default function() {
   const Console = {
     clear: clearConsole,
 
-    run: async (func: (x: string) => string, message?: any): Promise<void> => {
+    run: async (func: (x: string) => string, opener?: () => string): Promise<void> => {
       ensure.func('console.run', func);
-      const opener = message ? Mewlix.purrify(message) : message;
       try { 
         while (true) {
-          if (opener) { addMessage(opener, false) };
+          if (!Mewlix.isNothing(opener)) {
+            addMessage(opener!(), false)
+          };
           const input = await getInput();
           const output = func(input);
           addMessage(Mewlix.purrify(output), false);
@@ -368,8 +369,8 @@ export default function() {
    * ------------------------------------- */
   const ConsoleCurry = {
     run: (func: (x: string) => string) =>
-      (message?: any) =>
-        Console.run(func, message),
+      (opener?: () => string) =>
+        Console.run(func, opener),
 
     write_file: (filename: string | null) =>
       (contents: string) =>
