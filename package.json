@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "The base library and templates for Mewlix, a cat-themed esoteric language.",
   "scripts": {
-    "build": "echo \"todo\" && exit 1",
-    "test": "echo \"todo\" && exit 1",
-    "clean": "echo \"todo\" && exit 1"
+    "build": "./build.sh",
+    "test": "echo \"Not implemented yet!\" && exit 1",
+    "clean": "rm -rf ./build"
   },
   "author": "kbmackenzie <kelly.a.betty@gmail.com>",
   "license": "MIT",
