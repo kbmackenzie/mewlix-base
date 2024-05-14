@@ -480,7 +480,7 @@ export default function() {
   /* All the 'as any' castings are a necessary compromise to guarantee dynamic assignment behavior.
    * The sacrifices needed to write the base for a dynamic language in a typed one. */
 
-  Mewlix.library = function(libraryKey: string, library: StringIndexable = {}) {
+  function library(libraryKey: string, library: StringIndexable = {}) {
     const yarnball = new YarnBall(libraryKey);
     for (const key in library) {
       yarnball[key] = library[key];
@@ -488,7 +488,7 @@ export default function() {
     return yarnball;
   };
 
-  Mewlix.curryLibrary = function(libraryKey: string, base: YarnBall, library: StringIndexable = {}) {
+  function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable = {}) {
     const yarnball = new YarnBall(libraryKey);
     // Copy curried functions:
     for (const key in library) {
@@ -501,6 +501,9 @@ export default function() {
     }
     return yarnball;
   };
+
+  Mewlix.library = library;
+  Mewlix.curryLibrary = curryLibrary;
 
   /* -----------------------------------------------------
    * Type Checking
@@ -1506,7 +1509,7 @@ export default function() {
       ].map(x => x.name)
     ),
   };
-  Mewlix.Base = Mewlix.library('std', Base);
+  Mewlix.Base = library('std', Base);
 
   /* Freezing the base library, as it's going to be accessible inside Mewlix. */
   Object.freeze(Mewlix.Base);
@@ -1514,10 +1517,10 @@ export default function() {
   /* ------------------------------------------
    * Standard Library - Currying
    * ------------------------------------------ */
-  Mewlix.BaseCurry = ((): void => {
+  Mewlix.BaseCurry = ((): YarnBall => {
     const std = Base;
 
-    return Mewlix.curryLibrary('std.curry', Mewlix.Base, {
+    return curryLibrary('std.curry', Mewlix.Base, {
       tear: (str: string) =>
         (start: number) =>
           (end: number) =>
