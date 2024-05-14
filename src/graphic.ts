@@ -615,10 +615,19 @@ export default function() {
   /* Color container, wrapping a RGBA color value.
    * It accepts an opacity value too, in percentage. */
   class Color extends Mewlix.Clowder {
+    red: number;
+    green: number;
+    blue: number;
+    opacity: number;
+
     constructor() {
       super();
+      this.red   = 0;
+      this.green = 0;
+      this.blue  = 0;
+      this.opacity = 0;
 
-      this[Mewlix.wake] = (function wake(red, green, blue, opacity = 100) {
+      this[Mewlix.wake] = (function wake(this: Color, red: number, green: number, blue: number, opacity: number = 100) {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
@@ -629,11 +638,11 @@ export default function() {
         return this;
       }).bind(this);
 
-      this.alpha = (function alpha() { /* alpha byte value! */
+      this.alpha = (function alpha(this: Color): number { /* alpha byte value! */
         return percentageToByte(this.opacity);
       }).bind(this);
 
-      this.to_hex = (function to_hex() {
+      this.to_hex = (function to_hex(this: Color): string {
         const r = this.red.toString(16);
         const g = this.green.toString(16);
         const b = this.blue.toString(16);
@@ -641,11 +650,11 @@ export default function() {
       }).bind(this);
     }
 
-    [toColor]() {
+    [toColor](): string {
       return `rgb(${this.red} ${this.green} ${this.blue} / ${this.opacity}%)`;
     }
 
-    static fromHex(str) {
+    static fromHex(str: string): Color {
       const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
 
       if (hex === null) {
@@ -657,7 +666,7 @@ export default function() {
         str = str.split('').map(x => x + x).join('');
       }
 
-      return new Color()[Mewlix.wake](
+      return (new Color() as any)[Mewlix.wake](
         parseInt(str.slice(0, 1), 16),
         parseInt(str.slice(2, 3), 16),
         parseInt(str.slice(4, 5), 16),
