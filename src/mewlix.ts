@@ -1,6 +1,8 @@
 'use strict';
 
-export default function() {
+export type Mewlix = ReturnType<typeof createMewlix>;
+
+const createMewlix = function() {
   /* -----------------------------------------------------
    * MewlixValue -> Valid Mewlix values:
    * ----------------------------------------------------- */
@@ -1651,3 +1653,5 @@ export default function() {
     run: run,
   };
 }
+
+export default createMewlix;
