@@ -1090,7 +1090,7 @@ export default function() {
   /* -----------------------------------
    * Prevent arrow-key scrolling:
    * ----------------------------------- */
-  const preventKeys = new Set([
+  const preventKeys = new Set<string>([
     'Space',
     'ArrowLeft',
     'ArrowRight',
