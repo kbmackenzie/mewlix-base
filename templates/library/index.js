@@ -1,15 +1,16 @@
 'use strict';
-import initBase from './core/mewlix.js';
+
+import createMewlix from './core/mewlix.js';
 import initYarnball from './yarnball/yarnball.js'
 
 export default async function() {
   const readMeta = () => fetch('./core/meta.json')
     .then(response => response.json());
 
-  const meta = await readMeta();
-  globalThis.Mewlix = {};
-  initBase(),
+  globalThis.Mewlix = createMewlix(),
   initYarnball();
+
+  const meta = await readMeta();
   const entrypoint = meta.entrypoint || 'main';
 
   await Mewlix.run(async () => {
