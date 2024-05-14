@@ -915,7 +915,7 @@ export default function() {
    * All standard library functions *should use snake_case*, as
    * they're going to be accessible from within Mewlix. */
 
-  const Base = Mewlix.library('std', {
+  const Base = {
     purr: function purr(value: MewlixValue): string {
       return Mewlix.purrify(value);
     },
@@ -1499,8 +1499,8 @@ export default function() {
         ErrorCode.ExternalError,
       ].map(x => x.name)
     ),
-  });
-  Mewlix.Base = Base;
+  };
+  Mewlix.Base = Mewlix.library('std', Base);
 
   /* Freezing the base library, as it's going to be accessible inside Mewlix. */
   Object.freeze(Mewlix.Base);
@@ -1509,38 +1509,112 @@ export default function() {
    * Standard Library - Currying
    * ------------------------------------------ */
   Mewlix.BaseCurry = ((): void => {
-    const std = Mewlix.Base;
+    const std = Base;
 
     return Mewlix.curryLibrary('std.curry', Mewlix.Base, {
-      tear: (str: string) => (start: number) => (end: number) => std.tear(str, start, end),
-      poke: (value: string | Shelf) => (index: number) => std.poke(value, index),
-      join: (a: string | Shelf) => (b: string | Shelf) => std.join(a, b),
-      take: (value: string | Shelf) => (amount: number) => std.take(value, amount),
-      drop: (value: string | Shelf) => (amount: number) => std.drop(value, amount),
-      insert: (shelf: Shelf) => (value: MewlixValue) => (index: number) => std.insert(shelf, value, index),
-      remove: (shelf: Shelf) => (index: number) => std.remove(shelf, index),
+      tear: (str: string) =>
+        (start: number) =>
+          (end: number) =>
+            std.tear(str, start, end),
 
-      map: callback => shelf => std.map(callback, shelf),
-      filter: predicate => shelf => std.filter(predicate, shelf),
-      fold: callback => initial => shelf => std.fold(callback, initial, shelf),
-      any: predicate => shelf => std.any(predicate, shelf),
-      all: predicate => shelf => std.all(predicate, shelf),
-      zip: a => b => std.zip(a, b),
-      repeat: number => callback => std.repeat(number, callback),
-      foreach: callback => shelf => std.foreach(callback, shelf),
+      poke: (value: string | Shelf) =>
+        (index: number) =>
+          std.poke(value, index),
 
-      tuple: a => b => std.tuple(a, b),
+      join: (a: string | Shelf) =>
+        (b: string | Shelf) =>
+          std.join(a, b),
 
-      min: a => b => std.min(a, b),
-      max: a => b => std.max(a, b),
-      clamp: value => min => max => std.clamp(value, min, max),
-      logn: value => base => std.logn(value, base),
-      atan: y => x => std.atan2(y, x),
-      truncate: value => places => std.truncate(value, places),
-      random_int: min => max => std.random_int(min, max),
-      count: start => end => std.count(start, end),
+      take: (value: string | Shelf) =>
+        (amount: number) =>
+          std.take(value, amount),
 
-      save: key => contents => std.save(key, contents),
+      drop: (value: string | Shelf) =>
+        (amount: number) =>
+          std.drop(value, amount),
+
+      insert: (shelf: Shelf) =>
+        (value: MewlixValue) =>
+          (index: number) =>
+            std.insert(shelf, value, index),
+
+      remove: (shelf: Shelf) =>
+        (index: number) =>
+            std.remove(shelf, index),
+
+      map: (callback: (x: MewlixValue) => MewlixValue) =>
+          (shelf: Shelf) =>
+            std.map(callback, shelf),
+
+      filter: (predicate: (x: MewlixValue) => boolean) =>
+        (shelf: Shelf) =>
+          std.filter(predicate, shelf),
+
+      fold: (callback: (acc: MewlixValue, x: MewlixValue) => MewlixValue) =>
+        (initial: MewlixValue) =>
+          (shelf: Shelf) =>
+            std.fold(callback, initial, shelf),
+
+      any: (predicate: (x: MewlixValue) => boolean) =>
+        (shelf: Shelf) =>
+          std.any(predicate, shelf),
+
+      all: (predicate: (x: MewlixValue) => boolean) =>
+        (shelf: Shelf) =>
+          std.all(predicate, shelf),
+
+      zip: (a: Shelf) =>
+        (b: Shelf) =>
+          std.zip(a, b),
+
+      repeat: (number: number) =>
+        (callback: () => void) =>
+          std.repeat(number, callback),
+
+      foreach: (callback: (x: MewlixValue) => void) =>
+        (shelf: Shelf) =>
+          std.foreach(callback, shelf),
+
+      tuple: (a: MewlixValue) =>
+        (b: MewlixValue) =>
+          std.tuple(a, b),
+
+      min: (a: number) =>
+        (b: number) =>
+          std.min(a, b),
+
+      max: (a: number) =>
+        (b: number) =>
+          std.max(a, b),
+
+      clamp: (value: number) =>
+        (min: number) =>
+          (max: number) =>
+            std.clamp(value, min, max),
+
+      logn: (value: number) =>
+        (base: number) =>
+          std.logn(value, base),
+
+      atan: (y: number) =>
+        (x: number) =>
+          std.atan2(y, x),
+
+      truncate: (value: number) =>
+        (places: number) =>
+          std.truncate(value, places),
+
+      random_int: (min: number) =>
+        (max: number) =>
+          std.random_int(min, max),
+
+      count: (start: number) =>
+        (end: number) =>
+          std.count(start, end),
+
+      save: (key: string) =>
+        (contents: string) =>
+          std.save(key, contents),
     });
   })();
 
@@ -1554,10 +1628,5 @@ export default function() {
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
-  Mewlix.run = f => f();
-
-  /* -------------------------------------------------------
-   * Return Clean-Up Function:
-   * ------------------------------------------------------- */
-
+  Mewlix.run = (func: Function) => func();
 }
