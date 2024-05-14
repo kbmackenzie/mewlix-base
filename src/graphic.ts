@@ -491,6 +491,12 @@ export default function() {
   /* -----------------------------------
    * Core Utility:
    * ----------------------------------- */
+
+  /* *** Clowders are VERY HARD to add typings to because they're WEIRD! ***
+   * They're declared in an odd way: fields are expected to be dynamic.
+   * The [wake] contructor initializes fields and binds functions by force.
+   * This makes it very hard to write type signatures for them, haha. @ -@ */
+
   class Vector2 extends Mewlix.Clowder {
     x: number;
     y: number;
@@ -606,12 +612,6 @@ export default function() {
     );
   }
 
-  /* -----------------------------------
-   * Additional Clowders:
-   * ----------------------------------- */
-  /* All of the clowders in this section use *snake_case* naming for methods and properties.
-   * This is because they'll be available inside of Mewlix! */
-
   /* Color container, wrapping a RGBA color value.
    * It accepts an opacity value too, in percentage. */
   class Color extends Mewlix.Clowder {
@@ -619,6 +619,7 @@ export default function() {
     green: number;
     blue: number;
     opacity: number;
+    alpha: () => number;
 
     constructor() {
       super();
@@ -677,10 +678,17 @@ export default function() {
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
   class PixelCanvas extends Mewlix.Clowder {
+    width: number;
+    height: number;
+    data: any;
+
     constructor() {
       super();
+      this.width = 0;
+      this.height = 0;
+      this.data = null;
 
-      this[Mewlix.wake] = (function wake(width, height) {
+      this[Mewlix.wake] = (function wake(this: PixelCanvas, width: number, height: number) {
         this.width = width;
         this.height = height;
         this.data = new Uint8ClampedArray(width * height * 4);
@@ -691,7 +699,11 @@ export default function() {
       /* ------------------------------
        * Methods:
        * ------------------------------ */
-      this.fill = (function fill(color) {
+      this.fill = (function fill(this: PixelCanvas, color: Color) {
+        if (!this.data) {
+          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
+        };
         for (let i = 0; i < this.data.length; i += 4) {
           this.data[i]     = color.red;
           this.data[i + 1] = color.green;
@@ -700,7 +712,7 @@ export default function() {
         }
       }).bind(this);
 
-      this.set_pixel = (function set_pixel(x, y, color) {
+      this.set_pixel = (function set_pixel(this: PixelCanvas, x: number, y: number, color: Color) {
         const index = (x * this.width + y) * 4;
         this.data[index]     = color.red;
         this.data[index + 1] = color.green;
@@ -708,9 +720,9 @@ export default function() {
         this.data[index + 3] = color.alpha();
       }).bind(this);
 
-      this.get_pixel = (function get_pixel(x, y) {
+      this.get_pixel = (function get_pixel(this: PixelCanvas, x: number, y: number) {
         const index = (x * this.width + y) * 4;
-        return new Color()[Mewlix.wake](
+        return (new Color() as any)[Mewlix.wake](
           this.data[index],
           this.data[index + 1],
           this.data[index + 2],
@@ -718,7 +730,7 @@ export default function() {
         );
       }).bind(this);
 
-      this.to_sprite = (function to_image(key) {
+      this.to_sprite = (function to_image(this: PixelCanvas, key: string) {
         const copy = new Uint8ClampedArray(this.data);
         resourceQueue.push({
           type: 'canvas',
