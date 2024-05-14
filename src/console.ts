@@ -4,45 +4,54 @@ export default function() {
   /* -------------------------------------
    * Events:
    * ------------------------------------- */
-  // A custom event for when a user sends input to the console.
-  const inputReceived = file => new CustomEvent('input-received', {
-    detail: { fromFile: file !== undefined, file: file },
-  });
+  type InputInfo = {
+    fromFile: boolean;
+    file?: File;
+  };
+
+  /* A custom event for when a user sends input to the console. */
+  type InputReceivedEvent = CustomEvent<InputInfo>;
+
+  function inputReceived(file?: File): InputReceivedEvent {
+    return new CustomEvent('input-received', {
+      detail: { fromFile: file !== undefined, file: file }
+    });
+  };
 
   /* -------------------------------------
    * Constants:
    * ------------------------------------- */
   const promptMessage = '>> ';
 
-  const input             = document.getElementById('console-input');
-  const lines             = document.getElementById('console-lines');
-  const projectName       = document.getElementById('project-name');
-  const projectStatus     = document.getElementById('project-status');
-  const arrowButton       = document.getElementById('console-arrow');
-  const paperclipInput    = document.getElementById('paperclip-input');
-  const paperclipButton   = document.getElementById('console-paperclip');
+  const input           = document.getElementById('console-input')      as HTMLInputElement;
+  const lines           = document.getElementById('console-lines')      as HTMLUListElement;
+  const projectName     = document.getElementById('project-name')       as HTMLSpanElement;
+  const projectStatus   = document.getElementById('project-status')     as HTMLSpanElement;
+  const arrowButton     = document.getElementById('console-arrow')      as HTMLButtonElement;
+  const paperclipInput  = document.getElementById('paperclip-input')    as HTMLInputElement;
+  const paperclipButton = document.getElementById('console-paperclip')  as HTMLButtonElement;
 
-  const settingsMenu      = document.getElementById('settings');
-  const setColor          = document.getElementById('select-color');
-  const setErrorColor     = document.getElementById('select-error-color');
-  const showHighlight     = document.getElementById('show-highlight');
-  const saveLogButton     = document.getElementById('save-log');
+  const settingsMenu    = document.getElementById('settings')           as HTMLElement;
+  const setColor        = document.getElementById('select-color')       as HTMLInputElement;
+  const setErrorColor   = document.getElementById('select-error-color') as HTMLInputElement;
+  const showHighlight   = document.getElementById('show-highlight')     as HTMLInputElement;
+  const saveLogButton   = document.getElementById('save-log')           as HTMLButtonElement;
 
   /* -------------------------------------
    * Utils:
    * ------------------------------------- */
-  function isEmptyLine(line) {
+  function isEmptyLine(line: string): boolean {
     return /^\n?$/.test(line);
   }
 
-  function dateString() {
+  function dateString(): string {
     return new Date().toJSON().slice(0, 10);
   }
 
   /* -------------------------------------
    * Console lines:
    * ------------------------------------- */
-  function createPrompt() {
+  function createPrompt(): HTMLSpanElement {
     const span = document.createElement('span');
     span.style.color = setColor.value;
     span.classList.add('console_prompt');
@@ -51,7 +60,7 @@ export default function() {
     return span;
   }
 
-  function newLine(callback) {
+  function newLine(callback: (line: HTMLLIElement) => void): void {
     const line = document.createElement('li');
     line.classList.add('console_line');
     callback(line);
@@ -59,11 +68,11 @@ export default function() {
     scrollDown(lines);
   }
 
-  function scrollDown(elem) {
+  function scrollDown(elem: HTMLElement) {
     elem.scrollTop = elem.scrollHeight;
   }
 
-  function addMessage(message, fromUser = true) {
+  function addMessage(message: string, fromUser: boolean = true): void {
     newLine(line => {
       if (fromUser) {
         line.appendChild(createPrompt());
@@ -72,30 +81,30 @@ export default function() {
     });
   }
 
-  function addError(str) {
+  function addError(str: string): void {
     newLine(line => {
       line.style.color = setErrorColor.value;
       line.appendChild(document.createTextNode(`[Console] ${str}`));
     });
   }
 
-  function clearConsole() {
+  function clearConsole(): void {
     lines.replaceChildren();
   }
 
-  function setStatus(status) {
+  function setStatus(status: string): void {
     projectStatus.textContent = status;
   }
 
   /* -------------------------------------
    * File downloads:
    * ------------------------------------- */
-  function textBlob(text) {
+  function textBlob(text: string): string {
     const blob = new Blob([text], { type: 'text/plain' });
     return URL.createObjectURL(blob);
   }
 
-  function createLineButton(contents, name) {
+  function createLineButton(contents: string, name: string | null): HTMLAnchorElement {
     const filename = name ?? `mewlix-${dateString()}.txt`;
     const message = `Download ${JSON.stringify(filename)}`;
 
@@ -106,7 +115,7 @@ export default function() {
     return button;
   }
 
-  function addDownloadButton(contents, name) {
+  function addDownloadButton(contents: string, name: string | null): void {
     newLine(line => {
       const button = createLineButton(contents, name);
       line.appendChild(button);
@@ -117,13 +126,13 @@ export default function() {
   /* -------------------------------------
    * Console input:
    * ------------------------------------- */
-  function enableButtons(enable) {
+  function enableButtons(enable: boolean): void {
     arrowButton.disabled = !enable; 
     paperclipInput.disabled = !enable;
     paperclipButton.disabled = !enable; 
   }
 
-  function getInput() {
+  function getInput(): Promise<string> {
     input.disabled = false;
     input.focus();
     enableButtons(true);
@@ -131,22 +140,22 @@ export default function() {
     return new Promise(resolve => {
       input.addEventListener(
         'input-received',
-        async event => {
+        (async (event: InputReceivedEvent) => {
           input.disabled = true;
           enableButtons(false);
 
-          const text = (event.detail.fromFile)
+          const text = event.detail.fromFile && event.detail.file
             ? await event.detail.file.text()
             : input.value;
           input.value = '';
 
-          const line = (event.detail.fromFile)
+          const line = event.detail.fromFile && event.detail.file
             ? `<Read file: "${event.detail.file.name}">`
             : text;
 
           addMessage(line);
           resolve(text);
-        }, 
+        }) as any, /* A necessary sacrifice. This is fine. */ 
         { once: true }
       );
     });
@@ -155,7 +164,7 @@ export default function() {
   /* -------------------------------------
    * Additional utils:
    * ------------------------------------- */
-  function toggleHighlight(highlight) {
+  function toggleHighlight(highlight: boolean) {
     if (highlight) {
       input.classList.add('highlight');
     }
@@ -164,7 +173,7 @@ export default function() {
     }
   }
 
-  function setProjectName(name) {
+  function setProjectName(name: string) {
     if (name === '') return;
     projectName.textContent = name;
   }
@@ -172,8 +181,8 @@ export default function() {
   /* -------------------------------------
    * Paperclip Button:
    * ------------------------------------- */
-  function nub(array) {
-    const set = new Set();
+  function nub<T>(array: T[]): T[] {
+    const set = new Set<T>();
     return array.filter(x => {
       if (set.has(x)) return false;
       set.add(x);
@@ -181,19 +190,21 @@ export default function() {
     });
   }
 
-  function setAcceptedFiles(keys) {
+  function setAcceptedFiles(keys: string[]): void {
     paperclipInput.accept = nub(keys).join(', ')
   }
 
   /* -------------------------------------
    * Saving Data:
    * ------------------------------------- */
-  const getLines = () => Array.from(lines.getElementsByTagName('li'))
-    .filter(li => !li.classList.contains('file-download'))
-    .map(li => li.innerText)
-    .join('\n');
+  function getLines(): string {
+    return Array.from(lines.getElementsByTagName('li'))
+      .filter(li => !li.classList.contains('file-download'))
+      .map(li => li.innerText)
+      .join('\n');
+  }
 
-  function createLogDownload() {
+  function createLogDownload(): () => void {
     const filename = `mewlix-console-log-${dateString()}.txt`;
     const content = getLines() + '\n';
 
@@ -212,7 +223,7 @@ export default function() {
   /* -------------------------------------
    * Screen Overlay
    * ------------------------------------- */
-  function createDarkOverlay() {
+  function createDarkOverlay(): HTMLDivElement {
     const div = document.createElement('div');
     div.classList.add('screen-overlay', 'obscure');
     return div;
@@ -238,16 +249,16 @@ export default function() {
   });
 
   paperclipInput.addEventListener('change', () => {
-    if (paperclipInput.files.length === 0) return;
-    input.dispatchEvent(inputReceived(paperclipInput.files[0]));
+    if (paperclipInput.files?.length === 0) return;
+    input.dispatchEvent(inputReceived(paperclipInput.files?.[0]));
   });
 
-  document.getElementById('show-settings').addEventListener('click', () => {
+  document.getElementById('show-settings')!.addEventListener('click', () => {
     settingsMenu.classList.remove('hide');
     document.body.appendChild(createDarkOverlay());
   });
 
-  document.getElementById('hide-settings').addEventListener('click', () => {
+  document.getElementById('hide-settings')!.addEventListener('click', () => {
     settingsMenu.classList.add('hide');
     Array.from(document.getElementsByClassName('obscure')).forEach(x => x.remove());
   });
@@ -268,7 +279,7 @@ export default function() {
   /* -------------------------------------
    * Statements:
    * ------------------------------------- */
-  Mewlix.meow = message => {
+  Mewlix.meow = (message: any) => {
     addMessage(message, false);
     return message;
   };
@@ -286,10 +297,10 @@ export default function() {
    * All standard library functions *should use snake_case*, as
    * they're going to be accessible from within Mewlix. */
 
-  Mewlix.Console = Mewlix.library('std.console', {
+  const Console = {
     clear: clearConsole,
 
-    run: async func => {
+    run: async (func: (x: string) => string) => {
       ensure.func('console.run', func);
       while (true) {
         const input = await getInput();
@@ -298,52 +309,56 @@ export default function() {
       }
     },
 
-    name: name => {
+    name: (name: string) => {
       ensure.string('console.name', name);
       setProjectName(name);
     },
 
-    highlight: enable => {
+    highlight: (enable: boolean) => {
       showHighlight.checked = enable;
       toggleHighlight(enable);
     },
 
-    set_color: color => {
+    set_color: (color: string) => {
       ensure.string('console.set_color', color);
       setColor.value = color;
     },
 
-    set_error_color: color => {
+    set_error_color: (color: string) => {
       ensure.string('console.set_error_color', color);
       setErrorColor.value = color;
     },
 
-    accepted_files: accepted => {
+    accepted_files: (accepted: any) => {
       ensure.shelf('console.accepted_files', accepted);
       setAcceptedFiles(accepted.toArray());
     },
 
-    write_file: (filename, contents) => {
+    write_file: (filename: string | null, contents: string) => {
       ensure.string('console.write_file', contents);
       if (filename) {
         ensure.string('console.write_file', filename);
       }
       addDownloadButton(contents, filename);
     },
-  });
+  };
+  const ConsoleLibrary = Mewlix.library('std.console', Console);
 
   /* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.Console);
+  Object.freeze(ConsoleLibrary);
 
   /* -------------------------------------
    * Standard library - Curry:
    * ------------------------------------- */
-  Mewlix.ConsoleCurry = Mewlix.curryLibrary('std.console.curry', Mewlix.Console, {
-    write_file: filename => contents => Mewlix.Console.write_file(filename, contents),
-  });
+  const ConsoleCurry = {
+    write_file: (filename: string | null) =>
+      (contents: string) =>
+        Console.write_file(filename, contents),
+  };
+  const ConsoleCurryLibrary = Mewlix.curryLibrary('std.console.curry', ConsoleLibrary, ConsoleCurry);
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.ConsoleCurry);
+  Object.freeze(ConsoleCurryLibrary);
 
   /* -------------------------------------
    * Run Console:
@@ -364,4 +379,9 @@ export default function() {
       throw error;
     }
   };
+
+  /* -------------------------------------
+   * Return Console Namespace:
+   * ------------------------------------- */
+  return [ConsoleLibrary, ConsoleCurryLibrary];
 }
