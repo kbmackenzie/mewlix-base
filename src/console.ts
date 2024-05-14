@@ -279,7 +279,7 @@ export default function() {
   /* -------------------------------------
    * Override 'meow':
    * ------------------------------------- */
-  Mewlix.meow = (message: any) => {
+  Mewlix.meow = (message: string) => {
     addMessage(message, false);
     return message;
   };
