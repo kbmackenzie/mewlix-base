@@ -308,7 +308,7 @@ export default function() {
   const Console = {
     clear: clearConsole,
 
-    run: async (func: (x: string) => string, message?: any): void => {
+    run: async (func: (x: string) => string, message?: any): Promise<void> => {
       ensure.func('console.run', func);
       const opener = message ? Mewlix.purrify(message) : message;
       try { 
