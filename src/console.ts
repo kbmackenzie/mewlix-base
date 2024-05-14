@@ -164,7 +164,7 @@ export default function() {
   /* -------------------------------------
    * Additional utils:
    * ------------------------------------- */
-  function toggleHighlight(highlight: boolean) {
+  function toggleHighlight(highlight: boolean): void {
     if (highlight) {
       input.classList.add('highlight');
     }
@@ -173,7 +173,7 @@ export default function() {
     }
   }
 
-  function setProjectName(name: string) {
+  function setProjectName(name: string): void {
     if (name === '') return;
     projectName.textContent = name;
   }
@@ -277,7 +277,7 @@ export default function() {
   toggleHighlight(showHighlight.checked);
 
   /* -------------------------------------
-   * Statements:
+   * Override 'meow':
    * ------------------------------------- */
   Mewlix.meow = (message: any) => {
     addMessage(message, false);
@@ -363,7 +363,7 @@ export default function() {
   /* -------------------------------------
    * Run Console:
    * ------------------------------------- */
-  function setRunning() {
+  function setRunning(): void {
     setStatus('running: ');
     projectName.classList.remove('hide');
   }
