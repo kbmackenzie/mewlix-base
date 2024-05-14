@@ -4,6 +4,6 @@ The base library + project templates for [Mewlix](https://github.com/kbmackenzie
 
 Mewlix's base library defines the **Mewlix namespace**, containing all functions, classes and state needed by Mewlix to function.
 
-The `build.sh` script compiles + minifies all scripts, puts the templates together and generates the `.zip` files required by Mewlix's compiler.
+Running `npm run build` will run the `build.sh` script. The build process includes compiling + minifying all scripts, puttting the templates together and generating the `.zip` files required by Mewlix's compiler.
 
 ![Looping animation of a cartoon cat playing with a ball of yarn.](https://github.com/kbmackenzie/mewlix/wiki/imgs/cat-yarnball.webp)
