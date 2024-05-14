@@ -51,8 +51,8 @@ export default function() {
   Mewlix.ErrorCode = ErrorCode;
 
   class MewlixError extends Error {
-    name: string
-    code: ErrorCode
+    name: string;
+    code: ErrorCode;
 
     constructor(errorCode: ErrorCode, message: string) {
       super(errorCode.makeMessage(message));
@@ -250,7 +250,7 @@ export default function() {
       if (a instanceof ShelfBottom) return b instanceof ShelfBottom;
       if (b instanceof ShelfBottom) return a instanceof ShelfBottom;
 
-      return Mewlix.Compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
+      return Compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
     }
 
     static concat(a: Shelf, b: Shelf): Shelf {
@@ -308,7 +308,7 @@ export default function() {
     }
 
     contains(value: MewlixValue): boolean {
-      return Mewlix.Compare.isEqual(value, this.value)
+      return Compare.isEqual(value, this.value)
         ? true
         : this.next.contains(value);
     }
