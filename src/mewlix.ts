@@ -743,7 +743,7 @@ export default function() {
   const Reflection = {
     typeOf: function typeOf(value: any): string {
       if (value instanceof Shelf) return 'shelf';
-      if (value instanceof Mewlix) return 'box';
+      if (value instanceof Box) return 'box';
       if (value instanceof YarnBall) return 'yarn ball';
       if (value === null || value === undefined) return 'nothing';
 
