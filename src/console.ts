@@ -221,6 +221,14 @@ export default function() {
   }
 
   /* -------------------------------------
+   * Error Logging:
+   * ------------------------------------- */
+  function writeError(error: unknown): void {
+    addError(`Exception caught: ${error}`);
+    addError('See the debugging console for more information!');
+  }
+
+  /* -------------------------------------
    * Screen Overlay
    * ------------------------------------- */
   function createDarkOverlay(): HTMLDivElement {
@@ -302,10 +310,16 @@ export default function() {
 
     run: async (func: (x: string) => string) => {
       ensure.func('console.run', func);
-      while (true) {
-        const input = await getInput();
-        const output = func(input);
-        addMessage(Mewlix.purrify(output), false);
+      try { 
+        while (true) {
+          const input = await getInput();
+          const output = func(input);
+          addMessage(Mewlix.purrify(output), false);
+        }
+      }
+      catch (error) {
+        writeError(error);
+        throw error;
       }
     },
 
@@ -374,8 +388,7 @@ export default function() {
       func();
     }
     catch (error) {
-      addError(`Exception caught: ${error}`);
-      addError('See the debugging console for more information!');
+      writeError(error);
       throw error;
     }
   };
