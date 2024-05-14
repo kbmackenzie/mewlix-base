@@ -534,24 +534,24 @@ const createMewlix = function() {
   /* -----------------------------------------------------
    * JSON utils
    * ----------------------------------------------------- */
-  const MewlixToJSON = {
+  const MewlixFromJSON = {
     fromObject: (object: StringIndexable): Box => {
       return new Box(
         getEntries(object)
-          .map(([key, value]) => [key, MewlixToJSON.fromAny(value)])
+          .map(([key, value]) => [key, MewlixFromJSON.fromAny(value)])
       );
     },
     fromArray: (array: any[]): Shelf => {
       return Shelf.fromArray(
-        array.map(MewlixToJSON.fromAny)
+        array.map(MewlixFromJSON.fromAny)
       );
     },
     fromAny: (value: any): any => {
       if (typeof value !== 'object') return value;
       if (Array.isArray(value)) {
-        return MewlixToJSON.fromArray(value);
+        return MewlixFromJSON.fromArray(value);
       }
-      return MewlixToJSON.fromObject(value);
+      return MewlixFromJSON.fromObject(value);
     },
   }
 
@@ -1454,7 +1454,7 @@ const createMewlix = function() {
 
     from_json: function from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
-      return MewlixToJSON.fromAny(JSON.parse(value));
+      return MewlixFromJSON.fromAny(JSON.parse(value));
     },
 
     log: function log(value: MewlixValue): void {
@@ -1633,7 +1633,7 @@ const createMewlix = function() {
     isNothing: isNothing,
     clamp: clamp,
     opaque: opaque,
-    JSON: MewlixToJSON,
+    JSON: MewlixFromJSON,
     Comparison: Comparison,
     Numbers: Numbers,
     Boolean: Boolean,
