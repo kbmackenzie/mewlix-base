@@ -418,7 +418,7 @@ export default function() {
 
   type Resource =
     | { type: 'generic'; key: string; path: string; options?: Rectangle }
-    | { type: 'canvas'; key: string; data: ImageBitmap; }
+    | { type: 'canvas'; key: string; data: ImageData; }
     | { type: 'spritesheet'; path: string; frames: SpriteDetails[]; }
 
   const resourceQueue: Resource[] = [];
@@ -473,11 +473,11 @@ export default function() {
   /* -----------------------------------
    * Mouse Events:
    * ----------------------------------- */
-  let mouseX = 0;
-  let mouseY = 0;
+  let mouseX: number = 0;
+  let mouseY: number = 0;
 
-  let mouseClick = false;
-  let mouseDown  = false;
+  let mouseClick: boolean = false;
+  let mouseDown:  boolean = false;
 
   /* A big thanks to this StackOverflow answer for saving my life:
    * https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas/17130415#17130415 */
@@ -504,14 +504,16 @@ export default function() {
   const isMousePressed = () => mouseClick;
   const isMouseDown    = () => mouseDown;
 
-  function flushClick() {
+  function flushClick(): void {
     mouseClick = false;
   }
 
   /* -----------------------------------
    * Utility Functions:
    * ----------------------------------- */
-  const lerp = (start, end, x) => start + (end - start) * x;
+  function lerp(start: number, end: number, x: number): number {
+    return start + (end - start) * x;
+  }
 
   /* -----------------------------------
    * Core Utility:
@@ -769,39 +771,43 @@ export default function() {
   /* -----------------------------------
    * Game Loop
    * ----------------------------------- */
-  let deltaTime = 0;      // Delta time, in seconds!
-  let thumbnail = null;   // Callback function to generate a thumbnail;
+  let deltaTime: number = 0;                // Delta time, in seconds!
+  let thumbnail: Function | null = null;    // Callback function to generate a thumbnail;
 
-  const awaitClick = () => new Promise(resolve => {
-    canvas.addEventListener(
-      'click',
-      () => audioContext.resume().then(resolve),
-      { once: true }
-    )
-  });
+  function awaitClick(): Promise<void> {
+    return new Promise(resolve => {
+      canvas.addEventListener(
+        'click',
+        () => audioContext.resume().then(resolve),
+        { once: true }
+      )
+    });
+  }
 
-  function removeLoadingOverlay() {
+  function removeLoadingOverlay(): void {
     document.getElementById('loading-overlay')?.remove();
   }
 
-  async function drawPlay() {
+  async function drawPlay(): Promise<void> {
     const image = await loadImage('./core-assets/mewlix-play.png');
     context.fillStyle = 'rgb(0 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
   }
 
-  async function init(callback) {
+  async function init(callback: Function) {
     ensure.func('graphic.init', callback);
     await loadResources();
     await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
 
-    const nextFrame = () => new Promise(resolve => {
-      window.requestAnimationFrame(resolve);
-    });
+    function nextFrame(): Promise<number> {
+      return new Promise(resolve => {
+        window.requestAnimationFrame(resolve);
+      });
+    }
 
     async function run() {
-      let lastFrame; // Last frame's timestamp, in milliseconds.
+      let lastFrame: number; // Last frame's timestamp, in milliseconds.
 
       removeLoadingOverlay();
       context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -829,8 +835,14 @@ export default function() {
   /* -----------------------------------
    * Meow Expression
    * ----------------------------------- */
-  let meowOptions = null;
-  Mewlix.meow = message => {
+  type MeowOptions = TextOptions & {
+    x?: number;
+    y?: number;
+  };
+
+  let meowOptions: MeowOptions | null = null;
+
+  Mewlix.meow = (message: string) => {
     drawText(
       message,
       meowOptions?.x ?? 0,
