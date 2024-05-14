@@ -1514,7 +1514,8 @@ export default function() {
       ].map(x => x.name)
     ),
   };
-  Mewlix.Base = library('std', Base);
+  const BaseLibrary = library('std', Base);
+  Mewlix.Base = BaseLibrary;
 
   /* Freezing the base library, as it's going to be accessible inside Mewlix. */
   Object.freeze(Mewlix.Base);
@@ -1522,10 +1523,10 @@ export default function() {
   /* ------------------------------------------
    * Standard Library - Currying
    * ------------------------------------------ */
-  Mewlix.BaseCurry = ((): YarnBall => {
+  const BaseCurry = (() => {
     const std = Base;
 
-    return curryLibrary('std.curry', Mewlix.Base, {
+    return {
       tear: (str: string) =>
         (start: number) =>
           (end: number) =>
@@ -1629,8 +1630,10 @@ export default function() {
       save: (key: string) =>
         (contents: string) =>
           std.save(key, contents),
-    });
+    };
   })();
+  const BaseCurryLibrary = curryLibrary('std.curry', BaseLibrary, BaseCurry);
+  Mewlix.BaseCurry = BaseCurryLibrary; 
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
   Object.freeze(Mewlix.BaseCurry);
