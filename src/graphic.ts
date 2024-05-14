@@ -573,31 +573,36 @@ export default function() {
   }
 
   class GridSlot extends Mewlix.Clowder {
+    row: number;
+    column: number;
+
     constructor() {
       super();
+      this.row = 0;
+      this.column = 0;
 
-      this[Mewlix.wake] = (function wake(row, column) {
+      this[Mewlix.wake] = (function wake(this: GridSlot, row: number, column: number) {
         this.row    = clamp(row,    0, gridRows - 1);
         this.column = clamp(column, 0, gridColumns - 1);
         return this;
       }).bind(this);
 
-      this.position = (function position() {
-        return gridSlotToPosition(this.row, this.column);
+      this.position = (function position(this: GridSlot) {
+        return gridSlotToPosition(this);
       }).bind(this);
     }
   }
 
-  function positionToGridSlot(x, y) {
-    const row = Math.min(y / gridSlotHeight);
-    const col = Math.min(x / gridSlotWidth);
-    return new GridSlot()[Mewlix.wake](row, col);
+  function positionToGridSlot(point: Vector2): GridSlot {
+    const row = Math.min(point.y / gridSlotHeight);
+    const col = Math.min(point.x / gridSlotWidth);
+    return (new GridSlot() as any)[Mewlix.wake](row, col);
   }
 
-  function gridSlotToPosition(row, col) {
-    return new Vector2()[Mewlix.wake](
-      col * gridSlotWidth,
-      row * gridSlotHeight,
+  function gridSlotToPosition(slot: GridSlot): Vector2 {
+    return (new Vector2() as any)[Mewlix.wake](
+      slot.column * gridSlotWidth,
+      slot.row * gridSlotHeight,
     );
   }
 
@@ -617,10 +622,10 @@ export default function() {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
-        this.red      = clamp(red, 0, 255);
-        this.green    = clamp(green, 0, 255);
-        this.blue     = clamp(blue, 0, 255);
-        this.opacity  = clamp(opacity, 0, 100);
+        this.red     = clamp(red, 0, 255);
+        this.green   = clamp(green, 0, 255);
+        this.blue    = clamp(blue, 0, 255);
+        this.opacity = clamp(opacity, 0, 100);
         return this;
       }).bind(this);
 
