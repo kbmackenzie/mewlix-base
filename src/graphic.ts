@@ -114,7 +114,7 @@ export default function() {
     );
   }
 
-  function drawRect(rect: Rectangle, color: Color): void {
+  function drawRect(rect: Rectangle, color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
     context.fillRect(
       rect.x      * sizeModifier,
@@ -908,7 +908,7 @@ export default function() {
       ]);
     },
 
-    rect: (rect: Rectangle, color: Color): void => {
+    rect: (rect: Rectangle, color: string | Color): void => {
       ensure.box('graphic.rect', rect);
       return drawRect(rect, color);
     },
@@ -1028,17 +1028,42 @@ export default function() {
     const graphic = Graphic;
 
     return {
-      load: key => path => options => graphic.load(key, path, options),
-      spritesheet: path => frames => graphic.spritesheet(path, frames),
+      load: (key: string) =>
+        (path: string) =>
+          (options?: Rectangle) =>
+            graphic.load(key, path, options),
 
-      draw: key => x => y => graphic.draw(key, x, y),
-      rect: rect => color => graphic.rect(rect, color),
-      write: value => x => y => options => graphic.write(value, x, y, options),
-      measure_text: value => options => graphic.measure_text(value, options),
+      spritesheet: (path: string) =>
+        (frames: any) =>
+          graphic.spritesheet(path, frames),
+
+      draw: (key: string) =>
+        (x: number) =>
+          (y: number) =>
+            graphic.draw(key, x, y),
+
+      rect: (rect: Rectangle) =>
+        (color: string | Color) =>
+          graphic.rect(rect, color),
+
+      write: (value: any) =>
+        (x: number) =>
+          (y: number) =>
+            (options: TextOptions) =>
+              graphic.write(value, x, y, options),
+
+      measure_text: (value: any) =>
+        (options: TextOptions) =>
+          graphic.measure_text(value, options),
     
-      play_sfx: key => channel => graphic.play_sfx(key, channel),
+      play_sfx: (key: string) =>
+        (channel: number) =>
+          graphic.play_sfx(key, channel),
 
-      lerp: start => end => x => graphic.lerp(start, end, x),
+      lerp: (start: number) =>
+        (end: number) =>
+          (x: number) =>
+            graphic.lerp(start, end, x),
     };
   })();
   const GraphicCurryLibrary = Mewlix.curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
