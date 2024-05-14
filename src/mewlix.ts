@@ -176,7 +176,8 @@ export default function() {
   /* -----------------------------------------------------
    * Mewlix.Modules -> Default module container.
    * ----------------------------------------------------- */
-  Mewlix.Modules = new Mewlix.Namespace('default');
+  const Modules = new Mewlix.Namespace('default');
+  Mewlix.Modules = Modules;
 
   /* -----------------------------------------------------
    * Shelf -> Stack-like persistent data structure.
@@ -913,7 +914,7 @@ export default function() {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
     createBox: (object: StringIndexable) => new Mewlix(getEntries(object ?? {})),
-    inject: (key: string, object: StringIndexable) => Mewlix.Modules.injectModule(key, object),
+    inject: (key: string, object: StringIndexable) => Modules.injectModule(key, object),
   };
   Mewlix.API = API;
 
