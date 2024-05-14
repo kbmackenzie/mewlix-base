@@ -795,6 +795,13 @@ export default function() {
     context.drawImage(image, 0, 0);
   }
 
+  async function drawError(): Promise<void> {
+    const image = await loadImage('./core-assets/mewlix-error.png');
+    context.fillStyle = 'rgb(255 0 0 / 50%)';
+    context.fillRect(0, 0, canvasWidth, canvasHeight);
+    context.drawImage(image, 0, 0);
+  }
+
   async function init(callback: Function) {
     ensure.func('graphic.init', callback);
     await loadResources();
@@ -817,15 +824,21 @@ export default function() {
       await awaitClick();
       flushKeyQueue(); flushClick();
 
-      while (true) {
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
-        await callback();
-        flushKeyQueue(); flushClick();
-        const now = await nextFrame();
-        lastFrame ??= now;
+      try {
+        while (true) {
+          context.clearRect(0, 0, canvasWidth, canvasHeight);
+          await callback();
+          flushKeyQueue(); flushClick();
+          const now = await nextFrame();
+          lastFrame ??= now;
 
-        deltaTime = (now - lastFrame) / 1000;
-        lastFrame = now;
+          deltaTime = (now - lastFrame) / 1000;
+          lastFrame = now;
+        }
+      }
+      catch(error) {
+        await drawError();
+        throw error;
       }
     }
 
@@ -1079,10 +1092,7 @@ export default function() {
       await func();
     }
     catch (error) {
-      const image = await loadImage('./core-assets/mewlix-error.png');
-      context.fillStyle = 'rgb(255 0 0 / 50%)';
-      context.fillRect(0, 0, canvasWidth, canvasHeight);
-      context.drawImage(image, 0, 0);
+      await drawError();
       throw error;
     }
   };
