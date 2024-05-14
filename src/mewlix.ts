@@ -166,7 +166,7 @@ export default function() {
     /* Inject object as a valid Mewlix module.
      * The key should be a non-empty string. */
     injectModule(key: string, object: object): void {
-      const wrapped = Mewlix.wrap(object) as MewlixObject;
+      const wrapped = wrap(object) as MewlixObject;
       this.cache.set(key, wrapped);
       this.modules.set(key, () => wrapped);
     }
@@ -866,10 +866,11 @@ export default function() {
   /* -----------------------------------------------------
    * IO:
    * ----------------------------------------------------- */
-  Mewlix.meow = function meow(_: MewlixValue) {
+  function meow(_: MewlixValue) {
     throw new MewlixError(ErrorCode.CriticalError,
       "Core function 'Mewlix.meow' hasn't been implemented!");
   };
+  Mewlix.meow = meow;
 
   /* -----------------------------------------------------
    * API:
@@ -896,7 +897,7 @@ export default function() {
   };
   Mewlix.BoxWrapper = BoxWrapper;
 
-  Mewlix.wrap = function wrap(object: object) {
+  function wrap(object: object) {
     if (typeof object !== 'object') {
       throw new MewlixError(ErrorCode.InvalidImport,
         `Special import "${object}" isn't an object!`);
@@ -906,13 +907,15 @@ export default function() {
     }
     return new BoxWrapper(object);
   };
+  Mewlix.wrap = wrap;
 
-  Mewlix.API = {
+  const API = {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
     createBox: (object: StringIndexable) => new Mewlix(getEntries(object ?? {})),
     inject: (key: string, object: StringIndexable) => Mewlix.Modules.injectModule(key, object),
   };
+  Mewlix.API = API;
 
   /* -------------------------------------------------------
    * Base library.
@@ -1481,7 +1484,7 @@ export default function() {
     },
 
     meowf: function meowf(value: MewlixValue): void {
-      return Mewlix.meow(purrify(value));
+      return meow(purrify(value));
     },
 
     to_json: function to_json(value: MewlixValue): string {
