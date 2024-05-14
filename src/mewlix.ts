@@ -512,7 +512,7 @@ export default function() {
 
   const typecheck = (predicate: TypePredicate, expected: string) => (source: string, value: any) => {
     if (predicate(value)) return;
-    const typeOfValue = Mewlix.Reflection.typeOf(value);
+    const typeOfValue = Reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `${source}: Expected ${expected}, got ${typeOfValue}: ${value}!`);
   };
@@ -541,7 +541,7 @@ export default function() {
   function opaque(x: Object): void {
     Object.defineProperty(x, 'box', {
       value: () => {
-        const typeOfValue = Mewlix.Reflection.typeOf(x);
+        const typeOfValue = Reflection.typeOf(x);
         throw new MewlixError(ErrorCode.TypeMismatch,
           `Can't peek into object: Object "${x}" (type: ${typeOfValue}) isn't accessible through Mewlix!`);
       },
@@ -558,31 +558,32 @@ export default function() {
   /* -----------------------------------------------------
    * JSON utils
    * ----------------------------------------------------- */
-  Mewlix.JSON = {
+  const MewlixToJSON = {
     fromObject: (object: StringIndexable): Box => {
       return new Box(
         getEntries(object)
-          .map(([key, value]) => [key, Mewlix.JSON.fromAny(value)])
+          .map(([key, value]) => [key, MewlixToJSON.fromAny(value)])
       );
     },
     fromArray: (array: any[]): Shelf => {
       return Shelf.fromArray(
-        array.map(Mewlix.JSON.fromAny)
+        array.map(MewlixToJSON.fromAny)
       );
     },
     fromAny: (value: any): any => {
       if (typeof value !== 'object') return value;
       if (Array.isArray(value)) {
-        return Mewlix.JSON.fromArray(value);
+        return MewlixToJSON.fromArray(value);
       }
-      return Mewlix.JSON.fromObject(value);
+      return MewlixToJSON.fromObject(value);
     },
   }
+  Mewlix.JSON = MewlixToJSON;
 
   /* -----------------------------------------------------
    * Comparison: Enum-like class.
    * ----------------------------------------------------- */
-  Mewlix.Comparison = class Comparison {
+  class Comparison {
     operator: string
     id: number
 
@@ -607,6 +608,7 @@ export default function() {
       return xs.some(x => x.valueOf() === this.valueOf());
     }
   };
+  Mewlix.Comparison = Comparison;
 
   /* -----------------------------------------------------
    * Basic operations.
@@ -672,16 +674,16 @@ export default function() {
 
   const Boolean = {
     not: function not(a: any): boolean {
-      return !Mewlix.Conversion.toBool(a);
+      return !Conversion.toBool(a);
     },
     or: function or(a: any, fb: () => any): any {
-      return Mewlix.Conversion.toBool(a) ? a : fb();
+      return Conversion.toBool(a) ? a : fb();
     },
     and: function and(a: any, fb: () => any): any {
-      return Mewlix.Conversion.toBool(a) ? fb() : a;
+      return Conversion.toBool(a) ? fb() : a;
     },
     ternary: function ternary(condition: any, fa: () => any, fb: () => any): any {
-      return Mewlix.Conversion.toBool(condition) ? fa() : fb();
+      return Conversion.toBool(condition) ? fa() : fb();
     },
   };
   Mewlix.Boolean = Boolean;
@@ -698,10 +700,10 @@ export default function() {
     },
 
     // -- Numeric comparison:
-    compare: function compare(a: MewlixValue, b: MewlixValue): boolean {
+    compare: function compare(a: MewlixValue, b: MewlixValue): Comparison {
       if (typeof a !== typeof b) {
-        const typeofA = Mewlix.Reflection.typeOf(a);
-        const typeofB = Mewlix.Reflection.typeOf(b);
+        const typeofA = Reflection.typeOf(a);
+        const typeofB = Reflection.typeOf(b);
         throw new MewlixError(ErrorCode.TypeMismatch,
           `compare: Cannot compare values of different types: "${typeofA}" and "${typeofB}"!`);
       }
@@ -710,13 +712,13 @@ export default function() {
         case 'number':
         case 'string':
         case 'boolean':
-          if (a === b) return Mewlix.Comparison.EqualTo;
-          return (a < b!) ? Mewlix.Comparison.LessThan : Mewlix.Comparison.GreaterThan;
+          if (a === b) return Comparison.EqualTo;
+          return (a < b!) ? Comparison.LessThan : Comparison.GreaterThan;
         default:
           break;
       }
 
-      const typeOfValue = Mewlix.Reflection.typeOf(a);
+      const typeOfValue = Reflection.typeOf(a);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `compare: Cannot compare values of type "${typeOfValue}"!`);
     },
@@ -747,7 +749,7 @@ export default function() {
       if (value instanceof Shelf) return value.length();
       if (typeof value === 'string') return value.length;
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
     },
@@ -755,8 +757,8 @@ export default function() {
       if (b instanceof Shelf) { return b.contains(a); }
 
       if (typeof a !== 'string') {
-        const typeOfA = Mewlix.Reflection.typeOf(a);
-        const typeOfB = Mewlix.Reflection.typeOf(b);
+        const typeOfA = Reflection.typeOf(a);
+        const typeOfB = Reflection.typeOf(b);
         throw new MewlixError(ErrorCode.TypeMismatch,
           `in: Expected string for lookup in "${typeOfB}"; got "${typeOfA}": ${a}`);
       }
@@ -764,7 +766,7 @@ export default function() {
       if (typeof b === 'string') { return b.includes(a); }
       if (b instanceof Box) { return a in b; }
 
-      const typeOfB = Mewlix.Reflection.typeOf(b);
+      const typeOfB = Reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `in: Cannot perform lookup in value of type "${typeOfB}": ${b}`);
     },
@@ -840,21 +842,21 @@ export default function() {
       if (typeof value === 'string' || value instanceof Shelf) {
         return value;
       }
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `Expected string or shelf; received value of type '${typeOfValue}': ${value}`);
     },
     pounceError: function pounceError(error: Error) {
-      const errorCode = (error instanceof Mewlix.MewlixError)
-        ? (error as MewlixError).code 
-        : Mewlix.ErrorCode.ExternalError;
-      return new Mewlix([
+      const errorCode: ErrorCode = (error instanceof MewlixError)
+        ? error.code 
+        : ErrorCode.ExternalError;
+      return new Box([
         [ "name" , errorCode.name ],
         [ "id"   , errorCode.id   ]
       ]);
     },
     assert: function assert(expr: MewlixValue, message: string) {
-      if (Mewlix.Conversion.toBool(expr)) return;
+      if (Conversion.toBool(expr)) return;
       throw new MewlixError(ErrorCode.CatOnComputer,
         `Assertion failed: ${message}`);
     }
@@ -980,7 +982,7 @@ export default function() {
         return value?.peek();
       }
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
     },
@@ -1010,14 +1012,14 @@ export default function() {
     },
 
     nuzzle: function nuzzle(value: MewlixValue): boolean {
-      return Mewlix.Conversion.toBool(value);
+      return Conversion.toBool(value);
     },
 
     empty: function empty(value: string | Shelf): boolean {
       if (typeof value === 'string') return value === '';
       if (value instanceof Shelf) return value instanceof ShelfBottom;
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
@@ -1029,8 +1031,8 @@ export default function() {
       if (a instanceof Shelf && b instanceof Shelf) {
         return Shelf.concat(a, b);
       }
-      const typeofA = Mewlix.Reflection.typeOf(a);
-      const typeofB = Mewlix.Reflection.typeOf(b);
+      const typeofA = Reflection.typeOf(a);
+      const typeofB = Reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
           `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
     },
@@ -1052,7 +1054,7 @@ export default function() {
         return Shelf.fromArray(output);
       }
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
     },
@@ -1069,7 +1071,7 @@ export default function() {
         return output ?? new ShelfBottom();;
       }
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
     },
@@ -1078,7 +1080,7 @@ export default function() {
       if (typeof value === 'string') return [...value].reverse().join('');
       if (value instanceof Shelf) return Shelf.reverse(value);
 
-      const typeOfValue = Mewlix.Reflection.typeOf(value);
+      const typeOfValue = Reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
@@ -1087,7 +1089,7 @@ export default function() {
       ensure.shelf('std.sort', shelf);
       return Shelf.fromArray(shelf
         .toArray()
-        .sort((a, b) => Mewlix.Compare.compare(a, b).id)
+        .sort((a, b) => Compare.compare(a, b).id)
       );
     },
 
@@ -1096,7 +1098,7 @@ export default function() {
       const output = shelf.toArray();
 
       for (let i = output.length - 1; i > 0; i--) {
-        const j = Mewlix.Base.random_int(0, i);
+        const j = Base.random_int(0, i);
 
         const temp = output[i];
         output[i] = output[j];
@@ -1293,7 +1295,7 @@ export default function() {
     },
 
     slap: function slap(value: MewlixValue): number {
-      return Mewlix.Conversion.toNumber(value);
+      return Conversion.toNumber(value);
     },
 
     round: function round(value: number): number {
@@ -1328,7 +1330,7 @@ export default function() {
       ensure.number('std.clamp', min);
       ensure.number('std.clamp', max);
 
-      return Mewlix.clamp(value, min, max);
+      return clamp(value, min, max);
     },
 
     abs: function abs(value: number): number {
@@ -1351,7 +1353,7 @@ export default function() {
     logn: function logn(value: number, base: number): number {
       ensure.number('std.logn', value);
       if (value <= 0) {
-        const logType = Mewlix.isNothing(base)
+        const logType = isNothing(base)
           ? 'natural logarithm'
           : `logarithm to base ${base}`;
         throw new MewlixError(ErrorCode.InvalidOperation,
@@ -1488,7 +1490,7 @@ export default function() {
 
     from_json: function from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
-      return Mewlix.JSON.fromAny(JSON.parse(value));
+      return MewlixToJSON.fromAny(JSON.parse(value));
     },
 
     log: function log(value: MewlixValue): void {
