@@ -8,8 +8,11 @@ export default async function() {
   const readMeta = () => fetch('./core/meta.json')
     .then(response => response.json());
 
-  globalThis.Mewlix = createMewlix(),
-  initGraphic(),
+  globalThis.Mewlix = createMewlix();
+  const [graphicLib, graphicLibCurry] = initGraphic();
+  Mewlix.Graphic = graphicLib;
+  Mewlix.GraphicCurry = graphicLibCurry;
+
   initYarnball();
 
   const meta = await readMeta();
