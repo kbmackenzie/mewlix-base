@@ -1,3 +1,5 @@
 import { Mewlix } from './mewlix.ts';
 
-declare const Mewlix: Mewlix;
+declare global {
+  var Mewlix: Mewlix;
+}
