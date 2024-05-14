@@ -863,11 +863,11 @@ export default function() {
    * All standard library functions *should use snake_case*, as
    * they're going to be accessible from within Mewlix. */
 
-  Mewlix.Graphic = Mewlix.library('std.graphic', {
+  const Graphic = {
     init: init,
     delta: () => deltaTime,
 
-    load: (key, path, options = null) => {
+    load: (key: string, path: string, options?: Rectangle): void => {
       ensure.string('graphic.load', key);
       ensure.string('graphic.load', path);
       resourceQueue.push({
@@ -878,12 +878,12 @@ export default function() {
       });
     },
 
-    thumbnail: func => {
+    thumbnail: (func: Function): void => {
       ensure.func('graphic.thumbnail', func);
       thumbnail = func;
     },
 
-    spritesheet: (path, frames) => {
+    spritesheet: (path: string, frames: any): void => {
       ensure.string('graphic.spritesheet', path);
       ensure.shelf('graphic.spritesheet', frames);
       resourceQueue.push({
@@ -893,49 +893,49 @@ export default function() {
       });
     },
     
-    draw: (key, x = 0, y = 0) => {
+    draw: (key: string, x: number = 0, y: number = 0) => {
       ensure.string('graphic.draw', key);
       ensure.number('graphic.draw', x);
       ensure.number('graphic.draw', y);
       return drawSprite(key, x, y);
     },
 
-    measure: key => {
+    measure: (key: string) => {
       const image = getSprite(key);
       return new Mewlix.Box([
-        ["width"  , image.width ]
+        ["width"  , image.width ],
         ["height" , image.height]
       ]);
     },
 
-    rect: (rect, color) => {
+    rect: (rect: Rectangle, color: Color): void => {
       ensure.box('graphic.rect', rect);
       return drawRect(rect, color);
     },
 
     paint: fillCanvas,
 
-    write: (value, x = 0, y = 0, options = null) => {
+    write: (value: any, x: number = 0, y: number = 0, options?: TextOptions) => {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
       return drawText(Mewlix.purrify(value), x, y, options);
     },
 
-    measure_text: (value, options = null) => {
+    measure_text: (value: any, options?: TextOptions) => {
       return measureText(Mewlix.purrify(value), options);
     },
 
-    meow_options: box => {
+    meow_options: (box: MeowOptions): void => {
       ensure.box('graphic.meow_options', box);
       meowOptions = box;
     },
 
-    key_pressed: key => {
+    key_pressed: (key: string) => {
       ensure.string('graphic.key_pressed', key);
       return isKeyPressed(key);
     },
 
-    key_down: key => {
+    key_down: (key: string) => {
       ensure.string('graphic.key_down', key);
       return isKeyDown(key);
     },
@@ -953,32 +953,32 @@ export default function() {
 
     mouse_down: isMouseDown,
 
-    mouse_position: () => new Vector2()[Mewlix.wake](mouseX, mouseY),
+    mouse_position: () => (new Vector2() as any)[Mewlix.wake](mouseX, mouseY),
 
-    play_music: key => {
+    play_music: (key: string) => {
       ensure.string('graphic.play_music', key);
       return playMusic(key);
     },
 
-    play_sfx: (key, channel = 0) => {
+    play_sfx: (key: string, channel: number = 0) => {
       ensure.string('graphic.play_sfx', key);
       ensure.number('graphic.play_sfx', channel);
       return playSfx(key, channel);
     },
 
-    volume: value => {
+    volume: (value: number) => {
       ensure.number('graphic.volume', value);
       value = clamp(value, 0, 100) / 100;
       gameVolume.master.set(value);
     },
 
-    music_volume: value => {
+    music_volume: (value: number) => {
       ensure.number('graphic.music_volume', value);
       value = clamp(value, 0, 100) / 100;
       gameVolume.music.set(value);
     },
 
-    sfx_volume: value => {
+    sfx_volume: (value: number) => {
       ensure.number('graphic.sfx_volume', value);
       value = clamp(value, 0, 100) / 100;
       gameVolume.sfx.set(value);
@@ -986,14 +986,14 @@ export default function() {
 
     stop_music: stopMusic,
 
-    stop_sfx: channel => {
+    stop_sfx: (channel: number) => {
       ensure.number('graphic.stop_sfx', channel);
       return stopSfx(channel);
     },
 
     stop_all_sfx: stopAllSfx,
 
-    lerp: (start, end, x) => {
+    lerp: (start: number, end: number, x: number): number => {
       ensure.number('graphic.lerp', start);
       ensure.number('graphic.lerp', end);
       ensure.number('graphic.lerp', x);
@@ -1015,18 +1015,19 @@ export default function() {
     hex: Color.fromHex,
 
     PixelCanvas: PixelCanvas,
-  });
+  };
+  const GraphicLibrary = Mewlix.library('std.graphic', Graphic);
 
   /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.Graphic);
+  Object.freeze(GraphicLibrary);
 
   /* -----------------------------------
    * Standard library - Curry:
    * ----------------------------------- */
-  Mewlix.GraphicCurry = (() => {
-    const graphic = Mewlix.Graphic;
+  const GraphicCurry = (() => {
+    const graphic = Graphic;
 
-    return Mewlix.curryLibrary('std.graphic.curry', Mewlix.Graphic, {
+    return {
       load: key => path => options => graphic.load(key, path, options),
       spritesheet: path => frames => graphic.spritesheet(path, frames),
 
@@ -1038,11 +1039,12 @@ export default function() {
       play_sfx: key => channel => graphic.play_sfx(key, channel),
 
       lerp: start => end => x => graphic.lerp(start, end, x),
-    });
+    };
   })();
+  const GraphicCurryLibrary = Mewlix.curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.GraphicCurry);
+  Object.freeze(GraphicCurryLibrary);
 
   /* -----------------------------------
    * Run Console:
@@ -1076,4 +1078,9 @@ export default function() {
       event.preventDefault();
     }
   }, { passive: false });
+
+  /* -----------------------------------
+   * Return Graphic Namespace
+   * ----------------------------------- */
+  return [GraphicLibrary, GraphicCurryLibrary];
 }
