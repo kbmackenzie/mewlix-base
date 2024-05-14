@@ -317,7 +317,9 @@ export default function() {
           };
           const input = await getInput();
           const output = func(input);
-          addMessage(Mewlix.purrify(output), false);
+          if (!Mewlix.isNothing(output)) {
+            addMessage(Mewlix.purrify(output), false);
+          }
         }
       }
       catch (error) {
