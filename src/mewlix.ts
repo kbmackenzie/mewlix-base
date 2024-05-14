@@ -63,6 +63,57 @@ export default function() {
   Mewlix.MewlixError = MewlixError;
 
   /* -----------------------------------------------------
+   * String utils.
+   * ----------------------------------------------------- */
+  function purrify(value: MewlixValue): string {
+    if (typeof value === 'string') return value;
+    if (value === null || value === undefined) {
+      return 'nothing';
+    }
+    switch (typeof value) {
+      case 'function': return '<function>';
+      default: return value.toString();
+    }
+  };
+
+  function purrifyItem(value: MewlixValue): string {
+    if (typeof value === 'string') return JSON.stringify(value);
+    return purrify(value);
+  };
+
+  function purrifyArray(array: MewlixValue[]): string {
+    const items = array.map(purrifyItem).join(', ');
+    return `[${items}]`;
+  };
+
+  function purrifyObject(object: Box): string {
+    const pairs = getEntries(object).map(
+      ([key, value]) => `${key}: ${purrifyItem(value)}`
+    ).join(', ');
+    return `=^-x-^= [ ${pairs} ]`;
+  }
+
+  Mewlix.purrify = purrify;
+  Mewlix.purrifyItem = purrifyItem;
+  Mewlix.purrifyArray = purrifyArray;
+  Mewlix.purrifyObject = purrifyObject;
+
+  /* -----------------------------------------------------
+   * Object utils:
+   * ----------------------------------------------------- */
+  type StringIndexable = {
+    [key: string]: any;
+  };
+
+  function getEntries(source: StringIndexable): [string, any][] {
+    const entries: [string, any][] = [];
+    for (const key in source) {
+      entries.push([key, source[key]]);
+    }
+    return entries;
+  }
+
+  /* -----------------------------------------------------
    * MewlixObject -> Base object class.
    * ----------------------------------------------------- */
   class MewlixObject {
@@ -169,7 +220,7 @@ export default function() {
     }
 
     toString(): string {
-      return Mewlix.purrifyArray(this.toArray());
+      return purrifyArray(this.toArray());
     }
 
     toJSON() {
@@ -318,7 +369,7 @@ export default function() {
     }
 
     toString(): string {
-      return Mewlix.purrifyObject(this);
+      return purrifyObject(this);
     }
   };
   Mewlix.Box = Box;
@@ -423,21 +474,6 @@ export default function() {
   Mewlix.YarnBall = YarnBall;
 
   /* -----------------------------------------------------
-   * Object utils:
-   * ----------------------------------------------------- */
-  type StringIndexable = {
-    [key: string]: any;
-  };
-
-  function getEntries(source: StringIndexable): [string, any][] {
-    const entries: [string, any][] = [];
-    for (const key in source) {
-      entries.push([key, source[key]]);
-    }
-    return entries;
-  }
-
-  /* -----------------------------------------------------
    * Generate standard yarn balls.
    * ----------------------------------------------------- */
 
@@ -465,37 +501,6 @@ export default function() {
     }
     return yarnball;
   };
-
-  /* -----------------------------------------------------
-   * String utils.
-   * ----------------------------------------------------- */
-  Mewlix.purrify = function purrify(value: MewlixValue): string {
-    if (typeof value === 'string') return value;
-    if (value === null || value === undefined) {
-      return 'nothing';
-    }
-    switch (typeof value) {
-      case 'function': return '<function>';
-      default: return value.toString();
-    }
-  };
-
-  Mewlix.purrifyItem = function purrifyItem(value: MewlixValue): string {
-    if (typeof value === 'string') return JSON.stringify(value);
-    return Mewlix.purrify(value);
-  };
-
-  Mewlix.purrifyArray = function purrifyArray(array: MewlixValue[]): string {
-    const items = array.map(Mewlix.purrifyItem).join(', ');
-    return `[${items}]`;
-  };
-
-  Mewlix.purrifyObject = function purrifyObject(object: Box): string {
-    const pairs = getEntries(object).map(
-      ([key, value]) => `${key}: ${Mewlix.purrifyItem(value)}`
-    ).join(', ');
-    return `=^-x-^= [ ${pairs} ]`;
-  }
 
   /* -----------------------------------------------------
    * Type Checking
@@ -717,7 +722,7 @@ export default function() {
 
   const Strings = {
     concat: function concat(a: MewlixValue, b: MewlixValue): string {
-      return Mewlix.purrify(a) + Mewlix.purrify(b);
+      return purrify(a) + purrify(b);
     },
   };
   Mewlix.Strings = Strings;
@@ -918,13 +923,13 @@ export default function() {
 
   const Base = {
     purr: function purr(value: MewlixValue): string {
-      return Mewlix.purrify(value);
+      return purrify(value);
     },
 
     cat: function cat(shelf: Shelf): string {
       let acc = '';
       for (const value of shelf) {
-        acc = Mewlix.purrify(value) + acc;
+        acc = purrify(value) + acc;
       }
       return acc;
     },
@@ -1471,7 +1476,7 @@ export default function() {
     },
 
     meowf: function meowf(value: MewlixValue): void {
-      return Mewlix.meow(Mewlix.purrify(value));
+      return Mewlix.meow(purrify(value));
     },
 
     to_json: function to_json(value: MewlixValue): string {
@@ -1484,7 +1489,7 @@ export default function() {
     },
 
     log: function log(value: MewlixValue): void {
-      const message = Mewlix.purrify(value);
+      const message = purrify(value);
       console?.log(`[Mewlix] ${message}`);
     },
 
