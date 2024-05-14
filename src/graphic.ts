@@ -508,23 +508,23 @@ export default function() {
         return this;
       }).bind(this);
 
-      this.add = (function add(this: Vector2, that: Vector2) {
+      this.add = (function add(this: Vector2, that: Vector2): Vector2 {
         return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
       }).bind(this);
 
-      this.mul = (function mul(this: Vector2, that: Vector2) {
+      this.mul = (function mul(this: Vector2, that: Vector2): Vector2 {
         return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
       }).bind(this);
 
-      this.distance = (function distance(this: Vector2, that: Vector2) {
+      this.distance = (function distance(this: Vector2, that: Vector2): number {
         return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
       }).bind(this);
 
-      this.dot = (function dot(this: Vector2, that: Vector2) {
+      this.dot = (function dot(this: Vector2, that: Vector2): number {
         return this.x * that.x + this.y * that.y;
       }).bind(this);
 
-      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2) {
+      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2): number {
         const x = Mewlix.clamp(this.x, min.x, max.x);
         const y = Mewlix.clamp(this.y, min.y, max.y);
         return (new Vector2() as any)[Mewlix.wake](x, y);
@@ -533,10 +533,19 @@ export default function() {
   }
 
   class Rectangle extends Mewlix.Clowder {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+
     constructor() {
       super();
+      this.x = 0;
+      this.y = 0;
+      this.width = gridSlotWidth;
+      this.height = gridSlotHeight;
 
-      this[Mewlix.wake] = (function wake(x, y, width, height) {
+      this[Mewlix.wake] = (function wake(this: Rectangle, x: number, y: number, width: number, height: number) {
         [x, y, width, height].forEach(
           value => ensure.number('Rectangle.wake', value)
         );
@@ -547,14 +556,14 @@ export default function() {
         return this;
       }).bind(this);
 
-      this.contains = (function contains(point) {
+      this.contains = (function contains(this: Rectangle, point: Vector2): boolean {
         return (point.x >= this.x)
           && (point.y >= this.y)
           && (point.x < this.x + this.width)
           && (point.y < this.y + this.height);
       }).bind(this);
 
-      this.collides = (function collides(rect) {
+      this.collides = (function collides(this: Rectangle, rect: Rectangle): boolean {
         return (rect.x < this.x + this.width)
           && (rect.x + rect.width > this.x)
           && (rect.y < this.y + this.height)
