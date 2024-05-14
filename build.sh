@@ -11,6 +11,7 @@ mkdir "$FINAL"
 
 HEADER='./header.js'
 TERSER_CONFIG='./terser.config.json'
+PROJECT_DIRECTORY=$(pwd)
 
 # Write an error message to stderr.
 print_error() {
@@ -59,8 +60,19 @@ package_template() {
   cp "$FINAL/$1.js"     "$TARGET_FOLDER/core"
 
   echo "Zipping '$1' template:"
-  zip -r "./build/$1" "$TARGET_FOLDER"/* || {
+
+  cd "$TARGET_FOLDER" || {
+    print_error "Couldn't cd into target folder '$TARGET_FOLDER'!"
+    exit 1
+  }
+
+  zip -r "$PROJECT_DIRECTORY/build/$1" ./* || {
     print_error "Couldn't zip '$1' template!"
+    exit 1
+  }
+
+  cd "$PROJECT_DIRECTORY" || {
+    print_error "Couldn't cd back into project directory '$PROJECT_DIRECTORY'!"
     exit 1
   }
 }
@@ -71,3 +83,6 @@ package_all() {
   package_template 'graphic'
   package_template 'library'
 }
+
+build
+package_all
