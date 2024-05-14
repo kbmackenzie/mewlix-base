@@ -48,7 +48,6 @@ export default function() {
       return `[${this.name}] ${str}`
     }
   };
-  Mewlix.ErrorCode = ErrorCode;
 
   class MewlixError extends Error {
     name: string;
@@ -60,7 +59,6 @@ export default function() {
       this.code = errorCode;
     }
   }
-  Mewlix.MewlixError = MewlixError;
 
   /* -----------------------------------------------------
    * String utils.
@@ -93,11 +91,6 @@ export default function() {
     return `=^-x-^= [ ${pairs} ]`;
   }
 
-  Mewlix.purrify = purrify;
-  Mewlix.purrifyItem = purrifyItem;
-  Mewlix.purrifyArray = purrifyArray;
-  Mewlix.purrifyObject = purrifyObject;
-
   /* -----------------------------------------------------
    * Object utils:
    * ----------------------------------------------------- */
@@ -122,7 +115,6 @@ export default function() {
         `Mewlix object "${this.constructor.name}" cannot be coerced to a value with .valueOf()!`);
     }
   };
-  Mewlix.MewlixObject = MewlixObject;
 
   /* -----------------------------------------------------
    * Mewlix.Namespace -> Container for modules.
@@ -171,13 +163,11 @@ export default function() {
       this.modules.set(key, () => wrapped);
     }
   };
-  Mewlix.Namespace = Namespace;
 
   /* -----------------------------------------------------
    * Mewlix.Modules -> Default module container.
    * ----------------------------------------------------- */
-  const Modules = new Mewlix.Namespace('default');
-  Mewlix.Modules = Modules;
+  const Modules = new Namespace('default');
 
   /* -----------------------------------------------------
    * Shelf -> Stack-like persistent data structure.
@@ -342,10 +332,6 @@ export default function() {
     }
   }
 
-  Mewlix.Shelf = Shelf;
-  Mewlix.ShelfNode = ShelfNode;
-  Mewlix.ShelfBottom = ShelfBottom;
-
   /* -----------------------------------------------------
    * Box -> A core part of a cat-oriented language.
    * ----------------------------------------------------- */
@@ -373,7 +359,6 @@ export default function() {
       return purrifyObject(this);
     }
   };
-  Mewlix.Box = Box;
 
   /* -----------------------------------------------------
    * Mewlix.Enum -> Base for all enums.
@@ -417,14 +402,12 @@ export default function() {
       return `cat tree ${this.name}; ${enumKeys.join(' ')} ~meow`;
     }
   }
-  Mewlix.Enum = Enum;
 
   /* -----------------------------------------------------
    * Mewlix.Clowder -> Base for all clowders.
    * ----------------------------------------------------- */
   /* The clowder constructor symbol. */
   const wakeSymbol: unique symbol = Symbol('wake');
-  Mewlix.wake = wakeSymbol;
 
   /* All clowders should inherit from this class.
    * It has a default definition for wake(), too. */
@@ -438,7 +421,6 @@ export default function() {
       }).bind(this);
     }
   }
-  Mewlix.Clowder = Clowder;
 
   /* -----------------------------------------------------
    * Mewlix.YarnBall  -> Yarn ball export list.
@@ -472,7 +454,6 @@ export default function() {
       return `<yarn ball '${this.key}'>`
     }
   }
-  Mewlix.YarnBall = YarnBall;
 
   /* -----------------------------------------------------
    * Generate standard yarn balls.
@@ -503,9 +484,6 @@ export default function() {
     return yarnball;
   };
 
-  Mewlix.library = library;
-  Mewlix.curryLibrary = curryLibrary;
-
   /* -----------------------------------------------------
    * Type Checking
    * ----------------------------------------------------- */
@@ -526,7 +504,6 @@ export default function() {
     box:      typecheck(x => x instanceof Box,        'box'    ),
     func:     typecheck(x => typeof x === 'function', 'func'   ),
   };
-  Mewlix.ensure = ensure;
 
   /* -----------------------------------------------------
    * Value Utils 
@@ -552,10 +529,6 @@ export default function() {
     });
   };
 
-  Mewlix.isNothing = isNothing;
-  Mewlix.clamp = clamp;
-  Mewlix.opaque = opaque;
-
   /* -----------------------------------------------------
    * JSON utils
    * ----------------------------------------------------- */
@@ -579,7 +552,6 @@ export default function() {
       return MewlixToJSON.fromObject(value);
     },
   }
-  Mewlix.JSON = MewlixToJSON;
 
   /* -----------------------------------------------------
    * Comparison: Enum-like class.
@@ -609,7 +581,6 @@ export default function() {
       return xs.some(x => x.valueOf() === this.valueOf());
     }
   };
-  Mewlix.Comparison = Comparison;
 
   /* -----------------------------------------------------
    * Basic operations.
@@ -671,7 +642,6 @@ export default function() {
       return -a;
     },
   };
-  Mewlix.Numbers = Numbers;
 
   const Boolean = {
     not: function not(a: any): boolean {
@@ -687,7 +657,6 @@ export default function() {
       return Conversion.toBool(condition) ? fa() : fb();
     },
   };
-  Mewlix.Boolean = Boolean;
 
   const Compare = {
     isEqual: function isEqual(a: MewlixValue, b: MewlixValue): boolean {
@@ -724,14 +693,12 @@ export default function() {
         `compare: Cannot compare values of type "${typeOfValue}"!`);
     },
   };
-  Mewlix.Compare = Compare;
 
   const Strings = {
     concat: function concat(a: MewlixValue, b: MewlixValue): string {
       return purrify(a) + purrify(b);
     },
   };
-  Mewlix.Strings = Strings;
 
   const Shelves = {
     peek: function peek(shelf: Shelf): MewlixValue {
@@ -772,7 +739,6 @@ export default function() {
         `in: Cannot perform lookup in value of type "${typeOfB}": ${b}`);
     },
   };
-  Mewlix.Shelves = Shelves;
 
   const Reflection = {
     typeOf: function typeOf(value: any): string {
@@ -797,7 +763,6 @@ export default function() {
       return a instanceof b;
     },
   };
-  Mewlix.Relection = Reflection;
 
   const Boxes = {
     pairs: function pairs(value: Box): Shelf {
@@ -807,7 +772,6 @@ export default function() {
       ));
     },
   };
-  Mewlix.Boxes = Boxes;
 
   const Conversion = {
     toBool: function toBool(x: MewlixValue): boolean {
@@ -833,7 +797,6 @@ export default function() {
         `Value cannot be converted to a number: ${x}`);
     }
   };
-  Mewlix.Conversion = Conversion;
 
   /* -----------------------------------------------------
    * Statement built-ins
@@ -862,7 +825,6 @@ export default function() {
         `Assertion failed: ${message}`);
     }
   };
-  Mewlix.Internal = Internal;
 
   /* -----------------------------------------------------
    * IO:
@@ -871,7 +833,6 @@ export default function() {
     throw new MewlixError(ErrorCode.CriticalError,
       "Core function 'Mewlix.meow' hasn't been implemented!");
   };
-  Mewlix.meow = meow;
 
   /* -----------------------------------------------------
    * API:
@@ -896,7 +857,6 @@ export default function() {
       return (this as any).box().valueOf();
     }
   };
-  Mewlix.BoxWrapper = BoxWrapper;
 
   function wrap(object: object) {
     if (typeof object !== 'object') {
@@ -908,7 +868,6 @@ export default function() {
     }
     return new BoxWrapper(object);
   };
-  Mewlix.wrap = wrap;
 
   const API = {
     arrayToShelf: Shelf.fromArray,
@@ -916,7 +875,6 @@ export default function() {
     createBox: (object: StringIndexable) => new Mewlix(getEntries(object ?? {})),
     inject: (key: string, object: StringIndexable) => Modules.injectModule(key, object),
   };
-  Mewlix.API = API;
 
   /* -------------------------------------------------------
    * Base library.
@@ -1516,10 +1474,9 @@ export default function() {
     ),
   };
   const BaseLibrary = library('std', Base);
-  Mewlix.Base = BaseLibrary;
 
   /* Freezing the base library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.Base);
+  Object.freeze(BaseLibrary);
 
   /* ------------------------------------------
    * Standard Library - Currying
@@ -1634,10 +1591,9 @@ export default function() {
     };
   })();
   const BaseCurryLibrary = curryLibrary('std.curry', BaseLibrary, BaseCurry);
-  Mewlix.BaseCurry = BaseCurryLibrary; 
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(Mewlix.BaseCurry);
+  Object.freeze(BaseCurryLibrary);
 
   /* -------------------------------------------------------
    * Final Touches
@@ -1646,5 +1602,52 @@ export default function() {
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
-  Mewlix.run = (func: Function) => func();
+  const run = (func: Function) => func();
+
+  /* ------------------------------------------------------
+   * Return Mewlix Namespace
+   * ------------------------------------------------------ */
+  return {
+    ErrorCode: ErrorCode,
+    MewlixError: MewlixError,
+    purrify: purrify,
+    purrifyItem: purrifyItem,
+    purrifyArray: purrifyArray,
+    purrifyObject: purrifyObject,
+    MewlixObject: MewlixObject,
+    Namespace: Namespace,
+    Modules: Modules,
+    Shelf: Shelf,
+    ShelfNode: ShelfNode,
+    ShelfBottom: ShelfBottom,
+    Box: Box,
+    Enum: Enum,
+    wake: wakeSymbol,
+    Clowder: Clowder,
+    YarnBall: YarnBall,
+    library: library,
+    curryLibrary: curryLibrary,
+    ensure: ensure,
+    isNothing: isNothing,
+    clamp: clamp,
+    opaque: opaque,
+    JSON: MewlixToJSON,
+    Comparison: Comparison,
+    Numbers: Numbers,
+    Boolean: Boolean,
+    Compare: Compare,
+    Strings: Strings,
+    Shelves: Shelves,
+    Relection: Reflection,
+    Boxes: Boxes,
+    Conversion: Conversion,
+    Internal: Internal,
+    meow: meow,
+    BoxWrapper: BoxWrapper,
+    wrap: wrap,
+    API: API,
+    Base: BaseLibrary,
+    BaseCurry: BaseCurryLibrary, 
+    run: run,
+  };
 }
