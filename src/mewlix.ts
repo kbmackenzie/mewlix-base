@@ -831,7 +831,7 @@ const createMewlix = function() {
   /* -----------------------------------------------------
    * IO:
    * ----------------------------------------------------- */
-  function meow(_: MewlixValue) {
+  function meow(_: string) {
     throw new MewlixError(ErrorCode.CriticalError,
       "Core function 'Mewlix.meow' hasn't been implemented!");
   };
