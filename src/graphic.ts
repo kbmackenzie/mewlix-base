@@ -5,14 +5,20 @@ export default function() {
   const clamp  = Mewlix.clamp;
 
   /* Convert percentage value (0% - 100%) to byte (0 - 255) */
-  const percentageToByte = p => Math.floor((255 * p) / 100);
-  const byteToPercentage = b => Math.floor((100 * b) / 255);
+  function percentageToByte(p: number) {
+    return Math.floor((255 * p) / 100);
+  }
+
+  /* Convert byte (0 - 255) to percentage value (0% - 100%) */
+  function byteToPercentage(b: number) {
+    return Math.floor((100 * b) / 255);
+  }
 
   /* -----------------------------------
    * Initializing Canvas:
    * ----------------------------------- */
-  const canvas  = document.getElementById('game-canvas');
-  const context = canvas.getContext('2d');
+  const canvas  = document.getElementById('game-canvas') as HTMLCanvasElement;
+  const context = canvas.getContext('2d')!;
   context.imageSmoothingEnabled = false;
 
   const canvasWidth  = canvas.width;
@@ -23,28 +29,28 @@ export default function() {
 
   const sizeModifier = Math.floor(canvas.width / virtualWidth);
 
-  const spriteMap = new Map();
-  const audioMap  = new Map();
+  const spriteMap = new Map<string, ImageBitmap>();
+  const audioMap  = new Map<string, AudioBuffer>();
 
   const gridSlotWidth  = 16;
   const gridSlotHeight = 16;
-  const gridColumns  = Math.floor(virtualWidth  / gridSlotWidth );
-  const gridRows     = Math.floor(virtualHeight / gridSlotHeight);
+  const gridColumns = Math.floor(virtualWidth  / gridSlotWidth );
+  const gridRows    = Math.floor(virtualHeight / gridSlotHeight);
 
   /* -----------------------------------
    * Loading Images:
    * ----------------------------------- */
   /* Load an image file as ImageBitmap. */
-  const loadImage = (path, rect) => fetch(path)
+  const loadImage = (path: string, rect: Rectangle) => fetch(path)
     .then(response => response.blob())
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
       return createImageBitmap(
         blob,
-        rect?.x ?? 0,
-        rect?.y ?? 0,
-        rect?.width  ?? gridSlotWidth,
-        rect?.height ?? gridSlotHeight,
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height,
       );
     });
 
@@ -324,6 +330,98 @@ export default function() {
   });
 
   /* -----------------------------------
+   * Generic Loading:
+   * ----------------------------------- */
+  let imageExtensions = new Set([
+    'png',
+    'jpg',
+    'bmp',
+    'jpeg',
+  ]);
+
+  let audioExtensions = new Set([
+    'mp3',
+    'wav',
+    'ogg',
+  ]);
+
+  const fontExtensions = new Set([
+    'ttf',
+    'otf',
+    'woff',
+    'woff2',
+  ]);
+
+  function getExtensionOf(path) {
+    return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
+  }
+
+  async function loadAny(key, path, options) {
+    const extension = getExtensionOf(path)?.toLowerCase();
+    if (!extension) {
+      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+        `Couldn't parse file extension in filepath "${path}"!`);
+    }
+
+    if (imageExtensions.has(extension)) {
+      await loadSprite(key, path, options);
+      return;
+    }
+
+    if (audioExtensions.has(extension)) {
+      await loadAudio(key, path);
+      return;
+    }
+
+    if (fontExtensions.has(extension)) {
+      await loadFont(key, path);
+      return;
+    }
+
+    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      `Unrecognized file format "${extension}" in 'load' function!`);
+  }
+
+  /* -----------------------------------
+   * Resource Queue:
+   * ----------------------------------- */
+
+  /* A queue to store data about resources to be loaded.
+   * Items queued will be loaded when graphic.init() is called!
+   *
+   * The queue stores data about three tpyes of resources:
+   * - Generic (images, audio, fonts)
+   * - Spritesheet sprites
+   * - PixelCanvas sprite rendering
+   *
+   * The 'type' attribute in each object stored in the queue
+   * indicates the type of resource it represents. */
+  const resourceQueue = [];
+
+  async function loadResource(resource) {
+    if (resource.type === 'generic') {
+      const { key, path, options } = resource;
+      await loadAny(key, path, options);
+    }
+    else if (resource.type === 'canvas') {
+      const { key, data } = resource;
+      const image = await createImageBitmap(data);
+      spriteMap.set(key, image);
+    }
+    else if (resource.type === 'spritesheet') {
+      const { path, frames } = resource;
+      await fromSpritesheet(path, frames);
+    }
+  }
+
+  async function loadResources() {
+    for (const resource of resourceQueue) {
+      await loadResource(resource);
+    }
+    resourceQueue.length = 0;
+  }
+
+  /* -----------------------------------
    * Keyboard Events
    * ----------------------------------- */
   const keysDown = new Set();
@@ -386,110 +484,23 @@ export default function() {
   }
 
   /* -----------------------------------
-   * Generic Loading:
-   * ----------------------------------- */
-  let imageExtensions = new Set([
-    'png',
-    'jpg',
-    'bmp',
-    'jpeg',
-  ]);
-
-  let audioExtensions = new Set([
-    'mp3',
-    'wav',
-    'ogg',
-  ]);
-
-  const fontExtensions = new Set([
-    'ttf',
-    'otf',
-    'woff',
-    'woff2',
-  ]);
-
-  function getExtensionOf(path) {
-    return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
-  }
-
-  async function loadAny(key, path, options) {
-    const extension = getExtensionOf(path)?.toLowerCase();
-    if (!extension) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-        `Couldn't parse file extension in filepath "${path}"!`);
-    }
-
-    if (imageExtensions.has(extension)) {
-      await loadSprite(key, path, options);
-      return;
-    }
-
-    if (audioExtensions.has(extension)) {
-      await loadAudio(key, path);
-      return;
-    }
-
-    if (fontExtensions.has(extension)) {
-      await loadFont(key, path);
-      return;
-    }
-
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
-      `Unrecognized file format "${extension}" in 'load' function!`);
-  }
-
-  /* -----------------------------------
    * Utility Functions:
    * ----------------------------------- */
   const lerp = (start, end, x) => start + (end - start) * x;
 
   /* -----------------------------------
-   * Resource Queue:
-   * ----------------------------------- */
-
-  /* A queue to store data about resources to be loaded.
-   * Items queued will be loaded when graphic.init() is called!
-   *
-   * The queue stores data about three tpyes of resources:
-   * - Generic (images, audio, fonts)
-   * - Spritesheet sprites
-   * - PixelCanvas sprite rendering
-   *
-   * The 'type' attribute in each object stored in the queue
-   * indicates the type of resource it represents. */
-  const resourceQueue = [];
-
-  async function loadResource(resource) {
-    if (resource.type === 'generic') {
-      const { key, path, options } = resource;
-      await loadAny(key, path, options);
-    }
-    else if (resource.type === 'canvas') {
-      const { key, data } = resource;
-      const image = await createImageBitmap(data);
-      spriteMap.set(key, image);
-    }
-    else if (resource.type === 'spritesheet') {
-      const { path, frames } = resource;
-      await fromSpritesheet(path, frames);
-    }
-  }
-
-  async function loadResources() {
-    for (const resource of resourceQueue) {
-      await loadResource(resource);
-    }
-    resourceQueue.length = 0;
-  }
-
-  /* -----------------------------------
    * Core Utility:
    * ----------------------------------- */
   class Vector2 extends Mewlix.Clowder {
+    x: number;
+    y: number;
+
     constructor() {
       super();
+      this.x = 0;
+      this.y = 0;
 
-      this[Mewlix.wake] = (function wake(x, y) {
+      this[Mewlix.wake] = (function wake(this: Vector2, x: number, y: number) {
         ensure.number('Vector2.wake', x);
         ensure.number('Vector2.wake', y);
         this.x = x;
@@ -497,26 +508,26 @@ export default function() {
         return this;
       }).bind(this);
 
-      this.add = (function add(that) {
-        return new Vector2()[Mewlix.wake](this.x + that.x, this.y + that.y);
+      this.add = (function add(this: Vector2, that: Vector2) {
+        return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
       }).bind(this);
 
-      this.mul = (function mul(that) {
-        return new Vector2()[Mewlix.wake](this.x + that.x, this.y + that.y);
+      this.mul = (function mul(this: Vector2, that: Vector2) {
+        return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
       }).bind(this);
 
-      this.distance = (function distance(that) {
+      this.distance = (function distance(this: Vector2, that: Vector2) {
         return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
       }).bind(this);
 
-      this.dot = (function dot(that) {
+      this.dot = (function dot(this: Vector2, that: Vector2) {
         return this.x * that.x + this.y * that.y;
       }).bind(this);
 
-      this.clamp = (function clamp(min, max) {
-        const x = clamp(this.x, min.x, max.x);
-        const y = clamp(this.y, min.y, max.y);
-        return new Vector2()[Mewlix.wake](x, y);
+      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2) {
+        const x = Mewlix.clamp(this.x, min.x, max.x);
+        const y = Mewlix.clamp(this.y, min.y, max.y);
+        return (new Vector2() as any)[Mewlix.wake](x, y);
       }).bind(this);
     }
   }
