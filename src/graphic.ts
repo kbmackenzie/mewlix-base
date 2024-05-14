@@ -41,7 +41,7 @@ export default function() {
    * Loading Images:
    * ----------------------------------- */
   /* Load an image file as ImageBitmap. */
-  const loadImage = (path: string, rect: Rectangle) => fetch(path)
+  const loadImage = (path: string, rect?: Rectangle) => fetch(path)
     .then(response => response.blob())
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
@@ -55,14 +55,19 @@ export default function() {
     });
 
   /* Load an image file as a sprite + add it to spriteMap. */
-  const loadSprite = (key, path, rect) => loadImage(path, rect)
+  const loadSprite = (key: string, path: string, rect?: Rectangle) => loadImage(path, rect)
     .then(image => {
       spriteMap.set(key, image);
       return image;
     });
 
+  type SpriteDetails = {
+    key: string;
+    rect: Rectangle;
+  };
+
   /* Load a spritesheet image and divide it into sprites. */
-  async function fromSpritesheet(path, frames) {
+  async function fromSpritesheet(path: string, frames: SpriteDetails[]) {
     const sheet = await loadImage(path);
     for (const frame of frames) {
       const { key, rect } = frame;
@@ -74,9 +79,9 @@ export default function() {
   /* -----------------------------------
    * Colors:
    * ----------------------------------- */
-  const toColor = Symbol('toColor');
+  const toColor: unique symbol = Symbol('toColor');
 
-  function withColor(value) {
+  function withColor(value: string | Color): string {
     if (typeof value === 'string') return value;    
     if (typeof value === 'object' && toColor in value) {
       return value[toColor]();
@@ -90,15 +95,15 @@ export default function() {
   /* -----------------------------------
    * Drawing:
    * ----------------------------------- */
-  function getSprite(key) {
+  function getSprite(key: string): ImageBitmap {
     if (!spriteMap.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
         `No loaded image resource associated with key "${key}"!`);
     }
-    return spriteMap.get(key);
+    return spriteMap.get(key)!;
   }
 
-  function drawSprite(key, x, y) {
+  function drawSprite(key: string, x: number, y: number): void {
     const image = getSprite(key);
     context.drawImage(
       image,
@@ -109,7 +114,7 @@ export default function() {
     );
   }
 
-  function drawRect(rect, color) {
+  function drawRect(rect: Rectangle, color: Color): void {
     context.fillStyle = withColor(color ?? 'black');
     context.fillRect(
       rect.x      * sizeModifier,
@@ -119,7 +124,7 @@ export default function() {
     );
   }
 
-  function fillCanvas(color) {
+  function fillCanvas(color: Color): void {
     context.fillStyle = withColor(color ?? 'black');
     context.fillRect(0, 0, canvasWidth, canvasHeight);
   }
@@ -127,7 +132,7 @@ export default function() {
   /* -----------------------------------
    * Loading Fonts:
    * ----------------------------------- */
-  const loadFont = (name, url) => new FontFace(name, `url(${url})`)
+  const loadFont = (name: string, url: string): Promise<void> => new FontFace(name, `url(${url})`)
     .load()
     .then(font => {
       document.fonts.add(font);
@@ -139,7 +144,13 @@ export default function() {
   const defaultFont = 'Munro';
   const defaultFontSize = 8;
 
-  function setupText(options) {
+  type TextOptions = {
+    font?: string;
+    size?: number;
+    color?: string | Color;
+  };
+
+  function setupText(options: TextOptions | null) {
     const font = options?.font ?? defaultFont;
     const fontSize = Math.floor(options?.size ?? defaultFontSize);
 
@@ -149,7 +160,7 @@ export default function() {
     context.textBaseline = 'top';
   }
 
-  function drawText(message, x = 0, y = 0, options = null) {
+  function drawText(message: string, x: number = 0, y: number = 0, options: TextOptions | null = null) {
     setupText(options);
     context.fillText(
       message,
@@ -158,7 +169,7 @@ export default function() {
     );
   }
 
-  function measureText(message, options) {
+  function measureText(message: string, options: TextOptions | null = null) {
     setupText(options);
     const metrics = context.measureText(message);
 
@@ -190,7 +201,7 @@ export default function() {
   /* -----------------------------------
    * Loading Audio:
    * ----------------------------------- */
-  const loadAudio = (key, path) => fetch(path)
+  const loadAudio = (key: string, path: string): Promise<AudioBuffer> => fetch(path)
     .then(response => response.arrayBuffer())
     .then(buffer => audioContext.decodeAudioData(buffer))
     .then(audio => {
@@ -198,22 +209,26 @@ export default function() {
       return audio;
     });
 
-  function getBuffer(key) {
+  function getBuffer(key: string): AudioBuffer {
     if (!audioMap.has(key)) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
         `No existing audio track is associated with the key ${key}!`);
     }
-    return audioMap.get(key);
+    return audioMap.get(key)!;
   }
 
   /* -----------------------------------
    * Playing Music:
    * ----------------------------------- */
-  const musicChannel = {
+  type MusicChannel = {
+    track: AudioBufferSourceNode | null;
+  };
+
+  const musicChannel: MusicChannel = {
     track: null,
   };
 
-  function playMusic(key) {
+  function playMusic(key: string) {
     musicChannel.track?.stop();
     const buffer = getBuffer(key);
 
@@ -226,7 +241,7 @@ export default function() {
     musicChannel.track = track;
   }
 
-  function stopMusic() {
+  function stopMusic(): void {
     musicChannel.track?.stop();
     musicChannel.track = null;
   }
@@ -234,10 +249,12 @@ export default function() {
   /* -----------------------------------
    * Playing Music:
    * ----------------------------------- */
-  const soundChannelCount = 8;
-  const soundChannels = new Array(soundChannelCount).fill(null);
+  type SoundChannel = AudioBufferSourceNode | null;
 
-  function withSoundChannel(index, callback) {
+  const soundChannelCount = 8;
+  const soundChannels: Array<SoundChannel> = new Array(soundChannelCount).fill(null);
+
+  function withSoundChannel(index: number, callback: (audio: SoundChannel) => SoundChannel) {
     if (index < 0 || index >= soundChannelCount) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
         `Invalid sound channel index: ${index}`);
@@ -245,7 +262,7 @@ export default function() {
     soundChannels[index] = callback(soundChannels[index]);
   }
 
-  function playSfx(key, index = 0) {
+  function playSfx(key: string, index: number = 0) {
     withSoundChannel(index, channel => {
       channel?.stop();
       const buffer = getBuffer(key);
@@ -259,14 +276,14 @@ export default function() {
     });
   }
 
-  function stopSfx(index = 0) {
+  function stopSfx(index: number = 0) {
     withSoundChannel(index, channel => {
       channel?.stop();
       return null;
     });
   }
 
-  function stopAllSfx() {
+  function stopAllSfx(): void {
     soundChannels.forEach(channel => channel?.stop());
     soundChannels.fill(null);
   }
@@ -274,52 +291,54 @@ export default function() {
   /* -----------------------------------
    * Volume Control:
    * ----------------------------------- */
-  const gameVolume = {
-    mute: false
-  };
+  let mute: boolean = false;
 
-  function setVolumeOf(node, volume) {
+  function setVolumeOf(node: GainNode, volume: number) {
     node.gain.cancelScheduledValues(audioContext.currentTime);
     node.gain.setValueAtTime(node.gain.value, audioContext.currentTime);
     node.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.5);
   }
 
   class VolumeControl {
-    constructor(node) {
+    node: GainNode;
+    volume: number;
+
+    constructor(node: GainNode) {
       this.node = node;
       this.volume = node.gain.value;
     }
 
-    set(volume) {
+    set(volume: number) {
       this.volume = volume;
       this.update();
     }
 
-    update() {
-      const value = this.volume * !gameVolume.mute;
+    update(): void {
+      const value = this.volume * Number(!mute);
       setVolumeOf(this.node, value);
     }
   }
 
-  gameVolume.master = new VolumeControl(masterVolume);
-  gameVolume.music  = new VolumeControl(musicVolume);
-  gameVolume.sfx    = new VolumeControl(sfxVolume);
-
-  gameVolume.update = function() {
-    this.master.update();
-    this.music.update();
-    this.sfx.update();
-  };
+  const gameVolume = {
+    master: new VolumeControl(masterVolume),
+    music: new VolumeControl(musicVolume),
+    sfx: new VolumeControl(sfxVolume),
+    update: function() {
+      this.master.update();
+      this.music.update();
+      this.sfx.update();
+    },
+  }
 
   /* -----------------------------------
    * Sound Button:
    * ----------------------------------- */
-  const soundButton = document.getElementById('game-sound');
+  const soundButton = document.getElementById('game-sound') as HTMLButtonElement;
 
   soundButton.addEventListener('click', () => {
-    gameVolume.mute = !gameVolume.mute;
+    mute = !mute;
 
-    if (gameVolume.mute) {
+    if (mute) {
       soundButton.classList.add('muted');
     }
     else {
@@ -352,11 +371,11 @@ export default function() {
     'woff2',
   ]);
 
-  function getExtensionOf(path) {
+  function getExtensionOf(path: string): string | undefined {
     return /\.([a-zA-Z0-9]{3,4})$/.exec(path)?.[1];
   }
 
-  async function loadAny(key, path, options) {
+  async function loadAny(key: string, path: string, options?: Rectangle) {
     const extension = getExtensionOf(path)?.toLowerCase();
     if (!extension) {
       throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
@@ -396,9 +415,15 @@ export default function() {
    *
    * The 'type' attribute in each object stored in the queue
    * indicates the type of resource it represents. */
-  const resourceQueue = [];
 
-  async function loadResource(resource) {
+  type Resource =
+    | { type: 'generic'; key: string; path: string; options?: Rectangle }
+    | { type: 'canvas'; key: string; data: ImageBitmap; }
+    | { type: 'spritesheet'; path: string; frames: SpriteDetails[]; }
+
+  const resourceQueue: Resource[] = [];
+
+  async function loadResource(resource: Resource) {
     if (resource.type === 'generic') {
       const { key, path, options } = resource;
       await loadAny(key, path, options);
@@ -414,7 +439,7 @@ export default function() {
     }
   }
 
-  async function loadResources() {
+  async function loadResources(): Promise<void> {
     for (const resource of resourceQueue) {
       await loadResource(resource);
     }
@@ -424,8 +449,8 @@ export default function() {
   /* -----------------------------------
    * Keyboard Events
    * ----------------------------------- */
-  const keysDown = new Set();
-  const keyQueue = new Set();
+  const keysDown = new Set<string>();
+  const keyQueue = new Set<string>();
 
   window.addEventListener('keydown', event => {
     if (event.repeat) return;
@@ -437,11 +462,11 @@ export default function() {
     keysDown.delete(event.key);
   }, { passive: true });
 
-  const isKeyPressed  = key => keyQueue.has(key);
-  const isKeyDown     = key => keysDown.has(key);
-  const isKeyUp       = key => !keysDown.has(key);
+  const isKeyPressed  = (key: string) => keyQueue.has(key);
+  const isKeyDown     = (key: string) => keysDown.has(key);
+  //const isKeyUp       = (key: string) => !keysDown.has(key);
 
-  function flushKeyQueue() {
+  function flushKeyQueue(): void {
     keyQueue.clear();
   }
 
@@ -852,7 +877,7 @@ export default function() {
       resourceQueue.push({
         type: 'spritesheet',
         path: path,
-        frames: frames,
+        frames: frames.toArray(),
       });
     },
     
