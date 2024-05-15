@@ -13,6 +13,20 @@ HEADER='./header.js'
 TERSER_CONFIG='./terser.config.json'
 PROJECT_DIRECTORY=$(pwd)
 
+# Dependency Management
+has_command() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+check_dependency() {
+  if has_command "$1"; then return 0; fi
+  print_error "Script dependency missing: '$1'"
+  return 1
+}
+
+check_dependency 'zip' || exit 1
+check_dependency 'npx' || exit 1
+
 # Write an error message to stderr.
 print_error() {
   echo "$1" 1>&2
@@ -87,5 +101,6 @@ package_all() {
   package_template 'library'
 }
 
+# Build Project
 build
 package_all
