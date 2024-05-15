@@ -15,7 +15,7 @@ PROJECT_DIRECTORY=$(pwd)
 
 # Dependency Management
 has_command() {
-  command -v "$1" > /dev/null 2>&1
+  command -v "$1" > /dev/null 2> /dev/null
 }
 
 check_dependency() {
@@ -101,6 +101,5 @@ package_all() {
   package_template 'library'
 }
 
-# Build Project
 build
 package_all
