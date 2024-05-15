@@ -57,7 +57,10 @@ package_template() {
 
   mkdir "$TARGET_FOLDER/core"
   cp "$FINAL/mewlix.js" "$TARGET_FOLDER/core"
-  cp "$FINAL/$1.js"     "$TARGET_FOLDER/core"
+
+  if [ -f "$FINAL/$1.js" ]; then
+    cp "$FINAL/$1.js"   "$TARGET_FOLDER/core"
+  fi
 
   echo "Zipping '$1' template:"
 
