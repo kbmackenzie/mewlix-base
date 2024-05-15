@@ -313,7 +313,7 @@ export default function() {
       try { 
         while (true) {
           if (!Mewlix.isNothing(opener)) {
-            addMessage(opener!(), false)
+            addMessage(Mewlix.purrify(opener!()), false)
           };
           const input = await getInput();
           const output = func(input);
