@@ -1087,12 +1087,13 @@ export default function() {
   /* -----------------------------------
    * Run Console:
    * ----------------------------------- */
-  Mewlix.run = async func => {
+  Mewlix.run = func => {
     try {
-      await func();
+      const value = func();
+      return value;
     }
     catch (error) {
-      await drawError();
+      drawError();
       throw error;
     }
   };

@@ -394,7 +394,8 @@ export default function() {
   Mewlix.run = func => {
     try {
       setRunning();
-      func();
+      const value = func();
+      return value;
     }
     catch (error) {
       writeError(error);
