@@ -1188,11 +1188,11 @@ const createMewlix = function() {
       return Shelf.fromArray(output);
     },
 
-    repeat: function repeat(number: number, callback: () => void): void {
+    repeat: function repeat(number: number, callback: (i?: number) => void): void {
       ensure.number('std.repeat', number);
       ensure.func('std.repeat', callback);
       for (let i = 0; i < number; i++) {
-        callback();
+        callback(i);
       }
     },
 
@@ -1543,7 +1543,7 @@ const createMewlix = function() {
           std.zip(a, b),
 
       repeat: (number: number) =>
-        (callback: () => void) =>
+        (callback: (i?: number) => void) =>
           std.repeat(number, callback),
 
       foreach: (callback: (x: MewlixValue) => void) =>
