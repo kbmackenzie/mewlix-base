@@ -21,7 +21,5 @@ export default async function() {
   }
   const entrypoint = meta.entrypoint || 'main';
 
-  await Mewlix.run(async () => {
-    await Mewlix.Modules.getModule(entrypoint);
-  });
+  return Mewlix.run(() => Mewlix.Modules.getModule(entrypoint));
 }
