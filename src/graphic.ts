@@ -1,6 +1,6 @@
 'use strict';
 
-import { Shelf, MewlixValue } from './mewlix.js';
+import { Shelf, Clowder, MewlixValue, MewlixObject, wakeSymbol, purrify } from './mewlix.js';
 
 export default function() {
   const ensure = Mewlix.ensure;
@@ -526,16 +526,17 @@ export default function() {
    * The [wake] contructor initializes fields and binds functions by force.
    * This makes it very hard to write type signatures for them, haha. @ -@ */
 
-  class Vector2 extends Mewlix.Clowder {
+  class Vector2 extends Clowder {
     x: number;
     y: number;
+    [wakeSymbol]: (x: number, y: number) => Vector2;
 
     constructor() {
       super();
       this.x = 0;
       this.y = 0;
 
-      this[Mewlix.wake] = (function wake(this: Vector2, x: number, y: number) {
+      this[wakeSymbol] = (function wake(this: Vector2, x: number, y: number) {
         ensure.number('Vector2.wake', x);
         ensure.number('Vector2.wake', y);
         this.x = x;
@@ -544,11 +545,11 @@ export default function() {
       }).bind(this);
 
       this.add = (function add(this: Vector2, that: Vector2): Vector2 {
-        return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
+        return new Vector2()[wakeSymbol](this.x + that.x, this.y + that.y);
       }).bind(this);
 
       this.mul = (function mul(this: Vector2, that: Vector2): Vector2 {
-        return (new Vector2() as any)[Mewlix.wake](this.x + that.x, this.y + that.y);
+        return new Vector2()[wakeSymbol](this.x + that.x, this.y + that.y);
       }).bind(this);
 
       this.distance = (function distance(this: Vector2, that: Vector2): number {
@@ -559,19 +560,20 @@ export default function() {
         return this.x * that.x + this.y * that.y;
       }).bind(this);
 
-      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2): number {
+      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
         const x = Mewlix.clamp(this.x, min.x, max.x);
         const y = Mewlix.clamp(this.y, min.y, max.y);
-        return (new Vector2() as any)[Mewlix.wake](x, y);
+        return new Vector2()[wakeSymbol](x, y);
       }).bind(this);
     }
   }
 
-  class Rectangle extends Mewlix.Clowder {
+  class Rectangle extends Clowder {
     x: number;
     y: number;
     width: number;
     height: number;
+    [wakeSymbol]: (x: number, y: number, width: number, height: number) => Rectangle;
 
     constructor() {
       super();
@@ -580,7 +582,7 @@ export default function() {
       this.width = gridSlotWidth;
       this.height = gridSlotHeight;
 
-      this[Mewlix.wake] = (function wake(this: Rectangle, x: number, y: number, width: number, height: number) {
+      this[wakeSymbol] = (function wake(this: Rectangle, x: number, y: number, width: number, height: number) {
         [x, y, width, height].forEach(
           value => ensure.number('Rectangle.wake', value)
         );
@@ -607,16 +609,17 @@ export default function() {
     }
   }
 
-  class GridSlot extends Mewlix.Clowder {
+  class GridSlot extends Clowder {
     row: number;
     column: number;
+    [wakeSymbol]: (row: number, column: number) => GridSlot;
 
     constructor() {
       super();
       this.row = 0;
       this.column = 0;
 
-      this[Mewlix.wake] = (function wake(this: GridSlot, row: number, column: number) {
+      this[wakeSymbol] = (function wake(this: GridSlot, row: number, column: number) {
         this.row    = clamp(row,    0, gridRows - 1);
         this.column = clamp(column, 0, gridColumns - 1);
         return this;
@@ -631,11 +634,11 @@ export default function() {
   function positionToGridSlot(point: Vector2): GridSlot {
     const row = Math.min(point.y / gridSlotHeight);
     const col = Math.min(point.x / gridSlotWidth);
-    return (new GridSlot() as any)[Mewlix.wake](row, col);
+    return new GridSlot()[wakeSymbol](row, col);
   }
 
   function gridSlotToPosition(slot: GridSlot): Vector2 {
-    return (new Vector2() as any)[Mewlix.wake](
+    return new Vector2()[wakeSymbol](
       slot.column * gridSlotWidth,
       slot.row * gridSlotHeight,
     );
@@ -643,12 +646,13 @@ export default function() {
 
   /* Color container, wrapping a RGBA color value.
    * It accepts an opacity value too, in percentage. */
-  class Color extends Mewlix.Clowder {
+  class Color extends Clowder {
     red: number;
     green: number;
     blue: number;
     opacity: number;
     alpha: () => number;
+    [wakeSymbol]: (red: number, green: number, blue: number, opacity?: number) => Color;
 
     constructor() {
       super();
@@ -657,7 +661,7 @@ export default function() {
       this.blue  = 0;
       this.opacity = 0;
 
-      this[Mewlix.wake] = (function wake(this: Color, red: number, green: number, blue: number, opacity: number = 100) {
+      this[wakeSymbol] = (function wake(this: Color, red: number, green: number, blue: number, opacity: number = 100) {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
@@ -696,7 +700,7 @@ export default function() {
         str = str.split('').map(x => x + x).join('');
       }
 
-      return (new Color() as any)[Mewlix.wake](
+      return new Color()[wakeSymbol](
         parseInt(str.slice(0, 1), 16),
         parseInt(str.slice(2, 3), 16),
         parseInt(str.slice(4, 5), 16),
@@ -706,10 +710,16 @@ export default function() {
 
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
-  class PixelCanvas extends Mewlix.Clowder {
+  class PixelCanvas extends MewlixObject {
     width: number;
     height: number;
-    data: any;
+    data: Uint8ClampedArray | null;
+    [wakeSymbol]: (width: number, height: number) => PixelCanvas;
+
+    fill: (color: Color) => void;
+    set_pixel: (x: number, y: number, color: Color) => void;
+    get_pixel: (x: number, y: number) => Color;
+    to_sprite: (key: string) => void;
 
     constructor() {
       super();
@@ -717,7 +727,14 @@ export default function() {
       this.height = 0;
       this.data = null;
 
-      this[Mewlix.wake] = (function wake(this: PixelCanvas, width: number, height: number) {
+      Object.defineProperty(this, 'box', {
+        value: () => this,
+        writable: false,
+        enumerable: false,
+        configurable: false,
+      });
+
+      this[wakeSymbol] = (function wake(this: PixelCanvas, width: number, height: number) {
         this.width = width;
         this.height = height;
         this.data = new Uint8ClampedArray(width * height * 4);
@@ -728,7 +745,7 @@ export default function() {
       /* ------------------------------
        * Methods:
        * ------------------------------ */
-      this.fill = (function fill(this: PixelCanvas, color: Color) {
+      this.fill = (function fill(this: PixelCanvas, color: Color): void {
         if (!this.data) {
           throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
@@ -741,7 +758,11 @@ export default function() {
         }
       }).bind(this);
 
-      this.set_pixel = (function set_pixel(this: PixelCanvas, x: number, y: number, color: Color) {
+      this.set_pixel = (function set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
+        if (!this.data) {
+          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
+        };
         const index = (x * this.width + y) * 4;
         this.data[index]     = color.red;
         this.data[index + 1] = color.green;
@@ -749,9 +770,13 @@ export default function() {
         this.data[index + 3] = color.alpha();
       }).bind(this);
 
-      this.get_pixel = (function get_pixel(this: PixelCanvas, x: number, y: number) {
+      this.get_pixel = (function get_pixel(this: PixelCanvas, x: number, y: number): Color {
+        if (!this.data) {
+          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
+        };
         const index = (x * this.width + y) * 4;
-        return (new Color() as any)[Mewlix.wake](
+        return new Color()[wakeSymbol](
           this.data[index],
           this.data[index + 1],
           this.data[index + 2],
@@ -759,7 +784,11 @@ export default function() {
         );
       }).bind(this);
 
-      this.to_sprite = (function to_image(this: PixelCanvas, key: string) {
+      this.to_sprite = (function to_image(this: PixelCanvas, key: string): void {
+        if (!this.data) {
+          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
+        };
         const copy = new Uint8ClampedArray(this.data);
         resourceQueue.push({
           type: 'canvas',
@@ -987,7 +1016,7 @@ export default function() {
 
     mouse_down: isMouseDown,
 
-    mouse_position: () => (new Vector2() as any)[Mewlix.wake](mouseX, mouseY),
+    mouse_position: () => new Vector2()[wakeSymbol](mouseX, mouseY),
 
     play_music: (key: string) => {
       ensure.string('graphic.play_music', key);
