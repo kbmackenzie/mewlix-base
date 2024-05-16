@@ -404,12 +404,13 @@ export class Enum extends Box {
  * Clowder -> Base for all clowders.
  * ----------------------------------------------------- */
 /* The clowder constructor symbol. */
-const wakeSymbol: unique symbol = Symbol('wake');
+export const wakeSymbol: unique symbol = Symbol('wake');
 
 /* All clowders should inherit from this class.
  * It has a default definition for wake(), too. */
 export class Clowder extends Box {
   [key: string | symbol]: MewlixValue;
+  [wakeSymbol]: (...args: any[]) => Clowder;
 
   constructor() {
     super();
@@ -834,7 +835,7 @@ function meow(_: string) {
 /* -----------------------------------------------------
  * API:
  * ----------------------------------------------------- */
-class BoxWrapper extends MewlixObject {
+export class BoxWrapper extends MewlixObject {
   constructor(object: object) {
     super();
     Object.defineProperty(this, 'box', {
@@ -855,7 +856,7 @@ class BoxWrapper extends MewlixObject {
   }
 };
 
-function wrap(object: object) {
+export function wrap(object: object) {
   if (typeof object !== 'object') {
     throw new MewlixError(ErrorCode.InvalidImport,
       `Special import "${object}" isn't an object!`);
