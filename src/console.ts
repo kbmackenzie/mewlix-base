@@ -1,6 +1,6 @@
 'use strict';
 
-import { Shelf, purrify } from './mewlix.js';
+import { Shelf, purrify, ensure, isNothing, library, curryLibrary } from './mewlix.js';
 
 export default function() {
   /* -------------------------------------
@@ -297,8 +297,6 @@ export default function() {
   /* -------------------------------------
    * Standard library:
    * ------------------------------------- */
-  const ensure = Mewlix.ensure;
-
   /* The std.console library documentation can be found on the wiki:
    * > https://github.com/kbmackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
    *
@@ -314,12 +312,12 @@ export default function() {
       ensure.func('console.run', func);
       try { 
         while (true) {
-          if (!Mewlix.isNothing(opener)) {
+          if (!isNothing(opener)) {
             addMessage(purrify(opener!()), false)
           };
           const input = await getInput();
           const output = func(input);
-          if (!Mewlix.isNothing(output)) {
+          if (!isNothing(output)) {
             addMessage(purrify(output), false);
           }
         }
@@ -363,7 +361,7 @@ export default function() {
       addDownloadButton(contents, filename);
     },
   };
-  const ConsoleLibrary = Mewlix.library('std.console', Console);
+  const ConsoleLibrary = library('std.console', Console);
 
   /* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
   Object.freeze(ConsoleLibrary);
@@ -380,7 +378,7 @@ export default function() {
       (contents: string) =>
         Console.write_file(filename, contents),
   };
-  const ConsoleCurryLibrary = Mewlix.curryLibrary('std.console.curry', ConsoleLibrary, ConsoleCurry);
+  const ConsoleCurryLibrary = curryLibrary('std.console.curry', ConsoleLibrary, ConsoleCurry);
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
   Object.freeze(ConsoleCurryLibrary);
