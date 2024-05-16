@@ -460,7 +460,7 @@ export class YarnBall extends MewlixObject {
 /* All the 'as any' castings are a necessary compromise to guarantee dynamic assignment behavior.
  * The sacrifices needed to write the base for a dynamic language in a typed one. */
 
-function library(libraryKey: string, library: StringIndexable = {}) {
+export function library(libraryKey: string, library: StringIndexable = {}) {
   const yarnball = new YarnBall(libraryKey);
   for (const key in library) {
     yarnball[key] = library[key];
@@ -468,7 +468,7 @@ function library(libraryKey: string, library: StringIndexable = {}) {
   return yarnball;
 };
 
-function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable = {}) {
+export function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable = {}) {
   const yarnball = new YarnBall(libraryKey);
   // Copy curried functions:
   for (const key in library) {
@@ -530,7 +530,7 @@ function opaque(x: Object): void {
 /* -----------------------------------------------------
  * JSON utils
  * ----------------------------------------------------- */
-const MewlixFromJSON = {
+export const MewlixFromJSON = {
   fromObject: (object: StringIndexable): Box => {
     return new Box(
       getEntries(object)
@@ -554,7 +554,7 @@ const MewlixFromJSON = {
 /* -----------------------------------------------------
  * Comparison: Enum-like class.
  * ----------------------------------------------------- */
-class Comparison {
+export class Comparison {
   operator: string
   id: number
 
@@ -583,7 +583,7 @@ class Comparison {
 /* -----------------------------------------------------
  * Basic operations.
  * ----------------------------------------------------- */
-const Numbers = {
+export const Numbers = {
   add: function add(a: number, b: number): number {
     ensure.number('+', a);
     ensure.number('+', b);
@@ -641,7 +641,7 @@ const Numbers = {
   },
 };
 
-const Booleans = {
+export const Booleans = {
   not: function not(a: any): boolean {
     return !Conversion.toBool(a);
   },
@@ -656,7 +656,7 @@ const Booleans = {
   },
 };
 
-const Compare = {
+export const Compare = {
   isEqual: function isEqual(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -692,13 +692,13 @@ const Compare = {
   },
 };
 
-const Strings = {
+export const Strings = {
   concat: function concat(a: MewlixValue, b: MewlixValue): string {
     return purrify(a) + purrify(b);
   },
 };
 
-const Shelves = {
+export const Shelves = {
   peek: function peek<T>(shelf: Shelf<T>): T | null {
     ensure.shelf('paw at', shelf);
     return shelf.peek();
@@ -738,7 +738,7 @@ const Shelves = {
   },
 };
 
-const Reflection = {
+export const Reflection = {
   typeOf: function typeOf(value: any): string {
     if (value instanceof Shelf) return 'shelf';
     if (value instanceof Box) return 'box';
@@ -762,7 +762,7 @@ const Reflection = {
   },
 };
 
-const Boxes = {
+export const Boxes = {
   pairs: function pairs(value: Box): Shelf<Box> {
     ensure.box('claw at', value);
     return Shelf.fromArray(getEntries(value).map(
@@ -771,7 +771,7 @@ const Boxes = {
   },
 };
 
-const Conversion = {
+export const Conversion = {
   toBool: function toBool(x: MewlixValue): boolean {
     switch (typeof x) {
       case 'object'   : return x !== null;
