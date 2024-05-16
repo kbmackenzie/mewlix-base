@@ -1,5 +1,7 @@
 'use strict';
 
+import { Shelf, MewlixValue } from './mewlix.js';
+
 export default function() {
   const ensure = Mewlix.ensure;
   const clamp  = Mewlix.clamp;
@@ -67,7 +69,7 @@ export default function() {
   };
 
   /* Load a spritesheet image and divide it into sprites. */
-  async function fromSpritesheet(path: string, frames: SpriteDetails[]) {
+  async function fromSpritesheet(path: string, frames: Shelf<SpriteDetails>) {
     const sheet = await loadImage(path);
     for (const frame of frames) {
       const { key, rect } = frame;
@@ -419,7 +421,7 @@ export default function() {
   type Resource =
     | { type: 'generic'; key: string; path: string; options?: Rectangle }
     | { type: 'canvas'; key: string; data: ImageData; }
-    | { type: 'spritesheet'; path: string; frames: SpriteDetails[]; }
+    | { type: 'spritesheet'; path: string; frames: Shelf<SpriteDetails>; }
 
   const resourceQueue: Resource[] = [];
 
@@ -911,7 +913,7 @@ export default function() {
       thumbnail = func;
     },
 
-    spritesheet: (path: string, frames: any): void => {
+    spritesheet: (path: string, frames: Shelf<SpriteDetails>): void => {
       if (!initialized) {
         resourceWarning('graphic.spritesheet', path);
         return;
@@ -921,7 +923,7 @@ export default function() {
       resourceQueue.push({
         type: 'spritesheet',
         path: path,
-        frames: frames.toArray(),
+        frames: frames,
       });
     },
     
@@ -947,13 +949,13 @@ export default function() {
 
     paint: fillCanvas,
 
-    write: (value: any, x: number = 0, y: number = 0, options?: TextOptions) => {
+    write: (value: MewlixValue, x: number = 0, y: number = 0, options?: TextOptions) => {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
       return drawText(Mewlix.purrify(value), x, y, options);
     },
 
-    measure_text: (value: any, options?: TextOptions) => {
+    measure_text: (value: MewlixValue, options?: TextOptions) => {
       return measureText(Mewlix.purrify(value), options);
     },
 
@@ -1066,7 +1068,7 @@ export default function() {
             graphic.load(key, path, options),
 
       spritesheet: (path: string) =>
-        (frames: any) =>
+        (frames: Shelf<SpriteDetails>) =>
           graphic.spritesheet(path, frames),
 
       draw: (key: string) =>
@@ -1078,13 +1080,13 @@ export default function() {
         (color: string | Color) =>
           graphic.rect(rect, color),
 
-      write: (value: any) =>
+      write: (value: MewlixValue) =>
         (x: number) =>
           (y: number) =>
             (options: TextOptions) =>
               graphic.write(value, x, y, options),
 
-      measure_text: (value: any) =>
+      measure_text: (value: MewlixValue) =>
         (options: TextOptions) =>
           graphic.measure_text(value, options),
     
