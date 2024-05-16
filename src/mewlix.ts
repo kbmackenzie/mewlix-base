@@ -168,7 +168,7 @@ class Namespace extends MewlixObject {
 /* -----------------------------------------------------
  * Shelf -> Stack-like persistent data structure.
  * ----------------------------------------------------- */
-export class Shelf extends MewlixObject {
+export class Shelf<T> extends MewlixObject {
   constructor() {
     super();
     Object.defineProperty(this, 'box', {
@@ -182,17 +182,17 @@ export class Shelf extends MewlixObject {
     });
   }
 
-  peek(): MewlixValue {
+  peek(): T | null {
     throw new MewlixError(ErrorCode.CriticalError,
       `Class ${this.constructor.name} doesn't implement method 'peek'!`);
   }
 
-  pop(): Shelf {
+  pop(): Shelf<T> {
     throw new MewlixError(ErrorCode.CriticalError,
       `Class ${this.constructor.name} doesn't implement method 'pop'!`);
   }
 
-  push(value: MewlixValue): ShelfNode {
+  push(value: T): ShelfNode<T> {
     return new ShelfNode(value, this);
   }
 
@@ -201,7 +201,7 @@ export class Shelf extends MewlixObject {
       `Class ${this.constructor.name} doesn't implement method 'length'!`);
   }
 
-  contains(_: MewlixValue): boolean {
+  contains(_: T): boolean {
     throw new MewlixError(ErrorCode.CriticalError,
       `Class ${this.constructor.name} doesn't implement method 'contains'!`);
   }
@@ -215,14 +215,14 @@ export class Shelf extends MewlixObject {
   }
 
   *[Symbol.iterator]() {
-    let node: Shelf = this;
+    let node: Shelf<T> = this;
     while (node instanceof ShelfNode) {
       yield node.peek();
       node = node.pop();
     }
   }
 
-  toArray(): MewlixValue[] {
+  toArray(): T[] {
     const len = this.length();
     const output = new Array(len);
 
@@ -233,19 +233,19 @@ export class Shelf extends MewlixObject {
     return output;
   }
 
-  static isEqual(a: Shelf, b: Shelf): boolean {
+  static isEqual<T>(a: Shelf<T>, b: Shelf<T>): boolean {
     if (a instanceof ShelfBottom) return b instanceof ShelfBottom;
     if (b instanceof ShelfBottom) return a instanceof ShelfBottom;
 
     return Compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
   }
 
-  static concat(a: Shelf, b: Shelf): Shelf {
+  static concat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
     if (a instanceof ShelfBottom) return b;
     if (b instanceof ShelfBottom) return a;
 
     const bucket = b.toArray();
-    let output: Shelf = a;
+    let output: Shelf<T> = a;
 
     for (const item of bucket) {
       output = output.push(item);
@@ -253,28 +253,28 @@ export class Shelf extends MewlixObject {
     return output;
   }
 
-  static reverse(a: Shelf): Shelf {
-    let b = new ShelfBottom();
+  static reverse<T>(a: Shelf<T>): Shelf<T> {
+    let b = new ShelfBottom<T>();
     for (const value of a) {
       b = b.push(value);
     }
     return b;
   }
 
-  static fromArray(arr: MewlixValue[]): Shelf {
+  static fromArray<T>(arr: T[]): Shelf<T> {
     return arr.reduce(
-      (tail: Shelf, value: MewlixValue) => new ShelfNode(value, tail),
+      (tail: Shelf<T>, value: MewlixValue) => new ShelfNode(value, tail),
       new ShelfBottom()
     );
   }
 }
 
-export class ShelfNode extends Shelf {
-  value: MewlixValue;
-  next: Shelf;
+export class ShelfNode<T> extends Shelf<T> {
+  value: T;
+  next: Shelf<T>;
   len: number;
 
-  constructor(value: MewlixValue, tail: Shelf) {
+  constructor(value: T, tail: Shelf<T>) {
     super();
     this.value = value;
     this.next  = tail;
@@ -282,11 +282,11 @@ export class ShelfNode extends Shelf {
     Object.freeze(this);
   }
 
-  peek(): MewlixValue {
+  peek(): T | null {
     return this.value;
   }
 
-  pop(): Shelf {
+  pop(): Shelf<T> {
     return this.next;
   }
 
@@ -294,24 +294,24 @@ export class ShelfNode extends Shelf {
     return this.len;
   }
 
-  contains(value: MewlixValue): boolean {
+  contains(value: T): boolean {
     return Compare.isEqual(value, this.value)
       ? true
       : this.next.contains(value);
   }
 }
 
-class ShelfBottom extends Shelf {
+class ShelfBottom<T> extends Shelf<T> {
   constructor() {
     super();
     Object.freeze(this);
   }
 
-  peek(): MewlixValue {
+  peek(): T | null {
     return null;
   }
 
-  pop(): Shelf {
+  pop(): Shelf<T> {
     return this;
   }
 
@@ -319,11 +319,11 @@ class ShelfBottom extends Shelf {
     return 0;
   }
 
-  contains(_: MewlixValue): boolean {
+  contains(_: T): boolean {
     return false;
   }
 
-  toArray(): MewlixValue[] {
+  toArray(): T[] {
     return [];
   }
 }
