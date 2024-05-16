@@ -1291,7 +1291,7 @@ const createMewlix = function() {
       return Math.max(a, b);
     },
 
-    clamp: function clamp(value: number, min: number, max: number): number {
+    clamp: function clamp_(value: number, min: number, max: number): number {
       ensure.number('std.clamp', value);
       ensure.number('std.clamp', min);
       ensure.number('std.clamp', max);
