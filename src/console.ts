@@ -1,6 +1,6 @@
 'use strict';
 
-import { Shelf } from './mewlix.js';
+import { Shelf, purrify } from './mewlix.js';
 
 export default function() {
   /* -------------------------------------
@@ -315,12 +315,12 @@ export default function() {
       try { 
         while (true) {
           if (!Mewlix.isNothing(opener)) {
-            addMessage(Mewlix.purrify(opener!()), false)
+            addMessage(purrify(opener!()), false)
           };
           const input = await getInput();
           const output = func(input);
           if (!Mewlix.isNothing(output)) {
-            addMessage(Mewlix.purrify(output), false);
+            addMessage(purrify(output), false);
           }
         }
       }
