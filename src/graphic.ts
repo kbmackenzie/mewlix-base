@@ -943,7 +943,7 @@ export default function() {
     },
 
     spritesheet: (path: string, frames: Shelf<SpriteDetails>): void => {
-      if (!initialized) {
+      if (initialized) {
         resourceWarning('graphic.spritesheet', path);
         return;
       }
