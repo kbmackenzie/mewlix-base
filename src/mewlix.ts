@@ -510,11 +510,11 @@ export function isNothing(x: any): boolean {
   return x === null || x === undefined;
 };
 
-export function clamp(value: number, min: number, max: number): number {
+export function clamp_(value: number, min: number, max: number): number {
   return value < min ? min : (value > max ? max : value);
 };
 
-function opaque(x: Object): void {
+export function opaque(x: Object): void {
   Object.defineProperty(x, 'box', {
     value: () => {
       const typeOfValue = Reflection.typeOf(x);
@@ -1291,12 +1291,12 @@ const createMewlix = function() {
       return Math.max(a, b);
     },
 
-    clamp: function clamp_(value: number, min: number, max: number): number {
+    clamp: function clamp(value: number, min: number, max: number): number {
       ensure.number('std.clamp', value);
       ensure.number('std.clamp', min);
       ensure.number('std.clamp', max);
 
-      return clamp(value, min, max);
+      return clamp_(value, min, max);
     },
 
     abs: function abs(value: number): number {
@@ -1633,7 +1633,7 @@ const createMewlix = function() {
     curryLibrary: curryLibrary,
     ensure: ensure,
     isNothing: isNothing,
-    clamp: clamp,
+    clamp: clamp_,
     opaque: opaque,
     JSON: MewlixFromJSON,
     Comparison: Comparison,
