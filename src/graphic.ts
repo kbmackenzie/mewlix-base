@@ -834,7 +834,7 @@ export default function() {
     context.drawImage(image, 0, 0);
   }
 
-  async function init(callback: Function) {
+  async function init(callback: () => void) {
     ensure.func('graphic.init', callback);
     initialized = true;
     await loadResources();
@@ -860,7 +860,7 @@ export default function() {
       try {
         while (true) {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
-          await callback();
+          callback();
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
           lastFrame ??= now;
@@ -933,7 +933,7 @@ export default function() {
       });
     },
 
-    thumbnail: (func: Function): void => {
+    thumbnail: (func: () => void): void => {
       if (initialized) {
         console.warn('[mewlix] Cannot set thumbnail after .init()!');
         return;
