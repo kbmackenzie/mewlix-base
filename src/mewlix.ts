@@ -118,54 +118,6 @@ export class MewlixObject {
 };
 
 /* -----------------------------------------------------
- * Namespace -> Container for modules.
- * ----------------------------------------------------- */
-type ModuleFunction = () => MewlixObject
-
-class Namespace extends MewlixObject {
-  name: string;
-  modules: Map<string, ModuleFunction>;
-  cache: Map<string, MewlixObject>;
-
-  constructor(name: string) {
-    super();
-    this.name = name;
-    this.modules = new Map();
-    this.cache = new Map();
-  }
-
-  addModule(key: string, func: ModuleFunction): void {
-    if (this.modules.has(key)) {
-      throw new MewlixError(ErrorCode.InvalidImport,
-        `Duplicate key: A module with the key "path" has already been imported!`);
-    }
-    this.modules.set(key, func);
-  }
-
-  getModule(key: string): MewlixObject {
-    if (!this.modules.has(key)) {
-      throw new MewlixError(ErrorCode.InvalidImport,
-        `The module "${key}" doesn't exist or hasn't been properly loaded!`);
-    }
-
-    if (this.cache.has(key)) {
-      return this.cache.get(key)!;
-    }
-    const yarnball = this.modules.get(key)!();
-    this.cache.set(key, yarnball);
-    return yarnball;
-  }
-
-  /* Inject object as a valid Mewlix module.
-   * The key should be a non-empty string. */
-  injectModule(key: string, object: object): void {
-    const wrapped = wrap(object) as MewlixObject;
-    this.cache.set(key, wrapped);
-    this.modules.set(key, () => wrapped);
-  }
-};
-
-/* -----------------------------------------------------
  * Shelf -> Stack-like persistent data structure.
  * ----------------------------------------------------- */
 export class Shelf<T> extends MewlixObject {
@@ -328,6 +280,54 @@ class ShelfBottom<T> extends Shelf<T> {
     return [];
   }
 }
+
+/* -----------------------------------------------------
+ * Namespace -> Container for modules.
+ * ----------------------------------------------------- */
+type ModuleFunction = () => MewlixObject
+
+class Namespace extends MewlixObject {
+  name: string;
+  modules: Map<string, ModuleFunction>;
+  cache: Map<string, MewlixObject>;
+
+  constructor(name: string) {
+    super();
+    this.name = name;
+    this.modules = new Map();
+    this.cache = new Map();
+  }
+
+  addModule(key: string, func: ModuleFunction): void {
+    if (this.modules.has(key)) {
+      throw new MewlixError(ErrorCode.InvalidImport,
+        `Duplicate key: A module with the key "path" has already been imported!`);
+    }
+    this.modules.set(key, func);
+  }
+
+  getModule(key: string): MewlixObject {
+    if (!this.modules.has(key)) {
+      throw new MewlixError(ErrorCode.InvalidImport,
+        `The module "${key}" doesn't exist or hasn't been properly loaded!`);
+    }
+
+    if (this.cache.has(key)) {
+      return this.cache.get(key)!;
+    }
+    const yarnball = this.modules.get(key)!();
+    this.cache.set(key, yarnball);
+    return yarnball;
+  }
+
+  /* Inject object as a valid Mewlix module.
+   * The key should be a non-empty string. */
+  injectModule(key: string, object: object): void {
+    const wrapped = wrap(object) as MewlixObject;
+    this.cache.set(key, wrapped);
+    this.modules.set(key, () => wrapped);
+  }
+};
 
 /* -----------------------------------------------------
  * Box -> A core part of a cat-oriented language.
