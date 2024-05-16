@@ -847,6 +847,11 @@ export default function() {
     await run();
   }
 
+  function resourceWarning(func: string, resource: string): void {
+    console.warn(`[mewlix] Function ${func} cannot be called after .init().`);
+    console.warn(`[mewlix] Resosurce "${resource}" will not be loaded.`);
+  }
+
   /* -----------------------------------
    * Meow Expression
    * ----------------------------------- */
@@ -883,6 +888,10 @@ export default function() {
     delta: () => deltaTime,
 
     load: (key: string, path: string, options?: Rectangle): void => {
+      if (initialized) {
+        resourceWarning('graphic.load', path);
+        return;
+      }
       ensure.string('graphic.load', key);
       ensure.string('graphic.load', path);
       resourceQueue.push({
@@ -894,11 +903,19 @@ export default function() {
     },
 
     thumbnail: (func: Function): void => {
+      if (initialized) {
+        console.warn('[mewlix] Cannot set thumbnail after .init()!');
+        return;
+      }
       ensure.func('graphic.thumbnail', func);
       thumbnail = func;
     },
 
     spritesheet: (path: string, frames: any): void => {
+      if (!initialized) {
+        resourceWarning('graphic.spritesheet', path);
+        return;
+      }
       ensure.string('graphic.spritesheet', path);
       ensure.shelf('graphic.spritesheet', frames);
       resourceQueue.push({
