@@ -1,11 +1,24 @@
 'use strict';
 
-import { Shelf, Clowder, MewlixValue, MewlixObject, wakeSymbol, purrify } from './mewlix.js';
+import {
+  Shelf,
+  Clowder,
+  ErrorCode,
+  MewlixError,
+  MewlixValue,
+  MewlixObject,
+  Box,
+  Reflection,
+  opaque,
+  wakeSymbol,
+  ensure,
+  clamp_,
+  purrify,
+  library,
+  curryLibrary
+} from './mewlix.js';
 
 export default function() {
-  const ensure = Mewlix.ensure;
-  const clamp  = Mewlix.clamp;
-
   /* Convert percentage value (0% - 100%) to byte (0 - 255) */
   function percentageToByte(p: number) {
     return Math.floor((255 * p) / 100);
@@ -89,8 +102,8 @@ export default function() {
       return value[toColor]();
     }
 
-    const typeOfValue = Mewlix.Reflection.typeOf(value);
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    const typeOfValue = Reflection.typeOf(value);
+    throw new MewlixError(ErrorCode.Graphic,
       `Expected color value, received value of type "${typeOfValue}": ${value}`);
   }
 
@@ -99,7 +112,7 @@ export default function() {
    * ----------------------------------- */
   function getSprite(key: string): ImageBitmap {
     if (!spriteMap.has(key)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      throw new MewlixError(ErrorCode.Graphic,
         `No loaded image resource associated with key "${key}"!`);
     }
     return spriteMap.get(key)!;
@@ -178,7 +191,7 @@ export default function() {
     const width  = metrics.width / sizeModifier;
     const height = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / sizeModifier;
 
-    return new Mewlix.Box([
+    return new Box([
       ["width"  , Math.round(width)  ],
       ["height" , Math.round(height) ],
     ]);
@@ -213,7 +226,7 @@ export default function() {
 
   function getBuffer(key: string): AudioBuffer {
     if (!audioMap.has(key)) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      throw new MewlixError(ErrorCode.Graphic,
         `No existing audio track is associated with the key ${key}!`);
     }
     return audioMap.get(key)!;
@@ -258,7 +271,7 @@ export default function() {
 
   function withSoundChannel(index: number, callback: (audio: SoundChannel) => SoundChannel) {
     if (index < 0 || index >= soundChannelCount) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      throw new MewlixError(ErrorCode.Graphic,
         `Invalid sound channel index: ${index}`);
     }
     soundChannels[index] = callback(soundChannels[index]);
@@ -380,7 +393,7 @@ export default function() {
   async function loadAny(key: string, path: string, options?: Rectangle) {
     const extension = getExtensionOf(path)?.toLowerCase();
     if (!extension) {
-      throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+      throw new MewlixError(ErrorCode.Graphic,
         `Couldn't parse file extension in filepath "${path}"!`);
     }
 
@@ -399,7 +412,7 @@ export default function() {
       return;
     }
 
-    throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+    throw new MewlixError(ErrorCode.Graphic,
       `Unrecognized file format "${extension}" in 'load' function!`);
   }
 
@@ -561,8 +574,8 @@ export default function() {
       }).bind(this);
 
       this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
-        const x = Mewlix.clamp(this.x, min.x, max.x);
-        const y = Mewlix.clamp(this.y, min.y, max.y);
+        const x = clamp_(this.x, min.x, max.x);
+        const y = clamp_(this.y, min.y, max.y);
         return new Vector2()[wakeSymbol](x, y);
       }).bind(this);
     }
@@ -620,8 +633,8 @@ export default function() {
       this.column = 0;
 
       this[wakeSymbol] = (function wake(this: GridSlot, row: number, column: number) {
-        this.row    = clamp(row,    0, gridRows - 1);
-        this.column = clamp(column, 0, gridColumns - 1);
+        this.row    = clamp_(row,    0, gridRows - 1);
+        this.column = clamp_(column, 0, gridColumns - 1);
         return this;
       }).bind(this);
 
@@ -665,10 +678,10 @@ export default function() {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
-        this.red     = clamp(red, 0, 255);
-        this.green   = clamp(green, 0, 255);
-        this.blue    = clamp(blue, 0, 255);
-        this.opacity = clamp(opacity, 0, 100);
+        this.red     = clamp_(red, 0, 255);
+        this.green   = clamp_(green, 0, 255);
+        this.blue    = clamp_(blue, 0, 255);
+        this.opacity = clamp_(opacity, 0, 100);
         return this;
       }).bind(this);
 
@@ -692,7 +705,7 @@ export default function() {
       const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
 
       if (hex === null) {
-        throw new Mewlix.MewlixError(Mewlix.ErrorCode.Graphic,
+        throw new MewlixError(ErrorCode.Graphic,
           `Couldn't parse string '${str}' as a valid hex code!`);
       }
 
@@ -738,7 +751,7 @@ export default function() {
         this.width = width;
         this.height = height;
         this.data = new Uint8ClampedArray(width * height * 4);
-        Mewlix.opaque(this.data);
+        opaque(this.data);
         return this;
       }).bind(this);
 
@@ -747,7 +760,7 @@ export default function() {
        * ------------------------------ */
       this.fill = (function fill(this: PixelCanvas, color: Color): void {
         if (!this.data) {
-          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+          throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
         for (let i = 0; i < this.data.length; i += 4) {
@@ -760,7 +773,7 @@ export default function() {
 
       this.set_pixel = (function set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
         if (!this.data) {
-          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+          throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
         const index = (x * this.width + y) * 4;
@@ -772,7 +785,7 @@ export default function() {
 
       this.get_pixel = (function get_pixel(this: PixelCanvas, x: number, y: number): Color {
         if (!this.data) {
-          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+          throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
         const index = (x * this.width + y) * 4;
@@ -786,7 +799,7 @@ export default function() {
 
       this.to_sprite = (function to_image(this: PixelCanvas, key: string): void {
         if (!this.data) {
-          throw new Mewlix.MewlixError(Mewlix.ErrorCode.InvalidOperation,
+          throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
         const copy = new Uint8ClampedArray(this.data);
@@ -878,7 +891,7 @@ export default function() {
     await run();
   }
 
-  function resourceWarning(func: string, resource: string): void {
+  function resourceError(func: string, resource: string): void {
     console.warn(`[mewlix] Function ${func} cannot be called after .init().`);
     console.warn(`[mewlix] Resosurce "${resource}" will not be loaded.`);
   }
@@ -920,7 +933,7 @@ export default function() {
 
     load: (key: string, path: string, options?: Rectangle): void => {
       if (initialized) {
-        resourceWarning('graphic.load', path);
+        resourceError('graphic.load', path);
         return;
       }
       ensure.string('graphic.load', key);
@@ -944,7 +957,7 @@ export default function() {
 
     spritesheet: (path: string, frames: Shelf<SpriteDetails>): void => {
       if (initialized) {
-        resourceWarning('graphic.spritesheet', path);
+        resourceError('graphic.spritesheet', path);
         return;
       }
       ensure.string('graphic.spritesheet', path);
@@ -965,7 +978,7 @@ export default function() {
 
     measure: (key: string) => {
       const image = getSprite(key);
-      return new Mewlix.Box([
+      return new Box([
         ["width"  , image.width ],
         ["height" , image.height]
       ]);
@@ -981,11 +994,11 @@ export default function() {
     write: (value: MewlixValue, x: number = 0, y: number = 0, options?: TextOptions) => {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
-      return drawText(Mewlix.purrify(value), x, y, options);
+      return drawText(purrify(value), x, y, options);
     },
 
     measure_text: (value: MewlixValue, options?: TextOptions) => {
-      return measureText(Mewlix.purrify(value), options);
+      return measureText(purrify(value), options);
     },
 
     meow_options: (box: MeowOptions): void => {
@@ -1003,7 +1016,7 @@ export default function() {
       return isKeyDown(key);
     },
 
-    keys: new Mewlix.Box([
+    keys: new Box([
       ["space"  , " "         ],
       ["enter"  , "Enter"     ],
       ["left"   , "ArrowLeft" ],
@@ -1031,19 +1044,19 @@ export default function() {
 
     volume: (value: number) => {
       ensure.number('graphic.volume', value);
-      value = clamp(value, 0, 100) / 100;
+      value = clamp_(value, 0, 100) / 100;
       gameVolume.master.set(value);
     },
 
     music_volume: (value: number) => {
       ensure.number('graphic.music_volume', value);
-      value = clamp(value, 0, 100) / 100;
+      value = clamp_(value, 0, 100) / 100;
       gameVolume.music.set(value);
     },
 
     sfx_volume: (value: number) => {
       ensure.number('graphic.sfx_volume', value);
-      value = clamp(value, 0, 100) / 100;
+      value = clamp_(value, 0, 100) / 100;
       gameVolume.sfx.set(value);
     },
 
@@ -1079,7 +1092,7 @@ export default function() {
 
     PixelCanvas: PixelCanvas,
   };
-  const GraphicLibrary = Mewlix.library('std.graphic', Graphic);
+  const GraphicLibrary = library('std.graphic', Graphic);
 
   /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
   Object.freeze(GraphicLibrary);
@@ -1129,7 +1142,7 @@ export default function() {
             graphic.lerp(start, end, x),
     };
   })();
-  const GraphicCurryLibrary = Mewlix.curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
+  const GraphicCurryLibrary = curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
   Object.freeze(GraphicCurryLibrary);
