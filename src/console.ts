@@ -1,5 +1,7 @@
 'use strict';
 
+import { Shelf } from './mewlix.js';
+
 export default function() {
   /* -------------------------------------
    * Events:
@@ -348,7 +350,7 @@ export default function() {
       setErrorColor.value = color;
     },
 
-    accepted_files: (accepted: any): void => {
+    accepted_files: (accepted: Shelf<string>): void => {
       ensure.shelf('console.accepted_files', accepted);
       setAcceptedFiles(accepted.toArray());
     },
