@@ -773,6 +773,7 @@ export default function() {
    * ----------------------------------- */
   let deltaTime: number = 0;                // Delta time, in seconds!
   let thumbnail: Function | null = null;    // Callback function to generate a thumbnail;
+  let initialized: boolean = false;         // Flag indicating whether .init() has been called
 
   function awaitClick(): Promise<void> {
     return new Promise(resolve => {
@@ -804,6 +805,7 @@ export default function() {
 
   async function init(callback: Function) {
     ensure.func('graphic.init', callback);
+    initialized = true;
     await loadResources();
     await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
 
