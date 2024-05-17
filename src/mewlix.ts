@@ -1,6 +1,8 @@
 'use strict';
 
-export type Mewlix = ReturnType<typeof createMewlix>;
+export type Mewlix = ReturnType<typeof createMewlix> & {
+  [key: string]: YarnBall;
+};
 
 /* -----------------------------------------------------
  * MewlixValue -> Valid Mewlix values:
