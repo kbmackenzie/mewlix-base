@@ -1467,18 +1467,17 @@ const createMewlix = function() {
       console?.log(`[Mewlix] ${message}`);
     },
 
-    error: new Enum('ErrorCode', [
-        ErrorCode.TypeMismatch,
-        ErrorCode.InvalidOperation,
-        ErrorCode.InvalidConversion,
-        ErrorCode.CatOnComputer,
-        ErrorCode.Console,
-        ErrorCode.Graphic,
-        ErrorCode.InvalidImport,
-        ErrorCode.CriticalError,
-        ErrorCode.ExternalError,
-      ].map(x => x.name)
-    ),
+    error: new Box([
+      ErrorCode.TypeMismatch,
+      ErrorCode.InvalidOperation,
+      ErrorCode.InvalidConversion,
+      ErrorCode.CatOnComputer,
+      ErrorCode.Console,
+      ErrorCode.Graphic,
+      ErrorCode.InvalidImport,
+      ErrorCode.CriticalError,
+      ErrorCode.ExternalError,
+    ].map(x => [x.name, x.id])),
   };
   const BaseLibrary = library('std', Base);
 
