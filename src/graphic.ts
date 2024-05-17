@@ -846,6 +846,7 @@ export default function(mewlix: Mewlix): void {
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
+    removeLoadingOverlay();
   }
 
   async function init(callback: () => void) {
