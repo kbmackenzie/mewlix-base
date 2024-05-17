@@ -815,8 +815,9 @@ const Internal = {
       ? error.code 
       : ErrorCode.ExternalError;
     return new Box([
-      [ "name" , errorCode.name ],
-      [ "id"   , errorCode.id   ]
+      [ "name"    , errorCode.name ],
+      [ "id"      , errorCode.id   ],
+      [ "message" , error.message ? purrify(error.message) : null ],
     ]);
   },
   assert: function assert(expr: MewlixValue, message: string) {
