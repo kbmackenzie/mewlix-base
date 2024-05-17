@@ -851,7 +851,6 @@ export default function(mewlix: Mewlix): void {
   async function init(callback: () => void) {
     ensure.func('graphic.init', callback);
     initialized = true;
-    await loadResources();
     await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
 
     function nextFrame(): Promise<number> {
@@ -863,15 +862,16 @@ export default function(mewlix: Mewlix): void {
     async function run() {
       let lastFrame: number; // Last frame's timestamp, in milliseconds.
 
-      removeLoadingOverlay();
-      context.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      await thumbnail?.();
-      await drawPlay();
-      await awaitClick();
-      flushKeyQueue(); flushClick();
-
       try {
+        await loadResources();
+        removeLoadingOverlay();
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        await thumbnail?.();
+        await drawPlay();
+        await awaitClick();
+        flushKeyQueue(); flushClick();
+
         while (true) {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
           callback();
@@ -1153,13 +1153,13 @@ export default function(mewlix: Mewlix): void {
   /* -----------------------------------
    * Run Console:
    * ----------------------------------- */
-  mewlix.run = (func) => {
+  mewlix.run = async (func) => {
     try {
       const value = func();
       return value;
     }
     catch (error) {
-      drawError();
+      await drawError();
       throw error;
     }
   };
