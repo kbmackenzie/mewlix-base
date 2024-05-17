@@ -1,8 +1,16 @@
 'use strict';
 
-import { Shelf, purrify, ensure, isNothing, library, curryLibrary } from './mewlix.js';
+import {
+  Mewlix,
+  Shelf,
+  purrify,
+  isNothing,
+  ensure,
+  library,
+  curryLibrary
+} from './mewlix.js';
 
-export default function() {
+export default function(mewlix: Mewlix): void {
   /* -------------------------------------
    * Events:
    * ------------------------------------- */
@@ -289,7 +297,7 @@ export default function() {
   /* -------------------------------------
    * Override 'meow':
    * ------------------------------------- */
-  Mewlix.meow = (message: string) => {
+  mewlix.meow = (message: string) => {
     addMessage(message, false);
     return message;
   };
@@ -365,6 +373,7 @@ export default function() {
 
   /* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
   Object.freeze(ConsoleLibrary);
+  mewlix.Console = ConsoleLibrary;
 
   /* -------------------------------------
    * Standard library - Curry:
@@ -382,6 +391,7 @@ export default function() {
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
   Object.freeze(ConsoleCurryLibrary);
+  mewlix.ConsoleCurry = ConsoleCurryLibrary;
 
   /* -------------------------------------
    * Run Console:
@@ -391,7 +401,7 @@ export default function() {
     projectName.classList.remove('hide');
   }
 
-  Mewlix.run = func => {
+  mewlix.run = (func) => {
     try {
       setRunning();
       const value = func();
@@ -402,9 +412,4 @@ export default function() {
       throw error;
     }
   };
-
-  /* -------------------------------------
-   * Return Console Namespace:
-   * ------------------------------------- */
-  return [ConsoleLibrary, ConsoleCurryLibrary];
 }
