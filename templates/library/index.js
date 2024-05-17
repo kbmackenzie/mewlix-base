@@ -1,18 +1,21 @@
 'use strict';
 
 import createMewlix from './core/mewlix.js';
-import initYarnball from './yarnball/yarnball.js'
+import initYarnball from './yarnball/yarnball.js';
 
-export default async function() {
+export default async function(callback) {
   const readMeta = () => fetch('./core/meta.json')
     .then(response => response.json());
 
-  globalThis.Mewlix = createMewlix(),
-  initYarnball();
-  Mewlix.meow = (x) => { console.log(x) };
+  const mewlix = createMewlix();
+  if (callback) {
+    callback(mewlix);
+  }
+  initYarnball(mewlix);
+  mewlix.meow = (x) => { console.log(x); };
 
   const meta = await readMeta();
   const entrypoint = meta.entrypoint || 'main';
 
-  return Mewlix.run(() => Mewlix.Modules.getModule(entrypoint));
+  return mewlix.run(() => mewlix.Modules.getModule(entrypoint));
 }
