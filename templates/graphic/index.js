@@ -1,7 +1,7 @@
 'use strict';
 
 import createMewlix from './core/mewlix.js';
-import initGraphic from './core/graphic.js'
+import initGraphic  from './core/graphic.js'
 import initYarnball from './yarnball/yarnball.js'
 
 export default async function(callback) {
@@ -20,6 +20,5 @@ export default async function(callback) {
     document.title = meta.title;
   }
   const entrypoint = meta.entrypoint || 'main';
-
   return mewlix.run(() => mewlix.Modules.getModule(entrypoint));
 }
