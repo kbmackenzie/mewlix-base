@@ -19,7 +19,7 @@ import {
   curryLibrary
 } from './mewlix.js';
 
-export default function(mewlix: Mewlix) {
+export default function(mewlix: Mewlix): void {
   /* Convert percentage value (0% - 100%) to byte (0 - 255) */
   function percentageToByte(p: number) {
     return Math.floor((255 * p) / 100);
@@ -1180,9 +1180,4 @@ export default function(mewlix: Mewlix) {
       event.preventDefault();
     }
   }, { passive: false });
-
-  /* -----------------------------------
-   * Return Graphic Namespace
-   * ----------------------------------- */
-  return [GraphicLibrary, GraphicCurryLibrary];
 }
