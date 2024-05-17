@@ -401,11 +401,10 @@ export default function(mewlix: Mewlix): void {
     projectName.classList.remove('hide');
   }
 
-  mewlix.run = (func) => {
+  mewlix.run = async (func) => {
     try {
       setRunning();
-      const value = func();
-      return value;
+      return func();
     }
     catch (error) {
       writeError(error);
