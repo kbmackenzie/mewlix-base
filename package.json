@@ -5,7 +5,8 @@
   "scripts": {
     "build": "./build.sh",
     "test": "echo \"Not implemented yet!\" && exit 1",
-    "clean": "rm -rf ./build"
+    "clean": "rm -rf ./build",
+    "typecheck": "tsc --noEmit"
   },
   "author": "kbmackenzie <kelly.a.betty@gmail.com>",
   "license": "MIT",
