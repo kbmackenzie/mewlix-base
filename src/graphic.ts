@@ -1,6 +1,7 @@
 'use strict';
 
 import {
+  Mewlix,
   Shelf,
   Clowder,
   ErrorCode,
@@ -18,7 +19,7 @@ import {
   curryLibrary
 } from './mewlix.js';
 
-export default function() {
+export default function(mewlix: Mewlix) {
   /* Convert percentage value (0% - 100%) to byte (0 - 255) */
   function percentageToByte(p: number) {
     return Math.floor((255 * p) / 100);
@@ -906,7 +907,7 @@ export default function() {
 
   let meowOptions: MeowOptions | null = null;
 
-  Mewlix.meow = (message: string) => {
+  mewlix.meow = (message: string) => {
     drawText(
       message,
       meowOptions?.x ?? 0,
@@ -1096,6 +1097,7 @@ export default function() {
 
   /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
   Object.freeze(GraphicLibrary);
+  mewlix.Graphic = GraphicLibrary;
 
   /* -----------------------------------
    * Standard library - Curry:
@@ -1146,11 +1148,12 @@ export default function() {
 
   /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
   Object.freeze(GraphicCurryLibrary);
+  mewlix.GraphicCurry = GraphicCurryLibrary;
 
   /* -----------------------------------
    * Run Console:
    * ----------------------------------- */
-  Mewlix.run = func => {
+  mewlix.run = (func) => {
     try {
       const value = func();
       return value;
