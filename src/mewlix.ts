@@ -1608,7 +1608,7 @@ const createMewlix = function() {
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
-  const run = (func: () => YarnBall) => func();
+  const run = (func: () => Promise<YarnBall>) => func();
 
   /* ------------------------------------------------------
    * Return Mewlix Namespace
