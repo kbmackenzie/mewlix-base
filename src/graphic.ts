@@ -1156,8 +1156,7 @@ export default function(mewlix: Mewlix): void {
    * ----------------------------------- */
   mewlix.run = async (func) => {
     try {
-      const value = func();
-      return value;
+      return func();
     }
     catch (error) {
       await drawError();
