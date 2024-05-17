@@ -9,7 +9,7 @@ export type MewlixValue =
     number
   | string
   | boolean
-  | Shelf<any>
+  | Shelf<MewlixValue>
   | Box
   | Function
   | null
