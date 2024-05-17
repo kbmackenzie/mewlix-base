@@ -16,8 +16,8 @@ export default async function(callback) {
   initYarnball(mewlix);
 
   const meta = await readMeta();
-  if (meta.name) {
-    document.title = meta.name;
+  if (meta.title) {
+    document.title = meta.title;
   }
   const entrypoint = meta.entrypoint || 'main';
 
