@@ -10,7 +10,7 @@ export default async function(callback) {
   const mewlix = createMewlix();
   initConsole(mewlix);
   if (callback) {
-    callback(mewlix);
+    await callback(mewlix);
   }
   initYarnball(mewlix);
 
