@@ -11,7 +11,7 @@ export default async function(callback) {
   const mewlix = createMewlix();
   initGraphic(mewlix);
   if (callback) {
-    callback(mewlix);
+    await callback(mewlix);
   }
   initYarnball(mewlix);
 
