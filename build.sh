@@ -57,6 +57,11 @@ build() {
   done
 }
 
+# Run postcss on a CSS file, transforming it in-place
+transform_css() {
+  npx postcss "$1" -r
+}
+
 # Package template (after building):
 package_template() {
   echo "Packaging '$1' template:"
@@ -68,6 +73,14 @@ package_template() {
     exit 1
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
+
+  STYLESHEET="$TARGET_FOLDER/style.css"
+  if [ -f "$STYLESHEET" ]; then
+    transform_css "$STYLESHEET" || {
+      print_error "Couldn't transform .css file '$STYLESHEET'!"
+      exit 1
+    }
+  fi
 
   mkdir "$TARGET_FOLDER/core"
   cp "$FINAL/mewlix.js" "$TARGET_FOLDER/core"
