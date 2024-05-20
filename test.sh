@@ -68,7 +68,7 @@ while true; do
   case "$1" in
     -r | --rebuild)
       REBUILD=true
-      exit 0 ;;
+      shift ;;
     --)
       shift
       break ;;
@@ -84,11 +84,11 @@ case "$1" in
     TARGET_TEMPLATE='graphic' ;;
   * )
     if [ -z "$1" ]; then
-      log_error 'Expected template, got no option!'
-      log_error 'Specify template name like this: npm run test -- console'
+      log_error 'Expected template, got none!'
     else
       log_error "Invalid template option: '$1'"
     fi
+    log_error 'Specify template as argument, like this: npm run test -- console'
     exit 1 ;;
 esac
 
