@@ -27,9 +27,14 @@ check_dependency() {
 check_dependency 'zip' || exit 1
 check_dependency 'npx' || exit 1
 
+# Write a log message to stdout.
+log_message() {
+  echo "[build.sh] $1"
+}
+
 # Write an error message to stderr.
 print_error() {
-  echo "$1" 1>&2
+  echo "[build.sh] $1" 1>&2
 }
 
 # Compile all .ts files in ./src/
@@ -64,7 +69,7 @@ transform_css() {
 
 # Package template (after building):
 package_template() {
-  echo "Packaging '$1' template:"
+  log_message "Packaging '$1' template:"
   TEMPLATE="./templates/$1"
   TARGET_FOLDER="./build/$1-build"
 
@@ -89,7 +94,7 @@ package_template() {
     cp "$FINAL/$1.js"   "$TARGET_FOLDER/core"
   fi
 
-  echo "Zipping '$1' template:"
+  log_message "Zipping '$1' template:"
 
   cd "$TARGET_FOLDER" || {
     print_error "Couldn't cd into target folder '$TARGET_FOLDER'!"
