@@ -4,7 +4,7 @@
   "description": "The base library and templates for Mewlix, a cat-themed esoteric language.",
   "scripts": {
     "build": "./build.sh",
-    "test": "echo \"Not implemented yet!\" && exit 1",
+    "test": "./test.sh",
     "clean": "rm -rf ./build",
     "typecheck": "tsc --noEmit"
   },
