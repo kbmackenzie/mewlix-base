@@ -28,9 +28,17 @@ function consoleTests(mewlix) {
     return document.getElementById('paperclip-input').accept === extensions.toArray().join(', ');
   });
 
+  test.run('console.write_file', () => {
+    const name = 'this-name-should-be-visible.txt';
+    const contents = 'example file';
+    console_.write_file(name, contents);
+    return true;
+  });
+
   return {
     summary: test.summary(),
     message: test.message(),
+    logFailures: () => test.logFailures(mewlix),
   };
 }
 
@@ -48,9 +56,7 @@ export default function(mewlix) {
       mewlix.meow('Running tests...');
 
       const result = consoleTests(mewlix);
-      for (const { name } of result.summary.failure) {
-        mewlix.meow(`Failed test ${name}!`);
-      }
+      result.logFailures();
       mewlix.meow(result.message);
       state = 'clear';
     },
