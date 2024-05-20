@@ -20,9 +20,6 @@ if [ ! -d "$BUILD_FOLDER" ]; then
   }
 fi
 
-rm -rf './build/test'
-mkdir  './build/test'
-
 DEFAULT_YARNBALL=$(cat << EOF
 export default function(mewlix) {
   mewlix.Modules.addModule("main", () => void 0);
@@ -57,7 +54,55 @@ create_tests() {
   create_test 'graphic'
 }
 
-create_tests
+TARGET_TEMPLATE=''
+REBUILD=false
+RUN_TEST=true
 
-# temporary line.
-npx http-server './build/test/console/' -o
+LONG_OPTIONS='rebuild'
+SHORT_OPTIONS='r'
+
+OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n 'test.sh' -- "$@")
+eval set -- "$OPTS"
+
+while true; do
+  case "$1" in
+    -r | --rebuild)
+      REBUILD=true
+      exit 0 ;;
+    --)
+      shift
+      break ;;
+    * )
+      break ;;
+  esac
+done
+
+case "$1" in
+  console)
+    TARGET_TEMPLATE='console' ;;
+  graphic)
+    TARGET_TEMPLATE='graphic' ;;
+  * )
+    if [ -z "$1" ]; then
+      log_error 'Expected template, got no option!'
+      log_error 'Specify template name like this: npm run test -- console'
+    else
+      log_error "Invalid template option: '$1'"
+    fi
+    exit 1 ;;
+esac
+
+if [ ! -d './build/test' ] || [ "$REBUILD" = 'true' ]; then
+  log_message 'Building tests...'
+  rm -rf './build/test'
+  mkdir  './build/test'
+
+  create_tests
+fi
+
+if [ "$RUN_TEST" = 'true' ]; then
+  npx http-server "./build/test/$TARGET_TEMPLATE/" -o || {
+    log_error "Couldn't run template '$1' in http server!"
+    exit 1
+  }
+fi
