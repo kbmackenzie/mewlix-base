@@ -101,7 +101,12 @@ if [ ! -d './build/test' ] || [ "$REBUILD" = 'true' ]; then
 fi
 
 if [ "$RUN_TEST" = 'true' ]; then
-  npx http-server "./build/test/$TARGET_TEMPLATE/" -o || {
+  SERVER_LOG_FILE='./build/test/output.log'
+
+  log_message "Running test for template '$TARGET_TEMPLATE'!"
+  log_message "Log output will be saved in '$SERVER_LOG_FILE'."
+
+  npx http-server "./build/test/$TARGET_TEMPLATE/" -o > "$SERVER_LOG_FILE" 2> "$SERVER_LOG_FILE" || {
     log_error "Couldn't run template '$1' in http server!"
     exit 1
   }
