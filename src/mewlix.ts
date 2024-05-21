@@ -66,7 +66,7 @@ export class MewlixError extends Error {
 /* -----------------------------------------------------
  * String utils.
  * ----------------------------------------------------- */
-export function purrify(value: MewlixValue): string {
+export function purrify(value: any): string {
   if (typeof value === 'string') return value;
   if (value === null || value === undefined) {
     return 'nothing';
@@ -77,17 +77,17 @@ export function purrify(value: MewlixValue): string {
   }
 };
 
-function purrifyItem(value: MewlixValue): string {
+function purrifyItem(value: any): string {
   if (typeof value === 'string') return JSON.stringify(value);
   return purrify(value);
 };
 
-function purrifyArray(array: MewlixValue[]): string {
+function purrifyArray(array: any[]): string {
   const items = array.map(purrifyItem).join(', ');
   return `[${items}]`;
 };
 
-function purrifyObject(object: Box): string {
+function purrifyObject(object: StringIndexable): string {
   const pairs = getEntries(object).map(
     ([key, value]) => `${key}: ${purrifyItem(value)}`
   ).join(', ');
@@ -157,7 +157,7 @@ export class Shelf<T> extends MewlixObject {
   }
 
   toString(): string {
-    return purrifyArray(this.toArray() as MewlixValue[]);
+    return purrifyArray(this.toArray());
   }
 
   toJSON() {
