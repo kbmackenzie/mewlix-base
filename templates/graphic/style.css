@@ -20,30 +20,30 @@ body {
   align-items: flex-end;
   width: 100vmin;
   height: 100vmin;
-}
 
-.game_canvas {
-  height: 100%;
-  image-rendering: pixelated;
-}
+  &_canvas {
+    height: 100%;
+    image-rendering: pixelated;
+  }
 
-.game_sound {
-  position: absolute;
-  width: 4rem;
-  height: 4rem;
-  border: none;
-  margin: 0.5rem;
-  opacity: 60%;
-  background: no-repeat center/contain url('./core-assets/icons/speaker-00.png'), transparent;
-}
+  &_sound {
+    position: absolute;
+    width: 4rem;
+    height: 4rem;
+    border: none;
+    margin: 0.5rem;
+    opacity: 60%;
+    background: no-repeat center/contain url('./core-assets/icons/speaker-00.png'), transparent;
 
-.game_sound:hover {
-  opacity: 100%;
-  cursor: pointer;
-}
+    &:hover {
+      opacity: 100%;
+      cursor: pointer;
+    }
 
-.game_sound.muted {
-  background-image: url('./core-assets/icons/speaker-01.png');
+    &.muted {
+      background-image: url('./core-assets/icons/speaker-01.png');
+    }
+  }
 }
 
 .loading-overlay {
