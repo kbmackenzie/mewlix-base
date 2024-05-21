@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BUILD_FOLDER='./build/'
-
 # Write an error message to stderr.
 log_message() {
   echo "[test.sh] $1"
@@ -12,7 +10,7 @@ log_error() {
   echo "[test.sh] $1" 1>&2
 }
 
-if [ ! -d "$BUILD_FOLDER" ]; then
+if [ ! -d './build' ]; then
   log_message 'Building templates before testing...'
   ./build.sh || {
     log_error 'Error building templates!'
@@ -31,7 +29,7 @@ create_test() {
   log_message "Creating test for template '$1'..."
   TARGET_FOLDER="./build/test/$1"
 
-  cp -r "$BUILD_FOLDER/$1-build" "$TARGET_FOLDER" || {
+  cp -r "./build/$1-build" "$TARGET_FOLDER" || {
     log_error "Couldn't copy template '$1'!"
     exit 1
   }
