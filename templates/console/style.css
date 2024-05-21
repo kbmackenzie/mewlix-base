@@ -175,7 +175,7 @@ html, body {
   height: 80%;
 }
 
-.console_paperclip {
+.console_file {
   grid-area: console-clip;
   background-color: inherit;
 }
@@ -185,7 +185,7 @@ html, body {
   background-color: inherit;
 }
 
-.console_paperclip > svg,
+.console_file > svg,
 .console_arrow > svg {
   width: 60%;
   height: 60%;

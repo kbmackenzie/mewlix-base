@@ -33,19 +33,19 @@ export default function(mewlix: Mewlix): void {
    * ------------------------------------- */
   const promptMessage = '>> ';
 
-  const input           = document.getElementById('console-input')      as HTMLInputElement;
-  const lines           = document.getElementById('console-lines')      as HTMLUListElement;
-  const projectName     = document.getElementById('project-name')       as HTMLSpanElement;
-  const projectStatus   = document.getElementById('project-status')     as HTMLSpanElement;
-  const arrowButton     = document.getElementById('console-arrow')      as HTMLButtonElement;
-  const paperclipInput  = document.getElementById('paperclip-input')    as HTMLInputElement;
-  const paperclipButton = document.getElementById('console-paperclip')  as HTMLButtonElement;
+  const input         = document.getElementById('console-input')      as HTMLInputElement;
+  const lines         = document.getElementById('console-lines')      as HTMLUListElement;
+  const projectName   = document.getElementById('project-name')       as HTMLSpanElement;
+  const projectStatus = document.getElementById('project-status')     as HTMLSpanElement;
+  const arrowButton   = document.getElementById('console-arrow')      as HTMLButtonElement;
+  const fileInput     = document.getElementById('file-input')         as HTMLInputElement;
+  const fileButton    = document.getElementById('console-file')       as HTMLButtonElement;
 
-  const settingsMenu    = document.getElementById('settings')           as HTMLElement;
-  const setColor        = document.getElementById('select-color')       as HTMLInputElement;
-  const setErrorColor   = document.getElementById('select-error-color') as HTMLInputElement;
-  const showHighlight   = document.getElementById('show-highlight')     as HTMLInputElement;
-  const saveLogButton   = document.getElementById('save-log')           as HTMLButtonElement;
+  const settingsMenu  = document.getElementById('settings')           as HTMLElement;
+  const setColor      = document.getElementById('select-color')       as HTMLInputElement;
+  const setErrorColor = document.getElementById('select-error-color') as HTMLInputElement;
+  const showHighlight = document.getElementById('show-highlight')     as HTMLInputElement;
+  const saveLogButton = document.getElementById('save-log')           as HTMLButtonElement;
 
   /* -------------------------------------
    * Utils:
@@ -138,8 +138,8 @@ export default function(mewlix: Mewlix): void {
    * ------------------------------------- */
   function enableButtons(enable: boolean): void {
     arrowButton.disabled = !enable; 
-    paperclipInput.disabled = !enable;
-    paperclipButton.disabled = !enable; 
+    fileInput.disabled = !enable;
+    fileButton.disabled = !enable; 
   }
 
   function getInput(): Promise<string> {
@@ -201,7 +201,7 @@ export default function(mewlix: Mewlix): void {
   }
 
   function setAcceptedFiles(keys: string[]): void {
-    paperclipInput.accept = nub(keys).join(', ')
+    fileInput.accept = nub(keys).join(', ')
   }
 
   /* -------------------------------------
@@ -261,14 +261,14 @@ export default function(mewlix: Mewlix): void {
     input.dispatchEvent(inputReceived());
   });
 
-  paperclipButton.addEventListener('click', event => {
+  fileButton.addEventListener('click', event => {
     event.preventDefault();
-    paperclipInput.click();
+    fileInput.click();
   });
 
-  paperclipInput.addEventListener('change', () => {
-    if (paperclipInput.files?.length === 0) return;
-    input.dispatchEvent(inputReceived(paperclipInput.files?.[0]));
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files?.length === 0) return;
+    input.dispatchEvent(inputReceived(fileInput.files?.[0]));
   });
 
   document.getElementById('show-settings')!.addEventListener('click', () => {

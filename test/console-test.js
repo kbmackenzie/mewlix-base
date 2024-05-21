@@ -25,7 +25,7 @@ function consoleTests(mewlix) {
   test.run('console.accepted', () => {
     const extensions = mewlix.API.shelf('.txt', '.md');
     console_.accepted_files(extensions);
-    return document.getElementById('paperclip-input').accept === extensions.toArray().join(', ');
+    return document.getElementById('file-input').accept === extensions.toArray().join(', ');
   });
 
   test.run('console.write_file', () => {
