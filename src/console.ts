@@ -189,7 +189,7 @@ export default function(mewlix: Mewlix): void {
   }
 
   /* -------------------------------------
-   * Paperclip Button:
+   * File Upload:
    * ------------------------------------- */
   function nub<T>(array: T[]): T[] {
     const set = new Set<T>();
