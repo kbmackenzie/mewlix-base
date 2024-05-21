@@ -125,15 +125,11 @@ export class MewlixObject {
 export class Shelf<T> extends MewlixObject {
   constructor() {
     super();
-    Object.defineProperty(this, 'box', {
-      value: () => {
-        throw new MewlixError(ErrorCode.TypeMismatch,
-          "Can't access properties in a value of type 'shelf'!");
-      },
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
+  }
+
+  box() {
+    throw new MewlixError(ErrorCode.TypeMismatch,
+      "Can't access properties in a value of type 'shelf'!");
   }
 
   peek(): T | null {
