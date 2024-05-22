@@ -227,16 +227,15 @@ export class Shelf<T> extends MewlixObject {
 }
 
 export class ShelfNode<T> extends Shelf<T> {
-  value: T;
-  next: Shelf<T>;
-  len: number;
+  readonly value: T;
+  readonly next: Shelf<T>;
+  readonly len: number;
 
   constructor(value: T, tail: Shelf<T>) {
     super();
     this.value = value;
     this.next  = tail;
     this.len   = tail.length() + 1;
-    Object.freeze(this);
   }
 
   peek(): T | null {
@@ -255,7 +254,6 @@ export class ShelfNode<T> extends Shelf<T> {
 class ShelfBottom<T> extends Shelf<T> {
   constructor() {
     super();
-    Object.freeze(this);
   }
 
   peek(): T | null {
