@@ -849,7 +849,7 @@ export default function(mewlix: Mewlix): void {
     removeLoadingOverlay();
   }
 
-  async function init(callback: () => void) {
+  async function init(callback: (delta?: number) => void) {
     ensure.func('graphic.init', callback);
     initialized = true;
     await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
@@ -875,7 +875,7 @@ export default function(mewlix: Mewlix): void {
 
         while (true) {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
-          callback();
+          callback(deltaTime);
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
           lastFrame ??= now;
