@@ -1,45 +1,40 @@
-import TestSuite from './test-suite.js';
+import testSuite from './test-suite.js';
 
 function consoleTests(mewlix) {
   'use strict';
-  const test = new TestSuite();
   const console_ = mewlix.Console;
 
-  test.run('console.name', () => {
-    const name = 'console test suite';
-    console_.name(name);
-    return document.getElementById('project-name').innerText === name;
-  });
+  return testSuite(run => {
+    run('console.name', () => {
+      const name = 'console test suite';
+      console_.name(name);
+      return document.getElementById('project-name').innerText === name;
+    });
 
-  test.run('console.highlight', () => {
-    console_.highlight(true);
-    return document.getElementById('show-highlight').checked;
-  });
+    run('console.highlight', () => {
+      console_.highlight(true);
+      return document.getElementById('show-highlight').checked;
+    });
 
-  test.run('console.set_color', () => {
-    const color = '#fb2bff';
-    console_.set_color(color);
-    return document.getElementById('select-color').value === color;
-  });
+    run('console.set_color', () => {
+      const color = '#fb2bff';
+      console_.set_color(color);
+      return document.getElementById('select-color').value === color;
+    });
 
-  test.run('console.accepted', () => {
-    const extensions = mewlix.API.shelf('.txt', '.md');
-    console_.accepted_files(extensions);
-    return document.getElementById('file-input').accept === extensions.toArray().join(', ');
-  });
+    run('console.accepted', () => {
+      const extensions = mewlix.API.shelf('.txt', '.md');
+      console_.accepted_files(extensions);
+      return document.getElementById('file-input').accept === extensions.toArray().join(', ');
+    });
 
-  test.run('console.write_file', () => {
-    const name = 'this-name-should-be-visible.txt';
-    const contents = 'example file';
-    console_.write_file(name, contents);
-    return true;
+    run('console.write_file', () => {
+      const name = 'this-name-should-be-visible.txt';
+      const contents = 'example file';
+      console_.write_file(name, contents);
+      return true;
+    });
   });
-
-  return {
-    summary: test.summary(),
-    message: test.message(),
-    logFailures: () => test.logFailures(mewlix),
-  };
 }
 
 export default function(mewlix) {
@@ -56,8 +51,9 @@ export default function(mewlix) {
       mewlix.meow('Running tests...');
 
       const result = consoleTests(mewlix);
-      result.logFailures();
-      mewlix.meow(result.message);
+      result.messages.forEach(message => mewlix.meow(message));
+      mewlix.meow(result.passed);
+
       state = 'clear';
     },
     ['clear']: (_) => {
