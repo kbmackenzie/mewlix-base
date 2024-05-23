@@ -816,9 +816,18 @@ export default function(mewlix: Mewlix): void {
   /* -----------------------------------
    * Game Loop
    * ----------------------------------- */
-  let deltaTime: number = 0;                // Delta time, in seconds!
-  let thumbnail: Function | null = null;    // Callback function to generate a thumbnail;
-  let initialized: boolean = false;         // Flag indicating whether .init() has been called
+  type GameLoop = (delta?: number) => void;
+
+  let deltaTime: number = 0;        // Delta time, in seconds!
+  let thumbnail: GameLoop | null;   // Callback function to generate a thumbnail;
+  let initialized: boolean = false; // Flag indicating whether .init() has been called
+
+  function setThumbnail(fn: GameLoop): void {
+    if (initialized) {
+      console.warn('[mewlix] Setting thumbnail after .init() has no effect!');
+    }
+    thumbnail = fn;
+  }
 
   function awaitClick(): Promise<void> {
     return new Promise(resolve => {
@@ -849,8 +858,7 @@ export default function(mewlix: Mewlix): void {
     removeLoadingOverlay();
   }
 
-  async function init(callback: (delta?: number) => void) {
-    ensure.func('graphic.init', callback);
+  async function init(fn: GameLoop): Promise<void> {
     initialized = true;
     await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
 
@@ -868,14 +876,14 @@ export default function(mewlix: Mewlix): void {
         removeLoadingOverlay();
         context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        await thumbnail?.();
+        thumbnail?.();
         await drawPlay();
         await awaitClick();
         flushKeyQueue(); flushClick();
 
         while (true) {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
-          callback(deltaTime);
+          fn(deltaTime);
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
           lastFrame ??= now;
@@ -930,7 +938,17 @@ export default function(mewlix: Mewlix): void {
    * they're going to be accessible from within Mewlix. */
 
   const Graphic = {
-    init: init,
+    init: (fn: GameLoop): Promise<void> => {
+      ensure.func('graphic.init', fn);
+      return init(fn);
+    },
+
+    init_: (fn: GameLoop): Promise<void> => {
+      ensure.func('graphic.init_', fn);
+      setThumbnail(fn);
+      return init(fn);
+    },
+
     delta: () => deltaTime,
 
     load: (key: string, path: string, options?: Rectangle): void => {
@@ -948,13 +966,9 @@ export default function(mewlix: Mewlix): void {
       });
     },
 
-    thumbnail: (func: () => void): void => {
-      if (initialized) {
-        console.warn('[mewlix] Cannot set thumbnail after .init()!');
-        return;
-      }
-      ensure.func('graphic.thumbnail', func);
-      thumbnail = func;
+    thumbnail: (fn: GameLoop): void => {
+      ensure.func('graphic.thumbnail', fn);
+      setThumbnail(fn)
     },
 
     spritesheet: (path: string, frames: Shelf<SpriteDetails>): void => {
