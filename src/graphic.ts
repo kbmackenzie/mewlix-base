@@ -228,7 +228,7 @@ export default function(mewlix: Mewlix): void {
   function getBuffer(key: string): AudioBuffer {
     if (!audioMap.has(key)) {
       throw new MewlixError(ErrorCode.Graphic,
-        `No existing audio track is associated with the key ${key}!`);
+        `No existing audio track is associated with the key "${key}"!`);
     }
     return audioMap.get(key)!;
   }
