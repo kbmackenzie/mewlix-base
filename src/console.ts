@@ -234,7 +234,7 @@ export default function(mewlix: Mewlix): void {
    * Error Logging:
    * ------------------------------------- */
   function writeError(error: unknown): void {
-    addError(`Exception caught: ${error}`);
+    addError(`Error caught: ${error}`);
     addError('See the debugging console for more information!');
   }
 
