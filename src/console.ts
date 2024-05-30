@@ -370,9 +370,6 @@ export default function(mewlix: Mewlix): void {
     },
   };
   const ConsoleLibrary = library('std.console', Console);
-
-  /* Freezing the std.console library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(ConsoleLibrary);
   mewlix.Console = ConsoleLibrary;
 
   /* -------------------------------------
@@ -388,9 +385,6 @@ export default function(mewlix: Mewlix): void {
         Console.write_file(filename, contents),
   };
   const ConsoleCurryLibrary = curryLibrary('std.console.curry', ConsoleLibrary, ConsoleCurry);
-
-  /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(ConsoleCurryLibrary);
   mewlix.ConsoleCurry = ConsoleCurryLibrary;
 
   /* -------------------------------------
