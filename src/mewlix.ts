@@ -1475,9 +1475,6 @@ const createMewlix = function() {
   };
   const BaseLibrary = library('std', Base);
 
-  /* Freezing the base library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(BaseLibrary);
-
   /* ------------------------------------------
    * Standard Library - Currying
    * ------------------------------------------ */
@@ -1591,9 +1588,6 @@ const createMewlix = function() {
     };
   })();
   const BaseCurryLibrary = curryLibrary('std.curry', BaseLibrary, BaseCurry);
-
-  /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(BaseCurryLibrary);
 
   /* -------------------------------------------------------
    * Final Touches
