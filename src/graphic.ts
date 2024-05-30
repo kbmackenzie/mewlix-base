@@ -916,7 +916,7 @@ export default function(mewlix: Mewlix): void {
 
   let meowOptions: MeowOptions | null = null;
 
-  mewlix.meow = (message: string) => {
+  mewlix.setMeow((message: string) => {
     drawText(
       message,
       meowOptions?.x ?? 0,
@@ -924,7 +924,7 @@ export default function(mewlix: Mewlix): void {
       meowOptions
     );
     return message;
-  };
+  });
 
   /* -----------------------------------
    * Standard library:
