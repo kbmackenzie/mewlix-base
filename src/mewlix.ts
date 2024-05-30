@@ -824,10 +824,7 @@ const Internal = {
 /* -----------------------------------------------------
  * IO:
  * ----------------------------------------------------- */
-function meow(_: string) {
-  throw new MewlixError(ErrorCode.CriticalError,
-    "Core function 'Mewlix.meow' hasn't been implemented!");
-};
+export type MeowFunc = (x: string) => string;
 
 /* -----------------------------------------------------
  * API:
@@ -876,6 +873,21 @@ const createMewlix = function() {
     createBox: (object: StringIndexable) => new Box(getEntries(object ?? {})),
     inject: (key: string, object: StringIndexable) => Modules.injectModule(key, object),
   };
+
+  /* -----------------------------------------------------
+   * IO:
+   * ----------------------------------------------------- */
+
+  /* A default implementation for the 'meow' expression: */
+  let meowFunc: MeowFunc = function(_) {
+    throw new MewlixError(ErrorCode.CriticalError,
+      "meow: Core function 'meow' hasn't been implemented!");
+  };
+
+  /* A setter for the 'meow' expression: */
+  function setMeow(func: MeowFunc): void {
+    meowFunc = func;
+  }
 
   /* -------------------------------------------------------
    * Base library.
@@ -1443,8 +1455,8 @@ const createMewlix = function() {
       return Date.now();
     },
 
-    meowf: function meowf(value: MewlixValue): void {
-      return meow(purrify(value));
+    meowf: function meowf(value: MewlixValue): string {
+      return meowFunc(purrify(value));
     },
 
     to_json: function to_json(value: MewlixValue): string {
@@ -1626,7 +1638,8 @@ const createMewlix = function() {
     Boxes: Boxes,
     Conversion: Conversion,
     Internal: Internal,
-    meow: meow,
+    meow: (x: string) => meowFunc(x),
+    setMeow: setMeow,
     BoxWrapper: BoxWrapper,
     wrap: wrap,
     API: API,
