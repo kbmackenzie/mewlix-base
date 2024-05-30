@@ -297,10 +297,10 @@ export default function(mewlix: Mewlix): void {
   /* -------------------------------------
    * Override 'meow':
    * ------------------------------------- */
-  mewlix.meow = (message: string) => {
+  mewlix.setMeow((message: string) => {
     addMessage(message, false);
     return message;
-  };
+  });
 
   /* -------------------------------------
    * Standard library:
