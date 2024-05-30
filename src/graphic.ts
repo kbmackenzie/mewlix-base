@@ -1109,9 +1109,6 @@ export default function(mewlix: Mewlix): void {
     PixelCanvas: PixelCanvas,
   };
   const GraphicLibrary = library('std.graphic', Graphic);
-
-  /* Freezing the std.graphic library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(GraphicLibrary);
   mewlix.Graphic = GraphicLibrary;
 
   /* -----------------------------------
@@ -1160,9 +1157,6 @@ export default function(mewlix: Mewlix): void {
     };
   })();
   const GraphicCurryLibrary = curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
-
-  /* Freezing the curry library, as it's going to be accessible inside Mewlix. */
-  Object.freeze(GraphicCurryLibrary);
   mewlix.GraphicCurry = GraphicCurryLibrary;
 
   /* -----------------------------------
