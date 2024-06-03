@@ -187,7 +187,7 @@ export class Shelf<T> extends MewlixObject {
     if (a instanceof ShelfBottom) return b instanceof ShelfBottom;
     if (b instanceof ShelfBottom) return a instanceof ShelfBottom;
 
-    return Compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
+    return compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
   }
 
   static concat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
@@ -205,7 +205,7 @@ export class Shelf<T> extends MewlixObject {
 
   static contains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
     for (const item in shelf) {
-      if (Compare.isEqual(value, item)) return true;
+      if (compare.isEqual(value, item)) return true;
     }
     return false;
   }
@@ -485,7 +485,7 @@ type TypePredicate = (value: any) => boolean
 
 const typecheck = (predicate: TypePredicate, expected: string) => (source: string, value: any) => {
   if (predicate(value)) return;
-  const typeOfValue = Reflection.typeOf(value);
+  const typeOfValue = reflection.typeOf(value);
   throw new MewlixError(ErrorCode.TypeMismatch,
     `${source}: Expected ${expected}, got ${typeOfValue}: ${value}!`);
 };
@@ -513,7 +513,7 @@ export function clamp_(value: number, min: number, max: number): number {
 export function opaque(x: Object): void {
   Object.defineProperty(x, 'box', {
     value: () => {
-      const typeOfValue = Reflection.typeOf(x);
+      const typeOfValue = reflection.typeOf(x);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `Can't peek into object: Object "${x}" (type: ${typeOfValue}) isn't accessible through Mewlix!`);
     },
@@ -526,24 +526,24 @@ export function opaque(x: Object): void {
 /* -----------------------------------------------------
  * JSON utils
  * ----------------------------------------------------- */
-export const MewlixFromJSON = {
+export const fromJSON = {
   fromObject: (object: StringIndexable): Box => {
     return new Box(
       getEntries(object)
-        .map(([key, value]) => [key, MewlixFromJSON.fromAny(value)])
+        .map(([key, value]) => [key, fromJSON.fromAny(value)])
     );
   },
   fromArray: (array: any[]): Shelf<any> => {
     return Shelf.fromArray(
-      array.map(MewlixFromJSON.fromAny)
+      array.map(fromJSON.fromAny)
     );
   },
   fromAny: (value: any): any => {
     if (typeof value !== 'object') return value;
     if (Array.isArray(value)) {
-      return MewlixFromJSON.fromArray(value);
+      return fromJSON.fromArray(value);
     }
-    return MewlixFromJSON.fromObject(value);
+    return fromJSON.fromObject(value);
   },
 }
 
@@ -579,7 +579,7 @@ export class Comparison {
 /* -----------------------------------------------------
  * Basic operations.
  * ----------------------------------------------------- */
-export const Numbers = {
+export const numbers = {
   add: function add(a: number, b: number): number {
     ensure.number('+', a);
     ensure.number('+', b);
@@ -637,22 +637,22 @@ export const Numbers = {
   },
 };
 
-export const Booleans = {
+export const boolean = {
   not: function not(a: any): boolean {
-    return !Conversion.toBool(a);
+    return !conversion.toBool(a);
   },
   or: function or(a: any, fb: () => any): any {
-    return Conversion.toBool(a) ? a : fb();
+    return conversion.toBool(a) ? a : fb();
   },
   and: function and(a: any, fb: () => any): any {
-    return Conversion.toBool(a) ? fb() : a;
+    return conversion.toBool(a) ? fb() : a;
   },
   ternary: function ternary(condition: any, fa: () => any, fb: () => any): any {
-    return Conversion.toBool(condition) ? fa() : fb();
+    return conversion.toBool(condition) ? fa() : fb();
   },
 };
 
-export const Compare = {
+export const compare = {
   isEqual: function isEqual(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -666,8 +666,8 @@ export const Compare = {
   // -- Numeric comparison:
   compare: function compare(a: MewlixValue, b: MewlixValue): Comparison {
     if (typeof a !== typeof b) {
-      const typeofA = Reflection.typeOf(a);
-      const typeofB = Reflection.typeOf(b);
+      const typeofA = reflection.typeOf(a);
+      const typeofB = reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `compare: Cannot compare values of different types: "${typeofA}" and "${typeofB}"!`);
     }
@@ -682,19 +682,19 @@ export const Compare = {
         break;
     }
 
-    const typeOfValue = Reflection.typeOf(a);
+    const typeOfValue = reflection.typeOf(a);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `compare: Cannot compare values of type "${typeOfValue}"!`);
   },
 };
 
-export const Strings = {
+export const strings = {
   concat: function concat(a: MewlixValue, b: MewlixValue): string {
     return purrify(a) + purrify(b);
   },
 };
 
-export const Shelves = {
+export const shelves = {
   peek: function peek<T>(shelf: Shelf<T>): T | null {
     ensure.shelf('paw at', shelf);
     return shelf.peek();
@@ -711,7 +711,7 @@ export const Shelves = {
     if (value instanceof Shelf) return value.length();
     if (typeof value === 'string') return value.length;
 
-    const typeOfValue = Reflection.typeOf(value);
+    const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
@@ -719,8 +719,8 @@ export const Shelves = {
     if (b instanceof Shelf) { return b.contains(a); }
 
     if (typeof a !== 'string') {
-      const typeOfA = Reflection.typeOf(a);
-      const typeOfB = Reflection.typeOf(b);
+      const typeOfA = reflection.typeOf(a);
+      const typeOfB = reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `in: Expected string for lookup in "${typeOfB}"; got "${typeOfA}": ${a}`);
     }
@@ -728,13 +728,13 @@ export const Shelves = {
     if (typeof b === 'string') { return b.includes(a); }
     if (b instanceof Box) { return a in b; }
 
-    const typeOfB = Reflection.typeOf(b);
+    const typeOfB = reflection.typeOf(b);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `in: Cannot perform lookup in value of type "${typeOfB}": ${b}`);
   },
 };
 
-export const Reflection = {
+export const reflection = {
   typeOf: function typeOf(value: any): string {
     if (value instanceof Shelf) return 'shelf';
     if (value instanceof Box) return 'box';
@@ -758,7 +758,7 @@ export const Reflection = {
   },
 };
 
-export const Boxes = {
+export const boxes = {
   pairs: function pairs(value: Box): Shelf<Box> {
     ensure.box('claw at', value);
     return Shelf.fromArray(getEntries(value).map(
@@ -767,7 +767,7 @@ export const Boxes = {
   },
 };
 
-export const Conversion = {
+export const conversion = {
   toBool: function toBool(x: MewlixValue): boolean {
     switch (typeof x) {
       case 'object'   : return x !== null;
@@ -795,12 +795,12 @@ export const Conversion = {
 /* -----------------------------------------------------
  * Statement built-ins
  * ----------------------------------------------------- */
-const Internal = {
+const internal = {
   canChase: function canChase(value: MewlixValue): MewlixValue {
     if (typeof value === 'string' || value instanceof Shelf) {
       return value;
     }
-    const typeOfValue = Reflection.typeOf(value);
+    const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `Expected string or shelf; received value of type '${typeOfValue}': ${value}`);
   },
@@ -815,7 +815,7 @@ const Internal = {
     ]);
   },
   assert: function assert(expr: MewlixValue, message: string) {
-    if (Conversion.toBool(expr)) return;
+    if (conversion.toBool(expr)) return;
     throw new MewlixError(ErrorCode.CatOnComputer,
       `Assertion failed: ${message}`);
   }
@@ -867,7 +867,7 @@ const createMewlix = function() {
    * ----------------------------------------------------- */
   const Modules = new Namespace('default');
 
-  const API = {
+  const api = {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
     createBox: (object: StringIndexable) => new Box(getEntries(object ?? {})),
@@ -957,7 +957,7 @@ const createMewlix = function() {
         return value?.peek();
       }
 
-      const typeOfValue = Reflection.typeOf(value);
+      const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
     },
@@ -987,14 +987,14 @@ const createMewlix = function() {
     },
 
     nuzzle: function nuzzle(value: MewlixValue): boolean {
-      return Conversion.toBool(value);
+      return conversion.toBool(value);
     },
 
     empty: function empty<T>(value: string | Shelf<T>): boolean {
       if (typeof value === 'string') return value === '';
       if (value instanceof Shelf) return value instanceof ShelfBottom;
 
-      const typeOfValue = Reflection.typeOf(value);
+      const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
@@ -1006,8 +1006,8 @@ const createMewlix = function() {
       if (a instanceof Shelf && b instanceof Shelf) {
         return Shelf.concat(a, b);
       }
-      const typeofA = Reflection.typeOf(a);
-      const typeofB = Reflection.typeOf(b);
+      const typeofA = reflection.typeOf(a);
+      const typeofB = reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
           `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
     },
@@ -1029,7 +1029,7 @@ const createMewlix = function() {
         return Shelf.fromArray(output);
       }
 
-      const typeOfValue = Reflection.typeOf(value);
+      const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
     },
@@ -1046,7 +1046,7 @@ const createMewlix = function() {
         return output ?? new ShelfBottom<T1>();
       }
 
-      const typeOfValue = Reflection.typeOf(value);
+      const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
     },
@@ -1055,7 +1055,7 @@ const createMewlix = function() {
       if (typeof value === 'string') return [...value].reverse().join('');
       if (value instanceof Shelf) return Shelf.reverse(value);
 
-      const typeOfValue = Reflection.typeOf(value);
+      const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
@@ -1064,7 +1064,7 @@ const createMewlix = function() {
       ensure.shelf('std.sort', shelf);
       return Shelf.fromArray(shelf
         .toArray()
-        .sort((a, b) => Compare.compare(a, b).id)
+        .sort((a, b) => compare.compare(a, b).id)
       );
     },
 
@@ -1270,7 +1270,7 @@ const createMewlix = function() {
     },
 
     slap: function slap(value: MewlixValue): number {
-      return Conversion.toNumber(value);
+      return conversion.toNumber(value);
     },
 
     round: function round(value: number): number {
@@ -1465,7 +1465,7 @@ const createMewlix = function() {
 
     from_json: function from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
-      return MewlixFromJSON.fromAny(JSON.parse(value));
+      return fromJSON.fromAny(JSON.parse(value));
     },
 
     log: function log(value: MewlixValue): void {
@@ -1627,22 +1627,22 @@ const createMewlix = function() {
     wake: wakeSymbol,
     Clowder: Clowder,
     YarnBall: YarnBall,
-    JSON: MewlixFromJSON,
+    fromJSON: fromJSON,
     Comparison: Comparison,
-    Numbers: Numbers,
-    Boolean: Booleans,
-    Compare: Compare,
-    Strings: Strings,
-    Shelves: Shelves,
-    Reflection: Reflection,
-    Boxes: Boxes,
-    Conversion: Conversion,
-    Internal: Internal,
+    numbers: numbers,
+    boolean: boolean,
+    compare: compare,
+    strings: strings,
+    shelves: shelves,
+    reflection: reflection,
+    boxes: boxes,
+    conversion: conversion,
+    internal: internal,
     meow: (x: string) => meowFunc(x),
     setMeow: setMeow,
     BoxWrapper: BoxWrapper,
     wrap: wrap,
-    API: API,
+    api: api,
     Base: BaseLibrary,
     BaseCurry: BaseCurryLibrary, 
     run: run,

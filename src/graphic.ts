@@ -9,7 +9,7 @@ import {
   MewlixValue,
   MewlixObject,
   Box,
-  Reflection,
+  reflection,
   opaque,
   wakeSymbol,
   ensure,
@@ -103,7 +103,7 @@ export default function(mewlix: Mewlix): void {
       return value[toColor]();
     }
 
-    const typeOfValue = Reflection.typeOf(value);
+    const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.Graphic,
       `Expected color value, received value of type "${typeOfValue}": ${value}`);
   }
