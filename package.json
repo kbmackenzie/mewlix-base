@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "author": "kbmackenzie <kelly.a.betty@gmail.com>",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "autoprefixer": "^10.4.19",
     "cssnano": "^7.0.1",
