@@ -316,7 +316,7 @@ export default function(mewlix: Mewlix): void {
   const Console = {
     clear: clearConsole,
 
-    run: async (func: (x: string) => string, opener?: () => string): Promise<void> => {
+    async run(func: (x: string) => string, opener?: () => string): Promise<void> {
       ensure.func('console.run', func);
       try { 
         while (true) {
@@ -336,32 +336,32 @@ export default function(mewlix: Mewlix): void {
       }
     },
 
-    name: (name: string): void => {
+    name(name: string): void {
       ensure.string('console.name', name);
       setProjectName(name);
     },
 
-    highlight: (enable: boolean): void => {
+    highlight(enable: boolean): void {
       showHighlight.checked = enable;
       toggleHighlight(enable);
     },
 
-    set_color: (color: string): void => {
+    set_color(color: string): void {
       ensure.string('console.set_color', color);
       setColor.value = color;
     },
 
-    set_error_color: (color: string): void => {
+    set_error_color(color: string): void {
       ensure.string('console.set_error_color', color);
       setErrorColor.value = color;
     },
 
-    accepted_files: (accepted: Shelf<string>): void => {
+    accepted_files(accepted: Shelf<string>): void {
       ensure.shelf('console.accepted_files', accepted);
       setAcceptedFiles(accepted.toArray());
     },
 
-    write_file: (filename: string | null, contents: string): void => {
+    write_file(filename: string | null, contents: string): void {
       ensure.string('console.write_file', contents);
       if (filename) {
         ensure.string('console.write_file', filename);
