@@ -421,6 +421,13 @@ export class Clowder<T> extends Box<T> {
     super();
     this[wake] = () => this;
   }
+
+  toString(): string {
+    if (typeof this._box.to_string === 'function') {
+      return purrify(this._box.to_string());
+    }
+    return purrifyBox(this);
+  }
 }
 
 /* -----------------------------------------------------
