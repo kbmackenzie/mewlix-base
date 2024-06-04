@@ -165,7 +165,9 @@ export default function(mewlix: Mewlix): void {
 
           addMessage(line);
           resolve(text);
-        }) as any, /* A necessary sacrifice. This is fine. */ 
+        }) as unknown as EventListener, /* A necessary sacrifice. This is fine. */ 
+        /* The reason why the type conversion is necessary:
+         * https://stackoverflow.com/a/65996495/19764270 **/
         { once: true }
       );
     });
