@@ -517,7 +517,7 @@ export function clamp_(value: number, min: number, max: number): number {
 
 export function opaque(x: object): void {
   Object.defineProperty(x, 'box', {
-    value: () => {
+    value() {
       const typeOfValue = reflection.typeOf(x);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `Can't peek into object: Object "${x}" (type: ${typeOfValue}) isn't accessible through Mewlix!`);
@@ -532,7 +532,7 @@ export function opaque(x: object): void {
  * JSON utils
  * ----------------------------------------------------- */
 export const fromJSON = {
-  fromObject: <T>(object: Box<T> | StringIndexable<T>): Box<T> => {
+  fromObject<T>(object: Box<T> | StringIndexable<T>): Box<T> {
     const target = (object instanceof Box)
       ? object.box()
       : object;
@@ -542,12 +542,12 @@ export const fromJSON = {
         .map(([key, value]) => [key, fromJSON.fromAny(value)])
     );
   },
-  fromArray: <T>(array: T[]): Shelf<T> => {
+  fromArray<T>(array: T[]): Shelf<T> {
     return Shelf.fromArray(
       array.map(fromJSON.fromAny)
     );
   },
-  fromAny: (value: any): any => { // todo: better type signature
+  fromAny(value: any): any { // todo: better type signature
     if (typeof value !== 'object') return value;
     if (Array.isArray(value)) {
       return fromJSON.fromArray(value);
