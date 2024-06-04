@@ -7,8 +7,8 @@ import {
   ErrorCode,
   MewlixError,
   MewlixValue,
-  MewlixObject,
   Box,
+  DynamicBox,
   reflection,
   opaque,
   wakeSymbol,
@@ -61,13 +61,8 @@ export default function(mewlix: Mewlix): void {
     .then(response => response.blob())
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
-      return createImageBitmap(
-        blob,
-        rect.x,
-        rect.y,
-        rect.width,
-        rect.height,
-      );
+      const { x, y, width, height } = rect.box();
+      return createImageBitmap(blob, x, y, width, height);
     });
 
   /* Load an image file as a sprite + add it to spriteMap. */
@@ -132,11 +127,12 @@ export default function(mewlix: Mewlix): void {
 
   function drawRect(rect: Rectangle, color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
+    const { x, y, width, height } = rect.box();
     context.fillRect(
-      rect.x      * sizeModifier,
-      rect.y      * sizeModifier,
-      rect.width  * sizeModifier,
-      rect.height * sizeModifier,
+      x      * sizeModifier,
+      y      * sizeModifier,
+      width  * sizeModifier,
+      height * sizeModifier,
     );
   }
 
@@ -185,14 +181,14 @@ export default function(mewlix: Mewlix): void {
     );
   }
 
-  function measureText(message: string, options: TextOptions | null = null) {
+  function measureText(message: string, options: TextOptions | null = null): Box<number> {
     setupText(options);
     const metrics = context.measureText(message);
 
     const width  = metrics.width / sizeModifier;
     const height = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / sizeModifier;
 
-    return new Box([
+    return new Box<number>([
       ["width"  , Math.round(width)  ],
       ["height" , Math.round(height) ],
     ]);
@@ -536,170 +532,254 @@ export default function(mewlix: Mewlix): void {
    * ----------------------------------- */
 
   /* *** Clowders are VERY HARD to add typings to because they're WEIRD! ***
-   * They're declared in an odd way: fields are expected to be dynamic.
-   * The [wake] contructor initializes fields and binds functions by force.
-   * This makes it very hard to write type signatures for them, haha. @ -@ */
+   *
+   * They will be declared in a very unusual way to get the best of both worlds:
+   * - The type of _box should be: <specific-type> & DynamicBox<MewlixValue>
+   *
+   * The struggles of writing the base library for dynamic language in statically typed one.*/
 
-  class Vector2 extends Clowder {
+  interface Vector2Like {
     x: number;
     y: number;
+  };
+
+  class Vector2 extends Clowder<MewlixValue> {
     [wakeSymbol]: (x: number, y: number) => Vector2;
+    _box: Vector2Like & DynamicBox<MewlixValue>;
+
+    box() {
+      return this._box;
+    }
 
     constructor() {
       super();
-      this.x = 0;
-      this.y = 0;
+      this._box = { x: 0, y: 0 };
 
-      this[wakeSymbol] = (function wake(this: Vector2, x: number, y: number) {
+      this[wakeSymbol] = (x: number, y: number) => {
         ensure.number('Vector2.wake', x);
         ensure.number('Vector2.wake', y);
-        this.x = x;
-        this.y = y;
+        this.box().x = x;
+        this.box().y = y;
         return this;
-      }).bind(this);
+      };
 
-      this.add = (function add(this: Vector2, that: Vector2): Vector2 {
-        return new Vector2()[wakeSymbol](this.x + that.x, this.y + that.y);
-      }).bind(this);
+      this.box().add = (that: Vector2) => {
+        const { x: ax, y: ay } = this.box();
+        const { x: bx, y: by } = that.box();
+        [ax, ay, bx, by].forEach(value => {
+          ensure.number('Vector2.add', value);
+        });
+        return new Vector2()[wakeSymbol](ax + bx, ay + by);
+      };
 
-      this.mul = (function mul(this: Vector2, that: Vector2): Vector2 {
-        return new Vector2()[wakeSymbol](this.x + that.x, this.y + that.y);
-      }).bind(this);
+      this.box().mul = (that: Vector2) => {
+        const { x: ax, y: ay } = this.box();
+        const { x: bx, y: by } = that.box();
+        [ax, ay, bx, by].forEach(value => {
+          ensure.number('Vector2.mul', value);
+        });
+        return new Vector2()[wakeSymbol](ax * bx, ay * by);
+      };
 
-      this.distance = (function distance(this: Vector2, that: Vector2): number {
-        return Math.sqrt((that.x - this.x) ** 2 + (that.y - this.y) ** 2);
-      }).bind(this);
+      this.box().distance = (that: Vector2) => {
+        const { x: ax, y: ay } = this.box();
+        const { x: bx, y: by } = that.box();
+        [ax, ay, bx, by].forEach(value => {
+          ensure.number('Vector2.distance', value);
+        });
+        return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+      };
 
-      this.dot = (function dot(this: Vector2, that: Vector2): number {
-        return this.x * that.x + this.y * that.y;
-      }).bind(this);
+      this.box().dot = (that: Vector2) => {
+        const { x: ax, y: ay } = this.box();
+        const { x: bx, y: by } = that.box();
+        [ax, ay, bx, by].forEach(value => {
+          ensure.number('Vector2.dot', value);
+        });
+        return ax * bx + ay * by;
+      };
 
-      this.clamp = (function clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
-        const x = clamp_(this.x, min.x, max.x);
-        const y = clamp_(this.y, min.y, max.y);
-        return new Vector2()[wakeSymbol](x, y);
-      }).bind(this);
+      this.box().clamp = (min: Vector2, max: Vector2) => {
+        const { x, y } = this.box();
+        const { x: minX, y: minY } = min.box();
+        const { x: maxX, y: maxY } = max.box();
+        [x, y, minX, minY, maxX, maxY].forEach(value => {
+          ensure.number('Vector2.clamp', value);
+        });
+      };
     }
   }
 
-  class Rectangle extends Clowder {
+  interface RectangleLike {
     x: number;
     y: number;
     width: number;
     height: number;
+  };
+
+  class Rectangle extends Clowder<MewlixValue> {
     [wakeSymbol]: (x: number, y: number, width: number, height: number) => Rectangle;
+    _box: RectangleLike & DynamicBox<MewlixValue>;
+
+    box() {
+      return this._box;
+    }
 
     constructor() {
       super();
-      this.x = 0;
-      this.y = 0;
-      this.width = gridSlotWidth;
-      this.height = gridSlotHeight;
+      this._box = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      };
 
-      this[wakeSymbol] = (function wake(this: Rectangle, x: number, y: number, width: number, height: number) {
-        [x, y, width, height].forEach(
-          value => ensure.number('Rectangle.wake', value)
-        );
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+      this[wakeSymbol] = (x: number, y: number, width: number, height: number) => {
+        [x, y, width, height].forEach(value => {
+          ensure.number('Rectangle.wake', value)
+        });
+        this.box().x = x;
+        this.box().y = y;
+        this.box().width = width;
+        this.box().height = height;
         return this;
-      }).bind(this);
+      };
 
-      this.contains = (function contains(this: Rectangle, point: Vector2): boolean {
-        return (point.x >= this.x)
-          && (point.y >= this.y)
-          && (point.x < this.x + this.width)
-          && (point.y < this.y + this.height);
-      }).bind(this);
+      this.box().contains = (point: Vector2) => {
+        const { x: rx, y: ry, width: rw, height: rh } = this.box();
+        const { x: px, y: py } = point.box();
+        [rx, ry, rw, rh, px, py].forEach(value => {
+          ensure.number('Rectangle.contains', value);
+        });
+        return (px >= rx) && (py >= ry) && (px < rx + rw) && (py < ry + rh);
+      };
 
-      this.collides = (function collides(this: Rectangle, rect: Rectangle): boolean {
-        return (rect.x < this.x + this.width)
-          && (rect.x + rect.width > this.x)
-          && (rect.y < this.y + this.height)
-          && (rect.y + rect.height > this.y)
-      }).bind(this);
+      this.box().collides = (that: Rectangle) => {
+        const { x: ax, y: ay, width: aw, height: ah} = this.box();
+        const { x: bx, y: by, width: bw, height: bh } = that.box();
+        [ax, ay, aw, ah, bx, by, bw, bh].forEach(value => {
+          ensure.number('Rectangle.collides', value);
+        });
+        return (bx < ax + aw)
+          && (bx + bw > ax)
+          && (by < ay + ah)
+          && (by + bh > ay);
+      };
     }
   }
 
-  class GridSlot extends Clowder {
+  interface GridSlotLike {
     row: number;
     column: number;
+  };
+
+  class GridSlot extends Clowder<MewlixValue> {
     [wakeSymbol]: (row: number, column: number) => GridSlot;
+    _box: GridSlotLike & DynamicBox<MewlixValue>;
+
+    box() {
+      return this._box;
+    }
 
     constructor() {
       super();
-      this.row = 0;
-      this.column = 0;
+      this._box = { row: 0, column: 0 };
 
-      this[wakeSymbol] = (function wake(this: GridSlot, row: number, column: number) {
-        this.row    = clamp_(row,    0, gridRows - 1);
-        this.column = clamp_(column, 0, gridColumns - 1);
+      this[wakeSymbol] = (row: number, column: number) => {
+        ensure.number('GridSlot.wake', row);
+        ensure.number('GridSlot.wake', column);
+
+        this.box().row    = clamp_(row,    0, gridRows - 1);
+        this.box().column = clamp_(column, 0, gridColumns - 1);
         return this;
-      }).bind(this);
+      };
 
-      this.position = (function position(this: GridSlot) {
-        return gridSlotToPosition(this);
-      }).bind(this);
+      this.box().position = () => {
+        ensure.number('GridSlot.position', this.box().x);
+        ensure.number('GridSlot.position', this.box().y);
+
+        gridSlotToPosition(this);
+      };
     }
   }
 
   function positionToGridSlot(point: Vector2): GridSlot {
-    const row = Math.min(point.y / gridSlotHeight);
-    const col = Math.min(point.x / gridSlotWidth);
+    const { x: px, y: py } = point.box();
+
+    const row = Math.min(py / gridSlotHeight);
+    const col = Math.min(px / gridSlotWidth);
     return new GridSlot()[wakeSymbol](row, col);
   }
 
   function gridSlotToPosition(slot: GridSlot): Vector2 {
+    const { row, column } = slot.box();
+
     return new Vector2()[wakeSymbol](
-      slot.column * gridSlotWidth,
-      slot.row * gridSlotHeight,
+      column * gridSlotWidth,
+      row * gridSlotHeight,
     );
   }
 
   /* Color container, wrapping a RGBA color value.
    * It accepts an opacity value too, in percentage. */
-  class Color extends Clowder {
+  interface ColorLike {
     red: number;
     green: number;
     blue: number;
     opacity: number;
-    alpha: () => number;
+    alpha(): number;
+  };
+
+  class Color extends Clowder<MewlixValue> {
     [wakeSymbol]: (red: number, green: number, blue: number, opacity?: number) => Color;
+    _box: ColorLike & DynamicBox<MewlixValue>;
+
+    box() {
+      return this._box;
+    }
 
     constructor() {
       super();
-      this.red   = 0;
-      this.green = 0;
-      this.blue  = 0;
-      this.opacity = 0;
+      this._box = {
+        red: 0,
+        green: 0,
+        blue: 0,
+        opacity: 0,
+        alpha() { return 0; },
+      };
 
-      this[wakeSymbol] = (function wake(this: Color, red: number, green: number, blue: number, opacity: number = 100) {
+      this[wakeSymbol] = (red: number, green: number, blue: number, opacity: number = 100) => {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
-        this.red     = clamp_(red, 0, 255);
-        this.green   = clamp_(green, 0, 255);
-        this.blue    = clamp_(blue, 0, 255);
-        this.opacity = clamp_(opacity, 0, 100);
+        this.box().red     = clamp_(red, 0, 255);
+        this.box().green   = clamp_(green, 0, 255);
+        this.box().blue    = clamp_(blue, 0, 255);
+        this.box().opacity = clamp_(opacity, 0, 100);
         return this;
-      }).bind(this);
+      };
 
-      this.alpha = (function alpha(this: Color): number { /* alpha byte value! */
-        return percentageToByte(this.opacity);
-      }).bind(this);
+      this.box().alpha = () => {
+        ensure.number('Color.alpha', this.box().opacity);
+        return percentageToByte(this.box().opacity);
+      };
 
-      this.to_hex = (function to_hex(this: Color): string {
-        const r = this.red.toString(16);
-        const g = this.green.toString(16);
-        const b = this.blue.toString(16);
+      this.box().to_hex = () => {
+        const { red, green, blue } = this.box();
+        [red, green, blue].forEach(value => {
+          ensure.number('Color.to_hex', value);
+        });
+
+        const r = red.toString(16);
+        const g = green.toString(16);
+        const b = blue.toString(16);
         return `#${r}${g}${b}`;
-      }).bind(this);
+      };
     }
 
     [toColor](): string {
-      return `rgb(${this.red} ${this.green} ${this.blue} / ${this.opacity}%)`;
+      const { red, green, blue, opacity } = this.box();
+      return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
     }
 
     static fromHex(str: string): Color {
@@ -724,16 +804,11 @@ export default function(mewlix: Mewlix): void {
 
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
-  class PixelCanvas extends MewlixObject {
+  class PixelCanvas extends Clowder<MewlixValue> {
+    [wakeSymbol]: (width: number, height: number) => PixelCanvas;
     width: number;
     height: number;
     data: Uint8ClampedArray | null;
-    [wakeSymbol]: (width: number, height: number) => PixelCanvas;
-
-    fill: (color: Color) => void;
-    set_pixel: (x: number, y: number, color: Color) => void;
-    get_pixel: (x: number, y: number) => Color;
-    to_sprite: (key: string) => void;
 
     constructor() {
       super();
@@ -741,54 +816,59 @@ export default function(mewlix: Mewlix): void {
       this.height = 0;
       this.data = null;
 
-      Object.defineProperty(this, 'box', {
-        value: () => this,
-        writable: false,
-        enumerable: false,
-        configurable: false,
-      });
+      this[wakeSymbol] = (width: number, height: number) => {
+        ensure.number('PixelCanvas.wake', width);
+        ensure.number('PixelCanvas.wake', height);
 
-      this[wakeSymbol] = (function wake(this: PixelCanvas, width: number, height: number) {
-        this.width = width;
+        this.width  = width;
         this.height = height;
-        this.data = new Uint8ClampedArray(width * height * 4);
-        opaque(this.data);
+        this.data   = new Uint8ClampedArray(width * height * 4);
+        opaque(this.data!);
         return this;
-      }).bind(this);
+      };
 
-      /* ------------------------------
-       * Methods:
-       * ------------------------------ */
-      this.fill = (function fill(this: PixelCanvas, color: Color): void {
+      this.box().fill = (color: Color) => {
         if (!this.data) {
           throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
+
+        const { red, green, blue } = color.box();
+        const alpha = color.box().alpha();
+
         for (let i = 0; i < this.data.length; i += 4) {
-          this.data[i]     = color.red;
-          this.data[i + 1] = color.green;
-          this.data[i + 2] = color.blue;
-          this.data[i + 3] = color.alpha();
+          this.data[i]     = red;
+          this.data[i + 1] = green;
+          this.data[i + 2] = blue;
+          this.data[i + 3] = alpha;
         }
-      }).bind(this);
+      };
 
-      this.set_pixel = (function set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
+      this.box().set_pixel = (x: number, y: number, color: Color) => {
         if (!this.data) {
           throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
+
+        const { red, green, blue } = color.box();
+        const alpha = color.box().alpha();
+
         const index = (x * this.width + y) * 4;
-        this.data[index]     = color.red;
-        this.data[index + 1] = color.green;
-        this.data[index + 2] = color.blue;
-        this.data[index + 3] = color.alpha();
-      }).bind(this);
+        this.data[index]     = red;
+        this.data[index + 1] = green;
+        this.data[index + 2] = blue;
+        this.data[index + 3] = alpha;
+      };
 
-      this.get_pixel = (function get_pixel(this: PixelCanvas, x: number, y: number): Color {
+      this.box().get_pixel = (x: number, y: number) => {
+        ensure.number('PixelCanvas.get_pixel', x);
+        ensure.number('PixelCanvas.get_pixel', y);
+
         if (!this.data) {
           throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
+
         const index = (x * this.width + y) * 4;
         return new Color()[wakeSymbol](
           this.data[index],
@@ -796,20 +876,23 @@ export default function(mewlix: Mewlix): void {
           this.data[index + 2],
           byteToPercentage(this.data[index + 3])
         );
-      }).bind(this);
+      };
 
-      this.to_sprite = (function to_image(this: PixelCanvas, key: string): void {
+      this.box().to_sprite = (key: string) => {
+        ensure.string('PixelCanvas.to_sprite', key);
+
         if (!this.data) {
           throw new MewlixError(ErrorCode.InvalidOperation,
             'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
         };
+
         const copy = new Uint8ClampedArray(this.data);
         resourceQueue.push({
           type: 'canvas',
           key: key,
           data: new ImageData(copy, this.width, this.height),
         });
-      }).bind(this);
+      };
     }
   }
 
@@ -994,7 +1077,7 @@ export default function(mewlix: Mewlix): void {
 
     measure: (key: string) => {
       const image = getSprite(key);
-      return new Box([
+      return new Box<number>([
         ["width"  , image.width ],
         ["height" , image.height]
       ]);
@@ -1032,7 +1115,7 @@ export default function(mewlix: Mewlix): void {
       return isKeyDown(key);
     },
 
-    keys: new Box([
+    keys: new Box<string>([
       ["space"  , " "         ],
       ["enter"  , "Enter"     ],
       ["left"   , "ArrowLeft" ],

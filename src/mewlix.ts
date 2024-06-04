@@ -12,7 +12,7 @@ export type MewlixValue =
   | string
   | boolean
   | Shelf<MewlixValue>
-  | Box
+  | Box<MewlixValue>
   | Function
   | null
   | undefined;
@@ -66,7 +66,7 @@ export class MewlixError extends Error {
 /* -----------------------------------------------------
  * String utils.
  * ----------------------------------------------------- */
-export function purrify(value: any): string {
+export function purrify<T>(value: T): string {
   if (typeof value === 'string') return value;
   if (value === null || value === undefined) {
     return 'nothing';
@@ -77,17 +77,17 @@ export function purrify(value: any): string {
   }
 };
 
-function purrifyItem(value: any): string {
+function purrifyItem<T>(value: T): string {
   if (typeof value === 'string') return JSON.stringify(value);
   return purrify(value);
 };
 
-function purrifyArray(array: any[]): string {
+function purrifyArray<T>(array: T[]): string {
   const items = array.map(purrifyItem).join(', ');
   return `[${items}]`;
 };
 
-function purrifyObject(object: StringIndexable): string {
+function purrifyBox<T>(object: Box<T> | StringIndexable<T>): string {
   const pairs = getEntries(object).map(
     ([key, value]) => `${key}: ${purrifyItem(value)}`
   ).join(', ');
@@ -97,14 +97,18 @@ function purrifyObject(object: StringIndexable): string {
 /* -----------------------------------------------------
  * Object utils:
  * ----------------------------------------------------- */
-type StringIndexable = {
-  [key: string]: any;
+type StringIndexable<T> = {
+  [key: string]: T;
 };
 
-function getEntries(source: StringIndexable): [string, any][] {
-  const entries: [string, any][] = [];
-  for (const key in source) {
-    entries.push([key, source[key]]);
+function getEntries<T>(source: Box<T> | StringIndexable<T>): [string, T][] {
+  const target = (source instanceof Box)
+    ? source.box()
+    : source;
+
+  const entries: [string, T][] = [];
+  for (const key in target) {
+    entries.push([key, target[key]]);
   }
   return entries;
 }
@@ -280,12 +284,12 @@ class ShelfBottom<T> extends Shelf<T> {
 /* -----------------------------------------------------
  * Namespace -> Container for modules.
  * ----------------------------------------------------- */
-type ModuleFunction = () => MewlixObject
+type ModuleFunction = () => MewlixObject;
 
 class Namespace extends MewlixObject {
   name: string;
-  modules: Map<string, ModuleFunction>;
   cache: Map<string, MewlixObject>;
+  modules: Map<string, ModuleFunction>;
 
   constructor(name: string) {
     super();
@@ -302,7 +306,7 @@ class Namespace extends MewlixObject {
     this.modules.set(key, func);
   }
 
-  getModule(key: string): MewlixObject {
+  getModule(key: string): object {
     if (!this.modules.has(key)) {
       throw new MewlixError(ErrorCode.InvalidImport,
         `The module "${key}" doesn't exist or hasn't been properly loaded!`);
@@ -319,7 +323,7 @@ class Namespace extends MewlixObject {
   /* Inject object as a valid Mewlix module.
    * The key should be a non-empty string. */
   injectModule(key: string, object: object): void {
-    const wrapped = wrap(object) as MewlixObject;
+    const wrapped = wrap(object);
     this.cache.set(key, wrapped);
     this.modules.set(key, () => wrapped);
   }
@@ -328,60 +332,56 @@ class Namespace extends MewlixObject {
 /* -----------------------------------------------------
  * Box -> A core part of a cat-oriented language.
  * ----------------------------------------------------- */
-export class Box extends MewlixObject {
-  /* This index signature is needed to guarantee the dynamic behavior of boxes.
-   * A sacrifice when writing a dynamic language's base library in a typed language. */
-  [key: string]: MewlixValue;
+export type DynamicBox<T> = {
+  [key: string]: T;
+};
 
-  constructor(entries: [string, MewlixValue][] = []) {
+export type BoxLike<T> = {
+  box(): T;
+};
+
+export class Box<T> extends MewlixObject implements BoxLike<DynamicBox<T>> {
+  _box: DynamicBox<T>;
+  box() {
+    return this._box;
+  }
+
+  constructor(entries: [string, T][] = []) {
     super();
-
-    Object.defineProperty(this, 'box', {
-      value: () => this,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
-
+    this._box = {};
     for (const [key, value] of entries) {
-      this[key] = value;
+      this._box[key] = value;
     }
   }
 
   toString(): string {
-    return purrifyObject(this);
+    return purrifyBox(this);
   }
 };
 
 /* -----------------------------------------------------
  * Enum -> Base for all enums.
  * ----------------------------------------------------- */
-export class EnumValue extends Box {
-  key: string;
-  value: number;
-  parent: string;
-
+export class EnumValue extends Box<string | number> {
   constructor(key: string, value: number, parent: string) {
     super();
-    this.key = key;
-    this.value = value;
-    this.parent = parent;
+    this.box().key = key;
+    this.box().value = value;
+    this.box().parent = parent;
   }
   toString(): string {
-    return `${this.parent}.${this.key}`;
+    return `${this.box().parent}.${this.box().key}`;
   }
 }
 
-export class Enum extends Box {
-  name: string;
-
+export class Enum extends Box<EnumValue | string> {
   constructor(name: string, keys: string[] = []) {
     super();
     let count = 0;
     for (const key of keys) {
-      this[key] = new EnumValue(key, count++, name);
+      this.box()[key] = new EnumValue(key, count++, name);
     }
-    this.name = name;
+    this.box().name = name;
   }
 
   toString(): string {
@@ -392,7 +392,7 @@ export class Enum extends Box {
     const enumKeys = values
       .filter(x => x instanceof EnumValue)
       .map(x => `${x.key};`);
-    return `cat tree ${this.name}; ${enumKeys.join(' ')} ~meow`;
+    return `cat tree ${this.box().name}; ${enumKeys.join(' ')} ~meow`;
   }
 }
 
@@ -404,15 +404,12 @@ export const wakeSymbol: unique symbol = Symbol('wake');
 
 /* All clowders should inherit from this class.
  * It has a default definition for wake(), too. */
-export class Clowder extends Box {
-  [key: string | symbol]: MewlixValue;
-  [wakeSymbol]: (...args: any[]) => Clowder;
+export class Clowder<T> extends Box<T> {
+  [wakeSymbol]: (...args: any[]) => Clowder<T>;
 
   constructor() {
     super();
-    this[wakeSymbol] = (function wake(this: Clowder): Clowder {
-      return this;
-    }).bind(this);
+    this[wakeSymbol] = () => this;
   }
 }
 
@@ -456,7 +453,7 @@ export class YarnBall extends MewlixObject {
 /* All the 'as any' castings are a necessary compromise to guarantee dynamic assignment behavior.
  * The sacrifices needed to write the base for a dynamic language in a typed one. */
 
-export function library(libraryKey: string, library: StringIndexable = {}) {
+export function library(libraryKey: string, library: StringIndexable<MewlixValue> = {}) {
   const yarnball = new YarnBall(libraryKey);
   for (const key in library) {
     yarnball[key] = library[key];
@@ -464,12 +461,14 @@ export function library(libraryKey: string, library: StringIndexable = {}) {
   return yarnball;
 };
 
-export function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable = {}) {
+export function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable<MewlixValue> = {}) {
   const yarnball = new YarnBall(libraryKey);
+
   // Copy curried functions:
   for (const key in library) {
     yarnball[key] = library[key];
   }
+
   // Fill in the blanks:
   for (const key in base) {
     if (key in yarnball) continue;
@@ -510,7 +509,7 @@ export function clamp_(value: number, min: number, max: number): number {
   return value < min ? min : (value > max ? max : value);
 };
 
-export function opaque(x: Object): void {
+export function opaque(x: object): void {
   Object.defineProperty(x, 'box', {
     value: () => {
       const typeOfValue = reflection.typeOf(x);
@@ -527,18 +526,22 @@ export function opaque(x: Object): void {
  * JSON utils
  * ----------------------------------------------------- */
 export const fromJSON = {
-  fromObject: (object: StringIndexable): Box => {
+  fromObject: <T>(object: Box<T> | StringIndexable<T>): Box<T> => {
+    const target = (object instanceof Box)
+      ? object.box()
+      : object;
+
     return new Box(
-      getEntries(object)
+      getEntries(target)
         .map(([key, value]) => [key, fromJSON.fromAny(value)])
     );
   },
-  fromArray: (array: any[]): Shelf<any> => {
+  fromArray: <T>(array: T[]): Shelf<T> => {
     return Shelf.fromArray(
       array.map(fromJSON.fromAny)
     );
   },
-  fromAny: (value: any): any => {
+  fromAny: (value: any): any => { // todo: better type signature
     if (typeof value !== 'object') return value;
     if (Array.isArray(value)) {
       return fromJSON.fromArray(value);
@@ -715,7 +718,7 @@ export const shelves = {
     throw new MewlixError(ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
-  contains: function contains<T>(a: T, b: Shelf<T> | Box | string): boolean {
+  contains: function contains<T1, T2>(a: T1, b: Shelf<T1> | Box<T2> | string): boolean {
     if (b instanceof Shelf) { return b.contains(a); }
 
     if (typeof a !== 'string') {
@@ -726,7 +729,7 @@ export const shelves = {
     }
 
     if (typeof b === 'string') { return b.includes(a); }
-    if (b instanceof Box) { return a in b; }
+    if (b instanceof Box) { return a in b._box; }
 
     const typeOfB = reflection.typeOf(b);
     throw new MewlixError(ErrorCode.TypeMismatch,
@@ -752,17 +755,17 @@ export const reflection = {
     }
   },
 
-  instanceOf: function instanceOf(a: Box, b: Function): boolean {
+  instanceOf: function instanceOf<T>(a: Box<T>, b: Function): boolean {
     ensure.box('is', a);
     return a instanceof b;
   },
 };
 
 export const boxes = {
-  pairs: function pairs(value: Box): Shelf<Box> {
+  pairs: function pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
     ensure.box('claw at', value);
     return Shelf.fromArray(getEntries(value).map(
-      ([key, value]) => new Box([["key", key], ["value", value]])
+      ([key, value]) => new Box<string | T>([["key", key], ["value", value]])
     ));
   },
 };
@@ -804,17 +807,17 @@ const internal = {
     throw new MewlixError(ErrorCode.TypeMismatch,
       `Expected string or shelf; received value of type '${typeOfValue}': ${value}`);
   },
-  pounceError: function pounceError(error: Error) {
+  pounceError: function pounceError(error: Error): Box<string | number | null> {
     const errorCode: ErrorCode = (error instanceof MewlixError)
       ? error.code 
       : ErrorCode.ExternalError;
-    return new Box([
+    return new Box<string | number | null>([
       [ "name"    , errorCode.name ],
       [ "id"      , errorCode.id   ],
       [ "message" , error.message ? purrify(error.message) : null ],
     ]);
   },
-  assert: function assert(expr: MewlixValue, message: string) {
+  assert: function assert(expr: MewlixValue, message: string): void {
     if (conversion.toBool(expr)) return;
     throw new MewlixError(ErrorCode.CatOnComputer,
       `Assertion failed: ${message}`);
@@ -829,28 +832,24 @@ export type MeowFunc = (x: string) => string;
 /* -----------------------------------------------------
  * API:
  * ----------------------------------------------------- */
-export class BoxWrapper extends MewlixObject {
-  constructor(object: object) {
-    super();
-    Object.defineProperty(this, 'box', {
-      value: () => object,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
+export class BoxWrapper<T extends object> extends MewlixObject {
+  _box: T;
+  box(): T {
+    return this._box;
   }
-
-  // Enforcing dynamic behavior through the type system is hard.
-  // Ungraceful casts, but alas! They only happen here.
+  constructor(object: T) {
+    super();
+    this._box = object;
+  }
   toString(): string {
-    return (this as any).box().toString();
+    return this.box().toString();
   }
   valueOf(): Object {
-    return (this as any).box().valueOf();
+    return this.box().valueOf();
   }
 };
 
-export function wrap(object: object) {
+export function wrap<T extends object>(object: T) {
   if (typeof object !== 'object') {
     throw new MewlixError(ErrorCode.InvalidImport,
       `Special import "${object}" isn't an object!`);
@@ -870,8 +869,8 @@ const createMewlix = function() {
   const api = {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
-    createBox: (object: StringIndexable) => new Box(getEntries(object ?? {})),
-    inject: (key: string, object: StringIndexable) => Modules.injectModule(key, object),
+    createBox: <T>(object: StringIndexable<T>) => new Box<T>(getEntries(object ?? {})),
+    inject: (key: string, object: object) => Modules.injectModule(key, object),
   };
 
   /* -----------------------------------------------------
@@ -1180,7 +1179,7 @@ const createMewlix = function() {
       return true;
     },
 
-    zip: function zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box> {
+    zip: function zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<T1 | T2>> {
       ensure.shelf('std.zip', a);
       ensure.shelf('std.zip', b);
 
@@ -1189,7 +1188,7 @@ const createMewlix = function() {
 
       let i = length - 1;
       while (a instanceof ShelfNode && b instanceof ShelfNode) {
-        output[i--] = new Box([
+        output[i--] = new Box<T1 | T2>([
           ["first",  a.peek()],
           ["second", b.peek()],
         ]);
@@ -1222,9 +1221,9 @@ const createMewlix = function() {
       ]);
     },
 
-    table: function(): Box {
+    table: function(): Box<MewlixValue> {
       const table = new Map<MewlixValue, MewlixValue>();
-      const box: Box = new Box([
+      const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (key: MewlixValue, value: MewlixValue) => {
           table.set(key, value);
           return box;
@@ -1247,9 +1246,9 @@ const createMewlix = function() {
       return box;
     },
 
-    set: () => {
+    set: function(): Box<MewlixValue> {
       const set = new Set<MewlixValue>();
-      const box: Box = new Box([
+      const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (value: MewlixValue) => {
           set.add(value);
           return box;
@@ -1439,7 +1438,7 @@ const createMewlix = function() {
       localStorage.setItem(key, contents);
     },
 
-    date: function date(): Box {
+    date: function date(): Box<number> {
       const now = new Date();
       return new Box([
         [ "day"    , now.getDay() + 1   ],
