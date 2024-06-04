@@ -924,44 +924,42 @@ const createMewlix = function() {
    *
    * All standard library functions *should use snake_case*, as
    * they're going to be accessible from within Mewlix. */
-
-  const Base = {
-    purr(value: MewlixValue): string {
+   function purr(value: MewlixValue): string {
       return purrify(value);
-    },
+  };
 
-    cat(shelf: Shelf<string>): string {
+   function cat(shelf: Shelf<string>): string {
       let acc = '';
       for (const value of shelf) {
         acc = purrify(value) + acc;
       }
       return acc;
-    },
+    };
 
-    trim(str: string): string {
+    function trim(str: string): string {
       ensure.string('std.trim', str)
       return str.trim();
-    },
+    };
 
-    tear(str: string, start: number, end: number): string {
+    function tear(str: string, start: number, end: number): string {
       ensure.string('std.tear', str);
       ensure.number('std.tear', start);
       ensure.number('std.tear', end);
 
       return str.substring(start, end);
-    },
+    };
 
-    push_down(str: string): string {
+    function push_down(str: string): string {
       ensure.string('std.push_down', str);
       return str.toLowerCase();
-    },
+    };
 
-    push_up(str: string): string {
+    function push_up(str: string): string {
       ensure.string('std.push_up', str);
       return str.toUpperCase();
-    },
+    };
 
-    poke<T>(value: string | Shelf<T>, index: number = 0): T | string | null {
+    function poke<T>(value: string | Shelf<T>, index: number = 0): T | string | null {
       ensure.number('std.poke', index);
 
       if (typeof value === 'string') {
@@ -984,18 +982,18 @@ const createMewlix = function() {
       const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
-    },
+    };
 
-    char(value: number): string {
+    function char(value: number): string {
       ensure.number('std.char', value);
       if (value < 0 || value > 65535) {
         throw new MewlixError(ErrorCode.InvalidOperation,
           `std.char: Value outside of valid character range: ${value}`);
       }
       return String.fromCharCode(value);
-    },
+    };
 
-    bap(value: string): number {
+    function bap(value: string): number {
       ensure.string('std.bap', value);
       if (value.length === 0) {
         throw new MewlixError(ErrorCode.InvalidOperation,
@@ -1008,22 +1006,22 @@ const createMewlix = function() {
           `std.bap: Character code out of valid range: '${code}'`);
       }
       return code;
-    },
+    };
 
-    nuzzle(value: MewlixValue): boolean {
+    function nuzzle(value: MewlixValue): boolean {
       return conversion.toBool(value);
-    },
+    };
 
-    empty<T>(value: string | Shelf<T>): boolean {
+    function empty<T>(value: string | Shelf<T>): boolean {
       if (typeof value === 'string') return value === '';
       if (value instanceof Shelf) return value instanceof ShelfBottom;
 
       const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
-    },
+    };
 
-    join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
+    function join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
       if (typeof a === 'string' && typeof b === 'string') {
         return a + b;
       }
@@ -1034,9 +1032,9 @@ const createMewlix = function() {
       const typeofB = reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
           `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
-    },
+    };
 
-    take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+    function take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.take', amount);
 
       if (typeof value === 'string') return value.slice(0, amount);
@@ -1056,9 +1054,9 @@ const createMewlix = function() {
       const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
-    },
+    };
 
-    drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+    function drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.drop', amount);
 
       if (typeof value === 'string') return value.slice(amount);
@@ -1073,40 +1071,40 @@ const createMewlix = function() {
       const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
-    },
+    };
 
-    reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
+    function reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
       if (typeof value === 'string') return [...value].reverse().join('');
       if (value instanceof Shelf) return Shelf.reverse(value);
 
       const typeOfValue = reflection.typeOf(value);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
-    },
+    };
     
-    sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
+    function sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
       ensure.shelf('std.sort', shelf);
       return Shelf.fromArray(shelf
         .toArray()
         .sort((a, b) => compare.compare(a, b).id)
       );
-    },
+    };
 
-    shuffle<T>(shelf: Shelf<T>): Shelf<T> {
+    function shuffle<T>(shelf: Shelf<T>): Shelf<T> {
       ensure.shelf('std.shuffle', shelf);
       const output = shelf.toArray();
 
       for (let i = output.length - 1; i > 0; i--) {
-        const j = Base.random_int(0, i);
+        const j = random_int(0, i);
 
         const temp = output[i];
         output[i] = output[j];
         output[j] = temp;
       }
       return Shelf.fromArray(output);
-    },
+    };
 
-    insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
+    function insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
       ensure.shelf('std.insert', shelf);
       ensure.number('std.insert', index);
 
@@ -1125,9 +1123,9 @@ const createMewlix = function() {
         bottom = bottom.push(item);
       }
       return bottom;
-    },
+    };
 
-    remove<T>(shelf: Shelf<T>, index: number = 0): Shelf<T> {
+    function remove<T>(shelf: Shelf<T>, index: number = 0): Shelf<T> {
       ensure.shelf('std.remove', shelf);
       ensure.number('std.remove', index);
 
@@ -1146,9 +1144,9 @@ const createMewlix = function() {
         bottom = bottom.push(item);
       }
       return bottom;
-    },
+    };
 
-    map<T1, T2>(callback: (x: T1) => T2, shelf: Shelf<T1>): Shelf<T2> {
+    function map<T1, T2>(callback: (x: T1) => T2, shelf: Shelf<T1>): Shelf<T2> {
       ensure.func('std.map', callback);
       ensure.shelf('std.map', shelf);
 
@@ -1159,9 +1157,9 @@ const createMewlix = function() {
         output[i--] = callback(value);
       }
       return Shelf.fromArray(output);
-    },
+    };
 
-    filter<T1>(predicate: (x: T1) => boolean, shelf: Shelf<T1>): Shelf<T1> {
+    function filter<T1>(predicate: (x: T1) => boolean, shelf: Shelf<T1>): Shelf<T1> {
       ensure.func('std.filter', predicate);
       ensure.shelf('std.filter', shelf);
 
@@ -1173,9 +1171,9 @@ const createMewlix = function() {
         }
       }
       return Shelf.reverse(bucket);
-    },
+    };
 
-    fold<T1, T2>(callback: (acc: T2, x: T1) => T2, initial: T2, shelf: Shelf<T1>) {
+    function fold<T1, T2>(callback: (acc: T2, x: T1) => T2, initial: T2, shelf: Shelf<T1>) {
       ensure.func('std.fold', callback);
       ensure.shelf('std.fold', shelf);
 
@@ -1184,27 +1182,27 @@ const createMewlix = function() {
         accumulator = callback(accumulator, value);
       }
       return accumulator;
-    },
+    };
 
-    any<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
+    function any<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
       ensure.func('std.any', predicate);
       ensure.shelf('std.any', shelf);
       for (const value of shelf) {
         if (predicate(value)) { return true; }
       }
       return false;
-    },
+    };
 
-    all<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
+    function all<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
       ensure.func('std.all', predicate);
       ensure.shelf('std.all', shelf);
       for (const value of shelf) {
         if (!(predicate(value))) { return false; }
       }
       return true;
-    },
+    };
 
-    zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<T1 | T2>> {
+    function zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<T1 | T2>> {
       ensure.shelf('std.zip', a);
       ensure.shelf('std.zip', b);
 
@@ -1221,32 +1219,32 @@ const createMewlix = function() {
         b = b.pop();
       }
       return Shelf.fromArray(output);
-    },
+    };
 
-    repeat(number: number, callback: (i?: number) => void): void {
+    function repeat(number: number, callback: (i?: number) => void): void {
       ensure.number('std.repeat', number);
       ensure.func('std.repeat', callback);
       for (let i = 0; i < number; i++) {
         callback(i);
       }
-    },
+    };
 
-    foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
+    function foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
       ensure.func('std.foreach', callback);
       ensure.shelf('std.foreach', shelf);
       for (const value of shelf) {
         callback(value);
       }
-    },
+    };
 
-    tuple(a: MewlixValue, b: MewlixValue): Box<MewlixValue> {
+    function tuple(a: MewlixValue, b: MewlixValue): Box<MewlixValue> {
       return new Box([
         ["first",  a],
         ["second", b],
       ]);
-    },
+    };
 
-    table(): Box<MewlixValue> {
+    function table(): Box<MewlixValue> {
       const table = new Map<MewlixValue, MewlixValue>();
       const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (key: MewlixValue, value: MewlixValue) => {
@@ -1269,9 +1267,9 @@ const createMewlix = function() {
         }],
       ]);
       return box;
-    },
+    };
 
-    set(): Box<MewlixValue> {
+    function set(): Box<MewlixValue> {
       const set = new Set<MewlixValue>();
       const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (value: MewlixValue) => {
@@ -1291,65 +1289,65 @@ const createMewlix = function() {
         }],
       ]);
       return box;
-    },
+    };
 
-    slap(value: MewlixValue): number {
+    function slap(value: MewlixValue): number {
       return conversion.toNumber(value);
-    },
+    };
 
-    round(value: number): number {
+    function round(value: number): number {
       ensure.number('std.round', value);
       return Math.round(value);
-    },
+    };
 
-    floor(value: number): number {
+    function floor(value: number): number {
       ensure.number('std.floor', value);
       return Math.floor(value);
-    },
+    };
 
-    ceiling(value: number): number {
+    function ceiling(value: number): number {
       ensure.number('std.ceiling', value);
       return Math.ceil(value);
-    },
+    };
 
-    min(a: number, b: number): number {
+    function min(a: number, b: number): number {
       ensure.number('std.min', a);
       ensure.number('std.min', b);
       return Math.min(a, b);
-    },
+    };
 
-    max(a: number, b: number): number {
+    function max(a: number, b: number): number {
       ensure.number('std.max', a);
       ensure.number('std.max', b);
       return Math.max(a, b);
-    },
+    };
 
-    clamp(value: number, min: number, max: number): number {
+    function clamp(value: number, min: number, max: number): number {
       ensure.number('std.clamp', value);
       ensure.number('std.clamp', min);
       ensure.number('std.clamp', max);
 
       return clamp_(value, min, max);
-    },
+    };
 
-    abs(value: number): number {
+    function abs(value: number): number {
       ensure.number('std.abs', value);
       return Math.abs(value);
-    },
+    };
 
-    pi: Math.PI,
-    e: Math.E,
+    const pi = Math.PI;
+    const e  = Math.E;
 
-    sqrt(value: number): number {
+    function sqrt(value: number): number {
       ensure.number('std.sqrt', value);
       if (value < 0) {
         throw new MewlixError(ErrorCode.InvalidOperation,
           `std.sqrt: Cannot calculate square root of negative number ${value}!`);
       }
       return Math.sqrt(value);
-    },
+    };
 
-    logn(value: number, base: number): number {
+    function logn(value: number, base: number): number {
       ensure.number('std.logn', value);
       if (value <= 0) {
         const logType = isNothing(base)
@@ -1367,45 +1365,45 @@ const createMewlix = function() {
           `std.logn: Invalid base for logarithm: ${base}!`);
       }
       return Math.log(value) / Math.log(base);
-    },
+    };
 
-    acos(value: number): number {
+    function acos(value: number): number {
       ensure.number('std.acos', value);
       return Math.acos(value);
-    },
+    };
 
-    asin(value: number): number {
+    function asin(value: number): number {
       ensure.number('std.asin', value);
       return Math.asin(value);
-    },
+    };
 
-    atan(value: number): number {
+    function atan(value: number): number {
       ensure.number('std.atan', value);
       return Math.atan(value);
-    },
+    };
 
-    cos(value: number): number {
+    function cos(value: number): number {
       ensure.number('std.cos', value);
       return Math.cos(value);
-    },
+    };
 
-    sin(value: number): number {
+    function sin(value: number): number {
       ensure.number('std.sin', value);
       return Math.sin(value);
-    },
+    };
 
-    tan(value: number): number {
+    function tan(value: number): number {
       ensure.number('std.tan', value);
       return Math.tan(value);
-    },
+    };
 
-    atan2(y: number, x: number): number {
+    function atan2(y: number, x: number): number {
       ensure.number('std.atan2', y);
       ensure.number('std.atan2', x);
       return Math.atan2(y, x);
-    },
+    };
 
-    truncate(value: number, places: number = 0): number {
+    function truncate(value: number, places: number = 0): number {
       ensure.number('std.truncate', value);
       ensure.number('std.truncate', places);
       if (places < 0) {
@@ -1414,13 +1412,13 @@ const createMewlix = function() {
       }
       const modifier = 10 ** places;
       return Math.trunc(value * modifier) / modifier;
-    },
+    };
 
-    random() {
+    function random() {
       return Math.random();
-    },
+    };
 
-    random_int(min: number, max: number): number {
+    function random_int(min: number, max: number): number {
       if (max === undefined) {
         max = min;
         min = 0;
@@ -1428,9 +1426,9 @@ const createMewlix = function() {
       ensure.number('std.random_int', min);
       ensure.number('std.random_int', max);
       return Math.floor(Math.random() * (max - min + 1) + min);
-    },
+    };
 
-    count(start: number = 0, end: number): Shelf<number> {
+    function count(start: number = 0, end: number): Shelf<number> {
       if (end === undefined) {
         end = start;
         start = 0;
@@ -1450,20 +1448,20 @@ const createMewlix = function() {
         output = output.push(i);
       }
       return output;
-    },
+    };
 
-    read(key: string): string | null {
+    function read(key: string): string | null {
       ensure.string('std.read', key);
       return localStorage.getItem(key);
-    },
+    };
 
-    save(key: string, contents: string): void {
+    function save(key: string, contents: string): void {
       ensure.string('std.save', key);
       ensure.string('std.save', contents);
       localStorage.setItem(key, contents);
-    },
+    };
 
-    date(): Box<number> {
+    function date(): Box<number> {
       const now = new Date();
       return new Box([
         [ "day"    , now.getDay() + 1   ],
@@ -1473,31 +1471,31 @@ const createMewlix = function() {
         [ "minutes", now.getMinutes()   ],
         [ "seconds", now.getSeconds()   ],
       ]);
-    },
+    };
 
-    time(): number {
+    function time(): number {
       return Date.now();
-    },
+    };
 
-    meowf(value: MewlixValue): string {
+    function meowf(value: MewlixValue): string {
       return meowFunc(purrify(value));
-    },
+    };
 
-    to_json(value: MewlixValue): string {
+    function to_json(value: MewlixValue): string {
       return JSON.stringify(value);
-    },
+    };
 
-    from_json(value: string): MewlixValue {
+    function from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
       return fromJSON(JSON.parse(value));
-    },
+    };
 
-    log(value: MewlixValue): void {
+    function log(value: MewlixValue): void {
       const message = purrify(value);
       console?.log(`[Mewlix] ${message}`);
-    },
+    };
 
-    error: new Box([
+    const error = new Box([
       ErrorCode.TypeMismatch,
       ErrorCode.InvalidOperation,
       ErrorCode.InvalidConversion,
@@ -1507,122 +1505,182 @@ const createMewlix = function() {
       ErrorCode.InvalidImport,
       ErrorCode.CriticalError,
       ErrorCode.ExternalError,
-    ].map(x => [x.name, x.id])),
+    ].map(x => [x.name, x.id]));
+
+  const Base = {
+    purr,
+    cat,
+    trim,
+    tear,
+    push_down,
+    push_up,
+    poke,
+    char,
+    bap,
+    nuzzle,
+    empty,
+    join,
+    take,
+    drop,
+    reverse,
+    sort,
+    shuffle,
+    insert,
+    remove,
+    map,
+    filter,
+    fold,
+    any,
+    all,
+    zip,
+    repeat,
+    foreach,
+    tuple,
+    table,
+    set,
+    slap,
+    round,
+    floor,
+    ceiling,
+    min,
+    max,
+    clamp,
+    abs,
+    pi,
+    e,
+    sqrt,
+    logn,
+    acos,
+    asin,
+    atan,
+    cos,
+    sin,
+    tan,
+    atan2,
+    truncate,
+    random,
+    random_int,
+    count,
+    read,
+    save,
+    date,
+    time,
+    meowf,
+    to_json,
+    from_json,
+    log,
+    error,
   };
   const BaseLibrary = library('std', Base);
 
   /* ------------------------------------------
    * Standard Library - Currying
    * ------------------------------------------ */
-  const BaseCurry = (() => {
-    const std = Base;
-
-    return {
-      tear: (str: string) =>
-        (start: number) =>
-          (end: number) =>
-            std.tear(str, start, end),
-
-      poke: <T extends string | Shelf<T>>(value: T) =>
-        (index: number) =>
-          std.poke(value, index),
-
-      join: <T1, T2 extends string | Shelf<T1>>(a: T2) =>
-        (b: T2): string | Shelf<T1> =>
-          std.join(a, b),
-
-      take: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
-        (amount: number): string | Shelf<T1> =>
-          std.take(value, amount),
-
-      drop: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
-        (amount: number): string | Shelf<T1> =>
-          std.drop(value, amount),
-
-      insert: <T>(shelf: Shelf<T>) =>
-        (value: T) =>
-          (index: number) =>
-            std.insert(shelf, value, index),
-
-      remove: <T>(shelf: Shelf<T>) =>
-        (index: number) =>
-            std.remove(shelf, index),
-
-      map: <T1, T2>(callback: (x: T1) => T2) =>
-          (shelf: Shelf<T1>) =>
-            std.map(callback, shelf),
-
-      filter: <T1>(predicate: (x: T1) => boolean) =>
-        (shelf: Shelf<T1>) =>
-          std.filter(predicate, shelf),
-
-      fold: <T1, T2>(callback: (acc: T2, x: T1) => T2) =>
-        (initial: T2) =>
-          (shelf: Shelf<T1>) =>
-            std.fold(callback, initial, shelf),
-
-      any: <T>(predicate: (x: T) => boolean) =>
-        (shelf: Shelf<T>) =>
-          std.any(predicate, shelf),
-
-      all: <T>(predicate: (x: T) => boolean) =>
-        (shelf: Shelf<T>) =>
-          std.all(predicate, shelf),
-
-      zip: <T1, T2>(a: Shelf<T1>) =>
-        (b: Shelf<T2>) =>
-          std.zip(a, b),
-
-      repeat: (number: number) =>
-        (callback: (i?: number) => void) =>
-          std.repeat(number, callback),
-
-      foreach: <T>(callback: (x: T) => void) =>
-        (shelf: Shelf<T>) =>
-          std.foreach(callback, shelf),
-
-      tuple: (a: MewlixValue) =>
-        (b: MewlixValue) =>
-          std.tuple(a, b),
-
-      min: (a: number) =>
-        (b: number) =>
-          std.min(a, b),
-
-      max: (a: number) =>
-        (b: number) =>
-          std.max(a, b),
-
-      clamp: (value: number) =>
-        (min: number) =>
-          (max: number) =>
-            std.clamp(value, min, max),
-
-      logn: (value: number) =>
-        (base: number) =>
-          std.logn(value, base),
-
-      atan: (y: number) =>
-        (x: number) =>
-          std.atan2(y, x),
-
-      truncate: (value: number) =>
-        (places: number) =>
-          std.truncate(value, places),
-
-      random_int: (min: number) =>
-        (max: number) =>
-          std.random_int(min, max),
-
-      count: (start: number) =>
+  const BaseCurry = {
+    tear: (str: string) =>
+      (start: number) =>
         (end: number) =>
-          std.count(start, end),
+          tear(str, start, end),
 
-      save: (key: string) =>
-        (contents: string) =>
-          std.save(key, contents),
-    };
-  })();
+    poke: <T extends string | Shelf<T>>(value: T) =>
+      (index: number) =>
+        poke(value, index),
+
+    join: <T1, T2 extends string | Shelf<T1>>(a: T2) =>
+      (b: T2): string | Shelf<T1> =>
+        join(a, b),
+
+    take: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
+      (amount: number): string | Shelf<T1> =>
+        take(value, amount),
+
+    drop: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
+      (amount: number): string | Shelf<T1> =>
+        drop(value, amount),
+
+    insert: <T>(shelf: Shelf<T>) =>
+      (value: T) =>
+        (index: number) =>
+          insert(shelf, value, index),
+
+    remove: <T>(shelf: Shelf<T>) =>
+      (index: number) =>
+        remove(shelf, index),
+
+    map: <T1, T2>(callback: (x: T1) => T2) =>
+      (shelf: Shelf<T1>) =>
+        map(callback, shelf),
+
+    filter: <T1>(predicate: (x: T1) => boolean) =>
+      (shelf: Shelf<T1>) =>
+        filter(predicate, shelf),
+
+    fold: <T1, T2>(callback: (acc: T2, x: T1) => T2) =>
+      (initial: T2) =>
+        (shelf: Shelf<T1>) =>
+          fold(callback, initial, shelf),
+
+    any: <T>(predicate: (x: T) => boolean) =>
+      (shelf: Shelf<T>) =>
+        any(predicate, shelf),
+
+    all: <T>(predicate: (x: T) => boolean) =>
+      (shelf: Shelf<T>) =>
+        all(predicate, shelf),
+
+    zip: <T1, T2>(a: Shelf<T1>) =>
+      (b: Shelf<T2>) =>
+        zip(a, b),
+
+    repeat: (number: number) =>
+      (callback: (i?: number) => void) =>
+        repeat(number, callback),
+
+    foreach: <T>(callback: (x: T) => void) =>
+      (shelf: Shelf<T>) =>
+        foreach(callback, shelf),
+
+    tuple: (a: MewlixValue) =>
+      (b: MewlixValue) =>
+        tuple(a, b),
+
+    min: (a: number) =>
+      (b: number) =>
+        min(a, b),
+
+    max: (a: number) =>
+      (b: number) =>
+        max(a, b),
+
+    clamp: (value: number) =>
+      (min: number) =>
+        (max: number) =>
+          clamp(value, min, max),
+
+    logn: (value: number) =>
+      (base: number) =>
+        logn(value, base),
+
+    atan: (y: number) =>
+      (x: number) =>
+        atan2(y, x),
+
+    truncate: (value: number) =>
+      (places: number) =>
+        truncate(value, places),
+
+    random_int: (min: number) =>
+      (max: number) =>
+        random_int(min, max),
+
+    count: (start: number) =>
+      (end: number) =>
+        count(start, end),
+
+    save: (key: string) =>
+      (contents: string) =>
+        save(key, contents),
+  };
   const BaseCurryLibrary = curryLibrary('std.curry', BaseLibrary, BaseCurry);
 
   /* -------------------------------------------------------
