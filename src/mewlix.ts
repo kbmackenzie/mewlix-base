@@ -97,7 +97,7 @@ function purrifyBox<T>(object: Box<T> | StringIndexable<T>): string {
   const pairs = getEntries(object).map(
     ([key, value]) => `${key}: ${purrifyItem(value)}`
   ).join(', ');
-  return `=^-x-^= [ ${pairs} ]`;
+  return `📦 [ ${pairs} ]`;
 }
 
 /* -----------------------------------------------------
