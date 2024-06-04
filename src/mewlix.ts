@@ -1589,27 +1589,46 @@ const createMewlix = function() {
   /* ------------------------------------------
    * Standard Library - Currying
    * ------------------------------------------ */
+  
+  /* Note: When currying overloaded functions, the type system gets quirky.
+   * 
+   * For example, this is how the 'poke' function *should* be curried in order to be
+   * accepted by the type system:
+   *
+      function pokeCurry(value: string): (index: number) => string | null;
+      function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
+      function pokeCurry<T>(value: string | Shelf<T>): (index: number) => string | T | null {
+        if (typeof value === 'string') return (index: number) => poke(value, index);
+        return (index: number) => poke<T>(value, index);
+      };
+    *
+    * This is some *really* stupid runtime redundancy.
+    * I *really* don't want to do that.
+    *
+    * Thus, type-casting *will* need to be used here.
+    * While it hurts type safety, it's a worthwhile trade-off. */
+
   const BaseCurry = {
     tear: (str: string) =>
       (start: number) =>
         (end: number) =>
           tear(str, start, end),
 
-    poke: <T extends string | Shelf<T>>(value: T) =>
+    poke: <T>(value: string | Shelf<T>) =>
       (index: number) =>
-        poke(value, index),
+        poke(value as any, index) as string | Shelf<T>,
 
-    join: <T1, T2 extends string | Shelf<T1>>(a: T2) =>
-      (b: T2): string | Shelf<T1> =>
-        join(a, b),
+    join: <T>(a: string | Shelf<T>) =>
+      (b: string | Shelf<T>) =>
+        join(a as any, b as any) as string | Shelf<T>,
 
-    take: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
-      (amount: number): string | Shelf<T1> =>
-        take(value, amount),
+    take: <T>(value: string | Shelf<T>) =>
+      (amount: number) =>
+        take(value as any, amount) as string | Shelf<T>,
 
-    drop: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
-      (amount: number): string | Shelf<T1> =>
-        drop(value, amount),
+    drop: <T>(value: string | Shelf<T>) =>
+      (amount: number) =>
+        drop(value as any, amount) as string | Shelf<T>,
 
     insert: <T>(shelf: Shelf<T>) =>
       (value: T) =>
