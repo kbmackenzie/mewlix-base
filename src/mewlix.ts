@@ -1041,7 +1041,9 @@ const createMewlix = function() {
       `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
   };
 
-  function take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+  function take(value: string, amount: number): string;
+  function take<T>(value: Shelf<T>, amount: number): Shelf<T>;
+  function take<T>(value: string | Shelf<T>, amount: number): string | Shelf<T> {
     ensure.number('std.take', amount);
 
     if (typeof value === 'string') return value.slice(0, amount);
@@ -1063,16 +1065,18 @@ const createMewlix = function() {
       `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
   };
 
-  function drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+  function drop(value: string, amount: number): string;
+  function drop<T>(value: Shelf<T>, amount: number): Shelf<T>;
+  function drop<T>(value: string | Shelf<T>, amount: number): string | Shelf<T> {
     ensure.number('std.drop', amount);
 
     if (typeof value === 'string') return value.slice(amount);
     if (value instanceof Shelf) {
-      let output: Shelf<T1> = value;
+      let output: Shelf<T> = value;
       for (let i = amount; i > 0; i--) {
         output = output?.pop();
       }
-      return output ?? new ShelfBottom<T1>();
+      return output ?? new ShelfBottom<T>();
     }
 
     const typeOfValue = reflection.typeOf(value);
@@ -1080,7 +1084,9 @@ const createMewlix = function() {
       `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
   };
 
-  function reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
+  function reverse(value: string): string;
+  function reverse<T>(value: Shelf<T>): Shelf<T>;
+  function reverse<T>(value: string | Shelf<T>): string | Shelf<T> {
     if (typeof value === 'string') return [...value].reverse().join('');
     if (value instanceof Shelf) return Shelf.reverse(value);
 
