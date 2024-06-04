@@ -716,19 +716,19 @@ export const strings = {
 };
 
 export const shelves = {
-  peek: function peek<T>(shelf: Shelf<T>): T | null {
+  peek<T>(shelf: Shelf<T>): T | null {
     ensure.shelf('paw at', shelf);
     return shelf.peek();
   },
-  pop: function pop<T>(shelf: Shelf<T>): Shelf<T> {
+  pop<T>(shelf: Shelf<T>): Shelf<T> {
     ensure.shelf('knock over', shelf);
     return shelf.pop();
   },
-  push: function push<T>(value: T, shelf: Shelf<T>): Shelf<T> {
+  push<T>(value: T, shelf: Shelf<T>): Shelf<T> {
     ensure.shelf('push', shelf);
     return shelf.push(value);
   },
-  length: function length<T>(value: Shelf<T> | string): number {
+  length<T>(value: Shelf<T> | string): number {
     if (value instanceof Shelf) return value.length();
     if (typeof value === 'string') return value.length;
 
@@ -736,7 +736,7 @@ export const shelves = {
     throw new MewlixError(ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${value}`);
   },
-  contains: function contains<T1, T2>(a: T1, b: Shelf<T1> | Box<T2> | string): boolean {
+  contains<T1, T2>(a: T1, b: Shelf<T1> | Box<T2> | string): boolean {
     if (b instanceof Shelf) { return b.contains(a); }
 
     if (typeof a !== 'string') {
@@ -773,14 +773,14 @@ export const reflection = {
     }
   },
 
-  instanceOf: function instanceOf<T>(a: Box<T>, b: Function): boolean {
+  instanceOf<T>(a: Box<T>, b: Function): boolean {
     ensure.box('is', a);
     return a instanceof b;
   },
 };
 
 export const boxes = {
-  pairs: function pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
+  pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
     ensure.box('claw at', value);
     return Shelf.fromArray(getEntries(value).map(
       ([key, value]) => new Box<string | T>([["key", key], ["value", value]])
@@ -954,7 +954,7 @@ const createMewlix = function() {
       return str.toUpperCase();
     },
 
-    poke: function poke<T>(value: string | Shelf<T>, index: number = 0): T | string | null {
+    poke<T>(value: string | Shelf<T>, index: number = 0): T | string | null {
       ensure.number('std.poke', index);
 
       if (typeof value === 'string') {
@@ -1007,7 +1007,7 @@ const createMewlix = function() {
       return conversion.toBool(value);
     },
 
-    empty: function empty<T>(value: string | Shelf<T>): boolean {
+    empty<T>(value: string | Shelf<T>): boolean {
       if (typeof value === 'string') return value === '';
       if (value instanceof Shelf) return value instanceof ShelfBottom;
 
@@ -1016,7 +1016,7 @@ const createMewlix = function() {
         `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
 
-    join: function join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
+    join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
       if (typeof a === 'string' && typeof b === 'string') {
         return a + b;
       }
@@ -1029,7 +1029,7 @@ const createMewlix = function() {
           `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
     },
 
-    take: function take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+    take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.take', amount);
 
       if (typeof value === 'string') return value.slice(0, amount);
@@ -1051,7 +1051,7 @@ const createMewlix = function() {
         `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
     },
 
-    drop: function drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
+    drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.drop', amount);
 
       if (typeof value === 'string') return value.slice(amount);
@@ -1068,7 +1068,7 @@ const createMewlix = function() {
         `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
     },
 
-    reverse: function reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
+    reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
       if (typeof value === 'string') return [...value].reverse().join('');
       if (value instanceof Shelf) return Shelf.reverse(value);
 
@@ -1077,7 +1077,7 @@ const createMewlix = function() {
         `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
     
-    sort: function sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
+    sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
       ensure.shelf('std.sort', shelf);
       return Shelf.fromArray(shelf
         .toArray()
@@ -1085,7 +1085,7 @@ const createMewlix = function() {
       );
     },
 
-    shuffle: function shuffle<T>(shelf: Shelf<T>): Shelf<T> {
+    shuffle<T>(shelf: Shelf<T>): Shelf<T> {
       ensure.shelf('std.shuffle', shelf);
       const output = shelf.toArray();
 
@@ -1099,7 +1099,7 @@ const createMewlix = function() {
       return Shelf.fromArray(output);
     },
 
-    insert: function insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
+    insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
       ensure.shelf('std.insert', shelf);
       ensure.number('std.insert', index);
 
@@ -1120,7 +1120,7 @@ const createMewlix = function() {
       return bottom;
     },
 
-    remove: function remove<T>(shelf: Shelf<T>, index: number = 0): Shelf<T> {
+    remove<T>(shelf: Shelf<T>, index: number = 0): Shelf<T> {
       ensure.shelf('std.remove', shelf);
       ensure.number('std.remove', index);
 
@@ -1141,7 +1141,7 @@ const createMewlix = function() {
       return bottom;
     },
 
-    map: function map<T1, T2>(callback: (x: T1) => T2, shelf: Shelf<T1>): Shelf<T2> {
+    map<T1, T2>(callback: (x: T1) => T2, shelf: Shelf<T1>): Shelf<T2> {
       ensure.func('std.map', callback);
       ensure.shelf('std.map', shelf);
 
@@ -1154,7 +1154,7 @@ const createMewlix = function() {
       return Shelf.fromArray(output);
     },
 
-    filter: function filter<T1>(predicate: (x: T1) => boolean, shelf: Shelf<T1>): Shelf<T1> {
+    filter<T1>(predicate: (x: T1) => boolean, shelf: Shelf<T1>): Shelf<T1> {
       ensure.func('std.filter', predicate);
       ensure.shelf('std.filter', shelf);
 
@@ -1168,7 +1168,7 @@ const createMewlix = function() {
       return Shelf.reverse(bucket);
     },
 
-    fold: function fold<T1, T2>(callback: (acc: T2, x: T1) => T2, initial: T2, shelf: Shelf<T1>) {
+    fold<T1, T2>(callback: (acc: T2, x: T1) => T2, initial: T2, shelf: Shelf<T1>) {
       ensure.func('std.fold', callback);
       ensure.shelf('std.fold', shelf);
 
@@ -1179,7 +1179,7 @@ const createMewlix = function() {
       return accumulator;
     },
 
-    any: function any<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
+    any<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
       ensure.func('std.any', predicate);
       ensure.shelf('std.any', shelf);
       for (const value of shelf) {
@@ -1188,7 +1188,7 @@ const createMewlix = function() {
       return false;
     },
 
-    all: function all<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
+    all<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
       ensure.func('std.all', predicate);
       ensure.shelf('std.all', shelf);
       for (const value of shelf) {
@@ -1197,7 +1197,7 @@ const createMewlix = function() {
       return true;
     },
 
-    zip: function zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<T1 | T2>> {
+    zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<T1 | T2>> {
       ensure.shelf('std.zip', a);
       ensure.shelf('std.zip', b);
 
@@ -1224,7 +1224,7 @@ const createMewlix = function() {
       }
     },
 
-    foreach: function foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
+    foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
       ensure.func('std.foreach', callback);
       ensure.shelf('std.foreach', shelf);
       for (const value of shelf) {
@@ -1239,7 +1239,7 @@ const createMewlix = function() {
       ]);
     },
 
-    table: function(): Box<MewlixValue> {
+    table(): Box<MewlixValue> {
       const table = new Map<MewlixValue, MewlixValue>();
       const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (key: MewlixValue, value: MewlixValue) => {
@@ -1264,7 +1264,7 @@ const createMewlix = function() {
       return box;
     },
 
-    set: function(): Box<MewlixValue> {
+    set(): Box<MewlixValue> {
       const set = new Set<MewlixValue>();
       const box: Box<MewlixValue> = new Box<MewlixValue>([
         ["add", (value: MewlixValue) => {
