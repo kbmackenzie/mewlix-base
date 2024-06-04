@@ -406,16 +406,16 @@ export class Enum extends Box<EnumValue | string> {
  * Clowder -> Base for all clowders.
  * ----------------------------------------------------- */
 /* The clowder constructor symbol. */
-export const wakeSymbol: unique symbol = Symbol('wake');
+export const wake: unique symbol = Symbol('wake');
 
 /* All clowders should inherit from this class.
  * It has a default definition for wake(), too. */
 export class Clowder<T> extends Box<T> {
-  [wakeSymbol]: (...args: any[]) => Clowder<T>;
+  [wake]: (...args: any[]) => Clowder<T>;
 
   constructor() {
     super();
-    this[wakeSymbol] = () => this;
+    this[wake] = () => this;
   }
 }
 
@@ -1629,7 +1629,7 @@ const createMewlix = function() {
     ShelfBottom: ShelfBottom,
     Box: Box,
     Enum: Enum,
-    wake: wakeSymbol,
+    wake: wake,
     Clowder: Clowder,
     YarnBall: YarnBall,
     fromJSON: fromJSON,

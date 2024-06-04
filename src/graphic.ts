@@ -11,7 +11,7 @@ import {
   DynamicBox,
   reflection,
   opaque,
-  wakeSymbol,
+  wake,
   ensure,
   clamp_,
   purrify,
@@ -544,7 +544,7 @@ export default function(mewlix: Mewlix): void {
   };
 
   class Vector2 extends Clowder<MewlixValue> {
-    [wakeSymbol]: (x: number, y: number) => Vector2;
+    [wake]: (x: number, y: number) => Vector2;
     _box: Vector2Like & DynamicBox<MewlixValue>;
 
     box() {
@@ -555,7 +555,7 @@ export default function(mewlix: Mewlix): void {
       super();
       this._box = { x: 0, y: 0 };
 
-      this[wakeSymbol] = (x: number, y: number) => {
+      this[wake] = (x: number, y: number) => {
         ensure.number('Vector2.wake', x);
         ensure.number('Vector2.wake', y);
         this.box().x = x;
@@ -569,7 +569,7 @@ export default function(mewlix: Mewlix): void {
         [ax, ay, bx, by].forEach(value => {
           ensure.number('Vector2.add', value);
         });
-        return new Vector2()[wakeSymbol](ax + bx, ay + by);
+        return new Vector2()[wake](ax + bx, ay + by);
       };
 
       this.box().mul = (that: Vector2) => {
@@ -578,7 +578,7 @@ export default function(mewlix: Mewlix): void {
         [ax, ay, bx, by].forEach(value => {
           ensure.number('Vector2.mul', value);
         });
-        return new Vector2()[wakeSymbol](ax * bx, ay * by);
+        return new Vector2()[wake](ax * bx, ay * by);
       };
 
       this.box().distance = (that: Vector2) => {
@@ -618,7 +618,7 @@ export default function(mewlix: Mewlix): void {
   };
 
   class Rectangle extends Clowder<MewlixValue> {
-    [wakeSymbol]: (x: number, y: number, width: number, height: number) => Rectangle;
+    [wake]: (x: number, y: number, width: number, height: number) => Rectangle;
     _box: RectangleLike & DynamicBox<MewlixValue>;
 
     box() {
@@ -634,7 +634,7 @@ export default function(mewlix: Mewlix): void {
         height: 0
       };
 
-      this[wakeSymbol] = (x: number, y: number, width: number, height: number) => {
+      this[wake] = (x: number, y: number, width: number, height: number) => {
         [x, y, width, height].forEach(value => {
           ensure.number('Rectangle.wake', value)
         });
@@ -674,7 +674,7 @@ export default function(mewlix: Mewlix): void {
   };
 
   class GridSlot extends Clowder<MewlixValue> {
-    [wakeSymbol]: (row: number, column: number) => GridSlot;
+    [wake]: (row: number, column: number) => GridSlot;
     _box: GridSlotLike & DynamicBox<MewlixValue>;
 
     box() {
@@ -685,7 +685,7 @@ export default function(mewlix: Mewlix): void {
       super();
       this._box = { row: 0, column: 0 };
 
-      this[wakeSymbol] = (row: number, column: number) => {
+      this[wake] = (row: number, column: number) => {
         ensure.number('GridSlot.wake', row);
         ensure.number('GridSlot.wake', column);
 
@@ -708,13 +708,13 @@ export default function(mewlix: Mewlix): void {
 
     const row = Math.min(py / gridSlotHeight);
     const col = Math.min(px / gridSlotWidth);
-    return new GridSlot()[wakeSymbol](row, col);
+    return new GridSlot()[wake](row, col);
   }
 
   function gridSlotToPosition(slot: GridSlot): Vector2 {
     const { row, column } = slot.box();
 
-    return new Vector2()[wakeSymbol](
+    return new Vector2()[wake](
       column * gridSlotWidth,
       row * gridSlotHeight,
     );
@@ -731,7 +731,7 @@ export default function(mewlix: Mewlix): void {
   };
 
   class Color extends Clowder<MewlixValue> {
-    [wakeSymbol]: (red: number, green: number, blue: number, opacity?: number) => Color;
+    [wake]: (red: number, green: number, blue: number, opacity?: number) => Color;
     _box: ColorLike & DynamicBox<MewlixValue>;
 
     box() {
@@ -748,7 +748,7 @@ export default function(mewlix: Mewlix): void {
         alpha() { return 0; },
       };
 
-      this[wakeSymbol] = (red: number, green: number, blue: number, opacity: number = 100) => {
+      this[wake] = (red: number, green: number, blue: number, opacity: number = 100) => {
         [red, green, blue, opacity].forEach(
           value => ensure.number('Color.wake', value)
         );
@@ -794,7 +794,7 @@ export default function(mewlix: Mewlix): void {
         str = str.split('').map(x => x + x).join('');
       }
 
-      return new Color()[wakeSymbol](
+      return new Color()[wake](
         parseInt(str.slice(0, 1), 16),
         parseInt(str.slice(2, 3), 16),
         parseInt(str.slice(4, 5), 16),
@@ -805,7 +805,7 @@ export default function(mewlix: Mewlix): void {
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
   class PixelCanvas extends Clowder<MewlixValue> {
-    [wakeSymbol]: (width: number, height: number) => PixelCanvas;
+    [wake]: (width: number, height: number) => PixelCanvas;
     width: number;
     height: number;
     data: Uint8ClampedArray | null;
@@ -816,7 +816,7 @@ export default function(mewlix: Mewlix): void {
       this.height = 0;
       this.data = null;
 
-      this[wakeSymbol] = (width: number, height: number) => {
+      this[wake] = (width: number, height: number) => {
         ensure.number('PixelCanvas.wake', width);
         ensure.number('PixelCanvas.wake', height);
 
@@ -870,7 +870,7 @@ export default function(mewlix: Mewlix): void {
         };
 
         const index = (x * this.width + y) * 4;
-        return new Color()[wakeSymbol](
+        return new Color()[wake](
           this.data[index],
           this.data[index + 1],
           this.data[index + 2],
@@ -1128,7 +1128,7 @@ export default function(mewlix: Mewlix): void {
 
     mouse_down: isMouseDown,
 
-    mouse_position: () => new Vector2()[wakeSymbol](mouseX, mouseY),
+    mouse_position: () => new Vector2()[wake](mouseX, mouseY),
 
     play_music(key: string) {
       ensure.string('graphic.play_music', key);
