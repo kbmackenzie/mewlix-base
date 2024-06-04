@@ -13,9 +13,15 @@ export type MewlixValue =
   | boolean
   | Shelf<MewlixValue>
   | Box<MewlixValue>
-  | Function
+  | MewlixFunction
+  | MewlixConstructor
   | null
-  | undefined;
+  | void
+  | undefined
+  | Promise<void>;
+
+export type MewlixFunction = (...args: any[]) => MewlixValue;
+export type MewlixConstructor = new (...args: any[]) => MewlixValue;
 
 /* -----------------------------------------------------
  * MewlixError -> Custom error type.
@@ -998,7 +1004,7 @@ const createMewlix = function() {
         `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
     },
 
-    join: function join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2) {
+    join: function join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
       if (typeof a === 'string' && typeof b === 'string') {
         return a + b;
       }
@@ -1011,7 +1017,7 @@ const createMewlix = function() {
           `std.join: Values of type '${typeofA}' and '${typeofB}' can't be concatenated!`);
     },
 
-    take: function take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number) {
+    take: function take<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.take', amount);
 
       if (typeof value === 'string') return value.slice(0, amount);
@@ -1033,7 +1039,7 @@ const createMewlix = function() {
         `std.take: Can't perform 'take' operation on value of type "${typeOfValue}": ${value}`);
     },
 
-    drop: function drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number) {
+    drop: function drop<T1, T2 extends string | Shelf<T1>>(value: T2, amount: number): string | Shelf<T1> {
       ensure.number('std.drop', amount);
 
       if (typeof value === 'string') return value.slice(amount);
@@ -1050,7 +1056,7 @@ const createMewlix = function() {
         `std.drop: Can't perform 'drop' operation on value of type "${typeOfValue}": ${value}`);
     },
 
-    reverse: function reverse<T1, T2 extends string | Shelf<T1>>(value: T2) {
+    reverse: function reverse<T1, T2 extends string | Shelf<T1>>(value: T2): string | Shelf<T1> {
       if (typeof value === 'string') return [...value].reverse().join('');
       if (value instanceof Shelf) return Shelf.reverse(value);
 
@@ -1214,7 +1220,7 @@ const createMewlix = function() {
       }
     },
 
-    tuple(a: MewlixValue, b: MewlixValue) {
+    tuple(a: MewlixValue, b: MewlixValue): Box<MewlixValue> {
       return new Box([
         ["first",  a],
         ["second", b],
@@ -1498,20 +1504,20 @@ const createMewlix = function() {
           (end: number) =>
             std.tear(str, start, end),
 
-      poke: <T>(value: string | Shelf<T>) =>
+      poke: <T extends string | Shelf<T>>(value: T) =>
         (index: number) =>
           std.poke(value, index),
 
-      join: <T>(a: string | Shelf<T>) =>
-        (b: string | Shelf<T>) =>
+      join: <T1, T2 extends string | Shelf<T1>>(a: T2) =>
+        (b: T2): string | Shelf<T1> =>
           std.join(a, b),
 
-      take: <T>(value: string | Shelf<T>) =>
-        (amount: number) =>
+      take: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
+        (amount: number): string | Shelf<T1> =>
           std.take(value, amount),
 
-      drop: <T>(value: string | Shelf<T>) =>
-        (amount: number) =>
+      drop: <T1, T2 extends string | Shelf<T1>>(value: T2) =>
+        (amount: number): string | Shelf<T1> =>
           std.drop(value, amount),
 
       insert: <T>(shelf: Shelf<T>) =>
