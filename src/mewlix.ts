@@ -747,7 +747,7 @@ export const shelves = {
     }
 
     if (typeof b === 'string') { return b.includes(a); }
-    if (b instanceof Box) { return a in b._box; }
+    if (b instanceof Box) { return a in b.box(); }
 
     const typeOfB = reflection.typeOf(b);
     throw new MewlixError(ErrorCode.TypeMismatch,
