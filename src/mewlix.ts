@@ -363,6 +363,10 @@ export class Box<T> extends MewlixObject implements BoxLike<DynamicBox<T>> {
   toString(): string {
     return purrifyBox(this);
   }
+
+  toJSON() {
+    return this.box();
+  }
 };
 
 /* -----------------------------------------------------
