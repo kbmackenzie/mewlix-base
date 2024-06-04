@@ -583,22 +583,22 @@ export class Comparison {
  * Basic operations.
  * ----------------------------------------------------- */
 export const numbers = {
-  add: function add(a: number, b: number): number {
+  add(a: number, b: number): number {
     ensure.number('+', a);
     ensure.number('+', b);
     return a + b;
   },
-  sub: function sub(a: number, b: number): number {
+  sub(a: number, b: number): number {
     ensure.number('-', a);
     ensure.number('-', b);
     return a - b;
   },
-  mul: function mul(a: number, b: number): number {
+  mul(a: number, b: number): number {
     ensure.number('*', a);
     ensure.number('*', b);
     return a * b;
   },
-  div: function div(a: number, b: number): number {
+  div(a: number, b: number): number {
     ensure.number('/', a);
     ensure.number('/', b);
     if (b === 0) {
@@ -607,7 +607,7 @@ export const numbers = {
     }
     return a / b;
   },
-  floordiv: function floordiv(a: number, b: number): number {
+  floordiv(a: number, b: number): number {
     ensure.number('//', a);
     ensure.number('//', b);
     if (b == 0) {
@@ -616,7 +616,7 @@ export const numbers = {
     }
     return Math.floor(a / b);
   },
-  mod: function mod(a: number, b: number): number {
+  mod(a: number, b: number): number {
     ensure.number('%', a);
     ensure.number('%', b);
     if (b === 0) {
@@ -625,38 +625,38 @@ export const numbers = {
     }
     return ((a % b) + b) % b;
   },
-  pow: function pow(a: number, b: number): number {
+  pow(a: number, b: number): number {
     ensure.number('^', a);
     ensure.number('^', b);
     return a ** b;
   },
-  plus: function plus(a: number): number {
+  plus(a: number): number {
     ensure.number('+', a);
     return +a;
   },
-  minus: function minus(a: number): number {
+  minus(a: number): number {
     ensure.number('-', a);
     return -a;
   },
 };
 
 export const boolean = {
-  not: function not(a: any): boolean {
+  not(a: any): boolean {
     return !conversion.toBool(a);
   },
-  or: function or(a: any, fb: () => any): any {
+  or(a: any, fb: () => any): any {
     return conversion.toBool(a) ? a : fb();
   },
-  and: function and(a: any, fb: () => any): any {
+  and(a: any, fb: () => any): any {
     return conversion.toBool(a) ? fb() : a;
   },
-  ternary: function ternary(condition: any, fa: () => any, fb: () => any): any {
+  ternary(condition: any, fa: () => any, fb: () => any): any {
     return conversion.toBool(condition) ? fa() : fb();
   },
 };
 
 export const compare = {
-  isEqual: function isEqual(a: MewlixValue, b: MewlixValue): boolean {
+  isEqual(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
 
@@ -667,7 +667,7 @@ export const compare = {
   },
 
   // -- Numeric comparison:
-  compare: function compare(a: MewlixValue, b: MewlixValue): Comparison {
+  compare(a: MewlixValue, b: MewlixValue): Comparison {
     if (typeof a !== typeof b) {
       const typeofA = reflection.typeOf(a);
       const typeofB = reflection.typeOf(b);
@@ -692,7 +692,7 @@ export const compare = {
 };
 
 export const strings = {
-  concat: function concat(a: MewlixValue, b: MewlixValue): string {
+  concat(a: MewlixValue, b: MewlixValue): string {
     return purrify(a) + purrify(b);
   },
 };
@@ -738,7 +738,7 @@ export const shelves = {
 };
 
 export const reflection = {
-  typeOf: function typeOf(value: any): string {
+  typeOf(value: any): string {
     if (value instanceof Shelf) return 'shelf';
     if (value instanceof Box) return 'box';
     if (value instanceof YarnBall) return 'yarn ball';
@@ -771,7 +771,7 @@ export const boxes = {
 };
 
 export const conversion = {
-  toBool: function toBool(x: MewlixValue): boolean {
+  toBool(x: MewlixValue): boolean {
     switch (typeof x) {
       case 'object'   : return x !== null;
       case 'boolean'  : return x;
@@ -779,7 +779,7 @@ export const conversion = {
       default         : return true;
     }
   },
-  toNumber: function toNumber(x: MewlixValue): number {
+  toNumber(x: MewlixValue): number {
     switch (typeof x) {
       case 'number' : return x;
       case 'boolean': return x ? 1 : 0;
@@ -799,7 +799,7 @@ export const conversion = {
  * Statement built-ins
  * ----------------------------------------------------- */
 const internal = {
-  canChase: function canChase(value: MewlixValue): MewlixValue {
+  canChase(value: MewlixValue): MewlixValue {
     if (typeof value === 'string' || value instanceof Shelf) {
       return value;
     }
@@ -807,7 +807,7 @@ const internal = {
     throw new MewlixError(ErrorCode.TypeMismatch,
       `Expected string or shelf; received value of type '${typeOfValue}': ${value}`);
   },
-  pounceError: function pounceError(error: Error): Box<string | number | null> {
+  pounceError(error: Error): Box<string | number | null> {
     const errorCode: ErrorCode = (error instanceof MewlixError)
       ? error.code 
       : ErrorCode.ExternalError;
@@ -817,7 +817,7 @@ const internal = {
       [ "message" , error.message ? purrify(error.message) : null ],
     ]);
   },
-  assert: function assert(expr: MewlixValue, message: string): void {
+  assert(expr: MewlixValue, message: string): void {
     if (conversion.toBool(expr)) return;
     throw new MewlixError(ErrorCode.CatOnComputer,
       `Assertion failed: ${message}`);
@@ -901,11 +901,11 @@ const createMewlix = function() {
    * they're going to be accessible from within Mewlix. */
 
   const Base = {
-    purr: function purr(value: MewlixValue): string {
+    purr(value: MewlixValue): string {
       return purrify(value);
     },
 
-    cat: function cat(shelf: Shelf<string>): string {
+    cat(shelf: Shelf<string>): string {
       let acc = '';
       for (const value of shelf) {
         acc = purrify(value) + acc;
@@ -913,12 +913,12 @@ const createMewlix = function() {
       return acc;
     },
 
-    trim: function trim(str: string): string {
+    trim(str: string): string {
       ensure.string('std.trim', str)
       return str.trim();
     },
 
-    tear: function tear(str: string, start: number, end: number): string {
+    tear(str: string, start: number, end: number): string {
       ensure.string('std.tear', str);
       ensure.number('std.tear', start);
       ensure.number('std.tear', end);
@@ -926,12 +926,12 @@ const createMewlix = function() {
       return str.substring(start, end);
     },
 
-    push_down: function push_down(str: string): string {
+    push_down(str: string): string {
       ensure.string('std.push_down', str);
       return str.toLowerCase();
     },
 
-    push_up: function push_up(str: string): string {
+    push_up(str: string): string {
       ensure.string('std.push_up', str);
       return str.toUpperCase();
     },
@@ -961,7 +961,7 @@ const createMewlix = function() {
         `std.join: Can't index into value of type "${typeOfValue}": ${value}`);
     },
 
-    char: function char(value: number): string {
+    char(value: number): string {
       ensure.number('std.char', value);
       if (value < 0 || value > 65535) {
         throw new MewlixError(ErrorCode.InvalidOperation,
@@ -970,7 +970,7 @@ const createMewlix = function() {
       return String.fromCharCode(value);
     },
 
-    bap: function bap(value: string): number {
+    bap(value: string): number {
       ensure.string('std.bap', value);
       if (value.length === 0) {
         throw new MewlixError(ErrorCode.InvalidOperation,
@@ -985,7 +985,7 @@ const createMewlix = function() {
       return code;
     },
 
-    nuzzle: function nuzzle(value: MewlixValue): boolean {
+    nuzzle(value: MewlixValue): boolean {
       return conversion.toBool(value);
     },
 
@@ -1198,7 +1198,7 @@ const createMewlix = function() {
       return Shelf.fromArray(output);
     },
 
-    repeat: function repeat(number: number, callback: (i?: number) => void): void {
+    repeat(number: number, callback: (i?: number) => void): void {
       ensure.number('std.repeat', number);
       ensure.func('std.repeat', callback);
       for (let i = 0; i < number; i++) {
@@ -1214,7 +1214,7 @@ const createMewlix = function() {
       }
     },
 
-    tuple: function tuple(a: MewlixValue, b: MewlixValue) {
+    tuple(a: MewlixValue, b: MewlixValue) {
       return new Box([
         ["first",  a],
         ["second", b],
@@ -1268,38 +1268,38 @@ const createMewlix = function() {
       return box;
     },
 
-    slap: function slap(value: MewlixValue): number {
+    slap(value: MewlixValue): number {
       return conversion.toNumber(value);
     },
 
-    round: function round(value: number): number {
+    round(value: number): number {
       ensure.number('std.round', value);
       return Math.round(value);
     },
 
-    floor: function floor(value: number): number {
+    floor(value: number): number {
       ensure.number('std.floor', value);
       return Math.floor(value);
     },
 
-    ceiling: function ceiling(value: number): number {
+    ceiling(value: number): number {
       ensure.number('std.ceiling', value);
       return Math.ceil(value);
     },
 
-    min: function min(a: number, b: number): number {
+    min(a: number, b: number): number {
       ensure.number('std.min', a);
       ensure.number('std.min', b);
       return Math.min(a, b);
     },
 
-    max: function max(a: number, b: number): number {
+    max(a: number, b: number): number {
       ensure.number('std.max', a);
       ensure.number('std.max', b);
       return Math.max(a, b);
     },
 
-    clamp: function clamp(value: number, min: number, max: number): number {
+    clamp(value: number, min: number, max: number): number {
       ensure.number('std.clamp', value);
       ensure.number('std.clamp', min);
       ensure.number('std.clamp', max);
@@ -1307,7 +1307,7 @@ const createMewlix = function() {
       return clamp_(value, min, max);
     },
 
-    abs: function abs(value: number): number {
+    abs(value: number): number {
       ensure.number('std.abs', value);
       return Math.abs(value);
     },
@@ -1315,7 +1315,7 @@ const createMewlix = function() {
     pi: Math.PI,
     e: Math.E,
 
-    sqrt: function sqrt(value: number): number {
+    sqrt(value: number): number {
       ensure.number('std.sqrt', value);
       if (value < 0) {
         throw new MewlixError(ErrorCode.InvalidOperation,
@@ -1324,7 +1324,7 @@ const createMewlix = function() {
       return Math.sqrt(value);
     },
 
-    logn: function logn(value: number, base: number): number {
+    logn(value: number, base: number): number {
       ensure.number('std.logn', value);
       if (value <= 0) {
         const logType = isNothing(base)
@@ -1344,43 +1344,43 @@ const createMewlix = function() {
       return Math.log(value) / Math.log(base);
     },
 
-    acos: function acos(value: number): number {
+    acos(value: number): number {
       ensure.number('std.acos', value);
       return Math.acos(value);
     },
 
-    asin: function asin(value: number): number {
+    asin(value: number): number {
       ensure.number('std.asin', value);
       return Math.asin(value);
     },
 
-    atan: function atan(value: number): number {
+    atan(value: number): number {
       ensure.number('std.atan', value);
       return Math.atan(value);
     },
 
-    cos: function cos(value: number): number {
+    cos(value: number): number {
       ensure.number('std.cos', value);
       return Math.cos(value);
     },
 
-    sin: function sin(value: number): number {
+    sin(value: number): number {
       ensure.number('std.sin', value);
       return Math.sin(value);
     },
 
-    tan: function tan(value: number): number {
+    tan(value: number): number {
       ensure.number('std.tan', value);
       return Math.tan(value);
     },
 
-    atan2: function atan2(y: number, x: number): number {
+    atan2(y: number, x: number): number {
       ensure.number('std.atan2', y);
       ensure.number('std.atan2', x);
       return Math.atan2(y, x);
     },
 
-    truncate: function truncate(value: number, places: number = 0): number {
+    truncate(value: number, places: number = 0): number {
       ensure.number('std.truncate', value);
       ensure.number('std.truncate', places);
       if (places < 0) {
@@ -1391,11 +1391,11 @@ const createMewlix = function() {
       return Math.trunc(value * modifier) / modifier;
     },
 
-    random: function random() {
+    random() {
       return Math.random();
     },
 
-    random_int: function random_int(min: number, max: number): number {
+    random_int(min: number, max: number): number {
       if (max === undefined) {
         max = min;
         min = 0;
@@ -1405,7 +1405,7 @@ const createMewlix = function() {
       return Math.floor(Math.random() * (max - min + 1) + min);
     },
 
-    count: function count(start: number = 0, end: number): Shelf<number> {
+    count(start: number = 0, end: number): Shelf<number> {
       if (end === undefined) {
         end = start;
         start = 0;
@@ -1427,18 +1427,18 @@ const createMewlix = function() {
       return output;
     },
 
-    read: function read(key: string): string | null {
+    read(key: string): string | null {
       ensure.string('std.read', key);
       return localStorage.getItem(key);
     },
 
-    save: function save(key: string, contents: string): void {
+    save(key: string, contents: string): void {
       ensure.string('std.save', key);
       ensure.string('std.save', contents);
       localStorage.setItem(key, contents);
     },
 
-    date: function date(): Box<number> {
+    date(): Box<number> {
       const now = new Date();
       return new Box([
         [ "day"    , now.getDay() + 1   ],
@@ -1450,24 +1450,24 @@ const createMewlix = function() {
       ]);
     },
 
-    time: function time(): number {
+    time(): number {
       return Date.now();
     },
 
-    meowf: function meowf(value: MewlixValue): string {
+    meowf(value: MewlixValue): string {
       return meowFunc(purrify(value));
     },
 
-    to_json: function to_json(value: MewlixValue): string {
+    to_json(value: MewlixValue): string {
       return JSON.stringify(value);
     },
 
-    from_json: function from_json(value: string): MewlixValue {
+    from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
       return fromJSON.fromAny(JSON.parse(value));
     },
 
-    log: function log(value: MewlixValue): void {
+    log(value: MewlixValue): void {
       const message = purrify(value);
       console?.log(`[Mewlix] ${message}`);
     },
