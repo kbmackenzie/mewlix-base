@@ -960,7 +960,9 @@ const createMewlix = function() {
     return str.toUpperCase();
   };
 
-  function poke<T>(value: string | Shelf<T>, index: number = 0): T | string | null {
+  function poke(value: string, index: number): string | null;
+  function poke<T>(value: Shelf<T>, index: number): T | null;
+  function poke<T>(value: string | Shelf<T>, index: number = 0) {
     ensure.number('std.poke', index);
 
     if (typeof value === 'string') {
@@ -1013,6 +1015,8 @@ const createMewlix = function() {
     return conversion.toBool(value);
   };
 
+  function empty(value: string): boolean;
+  function empty<T>(value: Shelf<T>): boolean;
   function empty<T>(value: string | Shelf<T>): boolean {
     if (typeof value === 'string') return value === '';
     if (value instanceof Shelf) return value instanceof ShelfBottom;
