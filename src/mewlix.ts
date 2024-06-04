@@ -529,31 +529,39 @@ export function opaque(x: object): void {
 };
 
 /* -----------------------------------------------------
- * JSON utils
+ * JSON Conversion:
  * ----------------------------------------------------- */
-export const fromJSON = {
-  fromObject<T>(object: Box<T> | StringIndexable<T>): Box<T> {
-    const target = (object instanceof Box)
-      ? object.box()
-      : object;
+type JSONValue =
+  | number
+  | string
+  | boolean
+  | null
+  | JSONValue[]
+  | JSONObject;
 
+type JSONObject = {
+  [key: string]: JSONValue;
+};
+
+type MewlixJSON =
+  | number
+  | string
+  | boolean
+  | null
+  | Shelf<MewlixJSON>
+  | Box<MewlixJSON>;
+
+export function fromJSON(value: JSONValue): MewlixJSON {
+  if (Array.isArray(value)) {
+    return Shelf.fromArray(value.map(x => fromJSON(x)));
+  }
+  if (typeof value === 'object' && value !== null) {
     return new Box(
-      getEntries(target)
-        .map(([key, value]) => [key, fromJSON.fromAny(value)])
+      getEntries(value)
+        .map(([key, value]) => [key, fromJSON(value)])
     );
-  },
-  fromArray<T>(array: T[]): Shelf<T> {
-    return Shelf.fromArray(
-      array.map(fromJSON.fromAny)
-    );
-  },
-  fromAny(value: any): any { // todo: better type signature
-    if (typeof value !== 'object') return value;
-    if (Array.isArray(value)) {
-      return fromJSON.fromArray(value);
-    }
-    return fromJSON.fromObject(value);
-  },
+  }
+  return value;
 }
 
 /* -----------------------------------------------------
@@ -1470,7 +1478,7 @@ const createMewlix = function() {
 
     from_json(value: string): MewlixValue {
       ensure.string('std.from_json', value);
-      return fromJSON.fromAny(JSON.parse(value));
+      return fromJSON(JSON.parse(value));
     },
 
     log(value: MewlixValue): void {
