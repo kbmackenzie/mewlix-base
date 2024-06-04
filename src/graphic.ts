@@ -1021,12 +1021,12 @@ export default function(mewlix: Mewlix): void {
    * they're going to be accessible from within Mewlix. */
 
   const Graphic = {
-    init: (fn: GameLoop): Promise<void> => {
+    init(fn: GameLoop): Promise<void> {
       ensure.func('graphic.init', fn);
       return init(fn);
     },
 
-    init_: (fn: GameLoop): Promise<void> => {
+    init_(fn: GameLoop): Promise<void> {
       ensure.func('graphic.init_', fn);
       setThumbnail(fn);
       return init(fn);
@@ -1034,7 +1034,7 @@ export default function(mewlix: Mewlix): void {
 
     delta: () => deltaTime,
 
-    load: (key: string, path: string, options?: Rectangle): void => {
+    load(key: string, path: string, options?: Rectangle): void {
       if (initialized) {
         resourceError('graphic.load', path);
         return;
@@ -1049,12 +1049,12 @@ export default function(mewlix: Mewlix): void {
       });
     },
 
-    thumbnail: (fn: GameLoop): void => {
+    thumbnail(fn: GameLoop): void {
       ensure.func('graphic.thumbnail', fn);
       setThumbnail(fn)
     },
 
-    spritesheet: (path: string, frames: Shelf<SpriteDetails>): void => {
+    spritesheet(path: string, frames: Shelf<SpriteDetails>): void {
       if (initialized) {
         resourceError('graphic.spritesheet', path);
         return;
@@ -1068,14 +1068,14 @@ export default function(mewlix: Mewlix): void {
       });
     },
     
-    draw: (key: string, x: number = 0, y: number = 0) => {
+    draw(key: string, x: number = 0, y: number = 0) {
       ensure.string('graphic.draw', key);
       ensure.number('graphic.draw', x);
       ensure.number('graphic.draw', y);
       return drawSprite(key, x, y);
     },
 
-    measure: (key: string) => {
+    measure(key: string) {
       const image = getSprite(key);
       return new Box<number>([
         ["width"  , image.width ],
@@ -1083,34 +1083,34 @@ export default function(mewlix: Mewlix): void {
       ]);
     },
 
-    rect: (rect: Rectangle, color: string | Color): void => {
+    rect(rect: Rectangle, color: string | Color): void {
       ensure.box('graphic.rect', rect);
       return drawRect(rect, color);
     },
 
     paint: fillCanvas,
 
-    write: (value: MewlixValue, x: number = 0, y: number = 0, options?: TextOptions) => {
+    write(value: MewlixValue, x: number = 0, y: number = 0, options?: TextOptions) {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
       return drawText(purrify(value), x, y, options);
     },
 
-    measure_text: (value: MewlixValue, options?: TextOptions) => {
+    measure_text(value: MewlixValue, options?: TextOptions) {
       return measureText(purrify(value), options);
     },
 
-    meow_options: (box: MeowOptions): void => {
+    meow_options(box: MeowOptions): void {
       ensure.box('graphic.meow_options', box);
       meowOptions = box;
     },
 
-    key_pressed: (key: string) => {
+    key_pressed(key: string) {
       ensure.string('graphic.key_pressed', key);
       return isKeyPressed(key);
     },
 
-    key_down: (key: string) => {
+    key_down(key: string) {
       ensure.string('graphic.key_down', key);
       return isKeyDown(key);
     },
@@ -1130,30 +1130,30 @@ export default function(mewlix: Mewlix): void {
 
     mouse_position: () => new Vector2()[wakeSymbol](mouseX, mouseY),
 
-    play_music: (key: string) => {
+    play_music(key: string) {
       ensure.string('graphic.play_music', key);
       return playMusic(key);
     },
 
-    play_sfx: (key: string, channel: number = 0) => {
+    play_sfx(key: string, channel: number = 0) {
       ensure.string('graphic.play_sfx', key);
       ensure.number('graphic.play_sfx', channel);
       return playSfx(key, channel);
     },
 
-    volume: (value: number) => {
+    volume(value: number) {
       ensure.number('graphic.volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.master.set(value);
     },
 
-    music_volume: (value: number) => {
+    music_volume(value: number) {
       ensure.number('graphic.music_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.music.set(value);
     },
 
-    sfx_volume: (value: number) => {
+    sfx_volume(value: number) {
       ensure.number('graphic.sfx_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.sfx.set(value);
@@ -1161,14 +1161,14 @@ export default function(mewlix: Mewlix): void {
 
     stop_music: stopMusic,
 
-    stop_sfx: (channel: number) => {
+    stop_sfx(channel: number) {
       ensure.number('graphic.stop_sfx', channel);
       return stopSfx(channel);
     },
 
     stop_all_sfx: stopAllSfx,
 
-    lerp: (start: number, end: number, x: number): number => {
+    lerp(start: number, end: number, x: number): number {
       ensure.number('graphic.lerp', start);
       ensure.number('graphic.lerp', end);
       ensure.number('graphic.lerp', x);
