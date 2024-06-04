@@ -1026,7 +1026,9 @@ const createMewlix = function() {
       `std.empty: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   };
 
-  function join<T1, T2 extends string | Shelf<T1>>(a: T2, b: T2): string | Shelf<T1> {
+  function join(a: string, b: string): string;
+  function join<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T>;
+  function join<T>(a: string | Shelf<T>, b: string | Shelf<T>): string | Shelf<T> {
     if (typeof a === 'string' && typeof b === 'string') {
       return a + b;
     }
