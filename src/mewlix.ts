@@ -372,36 +372,62 @@ export class Box<T> extends MewlixObject implements BoxLike<DynamicBox<T>> {
 /* -----------------------------------------------------
  * Enum -> Base for all enums.
  * ----------------------------------------------------- */
-export class EnumValue extends Box<string | number> {
-  constructor(key: string, value: number, parent: string) {
+interface EnumValueLike {
+  key: string;
+  value: number;
+  parent: string;
+};
+
+export class EnumValue extends Box<MewlixValue> {
+  _box: EnumValueLike & DynamicBox<MewlixValue>;
+  parent: Enum;
+
+  box() {
+    return this._box;
+  }
+
+  constructor(key: string, value: number, parent: Enum) {
     super();
-    this.box().key = key;
-    this.box().value = value;
-    this.box().parent = parent;
+    this.parent = parent;
+    this._box = {
+      key: key,
+      value: value,
+      parent: parent.name,
+      prev: (): EnumValue | null => {
+        if (value - 1 <= 0) return null;
+        return parent.values[value - 1];
+      },
+      next: (): EnumValue | null => {
+        if (value + 1 >= parent.values.length) return null;
+        return parent.values[value+ 1];
+      },
+    };
   }
   toString(): string {
     return `${this.box().parent}.${this.box().key}`;
   }
 }
 
-export class Enum extends Box<EnumValue | string> {
+export class Enum extends Box<EnumValue> {
+  name: string;
+  values: EnumValue[];
+
   constructor(name: string, keys: string[] = []) {
     super();
+    this.name = name;
+    this.values = new Array(keys.length);
+
     let count = 0;
     for (const key of keys) {
-      this.box()[key] = new EnumValue(key, count++, name);
+      const value = new EnumValue(key, count, this);
+      this.box()[key]   = value;
+      this.box()[count] = value;
+      this.values[count++] = value;
     }
-    this.box().name = name;
   }
 
   toString(): string {
-    const values: any[] = [];
-    for (const key in this) {
-      values.push(this[key]);
-    }
-    const enumKeys = values
-      .filter(x => x instanceof EnumValue)
-      .map(x => `${x.key};`);
+    const enumKeys = this.values.map(x => `${x.box().key};`);
     return `cat tree ${this.box().name}; ${enumKeys.join(' ')} ~meow`;
   }
 }
