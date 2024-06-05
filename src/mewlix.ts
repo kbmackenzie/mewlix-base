@@ -479,10 +479,10 @@ export class YarnBall<T> extends MewlixObject {
     return `<yarn ball '${this.key}'>`
   }
 
-  static create(key: string, exports: [string, MewlixValue][] = []): YarnBall<GenericBox> {
+  static create(key: string, exports: [string, () => MewlixValue][] = []): YarnBall<GenericBox> {
     const yarnball = new YarnBall<GenericBox>(key, {});
     for (const [k, v] of exports) {
-      yarnball.box()[k] = v;
+      Object.defineProperty(yarnball.box(), k, { get: v });
     }
     return yarnball;
   }
