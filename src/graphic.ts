@@ -9,6 +9,7 @@ import {
   MewlixValue,
   Box,
   DynamicBox,
+  BoxLike,
   reflection,
   opaque,
   wake,
@@ -78,11 +79,12 @@ export default function(mewlix: Mewlix): void {
   };
 
   /* Load a spritesheet image and divide it into sprites. */
-  async function fromSpritesheet(path: string, frames: Shelf<SpriteDetails>) {
+  async function fromSpritesheet(path: string, frames: Shelf<BoxLike<SpriteDetails>>) {
     const sheet = await loadImage(path);
     for (const frame of frames) {
-      const { key, rect } = frame;
-      const sprite = await createImageBitmap(sheet, rect.x, rect.y, rect.width, rect.height);
+      const { key, rect } = frame.box();
+      const { x, y, width, height } = rect.box();
+      const sprite = await createImageBitmap(sheet, x, y, width, height);
       spriteMap.set(key, sprite);
     }
   }
@@ -431,7 +433,7 @@ export default function(mewlix: Mewlix): void {
   type Resource =
     | { type: 'generic'; key: string; path: string; options?: Rectangle }
     | { type: 'canvas'; key: string; data: ImageData; }
-    | { type: 'spritesheet'; path: string; frames: Shelf<SpriteDetails>; }
+    | { type: 'spritesheet'; path: string; frames: Shelf<BoxLike<SpriteDetails>>; }
 
   const resourceQueue: Resource[] = [];
 
@@ -1034,7 +1036,7 @@ export default function(mewlix: Mewlix): void {
 
     delta: () => deltaTime,
 
-    load(key: string, path: string, options?: Rectangle): void {
+    load(key: string, path: string, options?: BoxLike<Rectangle>): void {
       if (initialized) {
         resourceError('graphic.load', path);
         return;
@@ -1045,7 +1047,7 @@ export default function(mewlix: Mewlix): void {
         type: 'generic',
         key: key,
         path: path, 
-        options: options,
+        options: options?.box(),
       });
     },
 
@@ -1054,7 +1056,7 @@ export default function(mewlix: Mewlix): void {
       setThumbnail(fn)
     },
 
-    spritesheet(path: string, frames: Shelf<SpriteDetails>): void {
+    spritesheet(path: string, frames: Shelf<BoxLike<SpriteDetails>>): void {
       if (initialized) {
         resourceError('graphic.spritesheet', path);
         return;
@@ -1090,19 +1092,19 @@ export default function(mewlix: Mewlix): void {
 
     paint: fillCanvas,
 
-    write(value: MewlixValue, x: number = 0, y: number = 0, options?: TextOptions) {
+    write(value: MewlixValue, x: number = 0, y: number = 0, options?: BoxLike<TextOptions>) {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
-      return drawText(purrify(value), x, y, options);
+      return drawText(purrify(value), x, y, options?.box());
     },
 
-    measure_text(value: MewlixValue, options?: TextOptions) {
-      return measureText(purrify(value), options);
+    measure_text(value: MewlixValue, options?: BoxLike<TextOptions>) {
+      return measureText(purrify(value), options?.box());
     },
 
-    meow_options(box: MeowOptions): void {
+    meow_options(box: BoxLike<MeowOptions>): void {
       ensure.box('graphic.meow_options', box);
-      meowOptions = box;
+      meowOptions = box.box();
     },
 
     key_pressed(key: string) {
@@ -1203,11 +1205,11 @@ export default function(mewlix: Mewlix): void {
     return {
       load: (key: string) =>
         (path: string) =>
-          (options?: Rectangle) =>
+          (options?: BoxLike<Rectangle>) =>
             graphic.load(key, path, options),
 
       spritesheet: (path: string) =>
-        (frames: Shelf<SpriteDetails>) =>
+        (frames: Shelf<BoxLike<SpriteDetails>>) =>
           graphic.spritesheet(path, frames),
 
       draw: (key: string) =>
@@ -1222,11 +1224,11 @@ export default function(mewlix: Mewlix): void {
       write: (value: MewlixValue) =>
         (x: number) =>
           (y: number) =>
-            (options: TextOptions) =>
+            (options: BoxLike<TextOptions>) =>
               graphic.write(value, x, y, options),
 
       measure_text: (value: MewlixValue) =>
-        (options: TextOptions) =>
+        (options: BoxLike<TextOptions>) =>
           graphic.measure_text(value, options),
     
       play_sfx: (key: string) =>
