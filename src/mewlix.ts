@@ -174,7 +174,7 @@ export class Shelf<T> extends MewlixObject {
     return this.toArray();
   }
 
-  *[Symbol.iterator]() {
+  *[Symbol.iterator](): Iterator<T, any, undefined> {
     let node: Shelf<T> = this;
     while (node instanceof ShelfNode) {
       yield node.peek();
