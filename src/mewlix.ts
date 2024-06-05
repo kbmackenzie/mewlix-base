@@ -370,34 +370,34 @@ export class Box<T> extends MewlixObject implements BoxLike<DynamicBox<T>> {
 };
 
 /* -----------------------------------------------------
- * Enum -> Base for all enums.
+ * Cat Tree -> Enum-like structure.
  * ----------------------------------------------------- */
-interface EnumValueLike {
+interface CatTreeValueLike {
   key: string;
   value: number;
   parent: string;
 };
 
-export class EnumValue extends Box<MewlixValue> {
-  _box: EnumValueLike & DynamicBox<MewlixValue>;
-  parent: Enum;
+export class CatTreeValue extends Box<MewlixValue> {
+  _box: CatTreeValueLike & DynamicBox<MewlixValue>;
+  parent: CatTree;
 
   box() {
     return this._box;
   }
 
-  constructor(key: string, value: number, parent: Enum) {
+  constructor(key: string, value: number, parent: CatTree) {
     super();
     this.parent = parent;
     this._box = {
       key: key,
       value: value,
       parent: parent.name,
-      prev: (): EnumValue | null => {
+      prev: (): CatTreeValue | null => {
         if (value - 1 <= 0) return null;
         return parent.values[value - 1];
       },
-      next: (): EnumValue | null => {
+      next: (): CatTreeValue | null => {
         if (value + 1 >= parent.values.length) return null;
         return parent.values[value+ 1];
       },
@@ -408,9 +408,9 @@ export class EnumValue extends Box<MewlixValue> {
   }
 }
 
-export class Enum extends Box<EnumValue> {
+export class CatTree extends Box<CatTreeValue> {
   name: string;
-  values: EnumValue[];
+  values: CatTreeValue[];
 
   constructor(name: string, keys: string[] = []) {
     super();
@@ -419,7 +419,7 @@ export class Enum extends Box<EnumValue> {
 
     let count = 0;
     for (const key of keys) {
-      const value = new EnumValue(key, count, this);
+      const value = new CatTreeValue(key, count, this);
       this.box()[key]   = value;
       this.box()[count] = value;
       this.values[count++] = value;
@@ -1763,7 +1763,7 @@ const createMewlix = function() {
     ShelfNode: ShelfNode,
     ShelfBottom: ShelfBottom,
     Box: Box,
-    Enum: Enum,
+    Enum: CatTree,
     wake: wake,
     Clowder: Clowder,
     YarnBall: YarnBall,
