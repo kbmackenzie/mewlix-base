@@ -1617,22 +1617,43 @@ const createMewlix = function() {
    * ------------------------------------------ */
   
   /* Note: When currying overloaded functions, the type system gets quirky.
-   * 
-   * For example, this is how the 'poke' function *should* be curried in order to be
-   * accepted by the type system:
+   * Although I can type-cast it away, I chose not to.
+   * I prefer to write unique overloaded wrappers for all overloaded functions.
    *
-      function pokeCurry(value: string): (index: number) => string | null;
-      function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
-      function pokeCurry<T>(value: string | Shelf<T>): (index: number) => string | T | null {
-        if (typeof value === 'string') return (index: number) => poke(value, index);
-        return (index: number) => poke<T>(value, index);
-      };
-    *
-    * This is some *really* stupid runtime redundancy.
-    * I *really* don't want to do that.
-    *
-    * Thus, type-casting *will* need to be used here.
-    * While it hurts type safety, it's a worthwhile trade-off. */
+   * Although the wrappers below are slightly repetitive, it's worth it to 
+   * ensure type safety and avoid type-casting. */
+
+  function pokeCurry(value: string): (index: number) => string | null;
+  function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
+  function pokeCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(index: number) { return poke(value, index); }
+      : function(index: number) { return poke(value, index); };
+  }
+
+  function joinCurry(a: string): (b: string) => string;
+  function joinCurry<T>(a: Shelf<T>): (b: Shelf<T>) => Shelf<T>;
+  function joinCurry<T>(a: string | Shelf<T>) {
+    return (typeof a === 'string')
+      ? function(b: string)   { return join(a, b); }
+      : function(b: Shelf<T>) { return join(a, b); }
+  }
+
+  function takeCurry(value: string): (amount: number) => string;
+  function takeCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
+  function takeCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(amount: number) { return take(value, amount); }
+      : function(amount: number) { return take(value, amount); };
+  }
+
+  function dropCurry(value: string): (amount: number) => string;
+  function dropCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
+  function dropCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(amount: number) { return drop(value, amount); }
+      : function(amount: number) { return drop(value, amount); };
+  }
 
   const BaseCurry = {
     tear: (str: string) =>
@@ -1640,21 +1661,10 @@ const createMewlix = function() {
         (end: number) =>
           tear(str, start, end),
 
-    poke: <T>(value: string | Shelf<T>) =>
-      (index: number) =>
-        poke(value as any, index) as string | Shelf<T>,
-
-    join: <T>(a: string | Shelf<T>) =>
-      (b: string | Shelf<T>) =>
-        join(a as any, b as any) as string | Shelf<T>,
-
-    take: <T>(value: string | Shelf<T>) =>
-      (amount: number) =>
-        take(value as any, amount) as string | Shelf<T>,
-
-    drop: <T>(value: string | Shelf<T>) =>
-      (amount: number) =>
-        drop(value as any, amount) as string | Shelf<T>,
+    poke: pokeCurry,
+    join: joinCurry,
+    take: takeCurry,
+    drop: dropCurry,
 
     insert: <T>(shelf: Shelf<T>) =>
       (value: T) =>
