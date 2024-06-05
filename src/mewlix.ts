@@ -1,7 +1,7 @@
 'use strict';
 
 export type Mewlix = ReturnType<typeof createMewlix> & {
-  [key: string]: YarnBall;
+  [key: string]: YarnBall<any>;
 };
 
 /* -----------------------------------------------------
@@ -342,6 +342,8 @@ export type DynamicBox<T> = {
   [key: string]: T;
 };
 
+export type GenericBox = DynamicBox<MewlixValue>;
+
 export type BoxLike<T> = {
   box(): T;
 };
@@ -379,7 +381,7 @@ interface CatTreeValueLike {
 };
 
 export class CatTreeValue extends Box<MewlixValue> {
-  _box: CatTreeValueLike & DynamicBox<MewlixValue>;
+  _box: CatTreeValueLike & GenericBox;
   parent: CatTree;
 
   box() {
@@ -459,66 +461,36 @@ export class Clowder<T> extends Box<T> {
 /* -----------------------------------------------------
  * YarnBall -> Yarn ball export list.
  * ----------------------------------------------------- */
-export class YarnBall extends MewlixObject {
+export class YarnBall<T> extends MewlixObject {
   key: string;
-  [key: string]: MewlixValue;
+  exports: T;
 
-  constructor(moduleKey: string, exportList: [string, () => MewlixValue][] = []) {
+  box() {
+    return this.exports;
+  }
+
+  constructor(moduleKey: string, exports: T) {
     super();
     this.key = moduleKey;
-
-    for (const [field, func] of exportList) {
-      Object.defineProperty(this, field, {
-        get: func,
-        set() {
-          throw new MewlixError(ErrorCode.TypeMismatch,
-            `Cannot set field '${field}': Yarn ball fields are read-only!`);
-        }
-      });
-    }
-    Object.defineProperty(this, 'box', {
-      value: () => this,
-      writable: false,
-      enumerable: false,
-      configurable: false,
-    });
+    this.exports = exports;
   }
 
   toString() {
     return `<yarn ball '${this.key}'>`
   }
+
+  static create(key: string, exports: [string, MewlixValue][] = []): YarnBall<GenericBox> {
+    const yarnball = new YarnBall<GenericBox>(key, {});
+    for (const [k, v] of exports) {
+      yarnball.box()[k] = v;
+    }
+    return yarnball;
+  }
+
+  static mix<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2> {
+    return new YarnBall(key, {...a, ...b});
+  }
 }
-
-/* -----------------------------------------------------
- * Generate standard yarn balls.
- * ----------------------------------------------------- */
-
-/* All the 'as any' castings are a necessary compromise to guarantee dynamic assignment behavior.
- * The sacrifices needed to write the base for a dynamic language in a typed one. */
-
-export function library(libraryKey: string, library: StringIndexable<MewlixValue> = {}) {
-  const yarnball = new YarnBall(libraryKey);
-  for (const key in library) {
-    yarnball[key] = library[key];
-  }
-  return yarnball;
-};
-
-export function curryLibrary(libraryKey: string, base: YarnBall, library: StringIndexable<MewlixValue> = {}) {
-  const yarnball = new YarnBall(libraryKey);
-
-  // Copy curried functions:
-  for (const key in library) {
-    yarnball[key] = library[key];
-  }
-
-  // Fill in the blanks:
-  for (const key in base) {
-    if (key in yarnball) continue;
-    yarnball[key] = base[key];
-  }
-  return yarnball;
-};
 
 /* -----------------------------------------------------
  * Type Checking
@@ -1610,7 +1582,7 @@ const createMewlix = function() {
     log,
     error,
   };
-  const BaseLibrary = library('std', Base);
+  const BaseYarnBall = new YarnBall('std', Base);
 
   /* ------------------------------------------
    * Standard Library - Currying
@@ -1749,7 +1721,7 @@ const createMewlix = function() {
       (contents: string) =>
         save(key, contents),
   };
-  const BaseCurryLibrary = curryLibrary('std.curry', BaseLibrary, BaseCurry);
+  const BaseCurryYarnBall = YarnBall.mix('std.curry', BaseYarnBall, BaseCurry);
 
   /* -------------------------------------------------------
    * Final Touches
@@ -1758,7 +1730,7 @@ const createMewlix = function() {
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
-  const run = async (func: () => YarnBall): Promise<YarnBall> => func();
+  const run = async (func: () => YarnBall<GenericBox>): Promise<YarnBall<GenericBox>> => func();
 
   /* ------------------------------------------------------
    * Return Mewlix Namespace
@@ -1793,8 +1765,8 @@ const createMewlix = function() {
     BoxWrapper: BoxWrapper,
     wrap: wrap,
     api: api,
-    Base: BaseLibrary,
-    BaseCurry: BaseCurryLibrary, 
+    Base: BaseYarnBall,
+    BaseCurry: BaseCurryYarnBall, 
     run: run,
   };
 }
