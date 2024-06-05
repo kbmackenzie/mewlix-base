@@ -497,7 +497,7 @@ export class YarnBall<T> extends MewlixObject {
  * ----------------------------------------------------- */
 type TypePredicate = (value: any) => boolean
 
-const typecheck = (predicate: TypePredicate, expected: string) => (source: string, value: any) => {
+const typecheck = (predicate: TypePredicate, expected: string) => (source: string, value: any): void => {
   if (predicate(value)) return;
   const typeOfValue = reflection.typeOf(value);
   throw new MewlixError(ErrorCode.TypeMismatch,
@@ -505,12 +505,12 @@ const typecheck = (predicate: TypePredicate, expected: string) => (source: strin
 };
 
 export const ensure = {
-  number:   typecheck(x => typeof x === 'number',   'number' ),
-  string:   typecheck(x => typeof x === 'string',   'string' ),
-  boolean:  typecheck(x => typeof x === 'boolean',  'boolean'),
-  shelf:    typecheck(x => x instanceof Shelf,      'shelf'  ),
-  box:      typecheck(x => x instanceof Box,        'box'    ),
-  func:     typecheck(x => typeof x === 'function', 'func'   ),
+  number:   typecheck(x => typeof x === 'number'  , 'number'  ),
+  string:   typecheck(x => typeof x === 'string'  , 'string'  ),
+  boolean:  typecheck(x => typeof x === 'boolean' , 'boolean' ),
+  shelf:    typecheck(x => x instanceof Shelf     , 'shelf'   ),
+  box:      typecheck(x => x instanceof Box       , 'box'     ),
+  func:     typecheck(x => typeof x === 'function', 'function'),
 };
 
 /* -----------------------------------------------------
