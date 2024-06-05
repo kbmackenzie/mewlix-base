@@ -4,11 +4,12 @@ import {
   Mewlix,
   Shelf,
   Clowder,
+  YarnBall,
   ErrorCode,
   MewlixError,
   MewlixValue,
   Box,
-  DynamicBox,
+  GenericBox,
   BoxLike,
   reflection,
   opaque,
@@ -16,8 +17,6 @@ import {
   ensure,
   clamp_,
   purrify,
-  library,
-  curryLibrary
 } from './mewlix.js';
 
 export default function(mewlix: Mewlix): void {
@@ -536,7 +535,7 @@ export default function(mewlix: Mewlix): void {
   /* *** Clowders are VERY HARD to add typings to because they're WEIRD! ***
    *
    * They will be declared in a very unusual way to get the best of both worlds:
-   * - The type of _box should be: <specific-type> & DynamicBox<MewlixValue>
+   * - The type of _box should be: <specific-type> & GenericBox
    *
    * The struggles of writing the base library for dynamic language in statically typed one.*/
 
@@ -547,7 +546,7 @@ export default function(mewlix: Mewlix): void {
 
   class Vector2 extends Clowder<MewlixValue> {
     [wake]: (x: number, y: number) => Vector2;
-    _box: Vector2Like & DynamicBox<MewlixValue>;
+    _box: Vector2Like & GenericBox;
 
     box() {
       return this._box;
@@ -621,7 +620,7 @@ export default function(mewlix: Mewlix): void {
 
   class Rectangle extends Clowder<MewlixValue> {
     [wake]: (x: number, y: number, width: number, height: number) => Rectangle;
-    _box: RectangleLike & DynamicBox<MewlixValue>;
+    _box: RectangleLike & GenericBox;
 
     box() {
       return this._box;
@@ -677,7 +676,7 @@ export default function(mewlix: Mewlix): void {
 
   class GridSlot extends Clowder<MewlixValue> {
     [wake]: (row: number, column: number) => GridSlot;
-    _box: GridSlotLike & DynamicBox<MewlixValue>;
+    _box: GridSlotLike & GenericBox;
 
     box() {
       return this._box;
@@ -734,7 +733,7 @@ export default function(mewlix: Mewlix): void {
 
   class Color extends Clowder<MewlixValue> {
     [wake]: (red: number, green: number, blue: number, opacity?: number) => Color;
-    _box: ColorLike & DynamicBox<MewlixValue>;
+    _box: ColorLike & GenericBox;
 
     box() {
       return this._box;
@@ -1193,8 +1192,8 @@ export default function(mewlix: Mewlix): void {
 
     PixelCanvas: PixelCanvas,
   };
-  const GraphicLibrary = library('std.graphic', Graphic);
-  mewlix.Graphic = GraphicLibrary;
+  const GraphicYarnBall = new YarnBall('std.graphic', Graphic);
+  mewlix.Graphic = GraphicYarnBall;
 
   /* -----------------------------------
    * Standard library - Curry:
@@ -1241,8 +1240,9 @@ export default function(mewlix: Mewlix): void {
             graphic.lerp(start, end, x),
     };
   })();
-  const GraphicCurryLibrary = curryLibrary('std.graphic.curry', GraphicLibrary, GraphicCurry);
-  mewlix.GraphicCurry = GraphicCurryLibrary;
+
+  const GraphicCurryYarnBall = YarnBall.mix('std.graphic.curry', GraphicYarnBall, GraphicCurry);
+  mewlix.GraphicCurry = GraphicCurryYarnBall;
 
   /* -----------------------------------
    * Run Console:
