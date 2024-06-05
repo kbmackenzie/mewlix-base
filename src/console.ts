@@ -3,11 +3,10 @@
 import {
   Mewlix,
   Shelf,
+  YarnBall,
   purrify,
   isNothing,
   ensure,
-  library,
-  curryLibrary
 } from './mewlix.js';
 
 export default function(mewlix: Mewlix): void {
@@ -371,8 +370,9 @@ export default function(mewlix: Mewlix): void {
       addDownloadButton(contents, filename);
     },
   };
-  const ConsoleLibrary = library('std.console', Console);
-  mewlix.Console = ConsoleLibrary;
+
+  const ConsoleYarnBall = new YarnBall('std.console', Console);
+  mewlix.Console = ConsoleYarnBall;
 
   /* -------------------------------------
    * Standard library - Curry:
@@ -386,8 +386,9 @@ export default function(mewlix: Mewlix): void {
       (contents: string) =>
         Console.write_file(filename, contents),
   };
-  const ConsoleCurryLibrary = curryLibrary('std.console.curry', ConsoleLibrary, ConsoleCurry);
-  mewlix.ConsoleCurry = ConsoleCurryLibrary;
+
+  const ConsoleCurryYarnBall = YarnBall.mix('std.console.curry', ConsoleYarnBall, ConsoleCurry);
+  mewlix.ConsoleCurry = ConsoleCurryYarnBall;
 
   /* -------------------------------------
    * Run Console:
