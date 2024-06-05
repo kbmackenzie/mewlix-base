@@ -1,12 +1,15 @@
 'use strict';
 
+import { readFile } from 'node:fs/promises';
 import createMewlix from './core/mewlix.js';
 import initYarnball from './yarnball/yarnball.js';
 
-export default async function(callback) {
-  const readMeta = () => fetch('./core/meta.json')
-    .then(response => response.json());
+async function readJSON(path) {
+  const text = await readFile(path, { encoding: 'utf-8' });
+  return JSON.parse(text);
+}
 
+export default async function(callback) {
   const mewlix = createMewlix();
   if (callback) {
     await callback(mewlix);
@@ -14,7 +17,7 @@ export default async function(callback) {
   initYarnball(mewlix);
   mewlix.meow = (x) => { console.log(x); };
 
-  const meta = await readMeta();
+  const meta = await readJSON('./core/meta.json');
   const entrypoint = meta.entrypoint || 'main';
 
   return mewlix.run(() => mewlix.Modules.getModule(entrypoint));
