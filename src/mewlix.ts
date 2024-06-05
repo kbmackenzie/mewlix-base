@@ -401,7 +401,7 @@ export class CatTreeValue extends Box<MewlixValue> {
       },
       next: (): CatTreeValue | null => {
         if (value + 1 >= parent.values.length) return null;
-        return parent.values[value+ 1];
+        return parent.values[value + 1];
       },
     };
   }
