@@ -1773,7 +1773,7 @@ const createMewlix = function() {
     ShelfNode: ShelfNode,
     ShelfBottom: ShelfBottom,
     Box: Box,
-    Enum: CatTree,
+    CatTree: CatTree,
     wake: wake,
     Clowder: Clowder,
     YarnBall: YarnBall,
