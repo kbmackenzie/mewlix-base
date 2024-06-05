@@ -15,7 +15,11 @@ export default async function(callback) {
     await callback(mewlix);
   }
   initYarnball(mewlix);
-  mewlix.meow = (x) => { console.log(x); };
+
+  mewlix.setMeow((x) => {
+    console.log(x);
+    return x;
+  });
 
   const meta = await readJSON('./core/meta.json');
   const entrypoint = meta.entrypoint || 'main';
