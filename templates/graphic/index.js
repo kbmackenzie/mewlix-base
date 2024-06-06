@@ -1,8 +1,8 @@
 'use strict';
 
 import createMewlix from './core/mewlix.js';
-import initGraphic  from './core/graphic.js'
-import initYarnball from './yarnball/yarnball.js'
+import initGraphic  from './core/graphic.js';
+import initYarnball from './yarnball/yarnball.js';
 
 export default async function(callback) {
   const readMeta = () => fetch('./core/meta.json')
