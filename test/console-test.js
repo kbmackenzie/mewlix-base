@@ -2,7 +2,7 @@ import testSuite from './test-suite.js';
 
 function consoleTests(mewlix) {
   'use strict';
-  const console_ = mewlix.Console;
+  const console_ = mewlix.Console.box();
 
   return testSuite(run => {
     run('console.name', () => {
@@ -23,7 +23,7 @@ function consoleTests(mewlix) {
     });
 
     run('console.accepted', () => {
-      const extensions = mewlix.API.shelf('.txt', '.md');
+      const extensions = mewlix.api.shelf('.txt', '.md');
       console_.accepted_files(extensions);
       return document.getElementById('file-input').accept === extensions.toArray().join(', ');
     });
@@ -57,7 +57,7 @@ export default function(mewlix) {
       state = 'clear';
     },
     ['clear']: (_) => {
-      mewlix.Console.clear();
+      mewlix.Console.box().clear();
 
       const success = document.getElementById('console-lines').childNodes.length === 0;
       mewlix.meow(success
@@ -70,6 +70,6 @@ export default function(mewlix) {
 
   mewlix.Modules.addModule('main', () => {
     mewlix.meow('Running tests...');
-    mewlix.Console.run((input) => actions[state](input), () => prompt[state]);
+    mewlix.Console.box().run((input) => actions[state](input), () => prompt[state]);
   });
 }
