@@ -24,5 +24,5 @@ export default async function(callback) {
   const meta = await readJSON('./core/meta.json');
   const entrypoint = meta.entrypoint || 'main';
 
-  return mewlix.run(() => mewlix.Modules.getModule(entrypoint));
+  return mewlix.run(() => mewlix.modules.getModule(entrypoint));
 }
