@@ -887,13 +887,13 @@ const createMewlix = function() {
   /* -----------------------------------------------------
    * Modules -> Default module container.
    * ----------------------------------------------------- */
-  const Modules = new Namespace('default');
+  const modules = new Namespace('default');
 
   const api = {
     arrayToShelf: Shelf.fromArray,
     shelf: (...items: MewlixValue[]) => Shelf.fromArray(items),
     createBox: <T>(object: StringIndexable<T>) => new Box<T>(getEntries(object ?? {})),
-    inject: (key: string, object: object) => Modules.injectModule(key, object),
+    inject: (key: string, object: object) => modules.injectModule(key, object),
   };
 
   /* -----------------------------------------------------
@@ -1740,7 +1740,7 @@ const createMewlix = function() {
     MewlixError: MewlixError,
     purrify: purrify,
     MewlixObject: MewlixObject,
-    Modules: Modules,
+    modules: modules,
     Shelf: Shelf,
     ShelfNode: ShelfNode,
     ShelfBottom: ShelfBottom,
