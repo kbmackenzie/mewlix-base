@@ -8,7 +8,7 @@ export default function(mewlix) {
     return (128 / 8) * n;
   }
 
-  mewlix.Modules.addModule('main', () => {
+  mewlix.modules.addModule('main', () => {
     graphic.init(_ => {
       graphic.paint('#cecece');
       const x = 2;

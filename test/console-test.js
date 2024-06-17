@@ -68,7 +68,7 @@ export default function(mewlix) {
     },
   };
 
-  mewlix.Modules.addModule('main', () => {
+  mewlix.modules.addModule('main', () => {
     mewlix.meow('Running tests...');
     mewlix.Console.box().run((input) => actions[state](input), () => prompt[state]);
   });
