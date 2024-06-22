@@ -44,22 +44,30 @@ html, body
 .clickable:enabled:hover
   cursor: pointer
 
-.white-button
+.translucent
+  opacity: 60%
+
+.vector-button
   border: none
   color: white
-
-  opacity: 30%
-  transition: opacity 0.5s
   background-color: inherit
+  opacity: 50%
 
   &:enabled
-    opacity: 60%
+    opacity: 75%
+    transition: opacity 0.5s
 
   &:enabled:hover
     opacity: 100%
+    transition: opacity 0.5s
+    > svg
+      animation: 0.5s ease-in-out button-lift forwards
 
-.translucent
-  opacity: 60%
+@keyframes button-lift
+  from
+    transform: translateY(0)
+  to
+    transform: translateY(-5%)
 
 .hide
   /* I'm using !important because:
