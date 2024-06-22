@@ -1,0 +1,44 @@
+*
+  margin: 0
+  padding: 0
+  box-sizing: border-box
+
+html, body
+  height: 100%
+
+body
+  display: flex
+  align-items: center
+  justify-content: center
+
+.game
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  width: 100vmin
+  height: 100vmin
+
+  &_canvas
+    height: 100%
+    image-rendering: pixelated
+
+  &_sound
+    position: absolute
+    width: 4rem
+    height: 4rem
+    border: none
+    margin: 0.5rem
+    opacity: 60%
+    background: no-repeat center/contain url('./core-assets/icons/speaker-00.png'), transparent
+
+    &:hover
+      opacity: 100%
+      cursor: pointer
+
+    &.muted
+      background-image: url('./core-assets/icons/speaker-01.png')
+
+.loading-overlay
+  width: 100vmin
+  height: 100vmin
+  position: absolute
