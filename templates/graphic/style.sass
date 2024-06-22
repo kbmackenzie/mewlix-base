@@ -11,6 +11,9 @@ body
   align-items: center
   justify-content: center
 
+@function get-asset($path)
+  @return './core-assets/' + $path
+
 .game
   display: flex
   flex-direction: column
@@ -29,14 +32,16 @@ body
     border: none
     margin: 0.5rem
     opacity: 60%
-    background: no-repeat center/contain url('./core-assets/icons/speaker-00.png'), transparent
+    $speaker: get-asset('icons/speaker-00.png')
+    background: no-repeat center/contain url($speaker), transparent
 
     &:hover
       opacity: 100%
       cursor: pointer
 
     &.muted
-      background-image: url('./core-assets/icons/speaker-01.png')
+      $speaker-muted: get-asset('icons/speaker-01.png')
+      background-image: url($speaker-muted)
 
 .loading-overlay
   width: 100vmin
