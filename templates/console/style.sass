@@ -4,6 +4,11 @@ $header-color: #000
 $bg-color:     #121212
 $light-color:  #fff
 
+@mixin adjust-vector($width, $height)
+  > svg
+    width:  $width
+    height: $height
+
 *
   margin: 0
   padding: 0
@@ -11,11 +16,6 @@ $light-color:  #fff
 
 html, body
   height: 100%
-
-.center-items
-  display: flex
-  align-items: center
-  justify-content: center
 
 @function get-font($path)
   @return './core-assets/fonts/' + $path
@@ -41,6 +41,11 @@ html, body
     font-size: 1.2rem
     font-style: normal
     font-weight: normal
+
+.center-items
+  display: flex
+  align-items: center
+  justify-content: center
 
 .preserve-space
   white-space: pre
@@ -132,23 +137,17 @@ html, body
 
   &-settings
     grid-area: show-settings
-    > svg
-      width: 80%
-      height: 80%
+    @include adjust-vector(80%, 80%)
 
   &-file
     grid-area: console-clip
     background-color: inherit
-    > svg
-      width: 60%
-      height: 60%
+    @include adjust-vector(60%, 60%)
 
   &-arrow
     grid-area: console-arrow
     background-color: inherit
-    > svg
-      width: 60%
-      height: 60%
+    @include adjust-vector(60%, 60%)
 
   &-input
     grid-area: console-input
@@ -188,14 +187,14 @@ html, body
 
   background-color: color.scale($bg-color, $lightness: -30%)
 
-  $hidden-y: -200%
-  $shown-y:  0%
+  $hide-y: -200%
+  $show-y:  0%
 
-  transform: translateY($hidden-y)
+  transform: translateY($hide-y)
   transition: transform 0.3s
 
   &.show
-    transform: translateY($shown-y)
+    transform: translateY($show-y)
     transition: transform 0.5s
 
   &-title
@@ -204,10 +203,7 @@ html, body
 
   &-exit
     grid-area: settings-exit
-    > svg
-      width: 60%
-      height: 60%
-      margin: auto
+    @include adjust-vector(60%, 60%)
 
   &-options
     grid-area: settings-options
@@ -265,7 +261,7 @@ html, body
         color: $bg-color
 
 // -----------------------------------------
-// Visual Effects
+// Miscellaneous
 // -----------------------------------------
 .translucent
   opacity: 60%
