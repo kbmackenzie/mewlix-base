@@ -18,16 +18,16 @@
 
     <!-- Console Window -->
     <main id="console" class="console">
-      <h1 class="console-text center-items console-title">
+      <h1 class="fira-mono center-items console-title">
         <span id="project-status" class="preserve-space">loading...</span>
         <span id="project-name" class="preserve-space translucent hide">untitled</span>
       </h1>
-      <ul id="console-lines" class="console-text console-lines"></ul>
+      <ul id="console-lines" class="fira-mono console-lines"></ul>
       <textarea
           id="console-input"
           name="textarea"
           placeholder="Enter input here..."
-          class="console-text console-input"
+          class="fira-mono console-input"
           disabled></textarea>
       <button id="console-file" class="clickable vector-button center-items console-file" disabled>
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -64,7 +64,7 @@
     </main>
 
     <aside id="settings" class="settings hide">
-      <h1 class="console-text center-items translucent settings-title">mewlix v1.0</h1>
+      <h1 class="fira-mono center-items translucent settings-title">mewlix v1.0</h1>
       <button id="hide-settings" class="clickable vector-button center-items settings-exit">
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
@@ -73,7 +73,7 @@
           </g>
         </svg>
       </button>
-      <ul class="console-text settings-options">
+      <ul class="fira-mono settings-options">
         <li class="settings-option">
           <label for="select-color">Prompt color:</label>
           <input type="color" value="#f6d52d" name="select-color" id="select-color">
@@ -87,7 +87,7 @@
           <input type="checkbox" name="show-highlight" id="show-highlight">
         </li>
         <li class="center-items settings-savelog">
-          <button id="save-log" class="clickable console-text">Save Logs</button>
+          <button id="save-log" class="clickable">Save Logs</button>
         </li>
       </ul>
     </aside>
