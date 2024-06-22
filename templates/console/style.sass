@@ -30,9 +30,7 @@ html, body
   src: local($font-name), url($font-path) format('truetype')
 
 .fira-mono
-  color: white
   font: 1.1rem 'Fira Mono', 'Courier New', monospace
-
   h1
     font-size: 1.2rem
     font-style: normal
@@ -79,16 +77,22 @@ html, body
 
   &-title
     grid-area: console-title
+
+    color: white
     text-align: center
+
     white-space: nowrap
     overflow-x: hidden
 
   &-lines
     grid-area: console-lines
     list-style: none
+
+    color: white
+    background-color: #121212
+
     overflow-y: scroll
     overflow-x: hidden
-    background-color: #121212
     padding: 1rem 2rem
     word-wrap: break-word
 
@@ -141,12 +145,13 @@ html, body
 
   &-input
     grid-area: console-input
+    resize: none
 
     border: none
     padding: 1rem 2rem
     overflow-x: hidden
-    resize: none
 
+    color: white
     background-color: inherit
     transition: color 1s, background-color 1s
 
@@ -188,6 +193,7 @@ html, body
 
   &-title
     grid-area: settings-title
+    color: white
 
   &-exit
     grid-area: settings-exit
@@ -205,6 +211,7 @@ html, body
     justify-content: center
     align-items: center
 
+    color: white
     background-color: #1f1f1f
     padding: 0.5rem 1.5rem
 
@@ -241,13 +248,13 @@ html, body
       border-radius: 1rem
       border: 2px solid white
 
+      color: white
       background-color: inherit
-      transition: 0.6s
+      transition: color 0.6s, background-color 0.6s
 
       &:hover
         background-color: white
         color: #1f1f1f
-        transition: 0.6s
 
 // -----------------------------------------
 // Visual Effects
