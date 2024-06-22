@@ -1,0 +1,247 @@
+*
+  margin: 0
+  padding: 0
+  box-sizing: border-box
+
+html, body
+  height: 100%
+
+.center-items
+  display: flex
+  align-items: center
+  justify-content: center
+
+@font-face
+  font-family: 'Fira Mono'
+  src: local('Fira Mono'), url('./core-assets/fonts/FiraMono/FiraMono-Regular.ttf') format('truetype')
+
+@font-face
+  font-family: 'Fira Mono'
+  src: local('Fira Mono'), url('./core-assets/fonts/FiraMono/FiraMono-Bold.ttf') format('truetype')
+  font-weight: bold
+
+.font-console
+  color: white
+  font: 1.1rem 'Fira Mono', 'Courier New', monospace
+
+  h1
+    font-size: 1.2rem
+    font-style: normal
+    font-weight: normal
+
+.preserve-space
+  white-space: pre
+
+.undecorated-list
+  list-style: none
+
+.clickable:enabled:hover
+  cursor: pointer
+
+.white-button
+  opacity: 30%
+  transition: 1s
+  background-color: inherit
+  padding: 0
+  margin: 0
+  border: none
+
+  svg
+    color: white
+
+  &:enabled
+    opacity: 60%
+    transition: 1s
+
+  &:enabled:hover
+    opacity: 100%
+    transition: 0.6s
+
+.translucent
+  opacity: 60%
+
+.hide
+  /* I'm using !important because:
+   * 1. I want to *always* hide an element with this class.
+   * 2. I still wish to keep the class declaration up here.
+   * It's a lot simpler that way. */
+  display: none !important
+
+.screen-overlay
+  position: fixed
+  width: 100%
+  height: 100%
+
+.obscure
+  background-color: black
+  opacity: 80%
+  z-index: 10
+
+/* -----------------------------------------
+ * Console:
+ * ----------------------------------------- */
+.console
+  width: 100%
+  height: 100%
+  display: grid
+  $top:    ".              console-title   show-settings"
+  $middle: "console-lines  console-lines   console-lines"
+  $bottom: "console-clip   console-input   console-arrow"
+  grid-template-areas: $top $middle $bottom
+  grid-template-rows: 3rem auto 5rem
+  grid-template-columns: 5rem auto 5rem
+  background-color: black
+
+  &_title
+    grid-area: console-title
+    text-align: center
+    white-space: nowrap
+    overflow-x: hidden
+
+  &_lines
+    grid-area: console-lines
+    overflow-y: scroll
+    overflow-x: hidden
+    background-color: #121212
+    padding: 1rem 2rem
+    word-wrap: break-word
+
+  &_line
+    white-space: pre-wrap
+    display: block
+    margin-bottom: 1rem
+
+    &.file-download
+      margin: 2rem 0
+
+      > a
+        background-color: inherit
+        color: inherit
+        text-decoration: none
+        padding: 0.5rem 1rem
+        border: 2px solid white
+        border-radius: 0.5rem
+        transition: 0.6s
+
+        &:hover
+          background-color: white
+          color: #121212
+          transition: 0.6s
+
+  &_prompt
+    margin-right: 0.3rem
+    font-weight: bold
+
+  &_settings
+    grid-area: show-settings
+
+    > svg
+      width: 80%
+      height: 80%
+
+  &_file
+    grid-area: console-clip
+    background-color: inherit
+
+    > svg
+      width: 60%
+      height: 60%
+
+  &_arrow
+    grid-area: console-arrow
+    background-color: inherit
+
+    > svg
+      width: 60%
+      height: 60%
+
+  &_input
+    grid-area: console-input
+    border: none
+    padding: 1rem 2rem
+    overflow-x: hidden
+    resize: none
+    background-color: inherit
+
+    &:focus
+      outline: none
+
+    &.highlight:focus:enabled
+      background-color: white
+      color: black
+      transition: 1s
+
+/* -----------------------------------------
+ * Settings:
+ * ----------------------------------------- */
+.settings
+  position: fixed
+  display: grid
+  $top:    ".                  settings-title    settings-exit"
+  $bottom: "settings-options   settings-options  settings-options"
+  grid-template-areas: $top $bottom
+  grid-template-columns: 3rem auto 3rem
+  grid-template-rows: 2rem auto
+  background-color: #121212
+  overflow: hidden
+  border-radius: 1rem
+  z-index: 20
+
+  &_title
+    grid-area: settings-title
+
+
+  &_exit
+    grid-area: settings-exit
+
+    > svg
+      width: 60%
+      height: 60%
+
+  &_options
+    grid-area: settings-options
+    display: flex
+    background-color: #1f1f1f
+    flex-flow: column nowrap
+    justify-content: center
+    padding: 0.5rem 1.5rem
+    align-items: center
+
+  &_option
+    width: 100%
+    display: grid
+    grid-template-columns: 2.5fr 1.5fr
+    margin: 0.5rem
+
+    > label
+      text-align: right
+      margin: auto 0
+
+
+    > input
+      margin-left: 1rem
+      padding: 0.2rem
+      min-height: 1rem
+      min-width: 1rem
+
+      &[type='checkbox']
+        height: 1.5rem
+        width: 1.5rem
+
+  &_savelog
+    width: 100%
+    margin: 1rem 0 0.5rem 0
+
+    > button
+      width: 80%
+      height: 100%
+      padding: 0.5rem
+      border-radius: 1rem
+      border: 2px solid white
+      background-color: inherit
+      transition: 0.6s
+
+    &:hover
+      background-color: white
+      color: #1f1f1f
+      transition: 0.6s
