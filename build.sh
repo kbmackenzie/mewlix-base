@@ -47,6 +47,11 @@ minify() {
   npx terser "$1" --config-file "$TERSER_CONFIG"
 }
 
+# Compile a SASS stylesheet to a CSS stylesheet.
+from_sass() {
+  npx sass "$1/style.sass" "$1/style.css" --style=compressed --no-source-map
+}
+
 # Compile and minify all files, and prepend comment header to them.
 build() {
   compile || {
@@ -62,11 +67,6 @@ build() {
   done
 }
 
-# Run postcss on a CSS file, transforming it in-place
-transform_css() {
-  npx postcss "$1" -r
-}
-
 # Package template (after building):
 package_template() {
   log_message "Packaging '$1' template:"
@@ -79,12 +79,13 @@ package_template() {
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
 
-  STYLESHEET="$TARGET_FOLDER/style.css"
+  STYLESHEET="$TARGET_FOLDER/style.sass"
   if [ -f "$STYLESHEET" ]; then
-    transform_css "$STYLESHEET" || {
-      log_error "Couldn't transform .css file '$STYLESHEET'!"
+    from_sass "$TARGET_FOLDER" || {
+      log_error "Couldn't compile .sass stylesheet '$STYLESHEET'!"
       exit 1
     }
+    rm "$STYLESHEET"
   fi
 
   mkdir "$TARGET_FOLDER/core"
