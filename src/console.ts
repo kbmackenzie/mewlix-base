@@ -274,12 +274,18 @@ export default function(mewlix: Mewlix): void {
 
   document.getElementById('show-settings')!.addEventListener('click', () => {
     settingsMenu.classList.remove('hide');
+    setTimeout(() => {
+      settingsMenu.classList.add('show');
+    }, 50);
     document.body.appendChild(createDarkOverlay());
   });
 
   document.getElementById('hide-settings')!.addEventListener('click', () => {
-    settingsMenu.classList.add('hide');
-    Array.from(document.getElementsByClassName('dark-overlay')).forEach(x => x.remove());
+    settingsMenu.classList.remove('show');
+    setTimeout(() => {
+      settingsMenu.classList.add('hide');
+      Array.from(document.getElementsByClassName('dark-overlay')).forEach(x => x.remove());
+    }, 500);
   });
 
   showHighlight.addEventListener('change', () => {
