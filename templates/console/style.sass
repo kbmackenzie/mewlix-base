@@ -11,16 +11,25 @@ html, body
   align-items: center
   justify-content: center
 
-@font-face
-  font-family: 'Fira Mono'
-  src: local('Fira Mono'), url('./core-assets/fonts/FiraMono/FiraMono-Regular.ttf') format('truetype')
+@function get-font($path)
+  @return './core-assets/fonts/' + $path
 
 @font-face
-  font-family: 'Fira Mono'
-  src: local('Fira Mono'), url('./core-assets/fonts/FiraMono/FiraMono-Bold.ttf') format('truetype')
+  $font-name: 'Fira Mono'
+  $font-path: get-font('FiraMono/FiraMono-Regular.ttf')
+
+  font-family: $font-name 
+  src: local($font-name), url($font-path) format('truetype')
+
+@font-face
+  $font-name: 'Fira Mono'
+  $font-path: get-font('FiraMono/FiraMono-Bold.ttf')
+
+  font-family: $font-name
   font-weight: bold
+  src: local($font-name), url($font-path) format('truetype')
 
-.font-console
+.console-text
   color: white
   font: 1.1rem 'Fira Mono', 'Courier New', monospace
 
@@ -39,23 +48,18 @@ html, body
   cursor: pointer
 
 .white-button
-  opacity: 30%
-  transition: 1s
-  background-color: inherit
-  padding: 0
-  margin: 0
   border: none
+  color: white
 
-  svg
-    color: white
+  opacity: 30%
+  transition: opacity 0.5s
+  background-color: inherit
 
   &:enabled
     opacity: 60%
-    transition: 1s
 
   &:enabled:hover
     opacity: 100%
-    transition: 0.6s
 
 .translucent
   opacity: 60%
@@ -67,12 +71,10 @@ html, body
    * It's a lot simpler that way. */
   display: none !important
 
-.screen-overlay
+.dark-overlay
   position: fixed
   width: 100%
   height: 100%
-
-.obscure
   background-color: black
   opacity: 80%
   z-index: 10
@@ -92,13 +94,13 @@ html, body
   grid-template-columns: 5rem auto 5rem
   background-color: black
 
-  &_title
+  &-title
     grid-area: console-title
     text-align: center
     white-space: nowrap
     overflow-x: hidden
 
-  &_lines
+  &-lines
     grid-area: console-lines
     overflow-y: scroll
     overflow-x: hidden
@@ -106,7 +108,7 @@ html, body
     padding: 1rem 2rem
     word-wrap: break-word
 
-  &_line
+  &-line
     white-space: pre-wrap
     display: block
     margin-bottom: 1rem
@@ -128,34 +130,31 @@ html, body
           color: #121212
           transition: 0.6s
 
-  &_prompt
+  &-prompt
     margin-right: 0.3rem
     font-weight: bold
 
-  &_settings
+  &-settings
     grid-area: show-settings
-
     > svg
       width: 80%
       height: 80%
 
-  &_file
+  &-file
     grid-area: console-clip
     background-color: inherit
-
     > svg
       width: 60%
       height: 60%
 
-  &_arrow
+  &-arrow
     grid-area: console-arrow
     background-color: inherit
-
     > svg
       width: 60%
       height: 60%
 
-  &_input
+  &-input
     grid-area: console-input
     border: none
     padding: 1rem 2rem
@@ -187,18 +186,17 @@ html, body
   border-radius: 1rem
   z-index: 20
 
-  &_title
+  &-title
     grid-area: settings-title
 
 
-  &_exit
+  &-exit
     grid-area: settings-exit
-
     > svg
       width: 60%
       height: 60%
 
-  &_options
+  &-options
     grid-area: settings-options
     display: flex
     background-color: #1f1f1f
@@ -207,7 +205,7 @@ html, body
     padding: 0.5rem 1.5rem
     align-items: center
 
-  &_option
+  &-option
     width: 100%
     display: grid
     grid-template-columns: 2.5fr 1.5fr
@@ -216,7 +214,6 @@ html, body
     > label
       text-align: right
       margin: auto 0
-
 
     > input
       margin-left: 1rem
@@ -228,7 +225,7 @@ html, body
         height: 1.5rem
         width: 1.5rem
 
-  &_savelog
+  &-savelog
     width: 100%
     margin: 1rem 0 0.5rem 0
 
@@ -239,7 +236,7 @@ html, body
       border-radius: 1rem
       border: 2px solid white
       background-color: inherit
-      transition: 0.6s
+      transition: all 0.6s
 
     &:hover
       background-color: white

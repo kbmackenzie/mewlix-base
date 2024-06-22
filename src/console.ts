@@ -63,7 +63,7 @@ export default function(mewlix: Mewlix): void {
   function createPrompt(): HTMLSpanElement {
     const span = document.createElement('span');
     span.style.color = setColor.value;
-    span.classList.add('console_prompt');
+    span.classList.add('console-prompt');
 
     span.appendChild(document.createTextNode(promptMessage));
     return span;
@@ -71,7 +71,7 @@ export default function(mewlix: Mewlix): void {
 
   function newLine(callback: (line: HTMLLIElement) => void): void {
     const line = document.createElement('li');
-    line.classList.add('console_line');
+    line.classList.add('console-line');
     callback(line);
     lines.appendChild(line);
     scrollDown(lines);
@@ -244,7 +244,7 @@ export default function(mewlix: Mewlix): void {
    * ------------------------------------- */
   function createDarkOverlay(): HTMLDivElement {
     const div = document.createElement('div');
-    div.classList.add('screen-overlay', 'obscure');
+    div.classList.add('dark-overlay');
     return div;
   }
 
@@ -279,7 +279,7 @@ export default function(mewlix: Mewlix): void {
 
   document.getElementById('hide-settings')!.addEventListener('click', () => {
     settingsMenu.classList.add('hide');
-    Array.from(document.getElementsByClassName('obscure')).forEach(x => x.remove());
+    Array.from(document.getElementsByClassName('dark-overlay')).forEach(x => x.remove());
   });
 
   showHighlight.addEventListener('change', () => {
