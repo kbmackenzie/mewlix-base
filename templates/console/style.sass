@@ -1,3 +1,9 @@
+@use 'sass:color'
+
+$header-color: #000
+$bg-color:     #121212
+$light-color:  #fff
+
 *
   margin: 0
   padding: 0
@@ -44,7 +50,7 @@ html, body
 
 .vector-button
   border: none
-  color: white
+  color: $light-color
   background-color: inherit
   opacity: 50%
   transition: opacity 0.5s
@@ -73,12 +79,13 @@ html, body
   grid-template-areas: $top $middle $bottom
   grid-template-rows: 3rem auto 5rem
   grid-template-columns: 5rem auto 5rem
-  background-color: black
+
+  background-color: $header-color
 
   &-title
     grid-area: console-title
 
-    color: white
+    color: $light-color
     text-align: center
 
     white-space: nowrap
@@ -89,7 +96,7 @@ html, body
     list-style: none
 
     color: white
-    background-color: #121212
+    background-color: $bg-color
 
     overflow-y: scroll
     overflow-x: hidden
@@ -110,14 +117,14 @@ html, body
         text-decoration: none
 
         padding: 0.5rem 1rem
-        border: 2px solid white
+        border: 2px solid $light-color
         border-radius: 0.5rem
 
         transition: color 0.6s, background-color 0.6s
 
         &:hover
-          background-color: white
-          color: #121212
+          background-color: $light-color
+          color: $bg-color
 
   &-prompt
     margin-right: 0.3rem
@@ -159,7 +166,7 @@ html, body
       outline: none
 
     &.highlight:focus:enabled
-      background-color: white
+      background-color: $light-color
       color: black
 
 // -----------------------------------------
@@ -179,7 +186,7 @@ html, body
   z-index: 20
   overflow: hidden
 
-  background-color: #121212
+  background-color: color.scale($bg-color, $lightness: -30%)
 
   $hidden-y: -200%
   $shown-y:  0%
@@ -193,7 +200,7 @@ html, body
 
   &-title
     grid-area: settings-title
-    color: white
+    color: $light-color
 
   &-exit
     grid-area: settings-exit
@@ -211,9 +218,10 @@ html, body
     justify-content: center
     align-items: center
 
-    color: white
-    background-color: #1f1f1f
     padding: 0.5rem 1.5rem
+
+    color: $light-color
+    background-color: $bg-color
 
   &-option
     width: 100%
@@ -246,15 +254,15 @@ html, body
       padding: 0.5rem
 
       border-radius: 1rem
-      border: 2px solid white
+      border: 2px solid $light-color
 
-      color: white
+      color: $light-color
       background-color: inherit
       transition: color 0.6s, background-color 0.6s
 
       &:hover
-        background-color: white
-        color: #1f1f1f
+        background-color: $light-color
+        color: $bg-color
 
 // -----------------------------------------
 // Visual Effects
