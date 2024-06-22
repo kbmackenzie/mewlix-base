@@ -176,11 +176,14 @@ html, body
 
   background-color: #121212
 
-  transform: translateY(200%)
+  $hidden-y: -200%
+  $shown-y:  0%
+
+  transform: translateY($hidden-y)
   transition: transform 0.5s
 
   &.show
-    transform: translateY(0)
+    transform: translateY($shown-y)
 
   &-title
     grid-area: settings-title
