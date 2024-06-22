@@ -285,7 +285,7 @@ export default function(mewlix: Mewlix): void {
     setTimeout(() => {
       settingsMenu.classList.add('hide');
       Array.from(document.getElementsByClassName('dark-overlay')).forEach(x => x.remove());
-    }, 500);
+    }, 300);
   });
 
   showHighlight.addEventListener('change', () => {
