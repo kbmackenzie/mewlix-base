@@ -78,9 +78,9 @@ html, body
   width: 100%
   height: 100%
   display: grid
-  $top:    ".              console-title   show-settings"
-  $middle: "console-lines  console-lines   console-lines"
-  $bottom: "console-clip   console-input   console-arrow"
+  $top:    '.              console-title   show-settings'
+  $middle: 'console-lines  console-lines   console-lines'
+  $bottom: 'console-clip   console-input   console-arrow'
   grid-template-areas: $top $middle $bottom
   grid-template-rows: 3rem auto 5rem
   grid-template-columns: 5rem auto 5rem
@@ -175,17 +175,17 @@ html, body
   position: fixed
 
   display: grid
-  $top:    ".                  settings-title    settings-exit"
-  $bottom: "settings-options   settings-options  settings-options"
+  $top:    '.                 settings-title    settings-exit'
+  $bottom: 'settings-options  settings-options  settings-options'
   grid-template-areas: $top $bottom
-  grid-template-rows: 2rem auto
+  grid-template-rows: 3rem auto
   grid-template-columns: 3rem auto 3rem
 
   border-radius: 1rem
   z-index: 20
   overflow: hidden
 
-  background-color: color.scale($bg-color, $lightness: -30%)
+  background-color: $bg-color
 
   $hide-y: -200%
   $show-y:  0%
@@ -199,11 +199,16 @@ html, body
 
   &-title
     grid-area: settings-title
-    color: $light-color
+
+    margin: 0.5rem
+    border-radius: 15rem
+
+    color: $bg-color
+    background-color: white
 
   &-exit
     grid-area: settings-exit
-    @include adjust-vector(60%, 60%)
+    @include adjust-vector(50%, 50%)
 
   &-options
     grid-area: settings-options
@@ -215,9 +220,7 @@ html, body
     align-items: center
 
     padding: 0.5rem 1.5rem
-
     color: $light-color
-    background-color: $bg-color
 
   &-option
     width: 100%
