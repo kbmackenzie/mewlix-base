@@ -79,13 +79,12 @@ package_template() {
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
 
-  STYLESHEET="$TARGET_FOLDER/style.sass"
-  if [ -f "$STYLESHEET" ]; then
+  if [ -f "${TARGET_FOLDER}/style.sass" ]; then
     from_sass "$TARGET_FOLDER" || {
-      log_error "Couldn't compile .sass stylesheet '$STYLESHEET'!"
+      log_error "Couldn't compile .sass stylesheet '${TARGET_FOLDER}/style.sass'!"
       exit 1
     }
-    rm "$STYLESHEET"
+    rm "$TARGET_FOLDER"/*.sass
   fi
 
   mkdir "$TARGET_FOLDER/core"
