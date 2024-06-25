@@ -1,8 +1,5 @@
 @use 'sass:color'
-
-$header-color: #000
-$bg-color:     #121212
-$light-color:  #fff
+@use './colors'
 
 @mixin adjust-vector($width, $height)
   > svg
@@ -55,7 +52,7 @@ html, body
 
 .vector-button
   border: none
-  color: $light-color
+  color: colors.$white
   background-color: inherit
   opacity: 50%
   transition: opacity 0.5s
@@ -85,12 +82,12 @@ html, body
   grid-template-rows: 3rem auto 5rem
   grid-template-columns: 5rem auto 5rem
 
-  background-color: $header-color
+  background-color: colors.$void
 
   &-title
     grid-area: console-title
 
-    color: $light-color
+    color: colors.$white
     text-align: center
 
     white-space: nowrap
@@ -101,7 +98,7 @@ html, body
     list-style: none
 
     color: white
-    background-color: $bg-color
+    background-color: colors.$smoke
 
     overflow-y: scroll
     overflow-x: hidden
@@ -122,14 +119,14 @@ html, body
         text-decoration: none
 
         padding: 0.5rem 1rem
-        border: 2px solid $light-color
+        border: 2px solid colors.$white
         border-radius: 0.5rem
 
         transition: color 0.6s, background-color 0.6s
 
         &:hover
-          background-color: $light-color
-          color: $bg-color
+          background-color: colors.$white
+          color: colors.$smoke
 
   &-prompt
     margin-right: 0.3rem
@@ -165,7 +162,7 @@ html, body
       outline: none
 
     &.highlight:focus:enabled
-      background-color: $light-color
+      background-color: colors.$white
       color: black
 
 // -----------------------------------------
@@ -185,7 +182,7 @@ html, body
   z-index: 20
   overflow: hidden
 
-  background-color: $bg-color
+  background-color: colors.$smoke
 
   $hide-y: -200%
   $show-y:  0%
@@ -203,7 +200,7 @@ html, body
     margin: 0.5rem
     border-radius: 15rem
 
-    color: $bg-color
+    color: colors.$smoke
     background-color: white
 
   &-exit
@@ -220,7 +217,7 @@ html, body
     align-items: center
 
     padding: 0.5rem 1.5rem
-    color: $light-color
+    color: colors.$white
 
   &-option
     width: 100%
@@ -253,15 +250,15 @@ html, body
       padding: 0.5rem
 
       border-radius: 1rem
-      border: 2px solid $light-color
+      border: 2px solid colors.$white
 
-      color: $light-color
+      color: colors.$white
       background-color: inherit
       transition: color 0.6s, background-color 0.6s
 
       &:hover
-        background-color: $light-color
-        color: $bg-color
+        background-color: colors.$white
+        color: colors.$smoke
 
 // -----------------------------------------
 // Miscellaneous
