@@ -840,8 +840,7 @@ const internal = {
       [ "message" , error.message ? purrify(error.message) : null ],
     ]);
   },
-  assert(expr: MewlixValue, message: string): void {
-    if (conversion.toBool(expr)) return;
+  assertionFail(message: string): void {
     throw new MewlixError(ErrorCode.CatOnComputer,
       `Assertion failed: ${message}`);
   }
