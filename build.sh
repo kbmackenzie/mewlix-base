@@ -38,29 +38,29 @@ check_dependency 'zip' || exit 1
 check_dependency 'npx' || exit 1
 
 # Compile all .ts files in ./src/
-compile() {
+compile_ts() {
   npx tsc --outDir "$COMPILED"
 }
 
 # Minify a .js file (writes output to stdout)
-minify() {
+minify_js() {
   npx terser "$1" --config-file "$TERSER_CONFIG"
 }
 
 # Compile a SASS stylesheet to a CSS stylesheet.
-from_sass() {
+compile_sass() {
   npx sass "$1/style.sass" "$1/style.css" --style=compressed --no-source-map
 }
 
 # Compile and minify all files, and prepend comment header to them.
 build() {
-  compile || {
+  compile_ts || {
     log_error "Error when compiling .ts files!"
     exit 1
   }
   for FILE in "$COMPILED"/*.js; do
     NAME=$(basename "$FILE")
-    minify "$FILE" | cat "$HEADER" - > "$FINAL/$NAME" || {
+    minify_js "$FILE" | cat "$HEADER" - > "$FINAL/$NAME" || {
       log_error "Error when minifying file '$FILE'!"
       exit 1
     }
@@ -79,8 +79,9 @@ package_template() {
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
 
+  # Compile .sass stylesheets.
   if [ -f "${TARGET_FOLDER}/style.sass" ]; then
-    from_sass "$TARGET_FOLDER" || {
+    compile_sass "$TARGET_FOLDER" || {
       log_error "Couldn't compile .sass stylesheet '${TARGET_FOLDER}/style.sass'!"
       exit 1
     }
@@ -90,8 +91,9 @@ package_template() {
   mkdir "$TARGET_FOLDER/core"
   cp "$FINAL/mewlix.js" "$TARGET_FOLDER/core"
 
+  # Copy template-specific source files.
   if [ -f "$FINAL/$1.js" ]; then
-    cp "$FINAL/$1.js"   "$TARGET_FOLDER/core"
+    cp "$FINAL/$1.js" "$TARGET_FOLDER/core"
   fi
 
   log_message "Zipping '$1' template:"
