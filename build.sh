@@ -122,7 +122,7 @@ package_template() {
 package_all() {
   package_template 'console'
   package_template 'graphic'
-  package_template 'library'
+  package_template 'node'
 }
 
 build
