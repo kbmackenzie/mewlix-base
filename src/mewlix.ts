@@ -197,7 +197,7 @@ export class Shelf<T> extends MewlixObject {
     if (a instanceof ShelfBottom) return b instanceof ShelfBottom;
     if (b instanceof ShelfBottom) return a instanceof ShelfBottom;
 
-    return compare.isEqual(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
+    return compare.equal(a.peek(), b.peek()) && Shelf.isEqual(a.pop(), b.pop());
   }
 
   static concat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
@@ -215,7 +215,7 @@ export class Shelf<T> extends MewlixObject {
 
   static contains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
     for (const item in shelf) {
-      if (compare.isEqual(value, item)) return true;
+      if (compare.equal(value, item)) return true;
     }
     return false;
   }
@@ -679,7 +679,7 @@ export const boolean = {
 };
 
 export const compare = {
-  isEqual(a: MewlixValue, b: MewlixValue): boolean {
+  equal(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
 
