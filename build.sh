@@ -79,6 +79,9 @@ package_template() {
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
 
+  # Minify index.js source file.
+  minify_js "${TEMPLATE}/index.js" > "${TARGET_FOLDER}/index.js"
+
   # Compile .sass stylesheets.
   if [ -f "${TARGET_FOLDER}/style.sass" ]; then
     compile_sass "$TARGET_FOLDER" || {
@@ -88,10 +91,11 @@ package_template() {
     rm "$TARGET_FOLDER"/*.sass
   fi
 
+  # Create 'core' folder and copy core source files.
   mkdir "$TARGET_FOLDER/core"
   cp "$FINAL/mewlix.js" "$TARGET_FOLDER/core"
 
-  # Copy template-specific source files.
+  # Copy template-specific source file, if any.
   if [ -f "$FINAL/$1.js" ]; then
     cp "$FINAL/$1.js" "$TARGET_FOLDER/core"
   fi
