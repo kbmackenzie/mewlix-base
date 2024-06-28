@@ -688,9 +688,7 @@ export const compare = {
     }
     return a === b;
   },
-
-  // -- Numeric comparison:
-  compare(a: MewlixValue, b: MewlixValue): Comparison {
+  ordering(a: MewlixValue, b: MewlixValue): Comparison {
     if (typeof a !== typeof b) {
       const typeofA = reflection.typeOf(a);
       const typeofB = reflection.typeOf(b);
@@ -1096,7 +1094,7 @@ const createMewlix = function() {
     ensure.shelf('std.sort', shelf);
     return Shelf.fromArray(shelf
       .toArray()
-      .sort((a, b) => compare.compare(a, b).id)
+      .sort((a, b) => compare.ordering(a, b).id)
     );
   };
 
