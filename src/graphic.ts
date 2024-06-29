@@ -1212,6 +1212,10 @@ export default function(mewlix: Mewlix): void {
     hex: Color.fromHex,
 
     PixelCanvas: PixelCanvas,
+
+    page_background(color: string | Color): void {
+      document.body.style.backgroundColor = withColor(color);
+    },
   };
   const GraphicYarnBall = new YarnBall('std.graphic', Graphic);
   mewlix.Graphic = GraphicYarnBall;
