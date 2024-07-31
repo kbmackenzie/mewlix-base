@@ -20,44 +20,37 @@ fi
 
 DEFAULT_YARNBALL=$(cat << EOF
 export default function(mewlix) {
-  mewlix.Modules.addModule("main", () => void 0);
+  mewlix.modules.addModule("main", () => {
+    /* Make 'mewlix' object globally available (for testing). */
+    globalThis.mewlix = mewlix;
+  });
 }
 EOF
 )
 
-create_test() {
-  log_message "Creating test for template '$1'..."
-  TARGET_FOLDER="./build/test/$1"
+# ------------------------------
+# CONFIG OPTIONS
+# ------------------------------
+# Should tests be run?
+RUN_TESTS=true
 
-  cp -r "./build/$1-build" "$TARGET_FOLDER" || {
-    log_error "Couldn't copy template '$1'!"
-    exit 1
-  }
+# Which templates to target?
+TARGET_TEMPLATE='all'
 
-  echo '{}' > "$TARGET_FOLDER/core/meta.json"
-
-  YARNBALL_FOLDER="$TARGET_FOLDER/yarnball"
-  mkdir "$YARNBALL_FOLDER"
-  cp './test/test-suite.js' "$YARNBALL_FOLDER/test-suite.js"
-
-  if [ -f "./test/$1-test.js" ]; then
-    cp "./test/$1-test.js" "$YARNBALL_FOLDER/yarnball.js"
-  else
-    echo "$DEFAULT_YARNBALL" > "$YARNBALL_FOLDER/yarnball.js"
-  fi
-}
-
-create_tests() {
-  create_test 'console'
-  create_test 'graphic'
-}
-
-TARGET_TEMPLATE=''
+# Should tests be re-built?
 REBUILD=false
-RUN_TEST=true
 
-LONG_OPTIONS='rebuild'
-SHORT_OPTIONS='r'
+# What port to use with http-server?
+SERVER_PORT=8080
+
+# How long to wait for server before running jest?
+WAIT_DURATION=3
+
+# ------------------------------
+# Parse command-line arguments:
+# ------------------------------
+LONG_OPTIONS='rebuild,port:,wait:,dont-run'
+SHORT_OPTIONS='rp:w:d'
 
 OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n 'test.sh' -- "$@")
 eval set -- "$OPTS"
@@ -66,6 +59,15 @@ while true; do
   case "$1" in
     -r | --rebuild)
       REBUILD=true
+      shift ;;
+    -p | --port)
+      PORT="$2"
+      shift 2 ;;
+    -w | --wait)
+      WAIT_DURATION="$2"
+      shift 2 ;;
+    -d | --dont-run)
+      RUN_TESTS=false
       shift ;;
     --)
       shift
@@ -80,15 +82,32 @@ case "$1" in
     TARGET_TEMPLATE='console' ;;
   graphic)
     TARGET_TEMPLATE='graphic' ;;
-  * )
-    if [ -z "$1" ]; then
-      log_error 'Expected template, got none!'
-    else
-      log_error "Invalid template option: '$1'"
-    fi
-    log_error 'Specify template as argument, like this: npm run test -- console'
-    exit 1 ;;
+  * ) ;;
 esac
+
+# ------------------------------
+# Build tests:
+# ------------------------------
+create_test() {
+  log_message "Creating test for template '$1'..."
+  TARGET_FOLDER="./build/test/$1"
+
+  cp -r "./build/$1-build" "$TARGET_FOLDER" || {
+    log_error "Couldn't copy template '$1'!"
+    exit 1
+  }
+
+  echo '{}' > "$TARGET_FOLDER/core/meta.json"
+
+  YARNBALL_FOLDER="$TARGET_FOLDER/yarnball"
+  mkdir "$YARNBALL_FOLDER"
+  echo "$DEFAULT_YARNBALL" > "$YARNBALL_FOLDER/yarnball.js"
+}
+
+create_tests() {
+  create_test 'console'
+  create_test 'graphic'
+}
 
 if [ ! -d './build/test' ] || [ "$REBUILD" = 'true' ]; then
   log_message 'Building tests...'
@@ -98,14 +117,47 @@ if [ ! -d './build/test' ] || [ "$REBUILD" = 'true' ]; then
   create_tests
 fi
 
-if [ "$RUN_TEST" = 'true' ]; then
-  SERVER_LOG_FILE='./build/test/server.log'
+# ------------------------------
+# Run all tests:
+# ------------------------------
+run_server() {
+  TEMPLATE="$1"
+  PORT="$SERVER_PORT"
+  LOG_FILE="./build/test/server-${TEMPLATE}.log"
 
-  log_message "Running test for template '$TARGET_TEMPLATE'!"
-  log_message "http-server log output will be saved to '$SERVER_LOG_FILE'."
+  log_message "Running server for testing template '$TEMPLATE'..."
+  log_message "http-server log output will be saved to '$LOG_FILE'."
 
-  npx http-server "./build/test/$TARGET_TEMPLATE/" -o > "$SERVER_LOG_FILE" 2> "$SERVER_LOG_FILE" || {
-    log_error "Couldn't run template '$1' in http server!"
-    exit 1
-  }
+  ( npx http-server "./build/test/$TEMPLATE/" --port "$PORT" >"$LOG_FILE" 2>&1 ) &
+}
+
+run_test() {
+  TEMPLATE="$1"
+
+  # Run server + store PID
+  run_server "$TEMPLATE"
+  SERVER_PID=$!
+
+  # Run jest
+  sleep "$WAIT_DURATION"
+  npx jest "${TEMPLATE}.test.js"
+
+  # Kill server
+  kill "$SERVER_PID"
+}
+
+if [ "$RUN_TESTS" = 'true' ]; then
+  TEMPLATES='console graphic'
+
+  if [ "$TARGET_TEMPLATE" != 'all' ]; then
+    TEMPLATES="$TARGET_TEMPLATE"
+  fi
+
+  for TEMPLATE in $TEMPLATES; do
+    if [ ! -d "./build/test/$TEMPLATE" ]; then
+      log_error "Invalid template '$TEMPLATE': Test directory doesn't exist!"
+      continue
+    fi
+    run_test "$TEMPLATE"
+  done
 fi
