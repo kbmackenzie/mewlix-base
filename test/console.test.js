@@ -69,4 +69,30 @@ describe('mewlix console template', () => {
     });
     expect(hasCleared).toBe(true);
   });
+
+  it('should create a file download', async () => {
+    const filename = 'example-file.txt';
+    const contents = 'hello world!';
+    const fileDownload = await page.evaluate(
+      async (filename, contents) => {
+        globalThis.mewlix.Console.box().write_file(filename, contents);
+        const lastLine = document.getElementById('console-lines').lastChild;
+        const button   = lastLine.querySelector('a');
+
+        const response = await fetch(button.href);
+        const fileText = await response.text();
+
+        return {
+          download: button.download,
+          contents: fileText,
+          hasClass: lastLine.classList.contains('file-download'),
+        };
+      },
+      filename,
+      contents,
+    );
+    expect(fileDownload.hasClass).toBe(true);
+    expect(fileDownload.download).toBe(filename); 
+    expect(fileDownload.contents).toBe(contents + '\n');
+  });
 });
