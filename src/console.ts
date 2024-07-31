@@ -349,6 +349,7 @@ export default function(mewlix: Mewlix): void {
     },
 
     highlight(enable: boolean): void {
+      ensure.boolean('console.highlight', enable);
       showHighlight.checked = enable;
       toggleHighlight(enable);
     },
