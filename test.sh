@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Write an error message to stderr.
+# Write a log message to stdout.
 log_message() {
   echo "[test.sh] $1"
 }
@@ -37,7 +37,7 @@ EOF
 )
 
 # ------------------------------
-# CONFIG OPTIONS
+# Config options:
 # ------------------------------
 # Should tests be run?
 RUN_TESTS=true
@@ -125,7 +125,7 @@ run_server() {
   PORT=$(get_port "$TEMPLATE")
   LOG_FILE="./build/test/server-${TEMPLATE}.log"
 
-  log_message "Running server for testing template '$TEMPLATE'..."
+  log_message "Running server for testing '$TEMPLATE' template..."
   log_message "http-server log output will be saved to '$LOG_FILE'."
 
   ( npx http-server "./build/test/$TEMPLATE/" --port "$PORT" >"$LOG_FILE" 2>&1 ) &
