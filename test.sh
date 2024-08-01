@@ -18,7 +18,15 @@ if [ ! -d './build' ]; then
   }
 fi
 
-DEFAULT_YARNBALL=$(cat << EOF
+# ------------------------------
+# Constants:
+# ------------------------------
+
+# Templates with test suites:
+TEMPLATES='console graphic'
+
+# Yarn ball for testing:
+TEST_YARNBALL=$(cat << EOF
 export default function(mewlix) {
   mewlix.modules.addModule("main", () => {
     /* Make 'mewlix' object globally available (for testing). */
@@ -87,12 +95,13 @@ create_test() {
 
   YARNBALL_FOLDER="$TARGET_FOLDER/yarnball"
   mkdir "$YARNBALL_FOLDER"
-  echo "$DEFAULT_YARNBALL" > "$YARNBALL_FOLDER/yarnball.js"
+  echo "$TEST_YARNBALL" > "$YARNBALL_FOLDER/yarnball.js"
 }
 
 create_tests() {
-  create_test 'console'
-  create_test 'graphic'
+  for TEMPLATE in $TEMPLATES; do
+    create_test "$TEMPLATE"
+  done
 }
 
 if [ ! -d './build/test' ] || [ "$REBUILD" = 'true' ]; then
@@ -106,8 +115,6 @@ fi
 # ------------------------------
 # Run all tests:
 # ------------------------------
-TEMPLATES='console graphic'
-
 get_port() {
   TEMPLATE="$1"
   cat './test-config.json' | npx json "ports.${TEMPLATE}"
