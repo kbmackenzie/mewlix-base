@@ -1221,20 +1221,17 @@ export default function(mewlix: Mewlix): void {
       return lerp(start, end, x);
     },
 
+    hex(str: string): Color {
+      ensure.string('graphic.hex', str);
+      return hexToColor(str);
+    },
+
     Vector2: Vector2,
-
     Rectangle: Rectangle,
-    
     GridSlot: GridSlot,
-
     grid_slot: positionToGridSlot,
-
     slot_point: gridSlotToPosition,
-
     Color: Color,
-
-    hex: hexToColor,
-
     PixelCanvas: PixelCanvas,
 
     page_background(color: string | Color): void {
