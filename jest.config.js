@@ -1,4 +1,4 @@
 /** @type {import('jest').Config} */
-export default {
+module.exports = {
   preset: "jest-puppeteer",
 };
