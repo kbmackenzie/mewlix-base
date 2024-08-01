@@ -70,7 +70,7 @@ export function hexToRGB(str: string): RGB | null {
   return null; /* Theoretically unreachable. */
 }
 
-function hexToColor(str: string): Color {
+export function hexToColor(str: string): Color {
   const rgb = hexToRGB(str);
   if (rgb === null) {
     throw new MewlixError(ErrorCode.Graphic,
