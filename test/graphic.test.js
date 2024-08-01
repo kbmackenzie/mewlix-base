@@ -1,6 +1,10 @@
+const utils = require("./test-utils");
+
 describe('mewlix graphic template', () => {
   beforeAll(async () => {
-    await page.goto('http://localhost:8080/');
+    const config = await utils.readConfig();
+    const port = config.ports.graphic;
+    await page.goto(`http://localhost:${port}/`);
     /* Wait for the 'mewlix' object to become globablly available.
      * 
      * Note: The 'mewlix' object is typically local.
