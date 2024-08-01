@@ -34,23 +34,20 @@ EOF
 # Should tests be run?
 RUN_TESTS=true
 
-# Which templates to target?
-TARGET_TEMPLATE='all'
-
 # Should tests be re-built?
 REBUILD=false
-
-# What port to use with http-server?
-SERVER_PORT=8080
 
 # How long to wait for server before running jest?
 WAIT_DURATION=3
 
+# Note: Additional configuration should be placed in test-config.json.
+# Note: Server ports are defined in test-config.json.
+
 # ------------------------------
 # Parse command-line arguments:
 # ------------------------------
-LONG_OPTIONS='rebuild,port:,wait:,dont-run'
-SHORT_OPTIONS='rp:w:d'
+LONG_OPTIONS='rebuild,wait:,dont-run'
+SHORT_OPTIONS='rw:d'
 
 OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n 'test.sh' -- "$@")
 eval set -- "$OPTS"
@@ -60,9 +57,6 @@ while true; do
     -r | --rebuild)
       REBUILD=true
       shift ;;
-    -p | --port)
-      PORT="$2"
-      shift 2 ;;
     -w | --wait)
       WAIT_DURATION="$2"
       shift 2 ;;
@@ -76,14 +70,6 @@ while true; do
       break ;;
   esac
 done
-
-case "$1" in
-  console)
-    TARGET_TEMPLATE='console' ;;
-  graphic)
-    TARGET_TEMPLATE='graphic' ;;
-  * ) ;;
-esac
 
 # ------------------------------
 # Build tests:
@@ -120,9 +106,16 @@ fi
 # ------------------------------
 # Run all tests:
 # ------------------------------
+TEMPLATES='console graphic'
+
+get_port() {
+  TEMPLATE="$1"
+  cat './test-config.json' | npx json "ports.${TEMPLATE}"
+}
+
 run_server() {
   TEMPLATE="$1"
-  PORT="$SERVER_PORT"
+  PORT=$(get_port "$TEMPLATE")
   LOG_FILE="./build/test/server-${TEMPLATE}.log"
 
   log_message "Running server for testing template '$TEMPLATE'..."
@@ -131,33 +124,32 @@ run_server() {
   ( npx http-server "./build/test/$TEMPLATE/" --port "$PORT" >"$LOG_FILE" 2>&1 ) &
 }
 
-run_test() {
-  TEMPLATE="$1"
+run_tests() {
+  SERVER_PIDS=()
 
-  # Run server + store PID
-  run_server "$TEMPLATE"
-  SERVER_PID=$!
-
-  # Run jest
-  sleep "$WAIT_DURATION"
-  npx jest "${TEMPLATE}.test.js"
-
-  # Kill server
-  kill "$SERVER_PID"
-}
-
-if [ "$RUN_TESTS" = 'true' ]; then
-  TEMPLATES='console graphic'
-
-  if [ "$TARGET_TEMPLATE" != 'all' ]; then
-    TEMPLATES="$TARGET_TEMPLATE"
-  fi
-
-  for TEMPLATE in $TEMPLATES; do
+  for TEMPLATE in $1; do
+    # Verify test exists
     if [ ! -d "./build/test/$TEMPLATE" ]; then
       log_error "Invalid template '$TEMPLATE': Test directory doesn't exist!"
       continue
     fi
-    run_test "$TEMPLATE"
+    # Run server + store PID
+    run_server "$TEMPLATE"
+    SERVER_PID=$!
+
+    SERVER_PIDS+=("$SERVER_PID")
   done
+
+  # Run jest
+  sleep "$WAIT_DURATION"
+  npx jest
+
+  # Kill servers
+  for SERVER_PID in "${SERVER_PIDS[@]}"; do
+    kill "$SERVER_PID" || log_error "Couldn't kill server with PID '$SERVER_PID'!"
+  done
+}
+
+if [ "$RUN_TESTS" = 'true' ]; then
+  run_tests "$TEMPLATES"
 fi
