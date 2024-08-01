@@ -19,17 +19,361 @@ import {
   purrify,
 } from './mewlix.js';
 
+/* Convert percentage value (0% - 100%) to byte (0 - 255) */
+export function percentageToByte(p: number) {
+  return Math.floor((255 * p) / 100);
+}
+
+/* Convert byte (0 - 255) to percentage value (0% - 100%) */
+export function byteToPercentage(b: number) {
+  return Math.floor((100 * b) / 255);
+}
+
+/* Lerp (linear interpolation) util: */
+export function lerp(start: number, end: number, x: number): number {
+  return start + (end - start) * x;
+}
+
+export type HexadecimalChar =
+  '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
+
+export type Byte = `${HexadecimalChar}${HexadecimalChar}`;
+
+export type RGB = {
+  red:   Byte;
+  green: Byte;
+  blue:  Byte;
+};
+
+const parseHex = /^#?([a-f0-9]{3}|[a-f0-9]{6})$/i;
+
+export function hexToRGB(str: string): RGB | null {
+  const matches = parseHex.exec(str.trim());
+  if (matches === null) return null;
+
+  const hexcode = matches[1];
+  if (hexcode.length === 6) return {
+    red:   matches[1].slice(0, 2) as Byte,
+    green: matches[1].slice(2, 4) as Byte,
+    blue:  matches[1].slice(4, 6) as Byte,
+  };
+
+  if (hexcode.length === 3) {
+    const [r, g, b] = hexcode;
+    return {
+      red:   r + r as Byte,
+      green: g + g as Byte,
+      blue:  b + b as Byte,
+    };
+  }
+
+  return null; /* Theoretically unreachable. */
+}
+
+function hexToColor(str: string): Color {
+  const rgb = hexToRGB(str);
+  if (rgb === null) {
+    throw new MewlixError(ErrorCode.Graphic,
+      `Couldn't parse string '${str}' as a valid hex code!`);
+  }
+  return new Color()[wake](
+    parseInt(rgb.red  , 16),
+    parseInt(rgb.green, 16),
+    parseInt(rgb.blue , 16),
+  );
+}
+
+/* Canvas constants: */
+export const virtualWidth  = 128;
+export const virtualHeight = 128;
+
+export const gridSlotWidth  = 16;
+export const gridSlotHeight = 16;
+export const gridColumns = Math.floor(virtualWidth  / gridSlotWidth );
+export const gridRows    = Math.floor(virtualHeight / gridSlotHeight);
+
+/* Colors: */
+export const toColor: unique symbol = Symbol('toColor');
+
+export function withColor(value: string | Color): string {
+  if (typeof value === 'string') return value;    
+  if (typeof value === 'object' && toColor in value) {
+    return value[toColor]();
+  }
+
+  const typeOfValue = reflection.typeOf(value);
+  throw new MewlixError(ErrorCode.Graphic,
+    `Expected color value, received value of type "${typeOfValue}": ${value}`);
+}
+
+/* An interface for clowders that can self-validate.
+ * (As in: Perform runtime type-checking on their own properties!)  */
+interface SelfValidate {
+  validate(): void;
+}
+
+function validateAll(...args: SelfValidate[]): void {
+  args.forEach(x => x.validate());
+}
+
+/* ----------------------
+ * Clowders:
+ * ---------------------- */
+/* Note: Clowders are a little hard to add typings for, as they're very unique.
+ *
+ * Clodwer types are declared in an unique way.
+ * - The type of _box should be: <specific-type> & GenericBox
+ *
+ * The struggles of writing the base library for dynamic language in statically typed one.*/
+
+interface Vector2Like {
+  x: number;
+  y: number;
+};
+
+export class Vector2 extends Clowder<MewlixValue> implements SelfValidate {
+  [wake]: (x: number, y: number) => Vector2;
+  _box: Vector2Like & GenericBox;
+
+  box() {
+    return this._box;
+  }
+
+  validate() {
+    ensure.number('Vector2.x', this.box().x);
+    ensure.number('Vector2.y', this.box().y);
+  }
+
+  constructor() {
+    super();
+    this._box = { x: 0, y: 0 };
+
+    this[wake] = (x: number, y: number) => {
+      this.box().x = x;
+      this.box().y = y;
+      this.validate();
+      return this;
+    };
+
+    this.box().add = (that: Vector2) => {
+      validateAll(this, that);
+      const { x: ax, y: ay } = this.box();
+      const { x: bx, y: by } = that.box();
+      return new Vector2()[wake](ax + bx, ay + by);
+    };
+
+    this.box().mul = (that: Vector2) => {
+      validateAll(this, that);
+      const { x: ax, y: ay } = this.box();
+      const { x: bx, y: by } = that.box();
+      return new Vector2()[wake](ax * bx, ay * by);
+    };
+
+    this.box().distance = (that: Vector2) => {
+      validateAll(this, that);
+      const { x: ax, y: ay } = this.box();
+      const { x: bx, y: by } = that.box();
+      return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+    };
+
+    this.box().dot = (that: Vector2) => {
+      validateAll(this, that);
+      const { x: ax, y: ay } = this.box();
+      const { x: bx, y: by } = that.box();
+      return ax * bx + ay * by;
+    };
+
+    this.box().clamp = (min: Vector2, max: Vector2) => {
+      validateAll(this, min, max);
+      const { x, y } = this.box();
+      const { x: minX, y: minY } = min.box();
+      const { x: maxX, y: maxY } = max.box();
+      [x, y, minX, minY, maxX, maxY].forEach(value => {
+        ensure.number('Vector2.clamp', value);
+      });
+    };
+  }
+}
+
+interface RectangleLike {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export class Rectangle extends Clowder<MewlixValue> implements SelfValidate {
+  [wake]: (x: number, y: number, width: number, height: number) => Rectangle;
+  _box: RectangleLike & GenericBox;
+
+  box() {
+    return this._box;
+  }
+
+  validate() {
+    ensure.number('Rectangle.x'     , this.box().x    );
+    ensure.number('Rectangle.y'     , this.box().y    );
+    ensure.number('Rectangle.width' , this.box().width);
+    ensure.number('Rectangle.height', this.box().width);
+  }
+
+  constructor() {
+    super();
+    this._box = {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0
+    };
+
+    this[wake] = (x: number, y: number, width: number, height: number) => {
+      this.box().x = x;
+      this.box().y = y;
+      this.box().width = width;
+      this.box().height = height;
+      this.validate();
+      return this;
+    };
+
+    this.box().contains = (point: Vector2) => {
+      validateAll(this, point);
+      const { x: rx, y: ry, width: rw, height: rh } = this.box();
+      const { x: px, y: py } = point.box();
+      return (px >= rx) && (py >= ry) && (px < rx + rw) && (py < ry + rh);
+    };
+
+    this.box().collides = (that: Rectangle) => {
+      validateAll(this, that);
+      const { x: ax, y: ay, width: aw, height: ah } = this.box();
+      const { x: bx, y: by, width: bw, height: bh } = that.box();
+      return (bx < ax + aw)
+        && (bx + bw > ax)
+        && (by < ay + ah)
+        && (by + bh > ay);
+    };
+  }
+}
+
+interface GridSlotLike {
+  row: number;
+  column: number;
+};
+
+export class GridSlot extends Clowder<MewlixValue> implements SelfValidate {
+  [wake]: (row: number, column: number) => GridSlot;
+  _box: GridSlotLike & GenericBox;
+
+  box() {
+    return this._box;
+  }
+
+  validate() {
+    ensure.number('GridSlot.row'   , this.box().row   );
+    ensure.number('GridSlot.column', this.box().column);
+  }
+
+  constructor() {
+    super();
+    this._box = { row: 0, column: 0 };
+
+    this[wake] = (row: number, column: number) => {
+      this.box().row    = clamp_(row,    0, gridRows - 1);
+      this.box().column = clamp_(column, 0, gridColumns - 1);
+      this.validate();
+      return this;
+    };
+
+    this.box().position = () => {
+      this.validate();
+      gridSlotToPosition(this);
+    };
+  }
+}
+
+export function positionToGridSlot(point: Vector2): GridSlot {
+  const { x: px, y: py } = point.box();
+
+  const row = Math.min(py / gridSlotHeight);
+  const col = Math.min(px / gridSlotWidth);
+  return new GridSlot()[wake](row, col);
+}
+
+export function gridSlotToPosition(slot: GridSlot): Vector2 {
+  const { row, column } = slot.box();
+
+  return new Vector2()[wake](
+    column * gridSlotWidth,
+    row * gridSlotHeight,
+  );
+}
+
+/* Color container, wrapping a RGBA color value.
+ * It accepts an opacity value too, in percentage. */
+interface ColorLike {
+  red: number;
+  green: number;
+  blue: number;
+  opacity: number;
+  alpha(): number;
+};
+
+export class Color extends Clowder<MewlixValue> implements SelfValidate {
+  [wake]: (red: number, green: number, blue: number, opacity?: number) => Color;
+  _box: ColorLike & GenericBox;
+
+  box() {
+    return this._box;
+  }
+
+  validate() {
+    ensure.number('Color.red'    , this.box().red    );
+    ensure.number('Color.green'  , this.box().green  );
+    ensure.number('Color.blue'   , this.box().blue   );
+    ensure.number('Color.opacity', this.box().opacity);
+  }
+
+  constructor() {
+    super();
+    this._box = {
+      red: 0,
+      green: 0,
+      blue: 0,
+      opacity: 0,
+      alpha() { return 0; },
+    };
+
+    this[wake] = (red: number, green: number, blue: number, opacity: number = 100) => {
+      this.box().red     = clamp_(red, 0, 255);
+      this.box().green   = clamp_(green, 0, 255);
+      this.box().blue    = clamp_(blue, 0, 255);
+      this.box().opacity = clamp_(opacity, 0, 100);
+      this.validate();
+      return this;
+    };
+
+    this.box().alpha = () => {
+      ensure.number('Color.alpha', this.box().opacity);
+      return percentageToByte(this.box().opacity);
+    };
+
+    this.box().to_hex = () => {
+      this.validate()
+      const { red, green, blue } = this.box();
+      const r = red.toString(16);
+      const g = green.toString(16);
+      const b = blue.toString(16);
+        return `#${r}${g}${b}`;
+    };
+  }
+
+  [toColor](): string {
+    this.validate()
+    const { red, green, blue, opacity } = this.box();
+    return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
+  }
+}
+
 export default function(mewlix: Mewlix): void {
-  /* Convert percentage value (0% - 100%) to byte (0 - 255) */
-  function percentageToByte(p: number) {
-    return Math.floor((255 * p) / 100);
-  }
-
-  /* Convert byte (0 - 255) to percentage value (0% - 100%) */
-  function byteToPercentage(b: number) {
-    return Math.floor((100 * b) / 255);
-  }
-
   /* -----------------------------------
    * Initializing Canvas:
    * ----------------------------------- */
@@ -39,19 +383,10 @@ export default function(mewlix: Mewlix): void {
 
   const canvasWidth  = canvas.width;
   const canvasHeight = canvas.height;
-
-  const virtualWidth  = 128;
-  const virtualHeight = 128;
-
   const sizeModifier = Math.floor(canvas.width / virtualWidth);
 
   const spriteMap = new Map<string, ImageBitmap>();
   const audioMap  = new Map<string, AudioBuffer>();
-
-  const gridSlotWidth  = 16;
-  const gridSlotHeight = 16;
-  const gridColumns = Math.floor(virtualWidth  / gridSlotWidth );
-  const gridRows    = Math.floor(virtualHeight / gridSlotHeight);
 
   /* -----------------------------------
    * Loading Images:
@@ -86,22 +421,6 @@ export default function(mewlix: Mewlix): void {
       const sprite = await createImageBitmap(sheet, x, y, width, height);
       spriteMap.set(key, sprite);
     }
-  }
-
-  /* -----------------------------------
-   * Colors:
-   * ----------------------------------- */
-  const toColor: unique symbol = Symbol('toColor');
-
-  function withColor(value: string | Color): string {
-    if (typeof value === 'string') return value;    
-    if (typeof value === 'object' && toColor in value) {
-      return value[toColor]();
-    }
-
-    const typeOfValue = reflection.typeOf(value);
-    throw new MewlixError(ErrorCode.Graphic,
-      `Expected color value, received value of type "${typeOfValue}": ${value}`);
   }
 
   /* -----------------------------------
@@ -522,303 +841,8 @@ export default function(mewlix: Mewlix): void {
   }
 
   /* -----------------------------------
-   * Utility Functions:
+   * Utility Clowders:
    * ----------------------------------- */
-  function lerp(start: number, end: number, x: number): number {
-    return start + (end - start) * x;
-  }
-
-  /* -----------------------------------
-   * Clowder Validation
-   * ----------------------------------- */
-
-  /* An interface for clowders that can self-validate.
-   * (As in: Perform runtime type-checking on their own properties!)  */
-  interface SelfValidate {
-    validate(): void;
-  }
-
-  function validateAll(...args: SelfValidate[]): void {
-    args.forEach(x => x.validate());
-  }
-
-  /* -----------------------------------
-   * Core Utility:
-   * ----------------------------------- */
-
-  /* *** Clowders are VERY HARD to add typings to because they're WEIRD! ***
-   *
-   * They will be declared in a very unusual way to get the best of both worlds:
-   * - The type of _box should be: <specific-type> & GenericBox
-   *
-   * The struggles of writing the base library for dynamic language in statically typed one.*/
-
-  interface Vector2Like {
-    x: number;
-    y: number;
-  };
-
-  class Vector2 extends Clowder<MewlixValue> implements SelfValidate {
-    [wake]: (x: number, y: number) => Vector2;
-    _box: Vector2Like & GenericBox;
-
-    box() {
-      return this._box;
-    }
-
-    validate() {
-      ensure.number('Vector2.x', this.box().x);
-      ensure.number('Vector2.y', this.box().y);
-    }
-
-    constructor() {
-      super();
-      this._box = { x: 0, y: 0 };
-
-      this[wake] = (x: number, y: number) => {
-        this.box().x = x;
-        this.box().y = y;
-        this.validate();
-        return this;
-      };
-
-      this.box().add = (that: Vector2) => {
-        validateAll(this, that);
-        const { x: ax, y: ay } = this.box();
-        const { x: bx, y: by } = that.box();
-        return new Vector2()[wake](ax + bx, ay + by);
-      };
-
-      this.box().mul = (that: Vector2) => {
-        validateAll(this, that);
-        const { x: ax, y: ay } = this.box();
-        const { x: bx, y: by } = that.box();
-        return new Vector2()[wake](ax * bx, ay * by);
-      };
-
-      this.box().distance = (that: Vector2) => {
-        validateAll(this, that);
-        const { x: ax, y: ay } = this.box();
-        const { x: bx, y: by } = that.box();
-        return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
-      };
-
-      this.box().dot = (that: Vector2) => {
-        validateAll(this, that);
-        const { x: ax, y: ay } = this.box();
-        const { x: bx, y: by } = that.box();
-        return ax * bx + ay * by;
-      };
-
-      this.box().clamp = (min: Vector2, max: Vector2) => {
-        validateAll(this, min, max);
-        const { x, y } = this.box();
-        const { x: minX, y: minY } = min.box();
-        const { x: maxX, y: maxY } = max.box();
-        [x, y, minX, minY, maxX, maxY].forEach(value => {
-          ensure.number('Vector2.clamp', value);
-        });
-      };
-    }
-  }
-
-  interface RectangleLike {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-
-  class Rectangle extends Clowder<MewlixValue> implements SelfValidate {
-    [wake]: (x: number, y: number, width: number, height: number) => Rectangle;
-    _box: RectangleLike & GenericBox;
-
-    box() {
-      return this._box;
-    }
-
-    validate() {
-      ensure.number('Rectangle.x'     , this.box().x    );
-      ensure.number('Rectangle.y'     , this.box().y    );
-      ensure.number('Rectangle.width' , this.box().width);
-      ensure.number('Rectangle.height', this.box().width);
-    }
-
-    constructor() {
-      super();
-      this._box = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      };
-
-      this[wake] = (x: number, y: number, width: number, height: number) => {
-        this.box().x = x;
-        this.box().y = y;
-        this.box().width = width;
-        this.box().height = height;
-        this.validate();
-        return this;
-      };
-
-      this.box().contains = (point: Vector2) => {
-        validateAll(this, point);
-        const { x: rx, y: ry, width: rw, height: rh } = this.box();
-        const { x: px, y: py } = point.box();
-        return (px >= rx) && (py >= ry) && (px < rx + rw) && (py < ry + rh);
-      };
-
-      this.box().collides = (that: Rectangle) => {
-        validateAll(this, that);
-        const { x: ax, y: ay, width: aw, height: ah } = this.box();
-        const { x: bx, y: by, width: bw, height: bh } = that.box();
-        return (bx < ax + aw)
-          && (bx + bw > ax)
-          && (by < ay + ah)
-          && (by + bh > ay);
-      };
-    }
-  }
-
-  interface GridSlotLike {
-    row: number;
-    column: number;
-  };
-
-  class GridSlot extends Clowder<MewlixValue> implements SelfValidate {
-    [wake]: (row: number, column: number) => GridSlot;
-    _box: GridSlotLike & GenericBox;
-
-    box() {
-      return this._box;
-    }
-
-    validate() {
-      ensure.number('GridSlot.row'   , this.box().row   );
-      ensure.number('GridSlot.column', this.box().column);
-    }
-
-    constructor() {
-      super();
-      this._box = { row: 0, column: 0 };
-
-      this[wake] = (row: number, column: number) => {
-        this.box().row    = clamp_(row,    0, gridRows - 1);
-        this.box().column = clamp_(column, 0, gridColumns - 1);
-        this.validate();
-        return this;
-      };
-
-      this.box().position = () => {
-        this.validate();
-        gridSlotToPosition(this);
-      };
-    }
-  }
-
-  function positionToGridSlot(point: Vector2): GridSlot {
-    const { x: px, y: py } = point.box();
-
-    const row = Math.min(py / gridSlotHeight);
-    const col = Math.min(px / gridSlotWidth);
-    return new GridSlot()[wake](row, col);
-  }
-
-  function gridSlotToPosition(slot: GridSlot): Vector2 {
-    const { row, column } = slot.box();
-
-    return new Vector2()[wake](
-      column * gridSlotWidth,
-      row * gridSlotHeight,
-    );
-  }
-
-  /* Color container, wrapping a RGBA color value.
-   * It accepts an opacity value too, in percentage. */
-  interface ColorLike {
-    red: number;
-    green: number;
-    blue: number;
-    opacity: number;
-    alpha(): number;
-  };
-
-  class Color extends Clowder<MewlixValue> implements SelfValidate {
-    [wake]: (red: number, green: number, blue: number, opacity?: number) => Color;
-    _box: ColorLike & GenericBox;
-
-    box() {
-      return this._box;
-    }
-
-    validate() {
-      ensure.number('Color.red'    , this.box().red    );
-      ensure.number('Color.green'  , this.box().green  );
-      ensure.number('Color.blue'   , this.box().blue   );
-      ensure.number('Color.opacity', this.box().opacity);
-    }
-
-    constructor() {
-      super();
-      this._box = {
-        red: 0,
-        green: 0,
-        blue: 0,
-        opacity: 0,
-        alpha() { return 0; },
-      };
-
-      this[wake] = (red: number, green: number, blue: number, opacity: number = 100) => {
-        this.box().red     = clamp_(red, 0, 255);
-        this.box().green   = clamp_(green, 0, 255);
-        this.box().blue    = clamp_(blue, 0, 255);
-        this.box().opacity = clamp_(opacity, 0, 100);
-        this.validate();
-        return this;
-      };
-
-      this.box().alpha = () => {
-        ensure.number('Color.alpha', this.box().opacity);
-        return percentageToByte(this.box().opacity);
-      };
-
-      this.box().to_hex = () => {
-        this.validate()
-        const { red, green, blue } = this.box();
-        const r = red.toString(16);
-        const g = green.toString(16);
-        const b = blue.toString(16);
-        return `#${r}${g}${b}`;
-      };
-    }
-
-    [toColor](): string {
-      this.validate()
-      const { red, green, blue, opacity } = this.box();
-      return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
-    }
-
-    static fromHex(str: string): Color {
-      const hex = /^#?([a-z0-9]{3}|[a-z0-9]{6})$/i.exec(str.trim());
-
-      if (hex === null) {
-        throw new MewlixError(ErrorCode.Graphic,
-          `Couldn't parse string '${str}' as a valid hex code!`);
-      }
-
-      if (str.length === 3) {
-        str = str.split('').map(x => x + x).join('');
-      }
-
-      return new Color()[wake](
-        parseInt(str.slice(0, 1), 16),
-        parseInt(str.slice(2, 3), 16),
-        parseInt(str.slice(4, 5), 16),
-      );
-    }
-  }
-
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
   class PixelCanvas extends Clowder<MewlixValue> {
@@ -1209,7 +1233,7 @@ export default function(mewlix: Mewlix): void {
 
     Color: Color,
 
-    hex: Color.fromHex,
+    hex: hexToColor,
 
     PixelCanvas: PixelCanvas,
 
