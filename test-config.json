@@ -1,0 +1,6 @@
+{
+  "ports": {
+    "graphic": 8080,
+    "console": 8081
+  }
+}
