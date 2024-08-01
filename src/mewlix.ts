@@ -4,7 +4,7 @@ type Maybe<T> =
   | { type: 'some', value: T }
   | { type: 'none' };
 
-type ObjectTag = 'shelf' | 'box' | 'constructor' | 'clowder' | 'cat tree' | 'yarnball';
+type ObjectTag = 'shelf' | 'box' | 'constructor' | 'clowder' | 'cat tree' | 'cat fruit' | 'yarnball';
 type MewlixObject = { type: ObjectTag };
 
 type Shelf<T> =
@@ -34,8 +34,14 @@ type YarnBall<T> = Readonly<{
 type CatTree = Readonly<{
   type: 'cat tree';
   name: string;
-  keys: Record<string, symbol>;
-  get(key: string): symbol;
+  fruits: Record<string, CatFruit>;
+  get(key: string): CatFruit;
+}>;
+
+type CatFruit = Readonly<{
+  type: 'cat fruit';
+  key: string;
+  value: number;
 }>;
 
 /* - * - * - * - * - * - * - * - *
@@ -127,6 +133,126 @@ function shelfFromArray<T>(array: T[]): Shelf<T> {
     { type: 'shelf', kind: 'bottom' },
   );
 }
+
+/* - * - * - * - * - * - * - * - *
+ * Box: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+function createBox<T>(init: (box: Box<T>) => void): Box<T> {
+  const innerBox: Record<string, T> = {};
+  const box: Box<T> = {
+    type: 'box',
+    get(key: string): T { return innerBox[key]; },
+    set(key: string, value: T): void { innerBox[key] = value; },
+  };
+  init(box);
+  return box;
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Cat Tree: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+function createCatTree(name: string, keys: string[]): CatTree {
+  const fruits: Record<string, CatFruit> = {};
+  let i = 0;
+  for (const key of keys) {
+    const fruit: CatFruit = {
+      type: 'cat fruit',
+      key: key,
+      value: i++,
+    };
+    fruits[key] = fruit;
+  }
+  return {
+    type: 'cat tree',
+    name: name,
+    fruits: fruits,
+    get(key: string): CatFruit { return fruits[key]; },
+  };
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Namespace: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+type Namespace<T> = Readonly<{
+  type: 'namespace',
+  name: string;
+  cache: Map<string, T>;
+  modules: Map<string, () => T>;
+}>;
+
+function createNamespace<T>(name: string): Namespace<T> {
+  return {
+    type: 'namespace',
+    name: name,
+    cache: new Map(),
+    modules: new Map(),
+  };
+}
+
+function getModule<T>(namespace: Namespace<T>, name: string): T | undefined {
+  if (namespace.cache.has(name)) return namespace.cache.get(name);
+  const mod = namespace.modules.get(name);
+  if (!mod) return mod;
+  return mod();
+}
+
+function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void {
+  namespace.modules.set(name, mod);
+  if (namespace.cache.has(name)) {
+    namespace.cache.delete(name);
+  }
+}
+
+///* -----------------------------------------------------
+// * Namespace -> Container for modules.
+// * ----------------------------------------------------- */
+//type ModuleFunction = () => MewlixObject;
+//
+//class Namespace extends MewlixObject {
+//  name: string;
+//  cache: Map<string, MewlixObject>;
+//  modules: Map<string, ModuleFunction>;
+//
+//  constructor(name: string) {
+//    super();
+//    this.name = name;
+//    this.modules = new Map();
+//    this.cache = new Map();
+//  }
+//
+//  addModule(key: string, func: ModuleFunction): void {
+//    if (this.modules.has(key)) {
+//      throw new MewlixError(ErrorCode.InvalidImport,
+//        `Duplicate key: A module with the key "path" has already been imported!`);
+//    }
+//    this.modules.set(key, func);
+//  }
+//
+//  getModule(key: string): object {
+//    if (!this.modules.has(key)) {
+//      throw new MewlixError(ErrorCode.InvalidImport,
+//        `The module "${key}" doesn't exist or hasn't been properly loaded!`);
+//    }
+//
+//    if (this.cache.has(key)) {
+//      return this.cache.get(key)!;
+//    }
+//    const yarnball = this.modules.get(key)!();
+//    this.cache.set(key, yarnball);
+//    return yarnball;
+//  }
+//
+//  /* Inject object as a valid Mewlix module.
+//   * The key should be a non-empty string. */
+//  injectModule(key: string, object: object): void {
+//    const wrapped = wrap(object);
+//    this.cache.set(key, wrapped);
+//    this.modules.set(key, () => wrapped);
+//  }
+//};
 
 //export type Mewlix = ReturnType<typeof createMewlix> & {
 //  [key: string]: YarnBall<any>;
