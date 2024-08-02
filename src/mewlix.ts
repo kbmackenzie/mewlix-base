@@ -4,6 +4,8 @@ type Maybe<T> =
   | { type: 'some', value: T }
   | { type: 'none' };
 
+type If<T> = T | undefined;
+
 type ObjectTag = 'shelf' | 'box' | 'constructor' | 'clowder' | 'cat tree' | 'cat fruit' | 'yarnball';
 type MewlixObject = { type: ObjectTag };
 
@@ -13,7 +15,7 @@ type Shelf<T> =
 
 type Box<T> = Readonly<{
   type: 'box',
-  get(key: string): T;
+  get(key: string): If<T>;
   set(key: string, value: T): void;
 }>;
 
@@ -21,21 +23,21 @@ type Clowder<T> = Readonly<{
   type: 'clowder';
   kind: symbol;
   ancestry: Set<symbol>;
-  get(key: string): T;
+  get(key: string): If<T>;
   set(key: string, value: T): void;
 }>;
 
 type YarnBall<T> = Readonly<{
   type: 'yarnball',
   key: string;
-  bindings: T;
+  get(key: string): If<T>;
 }>;
 
 type CatTree = Readonly<{
   type: 'cat tree';
   name: string;
   fruits: Record<string, CatFruit>;
-  get(key: string): CatFruit;
+  get(key: string): If<CatFruit>;
 }>;
 
 type CatFruit = Readonly<{
@@ -142,8 +144,12 @@ function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   const innerBox: Record<string, T> = {};
   const box: Box<T> = {
     type: 'box',
-    get(key: string): T { return innerBox[key]; },
-    set(key: string, value: T): void { innerBox[key] = value; },
+    get(key: string): If<T> {
+      return innerBox[key];
+    },
+    set(key: string, value: T): void {
+      innerBox[key] = value;
+    },
   };
   init(box);
   return box;
@@ -168,9 +174,103 @@ function createCatTree(name: string, keys: string[]): CatTree {
     type: 'cat tree',
     name: name,
     fruits: fruits,
-    get(key: string): CatFruit { return fruits[key]; },
+    get(key: string): If<CatFruit> {
+      return fruits[key];
+    },
   };
 }
+
+/* - * - * - * - * - * - * - * - *
+ * Yarn Ball: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+type Bindings<T> = Record<string, () => T>;
+
+function createYarnBall<T>(key: string, init: (yarn: Bindings<T>) => void): YarnBall<T> {
+  const bindings: Bindings<T> = {};
+  init(bindings);
+  return {
+    type: 'yarnball',
+    key: key,
+    get(key: string): If<T> {
+      return bindings[key]?.();
+    }
+  };
+}
+
+function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
+  /* Mix through closures; preserve the original yarnballs. */
+  return {
+    type: 'yarnball',
+    key: key,
+    get(key: string): If<T> {
+      const value = a.get(key);
+      return (value === undefined) ? b.get(key) : value;
+    }
+  };
+}
+
+///* -----------------------------------------------------
+// * YarnBall -> Yarn ball export list.
+// * ----------------------------------------------------- */
+//export class YarnBall<T> extends MewlixObject {
+//  key: string;
+//  exports: T;
+//
+//  box() {
+//    return this.exports;
+//  }
+//
+//  constructor(moduleKey: string, exports: T) {
+//    super();
+//    this.key = moduleKey;
+//    this.exports = exports;
+//  }
+//
+//  toString() {
+//    return `<yarn ball '${this.key}'>`
+//  }
+//
+//  static create(key: string, exports: [string, () => MewlixValue][] = []): YarnBall<GenericBox> {
+//    const yarnball = new YarnBall<GenericBox>(key, {});
+//    for (const [k, v] of exports) {
+//      Object.defineProperty(yarnball.box(), k, { get: v });
+//    }
+//    return yarnball;
+//  }
+//
+//  static mix<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2> {
+//    return new YarnBall(key, {...a, ...b});
+//  }
+//}
+//
+
+
+
+///* -----------------------------------------------------
+// * Clowder -> Base for all clowders.
+// * ----------------------------------------------------- */
+///* The clowder constructor symbol. */
+//export const wake: unique symbol = Symbol('wake');
+//
+///* All clowders should inherit from this class.
+// * It has a default definition for wake(), too. */
+//export class Clowder<T> extends Box<T> {
+//  [wake]: (...args: any[]) => Clowder<T>;
+//
+//  constructor() {
+//    super();
+//    this[wake] = () => this;
+//  }
+//
+//  toString(): string {
+//    if (typeof this._box.to_string === 'function') {
+//      return purrify(this._box.to_string());
+//    }
+//    return purrifyBox(this);
+//  }
+//}
+//
 
 /* - * - * - * - * - * - * - * - *
  * Namespace: Logic + Operations
@@ -205,54 +305,6 @@ function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void
     namespace.cache.delete(name);
   }
 }
-
-///* -----------------------------------------------------
-// * Namespace -> Container for modules.
-// * ----------------------------------------------------- */
-//type ModuleFunction = () => MewlixObject;
-//
-//class Namespace extends MewlixObject {
-//  name: string;
-//  cache: Map<string, MewlixObject>;
-//  modules: Map<string, ModuleFunction>;
-//
-//  constructor(name: string) {
-//    super();
-//    this.name = name;
-//    this.modules = new Map();
-//    this.cache = new Map();
-//  }
-//
-//  addModule(key: string, func: ModuleFunction): void {
-//    if (this.modules.has(key)) {
-//      throw new MewlixError(ErrorCode.InvalidImport,
-//        `Duplicate key: A module with the key "path" has already been imported!`);
-//    }
-//    this.modules.set(key, func);
-//  }
-//
-//  getModule(key: string): object {
-//    if (!this.modules.has(key)) {
-//      throw new MewlixError(ErrorCode.InvalidImport,
-//        `The module "${key}" doesn't exist or hasn't been properly loaded!`);
-//    }
-//
-//    if (this.cache.has(key)) {
-//      return this.cache.get(key)!;
-//    }
-//    const yarnball = this.modules.get(key)!();
-//    this.cache.set(key, yarnball);
-//    return yarnball;
-//  }
-//
-//  /* Inject object as a valid Mewlix module.
-//   * The key should be a non-empty string. */
-//  injectModule(key: string, object: object): void {
-//    const wrapped = wrap(object);
-//    this.cache.set(key, wrapped);
-//    this.modules.set(key, () => wrapped);
-//  }
-//};
 
 //export type Mewlix = ReturnType<typeof createMewlix> & {
 //  [key: string]: YarnBall<any>;
