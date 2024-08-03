@@ -6,7 +6,7 @@ type Maybe<T> =
 
 type If<T> = T | undefined;
 
-type ObjectTag = 'shelf' | 'box' | 'constructor' | 'clowder' | 'cat tree' | 'cat fruit' | 'yarnball';
+type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
 type MewlixObject = { type: ObjectTag };
 
 type Shelf<T> =
@@ -19,12 +19,24 @@ type Box<T> = Readonly<{
   set(key: string, value: T): void;
 }>;
 
+type Initializer<T> =
+  (bindings: Record<string, T>) => void;
+
 type Clowder<T> = Readonly<{
   type: 'clowder';
   kind: symbol;
-  ancestry: Set<symbol>;
+  name: string;
+  parent: Clowder<T> | null;
+  initialize: Initializer<T>;
+}>;
+
+type ClowderInstance<T> = Readonly<{
+  type: 'clowder instance',
+  clowder: Clowder<T>;
+  parent: ClowderInstance<T> | null;
   get(key: string): If<T>;
   set(key: string, value: T): void;
+  outside(key: string): If<T>;
 }>;
 
 type YarnBall<T> = Readonly<{
@@ -210,67 +222,55 @@ function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
   };
 }
 
-///* -----------------------------------------------------
-// * YarnBall -> Yarn ball export list.
-// * ----------------------------------------------------- */
-//export class YarnBall<T> extends MewlixObject {
-//  key: string;
-//  exports: T;
-//
-//  box() {
-//    return this.exports;
-//  }
-//
-//  constructor(moduleKey: string, exports: T) {
-//    super();
-//    this.key = moduleKey;
-//    this.exports = exports;
-//  }
-//
-//  toString() {
-//    return `<yarn ball '${this.key}'>`
-//  }
-//
-//  static create(key: string, exports: [string, () => MewlixValue][] = []): YarnBall<GenericBox> {
-//    const yarnball = new YarnBall<GenericBox>(key, {});
-//    for (const [k, v] of exports) {
-//      Object.defineProperty(yarnball.box(), k, { get: v });
-//    }
-//    return yarnball;
-//  }
-//
-//  static mix<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2> {
-//    return new YarnBall(key, {...a, ...b});
-//  }
-//}
-//
+/* - * - * - * - * - * - * - * - *
+ * Clowders: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
 
+const wake:    unique symbol = Symbol('wake');
+const outside: unique symbol = Symbol('outside');
 
+function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initializer<T>): Clowder<T> {
+  return {
+    type: 'clowder',
+    kind: Symbol(name),
+    name: name,
+    parent: parent,
+    initialize: init,
+  };
+}
 
-///* -----------------------------------------------------
-// * Clowder -> Base for all clowders.
-// * ----------------------------------------------------- */
-///* The clowder constructor symbol. */
-//export const wake: unique symbol = Symbol('wake');
-//
-///* All clowders should inherit from this class.
-// * It has a default definition for wake(), too. */
-//export class Clowder<T> extends Box<T> {
-//  [wake]: (...args: any[]) => Clowder<T>;
-//
-//  constructor() {
-//    super();
-//    this[wake] = () => this;
-//  }
-//
-//  toString(): string {
-//    if (typeof this._box.to_string === 'function') {
-//      return purrify(this._box.to_string());
-//    }
-//    return purrifyBox(this);
-//  }
-//}
-//
+function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
+  const bindings: Record<string, T> = {};
+  clowder.initialize(bindings);
+  const parent = clowder.parent && instanceClowder(clowder.parent)
+  return {
+    type: 'clowder instance',
+    clowder: clowder,
+    parent: parent,
+    get(key: string): If<T> {
+      if (key in bindings) return bindings[key];
+      if (parent) return parent.get(key);
+      return undefined;
+    },
+    set(key: string, value: T): void {
+      bindings[key] = value;
+    },
+    outside(key: string): If<T> {
+      if (parent) return parent.get(key);
+      return undefined;
+    },
+  };
+}
+
+function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>): boolean {
+  const kind = instance.clowder.kind;
+  let c: Clowder<T2> | null = clowder;
+  while (c) {
+    if (c.kind === kind) return true;
+    c = clowder.parent;
+  }
+  return false;
+}
 
 /* - * - * - * - * - * - * - * - *
  * Namespace: Logic + Operations
