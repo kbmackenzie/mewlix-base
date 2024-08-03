@@ -56,6 +56,7 @@ type CatFruit = Readonly<{
   type: 'cat fruit';
   key: string;
   value: number;
+  get(key: string): If<string | number>;
 }>;
 
 /* - * - * - * - * - * - * - * - *
@@ -178,9 +179,15 @@ function createCatTree(name: string, keys: string[]): CatTree {
     const fruit: CatFruit = {
       type: 'cat fruit',
       key: key,
-      value: i++,
+      value: i,
+      get(k: string): If<string | number> {
+        if (k === 'key') return key;
+        if (k === 'value') return i;
+        return undefined;
+      }
     };
     fruits[key] = fruit;
+    i++;
   }
   return {
     type: 'cat tree',
