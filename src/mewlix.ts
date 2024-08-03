@@ -306,6 +306,45 @@ function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void
   }
 }
 
+/* - * - * - * - * - * - * - * - *
+ * Errors: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+enum ErrorCode {
+  TypeMismatch,
+  InvalidOperation,
+  InvalidConversion,
+  CatOnComputer,
+  Console,
+  Graphic,
+  InvalidImport,
+  CriticalError,
+  ExternalError,
+};
+
+const errorToString: Record<ErrorCode, string> = {
+  [ErrorCode.TypeMismatch]:      'type mismatch',
+  [ErrorCode.InvalidOperation]:  'invalid operation',
+  [ErrorCode.InvalidConversion]: 'invalid conversion',
+  [ErrorCode.CatOnComputer]:     'cat on computer',
+  [ErrorCode.Console]:           'console',
+  [ErrorCode.Graphic]:           'graphic',
+  [ErrorCode.InvalidImport]:     'invalid import',
+  [ErrorCode.CriticalError]:     'critical error',
+  [ErrorCode.ExternalError]:     'external error',
+};
+
+class MewlixError extends Error {
+  name: string;
+  code: ErrorCode;
+  constructor(errorCode: ErrorCode, message: string) {
+    const errorName = errorToString[errorCode];
+    super(`[${errorName}] ${message}`);
+    this.name = this.constructor.name;
+    this.code = errorCode;
+  }
+}
+
 //export type Mewlix = ReturnType<typeof createMewlix> & {
 //  [key: string]: YarnBall<any>;
 //};
