@@ -24,6 +24,7 @@ type Shelf<T> =
 
 type Box<T> = Readonly<{
   [tag]: 'box',
+  bindings: Record<string, T>;
   get(key: string): If<T>;
   set(key: string, value: T): void;
 }>;
@@ -43,6 +44,7 @@ type ClowderInstance<T> = Readonly<{
   [tag]: 'clowder instance',
   clowder: Clowder<T>;
   parent: ClowderInstance<T> | null;
+  bindings: Record<string, T>;
   get(key: string): If<T>;
   set(key: string, value: T): void;
   outside(key: string): If<T>;
@@ -166,6 +168,7 @@ function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   const innerBox: Record<string, T> = {};
   const box: Box<T> = {
     [tag]: 'box',
+    bindings: innerBox,
     get(key: string): If<T> {
       return innerBox[key];
     },
@@ -260,6 +263,7 @@ function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
     [tag]: 'clowder instance',
     clowder: clowder,
     parent: parent,
+    bindings: bindings,
     get(key: string): If<T> {
       if (key in bindings) return bindings[key];
       if (parent) return parent.get(key);
@@ -374,14 +378,75 @@ type MewlixValue =
   | Promise<void>;
 
 /* - * - * - * - * - * - * - * - *
+ * Utilities
+/* - * - * - * - * - * - * - * - * */
+
+function getEntries<T>(record: Record<string, T>): [string, T][] {
+  const entries: [string, T][] = [];
+  for (const key in record) {
+    entries.push([key, record[key]]);
+  }
+  return entries;
+}
+
+/* - * - * - * - * - * - * - * - *
  * Strings: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-function purrify<T>(value: MewlixValue<T>): string {
+const purrifyTable: Record<ObjectTag, (a: any) => string> = {
+  'shelf': purrifyShelf,
+  'box': purrifyBox,
+  'clowder': purrifyClowder,
+  'clowder instance': purrifyClowderInstance,
+  'cat tree': purrifyCatTree,
+  'cat fruit': purrifyCatFruit,
+  'yarnball': purrifyYarnBall
+};
+
+function purrify(value: any): string {
+  if (typeof value === 'object' && tag in value) {
+    return purrifyTable[value.tag as ObjectTag](value);
+  }
+  if (value === null || value === undefined) { return 'nothing'; }
+  return String(value);
 }
 
 function purrifyShelf<T>(shelf: Shelf<T>): string {
-  const array = shelfToArray(shelf);
+  const items = shelfToArray(shelf).map(purrify).join(', ');
+  return `[${items}]`;
+}
+
+function purrifyBox<T>(box: Box<T>): string {
+  const items = getEntries(box.bindings)
+    .map(([key, value]) => `"${key}": ${purrify(value)}`)
+    .join(', ');
+  return `📦 [${items}]`;
+}
+
+function purrifyClowder<T>(clowder: Clowder<T>): string {
+  return `clowder ${clowder.name}`;
+}
+
+function purrifyClowderInstance<T>(instance: ClowderInstance<T>): string {
+  const items = getEntries(instance.bindings)
+    .map(([key, value]) => `"${key}": ${purrify(value)}`)
+    .join(', ');
+  return `clowder ${instance.clowder.name} [${items}]`;
+}
+
+function purrifyYarnBall<T>(yarnball: YarnBall<T>): string {
+  return `yarnball ${yarnball.key}`;
+}
+
+function purrifyCatTree(tree: CatTree): string {
+  const items = getEntries(tree.fruits)
+    .map(([key, value]) => `"${key}": ${value.value}`)
+    .join(', ');
+  return `cat tree ${tree.name} [${items}]`;
+}
+
+function purrifyCatFruit(fruit: CatFruit): string {
+  return `cat fruit [${fruit.key}: ${fruit.value}]`;
 }
 
 //export type Mewlix = ReturnType<typeof createMewlix> & {
