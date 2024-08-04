@@ -1,5 +1,14 @@
 'use strict';
 
+/* - * - * - * - * - * - * - * - *
+ * Symbols (Core)
+/* - * - * - * - * - * - * - * - * */
+const tag  = Symbol('tag');
+const wake = Symbol('wake');
+
+/* - * - * - * - * - * - * - * - *
+ * Types (Core)
+/* - * - * - * - * - * - * - * - * */
 type Maybe<T> =
   | { type: 'some', value: T }
   | { type: 'none' };
@@ -7,14 +16,14 @@ type Maybe<T> =
 type If<T> = T | undefined;
 
 type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
-type MewlixObject = { type: ObjectTag };
+type MewlixObject = { [tag]: ObjectTag };
 
 type Shelf<T> =
-  | Readonly<{ type: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
-  | Readonly<{ type: 'shelf', kind: 'bottom', }>;
+  | Readonly<{ [tag]: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
+  | Readonly<{ [tag]: 'shelf', kind: 'bottom', }>;
 
 type Box<T> = Readonly<{
-  type: 'box',
+  [tag]: 'box',
   get(key: string): If<T>;
   set(key: string, value: T): void;
 }>;
@@ -23,7 +32,7 @@ type Initializer<T> =
   (bindings: Record<string, T>) => void;
 
 type Clowder<T> = Readonly<{
-  type: 'clowder';
+  [tag]: 'clowder';
   kind: symbol;
   name: string;
   parent: Clowder<T> | null;
@@ -31,7 +40,7 @@ type Clowder<T> = Readonly<{
 }>;
 
 type ClowderInstance<T> = Readonly<{
-  type: 'clowder instance',
+  [tag]: 'clowder instance',
   clowder: Clowder<T>;
   parent: ClowderInstance<T> | null;
   get(key: string): If<T>;
@@ -40,20 +49,20 @@ type ClowderInstance<T> = Readonly<{
 }>;
 
 type YarnBall<T> = Readonly<{
-  type: 'yarnball',
+  [tag]: 'yarnball',
   key: string;
   get(key: string): If<T>;
 }>;
 
 type CatTree = Readonly<{
-  type: 'cat tree';
+  [tag]: 'cat tree';
   name: string;
   fruits: Record<string, CatFruit>;
   get(key: string): If<CatFruit>;
 }>;
 
 type CatFruit = Readonly<{
-  type: 'cat fruit';
+  [tag]: 'cat fruit';
   key: string;
   value: number;
   get(key: string): If<string | number>;
@@ -64,10 +73,10 @@ type CatFruit = Readonly<{
 /* - * - * - * - * - * - * - * - * */
 function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
   return {
-    type: 'shelf',
+    [tag]: 'shelf',
     kind: 'node',
     value: value,
-    tail: tail ?? { type: 'shelf', kind: 'bottom' },
+    tail: tail ?? { [tag]: 'shelf', kind: 'bottom' },
     length: tail ? shelfLength(tail) + 1 : 1,
   };
 }
@@ -113,7 +122,7 @@ function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
 }
 
 function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
-  let output: Shelf<T> = { type: 'shelf', kind: 'bottom' };
+  let output: Shelf<T> = { [tag]: 'shelf', kind: 'bottom' };
   for (let node = shelf; node.kind === 'node'; node = node.tail) {
     output = shelfPush(output, node.value);
   }
@@ -145,7 +154,7 @@ function shelfToArray<T>(shelf: Shelf<T>): T[] {
 function shelfFromArray<T>(array: T[]): Shelf<T> {
   return array.reduce(
     (shelf: Shelf<T>, value: T) => shelfPush<T>(shelf, value),
-    { type: 'shelf', kind: 'bottom' },
+    { [tag]: 'shelf', kind: 'bottom' },
   );
 }
 
@@ -156,7 +165,7 @@ function shelfFromArray<T>(array: T[]): Shelf<T> {
 function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   const innerBox: Record<string, T> = {};
   const box: Box<T> = {
-    type: 'box',
+    [tag]: 'box',
     get(key: string): If<T> {
       return innerBox[key];
     },
@@ -177,7 +186,7 @@ function createCatTree(name: string, keys: string[]): CatTree {
   let i = 0;
   for (const key of keys) {
     const fruit: CatFruit = {
-      type: 'cat fruit',
+      [tag]: 'cat fruit',
       key: key,
       value: i,
       get(k: string): If<string | number> {
@@ -190,7 +199,7 @@ function createCatTree(name: string, keys: string[]): CatTree {
     i++;
   }
   return {
-    type: 'cat tree',
+    [tag]: 'cat tree',
     name: name,
     fruits: fruits,
     get(key: string): If<CatFruit> {
@@ -209,7 +218,7 @@ function createYarnBall<T>(key: string, init: (yarn: Bindings<T>) => void): Yarn
   const bindings: Bindings<T> = {};
   init(bindings);
   return {
-    type: 'yarnball',
+    [tag]: 'yarnball',
     key: key,
     get(key: string): If<T> {
       return bindings[key]?.();
@@ -220,7 +229,7 @@ function createYarnBall<T>(key: string, init: (yarn: Bindings<T>) => void): Yarn
 function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
   /* Mix through closures; preserve the original yarnballs. */
   return {
-    type: 'yarnball',
+    [tag]: 'yarnball',
     key: key,
     get(key: string): If<T> {
       const value = a.get(key);
@@ -233,12 +242,9 @@ function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
  * Clowders: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-const wake:    unique symbol = Symbol('wake');
-const outside: unique symbol = Symbol('outside');
-
 function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initializer<T>): Clowder<T> {
   return {
-    type: 'clowder',
+    [tag]: 'clowder',
     kind: Symbol(name),
     name: name,
     parent: parent,
@@ -251,7 +257,7 @@ function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
   clowder.initialize(bindings);
   const parent = clowder.parent && instanceClowder(clowder.parent)
   return {
-    type: 'clowder instance',
+    [tag]: 'clowder instance',
     clowder: clowder,
     parent: parent,
     get(key: string): If<T> {
@@ -284,7 +290,7 @@ function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>)
 /* - * - * - * - * - * - * - * - * */
 
 type Namespace<T> = Readonly<{
-  type: 'namespace',
+  [tag]: 'namespace',
   name: string;
   cache: Map<string, T>;
   modules: Map<string, () => T>;
@@ -292,7 +298,7 @@ type Namespace<T> = Readonly<{
 
 function createNamespace<T>(name: string): Namespace<T> {
   return {
-    type: 'namespace',
+    [tag]: 'namespace',
     name: name,
     cache: new Map(),
     modules: new Map(),
@@ -350,6 +356,32 @@ class MewlixError extends Error {
     this.name = this.constructor.name;
     this.code = errorCode;
   }
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Types (Value)
+/* - * - * - * - * - * - * - * - * */
+type MewlixFunction = (...args: any[]) => MewlixValue;
+
+type MewlixValue =
+  | number
+  | string
+  | boolean
+  | MewlixObject
+  | MewlixFunction
+  | null
+  | undefined
+  | Promise<void>;
+
+/* - * - * - * - * - * - * - * - *
+ * Strings: Logic + Operations
+/* - * - * - * - * - * - * - * - * */
+
+function purrify<T>(value: MewlixValue<T>): string {
+}
+
+function purrifyShelf<T>(shelf: Shelf<T>): string {
+  const array = shelfToArray(shelf);
 }
 
 //export type Mewlix = ReturnType<typeof createMewlix> & {
