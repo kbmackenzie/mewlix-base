@@ -394,13 +394,37 @@ function getEntries<T>(record: Record<string, T>): [string, T][] {
 /* - * - * - * - * - * - * - * - * */
 
 const purrifyTable: Record<ObjectTag, (a: any) => string> = {
-  'shelf': purrifyShelf,
-  'box': purrifyBox,
-  'clowder': purrifyClowder,
-  'clowder instance': purrifyClowderInstance,
-  'cat tree': purrifyCatTree,
-  'cat fruit': purrifyCatFruit,
-  'yarnball': purrifyYarnBall
+  'shelf': function<T>(shelf: Shelf<T>): string {
+    const items = shelfToArray(shelf).map(purrify).join(', ');
+    return `[${items}]`;
+  },
+  'box': function<T>(box: Box<T>): string {
+    const items = getEntries(box.bindings)
+      .map(([key, value]) => `"${key}": ${purrify(value)}`)
+      .join(', ');
+    return `📦 [${items}]`;
+  },
+  'clowder': function<T>(clowder: Clowder<T>): string {
+    return `clowder ${clowder.name}`;
+  },
+  'clowder instance': function<T>(instance: ClowderInstance<T>): string {
+    const items = getEntries(instance.bindings)
+      .map(([key, value]) => `"${key}": ${purrify(value)}`)
+      .join(', ');
+    return `clowder ${instance.clowder.name} [${items}]`;
+  },
+  'yarnball': function<T>(yarnball: YarnBall<T>): string {
+    return `yarnball ${yarnball.key}`;
+  },
+  'cat tree': function(tree: CatTree): string {
+    const items = getEntries(tree.fruits)
+      .map(([key, value]) => `"${key}": ${value.value}`)
+      .join(', ');
+    return `cat tree ${tree.name} [${items}]`;
+  },
+  'cat fruit': function(fruit: CatFruit): string {
+    return `cat fruit [${fruit.key}: ${fruit.value}]`;
+  },
 };
 
 function purrify(value: any): string {
@@ -411,40 +435,41 @@ function purrify(value: any): string {
   return String(value);
 }
 
-function purrifyShelf<T>(shelf: Shelf<T>): string {
-  const items = shelfToArray(shelf).map(purrify).join(', ');
-  return `[${items}]`;
+/* - * - * - * - * - * - * - * - *
+ * JSON Conversion
+/* - * - * - * - * - * - * - * - * */
+type JSONValue =
+  | number
+  | string
+  | boolean
+  | null
+  | JSONValue[]
+  | JSONObject;
+
+type JSONObject = {
+  [key: string]: JSONValue;
+};
+
+const toJSONValue: Record<ObjectTag, (a: MewlixObject) => JSONValue> = {
+};
+
+/* - * - * - * - * - * - * - * - *
+ * Value Utils
+/* - * - * - * - * - * - * - * - * */
+
+function isNothing(x: any): boolean {
+  return x === null || x === undefined;
 }
 
-function purrifyBox<T>(box: Box<T>): string {
-  const items = getEntries(box.bindings)
-    .map(([key, value]) => `"${key}": ${purrify(value)}`)
-    .join(', ');
-  return `📦 [${items}]`;
+function clamp_(value: number, min: number, max: number): number {
+  return (value < min) ? min : ((value > max) ? max : value);
 }
 
-function purrifyClowder<T>(clowder: Clowder<T>): string {
-  return `clowder ${clowder.name}`;
-}
-
-function purrifyClowderInstance<T>(instance: ClowderInstance<T>): string {
-  const items = getEntries(instance.bindings)
-    .map(([key, value]) => `"${key}": ${purrify(value)}`)
-    .join(', ');
-  return `clowder ${instance.clowder.name} [${items}]`;
-}
-
-function purrifyYarnBall<T>(yarnball: YarnBall<T>): string {
-  return `yarnball ${yarnball.key}`;
-}
-
-function purrifyCatTree(tree: CatTree): string {
-  const items = getEntries(tree.fruits)
-    .map(([key, value]) => `"${key}": ${value.value}`)
-    .join(', ');
-  return `cat tree ${tree.name} [${items}]`;
-}
-
-function purrifyCatFruit(fruit: CatFruit): string {
-  return `cat fruit [${fruit.key}: ${fruit.value}]`;
+function opaque(x: object): void {
+  Object.defineProperty(x, 'get', {
+    value: function(key: string) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `Cannot look up property "${key}": Object ${x} isn't accessible through Mewlix!`);
+    },
+  });
 }
