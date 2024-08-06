@@ -249,7 +249,29 @@ function createCatTree(name: string, keys: string[]): CatTree {
 
 type Bindings<T> = Record<string, () => T>;
 
-function createYarnBall<T>(key: string, init: (yarn: Bindings<T>) => void): YarnBall<T> {
+function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
+  return {
+    [tag]: 'yarnball',
+    key: key,
+    get(key: string): If<T> {
+      return lib[key];
+    },
+  };
+}
+
+function mixYarnBall<T>(key: string, a: Record<string, T>, b: Record<string, T>) {
+  /* Mix through closures; preserve the original yarnballs. */
+  return {
+    [tag]: 'yarnball',
+    key: key,
+    get(key: string): If<T> {
+      if (key in a) return a[key];
+      return b[key];
+    }
+  };
+}
+
+function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void): YarnBall<T> {
   const bindings: Bindings<T> = {};
   init(bindings);
   return {
@@ -258,28 +280,6 @@ function createYarnBall<T>(key: string, init: (yarn: Bindings<T>) => void): Yarn
     get(key: string): If<T> {
       return bindings[key]?.();
     }
-  };
-}
-
-function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
-  /* Mix through closures; preserve the original yarnballs. */
-  return {
-    [tag]: 'yarnball',
-    key: key,
-    get(key: string): If<T> {
-      const value = a.get(key);
-      return (value === undefined) ? b.get(key) : value;
-    }
-  };
-}
-
-function toYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
-  return {
-    [tag]: 'yarnball',
-    key: key,
-    get(key: string): If<T> {
-      return lib[key];
-    },
   };
 }
 
@@ -1629,7 +1629,5 @@ const createMewlix = function() {
     log,
     error,
   };
-  const std = toYarnBall('std', base)
+  const std = createYarnBall('std', base)
 }
-
-
