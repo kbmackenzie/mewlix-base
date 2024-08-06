@@ -514,6 +514,13 @@ function fromJSON(value: JSONValue): MewlixValue {
     case 'string':
     case 'boolean':
       return value;
+    case 'object':
+      if (value === null) return null;
+      return createBox(box => {
+        for (const key in value) {
+          box.set(key, fromJSON(value[key]));
+        }
+      });
     default:
       return null;
   }
