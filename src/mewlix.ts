@@ -756,6 +756,12 @@ const boolean = {
   },
 };
 
+const strings = {
+  concat(a: MewlixValue, b: MewlixValue): string {
+    return purrify(a) + purrify(b);
+  },
+};
+
 const relation = {
   equal(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
@@ -790,11 +796,5 @@ const relation = {
     const typeOfValue = reflection.typeOf(a);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `compare: Cannot compare values of type "${typeOfValue}"!`);
-  },
-};
-
-const strings = {
-  concat(a: MewlixValue, b: MewlixValue): string {
-    return purrify(a) + purrify(b);
   },
 };
