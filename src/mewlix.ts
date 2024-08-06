@@ -160,6 +160,12 @@ function shelfFromArray<T>(array: T[]): Shelf<T> {
   );
 }
 
+function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean {
+  if (a.kind === 'bottom') return b.kind === 'bottom';
+  if (b.kind === 'bottom') return false;
+  return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
+}
+
 /* - * - * - * - * - * - * - * - *
  * Box: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
