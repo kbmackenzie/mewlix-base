@@ -556,7 +556,7 @@ const compare = {
 /* - * - * - * - * - * - * - * - *
  * Conversions
 /* - * - * - * - * - * - * - * - * */
-const conversion = {
+const convert = {
   bool(a: any): boolean {
     if (a === false || a === null || a === undefined) return false;
     return true;
@@ -688,16 +688,16 @@ const numbers = {
 
 const boolean = {
   not(a: any): boolean {
-    return !conversion.bool(a);
+    return !convert.bool(a);
   },
   or(a: any, fb: () => any): any {
-    return conversion.bool(a) ? a : fb();
+    return convert.bool(a) ? a : fb();
   },
   and(a: any, fb: () => any): any {
-    return conversion.bool(a) ? fb() : a;
+    return convert.bool(a) ? fb() : a;
   },
   ternary(condition: any, fa: () => any, fb: () => any): any {
-    return conversion.bool(condition) ? fa() : fb();
+    return convert.bool(condition) ? fa() : fb();
   },
 };
 
