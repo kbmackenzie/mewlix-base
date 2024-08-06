@@ -816,3 +816,18 @@ const shelves = {
     return shelfPush(shelf, value);
   },
 };
+
+const collections = {
+  length<T>(value: Shelf<T> | string): number {
+    if (typeof value === 'string') return value.length;
+    if (typeof value === 'object'
+      && value !== null
+      && tag in value
+      && value[tag] === 'shelf') {
+      return shelfLength(value);
+    }
+    const typeOfValue = reflection.typeOf(value);
+    throw new MewlixError(ErrorCode.TypeMismatch,
+      `...?: Can't calculate length for value of type "${typeOfValue}": ${purrify(value)}`);
+  },
+};
