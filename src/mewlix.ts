@@ -932,7 +932,7 @@ const createMewlix = function() {
   }
 
   // meow.lib: core libraries
-  const lib: Record<string, YarnBall<MewlixValue>> = {};
+  const lib: Record<string, YarnBall<any>> = {};
 
   // meow.lib.std: the base library
 
@@ -1630,6 +1630,7 @@ const createMewlix = function() {
     error,
   };
   const std = createYarnBall('std', base)
+  lib.std = std;
 
   /* Note: When currying overloaded functions, the type system gets quirky.
    * Although I can type-cast it away, I chose not to.
@@ -1768,4 +1769,41 @@ const createMewlix = function() {
         save(key, contents),
   };
   const stdCurry = mixYarnBall('std.curry', base, baseCurry);
+  lib.stdCurry = stdCurry;
+
+  /* -------------------------------------------------------
+   * Final Touches
+   * ------------------------------------------------------- */
+  /* A default implementation for the 'run' entrypoint function.
+   * The console and graphic templates override this implementation.
+   *
+   * It should *always* be awaited, as it's expected to be asynchronous. */
+  const run = async (func: () => YarnBall<any>): Promise<YarnBall<any>> => func();
+
+  /* ------------------------------------------------------
+   * Return Mewlix Namespace
+   * ------------------------------------------------------ */
+  return {
+    ErrorCode,
+    MewlixError,
+    purrify,
+    modules,
+    wake,
+    fromJSON,
+    numbers,
+    boolean,
+    compare,
+    strings,
+    shelves,
+    reflection,
+    boxes,
+    convert,
+    internal,
+    meow: (x: string) => meowFunc(x),
+    setMeow,
+    wrap,
+    api,
+    lib,
+    run,
+  };
 }
