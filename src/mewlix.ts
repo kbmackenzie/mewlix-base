@@ -450,8 +450,66 @@ type JSONObject = {
   [key: string]: JSONValue;
 };
 
-const toJSONValue: Record<ObjectTag, (a: MewlixObject) => JSONValue> = {
+const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
+  'shelf': function<T>(shelf: Shelf<T>): JSONValue {
+    return shelfToArray(shelf).map(toJSON);
+  },
+  'box': function<T>(box: Box<T>): JSONValue {
+    return objectToJSON(box.bindings);
+  },
+  'clowder instance': function<T>(instance: ClowderInstance<T>): JSONValue {
+    return objectToJSON(instance.bindings);
+  },
+  'cat fruit': function(fruit: CatFruit): JSONValue {
+    return fruit.key;
+  },
+  /* Not convertible: */
+  'cat tree': (_) => null,
+  'clowder' : (_) => null,
+  'yarnball': (_) => null,
 };
+
+function toJSON(value: any): JSONValue {
+  if (typeof value === 'object' && tag in value) {
+    return mewlixToJSON[value.tag as ObjectTag](value);
+  }
+  if (Array.isArray(value)) {
+    return value.map(toJSON);
+  }
+  switch (typeof value) {
+    case 'number':
+    case 'string':
+    case 'boolean':
+      return value;
+    case 'object':
+      if (value === null) return null;
+      return objectToJSON(value);
+    default:
+      return null;
+  }
+}
+
+function objectToJSON(obj: object): JSONValue {
+  const output: Record<string, JSONValue> = {};
+  for (const key in obj) {
+    output[key] = toJSON(key);
+  }
+  return output;
+}
+
+function fromJSON(value: JSONValue): MewlixValue {
+  if (Array.isArray(value)) {
+    return shelfFromArray(value.map(fromJSON));
+  }
+  switch (typeof value) {
+    case 'number':
+    case 'string':
+    case 'boolean':
+      return value;
+    default:
+      return null;
+  }
+}
 
 /* - * - * - * - * - * - * - * - *
  * Value Utils
