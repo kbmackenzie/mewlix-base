@@ -669,8 +669,8 @@ const ensure = {
 function typeError(where: string, value: any, targetType: string): MewlixError {
   const type = reflection.typeOf(value);
   const purr = purrify(value);
-  return new MewlixError(ErrorCode.InvalidConversion,
-    `Expected ${targetType}, got value of type "${type}": ${purr}`);
+  return new MewlixError(ErrorCode.TypeMismatch,
+    `${where}: Expected ${targetType}, got value of type "${type}": ${purr}`);
 }
 
 /* - * - * - * - * - * - * - * - *
