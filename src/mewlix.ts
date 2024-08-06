@@ -317,6 +317,13 @@ function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>)
   return false;
 }
 
+function isClowderInstance<T>(value: any): value is ClowderInstance<T> {
+  return typeof value === 'object'
+    && value !== null
+    && tag in value
+    && value[tag] === 'clowder instance';
+}
+
 /* - * - * - * - * - * - * - * - *
  * Namespace: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
@@ -834,9 +841,24 @@ const collections = {
     throw new MewlixError(ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${purrify(value)}`);
   },
-  contains<T>(value: T, collection: Shelf<T> | Box<T> | ClowderInstance<T> | string): boolean {
+  contains<T extends MewlixValue>(
+    value: T,
+    collection: Shelf<T> | Box<T> | ClowderInstance<T> | string
+  ): boolean {
     if (isShelf(collection)) {
       return shelfContains(collection, value);
     }
+    if (typeof value === 'string') {
+      if (typeof collection === 'string') {
+        return collection.includes(value);
+      }
+      if (isBox(collection) || isClowderInstance(collection)) {
+        return collection.get(value) !== undefined;
+      }
+    }
+    const typeOfA = reflection.typeOf(value);
+    const typeOfB = reflection.typeOf(collection);
+    throw new MewlixError(ErrorCode.TypeMismatch,
+      `in: Cannot look up type "${typeOfA}" in type "${typeOfB}"!`);
   },
 };
