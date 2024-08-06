@@ -166,6 +166,13 @@ function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean
   return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
 }
 
+function isShelf(value: any): boolean {
+  return typeof value == 'object'
+    && value !== null
+    && tag in value
+    && value[tag] === 'shelf';
+}
+
 /* - * - * - * - * - * - * - * - *
  * Box: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
@@ -627,12 +634,7 @@ const relation = {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
 
-    if (typeof a === 'object'
-      && typeof b === 'object'
-      && tag in a!
-      && tag in b!
-      && a[tag] === 'shelf'
-      && b[tag] === 'shelf') {
+    if (isShelf(a) && isShelf(b)) {
         return shelfEquality(a as Shelf<MewlixValue>, b as Shelf<MewlixValue>);
     }
     return a === b;
@@ -694,10 +696,7 @@ const ensure = {
     throw typeError(where, a, 'string');
   },
   shelf(where: string, a: any): void {
-    if (typeof a === 'object'
-      && a !== null
-      && tag in a
-      && a[tag] === 'shelf') return;
+    if (isShelf(a)) return;
     throw typeError(where, a, 'shelf');
   },
   box(where: string, a: any): void {
