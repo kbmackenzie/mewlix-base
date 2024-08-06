@@ -579,6 +579,40 @@ const convert = {
 };
 
 /* - * - * - * - * - * - * - * - *
+ * Reflection
+/* - * - * - * - * - * - * - * - * */
+
+const reflection = {
+  typeOf(a: any): string {
+    switch (typeof a) {
+      case 'number' : return 'number';
+      case 'string' : return 'string';
+      case 'boolean': return 'boolean';
+      case 'object' :
+        if (a === null) return 'null';
+        if (tag in a) return a[tag] as string;
+        break;
+      case 'function': return 'function';
+      default: break;
+    }
+    return 'unrecognized';
+  },
+  instanceOf(a: any, b: any): boolean {
+    if (typeof a === 'object' && typeof b === 'object'
+      && a !== null && b !== null
+      && tag in a && tag in b
+      && a[tag] === 'clowder instance'
+      && b[tag] === 'clowder') {
+      return instanceOf(a, b);
+    }
+    const typeOfA = reflection.typeOf(a);
+    const typeOfB = reflection.typeOf(b);
+    throw new MewlixError(ErrorCode.InvalidOperation,
+      `Type "${typeOfA}" cannot be an instance of type "${typeOfB}"!`);
+  },
+};
+
+/* - * - * - * - * - * - * - * - *
  * Value Utils
 /* - * - * - * - * - * - * - * - * */
 
