@@ -83,6 +83,10 @@ function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
   };
 }
 
+function shelfBottom<T>(): Shelf<T> {
+  return { [tag]: 'shelf', kind: 'bottom' };
+}
+
 function shelfLength<T>(shelf: Shelf<T>): number {
   if (shelf.kind === 'bottom') return 0;
   return shelf.length;
@@ -124,7 +128,7 @@ function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
 }
 
 function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
-  let output: Shelf<T> = { [tag]: 'shelf', kind: 'bottom' };
+  let output: Shelf<T> = shelfBottom();
   for (let node = shelf; node.kind === 'node'; node = node.tail) {
     output = shelfPush(output, node.value);
   }
@@ -156,7 +160,7 @@ function shelfToArray<T>(shelf: Shelf<T>): T[] {
 function shelfFromArray<T>(array: T[]): Shelf<T> {
   return array.reduce(
     (shelf: Shelf<T>, value: T) => shelfPush<T>(shelf, value),
-    { [tag]: 'shelf', kind: 'bottom' },
+    shelfBottom(),
   );
 }
 
@@ -1082,8 +1086,7 @@ const createMewlix = function() {
       for (let i = amount; i > 0; i--) {
         output = output && shelfPop(output);
       }
-      /* todo: add function for generating a shelf bottom in a easier way */
-      return output ?? { [tag]: 'shelf', kind: 'bottom' };
+      return output ?? shelfBottom();
     }
     const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
@@ -1128,7 +1131,7 @@ const createMewlix = function() {
     ensure.shelf('std.insert', shelf);
     ensure.number('std.insert', index);
 
-    let top: Shelf<T> | null = { [tag]: 'shelf', kind: 'bottom' };
+    let top: Shelf<T> | null = shelfBottom();
     let bottom: Shelf<T> = shelf;
     let counter = (index >= 0)
       ? index
@@ -1151,7 +1154,7 @@ const createMewlix = function() {
     ensure.shelf('std.remove', shelf);
     ensure.number('std.remove', index);
 
-    let top: Shelf<T> | null = { [tag]: 'shelf', kind: 'bottom' };
+    let top: Shelf<T> | null = shelfBottom();
     let bottom: Shelf<T> = shelf;
     let counter = (index >= 0)
       ? index
@@ -1188,7 +1191,7 @@ const createMewlix = function() {
     ensure.func('std.filter', predicate);
     ensure.shelf('std.filter', shelf);
 
-    let bucket: Shelf<T> = { [tag]: 'shelf', kind: 'bottom' };
+    let bucket = shelfBottom<T>();
     const iterator = shelfIterator(shelf);
 
     for (const value of iterator) {
@@ -1478,7 +1481,7 @@ const createMewlix = function() {
     const step = (start < end) ? 1 : -1;
     const stop = start - step;
 
-    let output: Shelf<number> = { [tag]: 'shelf', kind: 'bottom' };
+    let output = shelfBottom<number>();
 
     for (let i = end; i != stop; i -= step) {
       output = shelfPush(output, i);
