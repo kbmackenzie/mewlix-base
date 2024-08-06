@@ -881,8 +881,45 @@ const boxes = {
 };
 
 /* - * - * - * - * - * - * - * - *
+ * Internal
+/* - * - * - * - * - * - * - * - * */
+
+const internal = {
+  chase,
+  pounce,
+  assertionFail,
+};
+
+function chase<T>(value: Shelf<T>): Generator<T, void, void>;
+function chase<T>(value: string): Generator<string, void, void>;
+function chase<T>(value: Shelf<T> | string) {
+  if (typeof value === 'string') return value[Symbol.iterator]();
+  if (isShelf(value)) return shelfIterator(value);
+  const typeOfValue = reflection.typeOf(value);
+  throw new MewlixError(ErrorCode.TypeMismatch,
+    `Cannot chase value of type "${typeOfValue}"! | value: ${value}`);
+}
+
+function pounce(error: Error): Box<string | number | null> {
+  const errorCode: ErrorCode = (error instanceof MewlixError)
+    ? error.code
+    : ErrorCode.ExternalError;
+  return createBox(box => {
+    box.set('name', errorToString[errorCode]);
+    box.set('id'  , errorCode);
+    box.set('message', error.message ? purrify(error.message) : null);
+  });
+}
+
+function assertionFail(message: string): void {
+  throw new MewlixError(ErrorCode.CatOnComputer,
+    `Assertion failed: ${message}`);
+}
+
+/* - * - * - * - * - * - * - * - *
  * IO
 /* - * - * - * - * - * - * - * - * */
+
 type MeowFunc = (input: string) => string;
 
 /* - * - * - * - * - * - * - * - *
