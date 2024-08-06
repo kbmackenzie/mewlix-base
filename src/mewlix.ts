@@ -874,3 +874,8 @@ const boxes = {
     ));
   },
 };
+
+/* - * - * - * - * - * - * - * - *
+ * IO
+/* - * - * - * - * - * - * - * - * */
+type MeowFunc = (input: string) => string;
