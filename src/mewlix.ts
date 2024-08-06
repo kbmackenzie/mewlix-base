@@ -685,7 +685,6 @@ const boolean = {
   },
 };
 
-/*
 const relation = {
   equal(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
@@ -695,30 +694,28 @@ const relation = {
       && typeof b === 'object'
       && tag in a!
       && tag in b!
-      && a.tag === 'shelf'
-      && b.tag === 'shelf') {
-        return 
+      && a[tag] === 'shelf'
+      && b[tag] === 'shelf') {
+        return shelfEquality(a, b);
     }
     return a === b;
   },
-  ordering(a: MewlixValue, b: MewlixValue): Comparison {
+  ordering(a: MewlixValue, b: MewlixValue): Ordering {
     if (typeof a !== typeof b) {
       const typeofA = reflection.typeOf(a);
       const typeofB = reflection.typeOf(b);
       throw new MewlixError(ErrorCode.TypeMismatch,
         `compare: Cannot compare values of different types: "${typeofA}" and "${typeofB}"!`);
     }
-
     switch (typeof a) {
       case 'number':
       case 'string':
       case 'boolean':
-        if (a === b) return Comparison.EqualTo;
-        return (a < b!) ? Comparison.LessThan : Comparison.GreaterThan;
+        if (a === b) return Ordering.Equal;
+        return (a < b!) ? Ordering.Less : Ordering.Greater;
       default:
         break;
     }
-
     const typeOfValue = reflection.typeOf(a);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `compare: Cannot compare values of type "${typeOfValue}"!`);
@@ -730,4 +727,3 @@ const strings = {
     return purrify(a) + purrify(b);
   },
 };
-*/
