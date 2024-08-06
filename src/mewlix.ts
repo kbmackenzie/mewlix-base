@@ -1846,3 +1846,4 @@ const createMewlix = function() {
 }
 
 export default createMewlix;
+export type Mewlix = ReturnType<typeof createMewlix>;
