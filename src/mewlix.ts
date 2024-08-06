@@ -41,7 +41,7 @@ export type ClowderInstance<T> = Readonly<{
   [tag]: 'clowder instance',
   clowder: Clowder<T>;
   parent: ClowderInstance<T> | null;
-  bindings: Record<string, T>;
+  bindings: ClowderBindings<T>;
   get(key: string): TryGet<T>;
   set(key: string, value: T): void;
   outside(key: string): TryGet<T>;
@@ -302,7 +302,7 @@ export function createClowder<T>(
   };
 }
 
-export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
+function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
   const bindings: ClowderBindings<T> = {
     [wake]: () => {},
   };
@@ -325,6 +325,14 @@ export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
       if (parent) return parent.get(key);
       return undefined;
     },
+  };
+}
+
+export function instantiate<T>(clowder: Clowder<T>): (...args: any[]) => ClowderInstance<T> {
+  const instance = instanceClowder(clowder);
+  return (...args) => {
+    instance.bindings[wake](...args);
+    return instance;
   };
 }
 
