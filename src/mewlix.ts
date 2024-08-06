@@ -102,10 +102,10 @@ function shelfPop<T>(shelf: Shelf<T>): Shelf<T> | null {
   return shelf.tail;
 }
 
-function shelfContains<T>(shelf: Shelf<T>, value: T): boolean {
+function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
   let node = shelf;
   while (node.kind === 'node') {
-    if (node.value === value) return true;
+    if (relation.equal(node.value, value)) return true;
     node = node.tail;
   }
   return false;
@@ -642,7 +642,7 @@ const relation = {
     if (isNothing(b)) return isNothing(a);
 
     if (isShelf(a) && isShelf(b)) {
-        return shelfEquality(a as Shelf<MewlixValue>, b as Shelf<MewlixValue>);
+      return shelfEquality(a as Shelf<MewlixValue>, b as Shelf<MewlixValue>);
     }
     return a === b;
   },
@@ -833,5 +833,10 @@ const collections = {
     const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
       `...?: Can't calculate length for value of type "${typeOfValue}": ${purrify(value)}`);
+  },
+  contains<T>(value: T, collection: Shelf<T> | Box<T> | ClowderInstance<T> | string): boolean {
+    if (isShelf(collection)) {
+      return shelfContains(collection, value);
+    }
   },
 };
