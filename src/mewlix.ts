@@ -561,6 +561,21 @@ const convert = {
     if (a === false || a === null || a === undefined) return false;
     return true;
   },
+  number(n: number): number {
+    switch (typeof n) {
+      case 'number' : return n;
+      case 'boolean': return n ? 1 : 0;
+      case 'string' : {
+        const number = Number(n);
+        if (Number.isNaN(number)) break;
+        return number;
+      }
+      default:
+        break;
+    }
+    throw new MewlixError(ErrorCode.InvalidConversion,
+      `Value cannot be converted to a number: ${n}`);
+  },
 };
 
 /* - * - * - * - * - * - * - * - *
