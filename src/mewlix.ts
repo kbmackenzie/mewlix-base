@@ -259,12 +259,12 @@ function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
   };
 }
 
-function mixYarnBall<T>(key: string, a: Record<string, T>, b: Record<string, T>) {
+function mixYarnBall<T1, T2>(key: string, a: Record<string, T1>, b: Record<string, T2>): YarnBall<T1 | T2> {
   /* Mix through closures; preserve the original yarnballs. */
   return {
     [tag]: 'yarnball',
     key: key,
-    get(key: string): If<T> {
+    get(key: string): If<T1 | T2> {
       if (key in a) return a[key];
       return b[key];
     }
