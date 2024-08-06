@@ -1808,18 +1808,19 @@ const createMewlix = function() {
   const stdCurry = mixYarnBall('std.curry', base, baseCurry);
   lib.stdCurry = stdCurry;
 
-  /* -------------------------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Final Touches
-   * ------------------------------------------------------- */
+  /* - * - * - * - * - * - * - * - * */
+
   /* A default implementation for the 'run' entrypoint function.
    * The console and graphic templates override this implementation.
    *
    * It should *always* be awaited, as it's expected to be asynchronous. */
   const run = async (func: () => YarnBall<any>): Promise<YarnBall<any>> => func();
 
-  /* ------------------------------------------------------
-   * Return Mewlix Namespace
-   * ------------------------------------------------------ */
+  /* - * - * - * - * - * - * - * - *
+   * Export Object
+  /* - * - * - * - * - * - * - * - * */
   return {
     ErrorCode,
     MewlixError,
