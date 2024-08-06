@@ -201,6 +201,13 @@ function objectToBox<T>(obj: Record<string, T>): Box<T> {
   });
 }
 
+function isBox(value: any): boolean {
+  return typeof value === 'object'
+    && value !== null
+    && tag in value
+    && value[tag] === 'box';
+}
+
 /* - * - * - * - * - * - * - * - *
  * Cat Tree: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
@@ -700,10 +707,7 @@ const ensure = {
     throw typeError(where, a, 'shelf');
   },
   box(where: string, a: any): void {
-    if (typeof a === 'object'
-      && a !== null
-      && tag in a
-      && a[tag] === 'box') return;
+    if (isBox(a)) return;
     throw typeError(where, a, 'box');
   },
   func(where: string, a: any): void {
