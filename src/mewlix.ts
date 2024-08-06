@@ -430,6 +430,7 @@ export type MewlixValue =
   | MewlixObject
   | MewlixFunction
   | null
+  | void
   | undefined
   | Promise<void>;
 
