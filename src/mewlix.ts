@@ -554,6 +554,16 @@ const compare = {
 };
 
 /* - * - * - * - * - * - * - * - *
+ * Conversions
+/* - * - * - * - * - * - * - * - * */
+const conversion = {
+  bool(a: any): boolean {
+    if (a === false || a === null || a === undefined) return false;
+    return true;
+  },
+};
+
+/* - * - * - * - * - * - * - * - *
  * Value Utils
 /* - * - * - * - * - * - * - * - * */
 
@@ -678,16 +688,16 @@ const numbers = {
 
 const boolean = {
   not(a: any): boolean {
-    return !conversion.toBool(a);
+    return !conversion.bool(a);
   },
   or(a: any, fb: () => any): any {
-    return conversion.toBool(a) ? a : fb();
+    return conversion.bool(a) ? a : fb();
   },
   and(a: any, fb: () => any): any {
-    return conversion.toBool(a) ? fb() : a;
+    return conversion.bool(a) ? fb() : a;
   },
   ternary(condition: any, fa: () => any, fb: () => any): any {
-    return conversion.toBool(condition) ? fa() : fb();
+    return conversion.bool(condition) ? fa() : fb();
   },
 };
 
