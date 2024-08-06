@@ -573,3 +573,41 @@ function opaque(x: object): void {
     },
   });
 }
+
+/* - * - * - * - * - * - * - * - *
+ * Type Coercion
+/* - * - * - * - * - * - * - * - * */
+
+const ensure = {
+  number(where: string, a: any): void {
+    if (typeof a === 'number') return;
+    throw typeError(where, a, 'number');
+  },
+  string(where: string, a: any): void {
+    if (typeof a === 'string') return;
+    throw typeError(where, a, 'string');
+  },
+  shelf(where: string, a: any): void {
+    if (typeof a === 'object' && tag in a && a.tag === 'shelf') return;
+    throw typeError(where, a, 'shelf');
+  },
+  box(where: string, a: any): void {
+    if (typeof a === 'object' && tag in a && a.tag === 'box') return;
+    throw typeError(where, a, 'box');
+  },
+  func(where: string, a: any): void {
+    if (typeof a === 'function') return;
+    throw typeError(where, a, 'function');
+  }
+};
+
+/* - * - * - * - * - * - * - * - *
+ * Mewlix Error - Utils 
+/* - * - * - * - * - * - * - * - * */
+
+function typeError(where: string, value: any, targetType: string): MewlixError {
+  const type = reflection.typeOf(value);
+  const purr = purrify(value);
+  return new MewlixError(ErrorCode.InvalidConversion,
+    `Expected ${targetType}, got value of type "${type}": ${purr}`);
+}
