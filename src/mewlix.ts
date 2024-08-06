@@ -444,7 +444,6 @@ export type MewlixValue =
 
 export type Gettable<T> = {
   [tag]: 'box' | 'clowder instance';
-  bindings: Record<string, T>;
   get(key: string): TryGet<T>;
 };
 
