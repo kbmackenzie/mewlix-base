@@ -575,7 +575,7 @@ function opaque(x: object): void {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Type Coercion
+ * Type Utils
 /* - * - * - * - * - * - * - * - * */
 
 const ensure = {
@@ -600,10 +600,6 @@ const ensure = {
     throw typeError(where, a, 'function');
   }
 };
-
-/* - * - * - * - * - * - * - * - *
- * Mewlix Error - Utils 
-/* - * - * - * - * - * - * - * - * */
 
 function typeError(where: string, value: any, targetType: string): MewlixError {
   const type = reflection.typeOf(value);
