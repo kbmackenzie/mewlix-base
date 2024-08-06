@@ -887,12 +887,3 @@ function wrap<T>(record: Record<string, T>): Box<T> {
     },
   };
 }
-
-function opaque(obj: object): void {
-  Object.defineProperty(obj, 'get', {
-    value: function(key: string) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        `Cannot look up property "${key}": Object ${obj} isn't accessible through Mewlix!`);
-    },
-  });
-}
