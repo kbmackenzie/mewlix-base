@@ -29,15 +29,12 @@ export type Box<T> = Readonly<{
   set(key: string, value: T): void;
 }>;
 
-type Initializer<T> =
-  (bindings: Record<string, T>) => void;
-
 export type Clowder<T> = Readonly<{
   [tag]: 'clowder';
   kind: symbol;
   name: string;
   parent: Clowder<T> | null;
-  initialize: Initializer<T>;
+  initialize: (bindings: ClowderBindings<T>) => void;
 }>;
 
 export type ClowderInstance<T> = Readonly<{
@@ -49,6 +46,10 @@ export type ClowderInstance<T> = Readonly<{
   set(key: string, value: T): void;
   outside(key: string): TryGet<T>;
 }>;
+
+export type ClowderBindings<T> = Record<string, T> & {
+  [wake]: (...args: any[]) => void;
+};
 
 export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
@@ -287,7 +288,11 @@ export function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void):
  * Clowders: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-export function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initializer<T>): Clowder<T> {
+export function createClowder<T>(
+  name: string,
+  parent: Clowder<T> | null,
+  init: (bindings: ClowderBindings<T>) => void,
+): Clowder<T> {
   return {
     [tag]: 'clowder',
     kind: Symbol(name),
@@ -298,7 +303,9 @@ export function createClowder<T>(name: string, parent: Clowder<T> | null, init: 
 }
 
 export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
-  const bindings: Record<string, T> = {};
+  const bindings: ClowderBindings<T> = {
+    [wake]: () => {},
+  };
   const parent = clowder.parent && instanceClowder(clowder.parent);
   clowder.initialize(bindings);
   return {
