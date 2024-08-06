@@ -13,7 +13,7 @@ export type Maybe<T> =
   | { type: 'some', value: T }
   | { type: 'none' };
 
-export type If<T> = T | undefined;
+export type TryGet<T> = T | undefined;
 
 type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
 export type MewlixObject = { [tag]: ObjectTag };
@@ -25,7 +25,7 @@ export type Shelf<T> =
 export type Box<T> = Readonly<{
   [tag]: 'box',
   bindings: Record<string, T>;
-  get(key: string): If<T>;
+  get(key: string): TryGet<T>;
   set(key: string, value: T): void;
 }>;
 
@@ -45,29 +45,29 @@ export type ClowderInstance<T> = Readonly<{
   clowder: Clowder<T>;
   parent: ClowderInstance<T> | null;
   bindings: Record<string, T>;
-  get(key: string): If<T>;
+  get(key: string): TryGet<T>;
   set(key: string, value: T): void;
-  outside(key: string): If<T>;
+  outside(key: string): TryGet<T>;
 }>;
 
 export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
   key: string;
-  get(key: string): If<T>;
+  get(key: string): TryGet<T>;
 }>;
 
 export type CatTree = Readonly<{
   [tag]: 'cat tree';
   name: string;
   fruits: Record<string, CatFruit>;
-  get(key: string): If<CatFruit>;
+  get(key: string): TryGet<CatFruit>;
 }>;
 
 export type CatFruit = Readonly<{
   [tag]: 'cat fruit';
   key: string;
   value: number;
-  get(key: string): If<string | number>;
+  get(key: string): TryGet<string | number>;
 }>;
 
 /* - * - * - * - * - * - * - * - *
@@ -186,7 +186,7 @@ export function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   const box: Box<T> = {
     [tag]: 'box',
     bindings: innerBox,
-    get(key: string): If<T> {
+    get(key: string): TryGet<T> {
       return innerBox[key];
     },
     set(key: string, value: T): void {
@@ -224,7 +224,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
       [tag]: 'cat fruit',
       key: key,
       value: i,
-      get(k: string): If<string | number> {
+      get(k: string): TryGet<string | number> {
         if (k === 'key') return key;
         if (k === 'value') return i;
         return undefined;
@@ -237,7 +237,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
     [tag]: 'cat tree',
     name: name,
     fruits: fruits,
-    get(key: string): If<CatFruit> {
+    get(key: string): TryGet<CatFruit> {
       return fruits[key];
     },
   };
@@ -253,7 +253,7 @@ export function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall
   return {
     [tag]: 'yarnball',
     key: key,
-    get(key: string): If<T> {
+    get(key: string): TryGet<T> {
       return lib[key];
     },
   };
@@ -264,7 +264,7 @@ export function mixYarnBall<T1, T2>(key: string, a: Record<string, T1>, b: Recor
   return {
     [tag]: 'yarnball',
     key: key,
-    get(key: string): If<T1 | T2> {
+    get(key: string): TryGet<T1 | T2> {
       if (key in a) return a[key];
       return b[key];
     }
@@ -277,7 +277,7 @@ export function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void):
   return {
     [tag]: 'yarnball',
     key: key,
-    get(key: string): If<T> {
+    get(key: string): TryGet<T> {
       return bindings[key]?.();
     }
   };
@@ -306,7 +306,7 @@ export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
     clowder: clowder,
     parent: parent,
     bindings: bindings,
-    get(key: string): If<T> {
+    get(key: string): TryGet<T> {
       if (key in bindings) return bindings[key];
       if (parent) return parent.get(key);
       return undefined;
@@ -314,7 +314,7 @@ export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
     set(key: string, value: T): void {
       bindings[key] = value;
     },
-    outside(key: string): If<T> {
+    outside(key: string): TryGet<T> {
       if (parent) return parent.get(key);
       return undefined;
     },
@@ -930,7 +930,7 @@ export function wrap<T>(record: Record<string, T>): Box<T> {
   return {
     [tag]: 'box',
     bindings: {},
-    get(key: string): If<T> {
+    get(key: string): TryGet<T> {
       return record[key];
     },
     set(key: string, value: T): void {
