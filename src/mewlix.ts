@@ -92,14 +92,14 @@ function shelfPush<T>(shelf: Shelf<T>, value: T): Shelf<T> {
   return newShelf(value, shelf);
 }
 
-function shelfPeek<T>(shelf: Shelf<T>): Maybe<T> {
-  if (shelf.kind === 'bottom') return { type: 'none' };
-  return { type: 'some', value: shelf.value };
+function shelfPeek<T>(shelf: Shelf<T>): T | null {
+  if (shelf.kind === 'bottom') return null;
+  return shelf.value;
 }
 
-function shelfPop<T>(shelf: Shelf<T>): Maybe<Shelf<T>> {
-  if (shelf.kind === 'bottom') return { type: 'none' };
-  return { type: 'some', value: shelf.tail };
+function shelfPop<T>(shelf: Shelf<T>): Shelf<T> | null {
+  if (shelf.kind === 'bottom') return null;
+  return shelf.tail;
 }
 
 function shelfContains<T>(shelf: Shelf<T>, value: T): boolean {
