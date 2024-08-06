@@ -607,3 +607,127 @@ function typeError(where: string, value: any, targetType: string): MewlixError {
   return new MewlixError(ErrorCode.InvalidConversion,
     `Expected ${targetType}, got value of type "${type}": ${purr}`);
 }
+
+/* - * - * - * - * - * - * - * - *
+ * Basic Operations
+/* - * - * - * - * - * - * - * - * */
+
+const numbers = {
+  add(a: number, b: number): number {
+    ensure.number('+', a);
+    ensure.number('+', b);
+    return a + b;
+  },
+  sub(a: number, b: number): number {
+    ensure.number('-', a);
+    ensure.number('-', b);
+    return a - b;
+  },
+  mul(a: number, b: number): number {
+    ensure.number('*', a);
+    ensure.number('*', b);
+    return a * b;
+  },
+  div(a: number, b: number): number {
+    ensure.number('/', a);
+    ensure.number('/', b);
+    if (b === 0) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `/: Attempted to divide ${a} by ${b}!`);
+    }
+    return a / b;
+  },
+  floordiv(a: number, b: number): number {
+    ensure.number('//', a);
+    ensure.number('//', b);
+    if (b == 0) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `//: Attempted to divide ${a} by ${b}!`);
+    }
+    return Math.floor(a / b);
+  },
+  mod(a: number, b: number): number {
+    ensure.number('%', a);
+    ensure.number('%', b);
+    if (b === 0) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `%: Attempted to divide ${a} by ${b}!`);
+    }
+    return ((a % b) + b) % b;
+  },
+  pow(a: number, b: number): number {
+    ensure.number('^', a);
+    ensure.number('^', b);
+    return a ** b;
+  },
+  plus(a: number): number {
+    ensure.number('+', a);
+    return +a;
+  },
+  minus(a: number): number {
+    ensure.number('-', a);
+    return -a;
+  },
+};
+
+const boolean = {
+  not(a: any): boolean {
+    return !conversion.toBool(a);
+  },
+  or(a: any, fb: () => any): any {
+    return conversion.toBool(a) ? a : fb();
+  },
+  and(a: any, fb: () => any): any {
+    return conversion.toBool(a) ? fb() : a;
+  },
+  ternary(condition: any, fa: () => any, fb: () => any): any {
+    return conversion.toBool(condition) ? fa() : fb();
+  },
+};
+
+/*
+const relation = {
+  equal(a: MewlixValue, b: MewlixValue): boolean {
+    if (isNothing(a)) return isNothing(b);
+    if (isNothing(b)) return isNothing(a);
+
+    if (typeof a === 'object'
+      && typeof b === 'object'
+      && tag in a!
+      && tag in b!
+      && a.tag === 'shelf'
+      && b.tag === 'shelf') {
+        return 
+    }
+    return a === b;
+  },
+  ordering(a: MewlixValue, b: MewlixValue): Comparison {
+    if (typeof a !== typeof b) {
+      const typeofA = reflection.typeOf(a);
+      const typeofB = reflection.typeOf(b);
+      throw new MewlixError(ErrorCode.TypeMismatch,
+        `compare: Cannot compare values of different types: "${typeofA}" and "${typeofB}"!`);
+    }
+
+    switch (typeof a) {
+      case 'number':
+      case 'string':
+      case 'boolean':
+        if (a === b) return Comparison.EqualTo;
+        return (a < b!) ? Comparison.LessThan : Comparison.GreaterThan;
+      default:
+        break;
+    }
+
+    const typeOfValue = reflection.typeOf(a);
+    throw new MewlixError(ErrorCode.TypeMismatch,
+      `compare: Cannot compare values of type "${typeOfValue}"!`);
+  },
+};
+
+const strings = {
+  concat(a: MewlixValue, b: MewlixValue): string {
+    return purrify(a) + purrify(b);
+  },
+};
+*/
