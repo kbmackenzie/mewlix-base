@@ -273,6 +273,16 @@ function mixYarnBall<T>(key: string, a: YarnBall<T>, b: YarnBall<T>) {
   };
 }
 
+function toYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
+  return {
+    [tag]: 'yarnball',
+    key: key,
+    get(key: string): If<T> {
+      return lib[key];
+    },
+  };
+}
+
 /* - * - * - * - * - * - * - * - *
  * Clowders: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
@@ -1619,7 +1629,7 @@ const createMewlix = function() {
     log,
     error,
   };
-
-  const std = createYarnBall<MewlixValue>('std', yarn => {
-  });
+  const std = toYarnBall('std', base)
 }
+
+
