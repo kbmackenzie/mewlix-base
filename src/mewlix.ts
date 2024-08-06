@@ -437,7 +437,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
 
 function purrify(value: any): string {
   if (typeof value === 'object' && tag in value) {
-    return purrifyTable[value.tag as ObjectTag](value);
+    return purrifyTable[value[tag] as ObjectTag](value);
   }
   if (value === null || value === undefined) { return 'nothing'; }
   return String(value);
@@ -479,7 +479,7 @@ const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
 
 function toJSON(value: any): JSONValue {
   if (typeof value === 'object' && tag in value) {
-    return mewlixToJSON[value.tag as ObjectTag](value);
+    return mewlixToJSON[value[tag] as ObjectTag](value);
   }
   if (Array.isArray(value)) {
     return value.map(toJSON);
@@ -588,11 +588,11 @@ const ensure = {
     throw typeError(where, a, 'string');
   },
   shelf(where: string, a: any): void {
-    if (typeof a === 'object' && tag in a && a.tag === 'shelf') return;
+    if (typeof a === 'object' && tag in a && a[tag] === 'shelf') return;
     throw typeError(where, a, 'shelf');
   },
   box(where: string, a: any): void {
-    if (typeof a === 'object' && tag in a && a.tag === 'box') return;
+    if (typeof a === 'object' && tag in a && a[tag] === 'box') return;
     throw typeError(where, a, 'box');
   },
   func(where: string, a: any): void {
