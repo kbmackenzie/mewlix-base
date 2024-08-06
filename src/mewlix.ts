@@ -687,15 +687,6 @@ function clamp_(value: number, min: number, max: number): number {
   return (value < min) ? min : ((value > max) ? max : value);
 }
 
-function opaque(x: object): void {
-  Object.defineProperty(x, 'get', {
-    value: function(key: string) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        `Cannot look up property "${key}": Object ${x} isn't accessible through Mewlix!`);
-    },
-  });
-}
-
 /* - * - * - * - * - * - * - * - *
  * Type Utils
 /* - * - * - * - * - * - * - * - * */
@@ -879,3 +870,29 @@ const boxes = {
  * IO
 /* - * - * - * - * - * - * - * - * */
 type MeowFunc = (input: string) => string;
+
+/* - * - * - * - * - * - * - * - *
+ * API
+/* - * - * - * - * - * - * - * - * */
+
+function wrap<T>(record: Record<string, T>): Box<T> {
+  return {
+    [tag]: 'box',
+    bindings: {},
+    get(key: string): If<T> {
+      return record[key];
+    },
+    set(key: string, value: T): void {
+      record[key] = value;
+    },
+  };
+}
+
+function opaque(obj: object): void {
+  Object.defineProperty(obj, 'get', {
+    value: function(key: string) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `Cannot look up property "${key}": Object ${obj} isn't accessible through Mewlix!`);
+    },
+  });
+}
