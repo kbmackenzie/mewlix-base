@@ -741,6 +741,10 @@ export const ensure = {
     if (isBox(a)) return;
     throw typeError(where, a, 'box');
   },
+  gettable(where: string, a: any): void {
+    if (isGettable(a)) return;
+    throw typeError(where, a, 'gettable');
+  },
   func(where: string, a: any): void {
     if (typeof a === 'function') return;
     throw typeError(where, a, 'function');
