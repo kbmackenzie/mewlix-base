@@ -3,16 +3,36 @@
 import {
   Mewlix,
   Shelf,
-  YarnBall,
   purrify,
+  convert,
   isNothing,
   ensure,
+  shelfToArray,
+  createYarnBall,
+  mixYarnBall,
 } from './mewlix.js';
 
+export function isEmptyLine(line: string): boolean {
+  return /^\n?$/.test(line);
+}
+
+export function dateString(): string {
+  return new Date().toJSON().slice(0, 10);
+}
+
+export function nub<T>(array: T[]): T[] {
+  const set = new Set<T>();
+  return array.filter(x => {
+    if (set.has(x)) return false;
+    set.add(x);
+    return true;
+  });
+}
+
 export default function(mewlix: Mewlix): void {
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Events:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   type InputInfo = {
     fromFile: boolean;
     file?: File;
@@ -27,9 +47,9 @@ export default function(mewlix: Mewlix): void {
     });
   };
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Constants:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const promptMessage = '>> ';
 
   const input         = document.getElementById('console-input')      as HTMLInputElement;
@@ -46,20 +66,9 @@ export default function(mewlix: Mewlix): void {
   const showHighlight = document.getElementById('show-highlight')     as HTMLInputElement;
   const saveLogButton = document.getElementById('save-log')           as HTMLButtonElement;
 
-  /* -------------------------------------
-   * Utils:
-   * ------------------------------------- */
-  function isEmptyLine(line: string): boolean {
-    return /^\n?$/.test(line);
-  }
-
-  function dateString(): string {
-    return new Date().toJSON().slice(0, 10);
-  }
-
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Console lines:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function createPrompt(): HTMLSpanElement {
     const span = document.createElement('span');
     span.style.color = setColor.value;
@@ -105,9 +114,9 @@ export default function(mewlix: Mewlix): void {
     projectStatus.textContent = status;
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * File downloads:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function textBlob(text: string): string {
     const blob = new Blob([text], { type: 'text/plain' });
     return URL.createObjectURL(blob);
@@ -132,9 +141,9 @@ export default function(mewlix: Mewlix): void {
     });
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Console input:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function enableButtons(enable: boolean): void {
     arrowButton.disabled = !enable; 
     fileInput.disabled = !enable;
@@ -165,16 +174,16 @@ export default function(mewlix: Mewlix): void {
           addMessage(line);
           resolve(text);
         }) as unknown as EventListener, /* A necessary sacrifice. This is fine. */ 
-        /* The reason why the type conversion is necessary:
+        /* The reason why the type cast is necessary:
          * https://stackoverflow.com/a/65996495/19764270 **/
         { once: true }
       );
     });
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Additional utils:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function toggleHighlight(highlight: boolean): void {
     if (highlight) {
       input.classList.add('highlight');
@@ -189,25 +198,16 @@ export default function(mewlix: Mewlix): void {
     projectName.textContent = name;
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * File Upload:
-   * ------------------------------------- */
-  function nub<T>(array: T[]): T[] {
-    const set = new Set<T>();
-    return array.filter(x => {
-      if (set.has(x)) return false;
-      set.add(x);
-      return true;
-    });
-  }
-
+   * - * - * - * - * - * - * - * - * */
   function setAcceptedFiles(keys: string[]): void {
     fileInput.accept = nub(keys).join(', ')
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Saving Data:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function getLines(): string {
     return Array.from(lines.getElementsByTagName('li'))
       .filter(li => !li.classList.contains('file-download'))
@@ -231,26 +231,26 @@ export default function(mewlix: Mewlix): void {
     };
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Error Logging:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function writeError(error: unknown): void {
     addError(`Error caught: ${error}`);
     addError('See the debugging console for more information!');
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Screen Overlay
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function createDarkOverlay(): HTMLDivElement {
     const div = document.createElement('div');
     div.classList.add('dark-overlay');
     return div;
   }
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Initialization:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   input.addEventListener('keydown', event => {
     if (event.repeat || event.key !== 'Enter' || event.shiftKey || isEmptyLine(input.value)) return;
     event.preventDefault();
@@ -296,22 +296,22 @@ export default function(mewlix: Mewlix): void {
     createLogDownload()();
   });
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Initialization (electric boogaloo):
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   toggleHighlight(showHighlight.checked);
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Override 'meow':
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   mewlix.setMeow((message: string) => {
     addMessage(message, false);
     return message;
   });
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Standard library:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   /* The std.console library documentation can be found on the wiki:
    * > https://github.com/kbmackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
    *
@@ -320,7 +320,7 @@ export default function(mewlix: Mewlix): void {
    * All standard library functions *should use snake_case*, as
    * they're going to be accessible from within Mewlix. */
 
-  const Console = {
+  const consoleLib = {
     clear: clearConsole,
 
     async run(func: (x: string) => string, opener?: () => string): Promise<void> {
@@ -349,8 +349,7 @@ export default function(mewlix: Mewlix): void {
     },
 
     highlight(enable: boolean): void {
-      ensure.boolean('console.highlight', enable);
-      showHighlight.checked = enable;
+      showHighlight.checked = convert.bool(enable);
       toggleHighlight(enable);
     },
 
@@ -366,7 +365,7 @@ export default function(mewlix: Mewlix): void {
 
     accepted_files(accepted: Shelf<string>): void {
       ensure.shelf('console.accepted_files', accepted);
-      setAcceptedFiles(accepted.toArray());
+      setAcceptedFiles(shelfToArray(accepted));
     },
 
     write_file(filename: string | null, contents: string): void {
@@ -378,28 +377,25 @@ export default function(mewlix: Mewlix): void {
     },
   };
 
-  const ConsoleYarnBall = new YarnBall('std.console', Console);
-  mewlix.Console = ConsoleYarnBall;
+  mewlix.lib.console = createYarnBall('std.console', consoleLib);
 
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Standard library - Curry:
-   * ------------------------------------- */
-  const ConsoleCurry = {
+   * - * - * - * - * - * - * - * - * */
+  const consoleCurry = {
     run: (func: (x: string) => string) =>
       (opener?: () => string) =>
-        Console.run(func, opener),
+        consoleLib.run(func, opener),
 
     write_file: (filename: string | null) =>
       (contents: string) =>
-        Console.write_file(filename, contents),
+        consoleLib.write_file(filename, contents),
   };
+  mewlix.lib.consoleCurry = mixYarnBall('std.console.curry', consoleLib, consoleCurry);
 
-  const ConsoleCurryYarnBall = YarnBall.mix('std.console.curry', ConsoleYarnBall, ConsoleCurry);
-  mewlix.ConsoleCurry = ConsoleCurryYarnBall;
-
-  /* -------------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Run Console:
-   * ------------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function setRunning(): void {
     setStatus('running: ');
     projectName.classList.remove('hide');
