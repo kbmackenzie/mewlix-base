@@ -180,6 +180,14 @@ function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   return box;
 }
 
+function objectToBox<T>(obj: Record<string, T>): Box<T> {
+  return createBox(box => {
+    for (const key in obj) {
+      box.set(key, obj[key]);
+    }
+  });
+}
+
 /* - * - * - * - * - * - * - * - *
  * Cat Tree: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
