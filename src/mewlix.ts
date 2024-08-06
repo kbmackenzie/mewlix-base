@@ -433,6 +433,10 @@ export type MewlixValue =
   | undefined
   | Promise<void>;
 
+export type Gettable<T> = MewlixObject & {
+  get(key: string): TryGet<T>;
+};
+
 /* - * - * - * - * - * - * - * - *
  * Utilities
 /* - * - * - * - * - * - * - * - * */
