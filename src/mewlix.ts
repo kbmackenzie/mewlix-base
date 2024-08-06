@@ -862,3 +862,15 @@ const collections = {
       `in: Cannot look up type "${typeOfA}" in type "${typeOfB}"!`);
   },
 };
+
+const boxes = {
+  pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
+    ensure.box('claw at', value);
+    return shelfFromArray(getEntries(value.bindings).map(
+      ([key, value]) => createBox(box => {
+        box.set('key', key);
+        box.set('value', value);
+      })
+    ));
+  },
+};
