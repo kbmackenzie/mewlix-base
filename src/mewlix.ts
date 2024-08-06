@@ -1636,7 +1636,10 @@ const createMewlix = function() {
    * I prefer to write unique overloaded wrappers for all overloaded functions.
    *
    * Although the wrappers below are slightly repetitive, it's worth it to 
-   * ensure type safety and avoid type-casting. */
+   * ensure type safety and avoid type-casting.
+   *
+   * A lot of the redundant checks will get minified away with Terser later on,
+   * so it's mostly fine! */
 
   function pokeCurry(value: string): (index: number) => string | null;
   function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
