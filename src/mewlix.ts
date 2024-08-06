@@ -802,3 +802,18 @@ const strings = {
     return purrify(a) + purrify(b);
   },
 };
+
+const shelves = {
+  peek<T>(shelf: Shelf<T>): T | null {
+    ensure.shelf('paw at', shelf);
+    return shelfPeek(shelf);
+  },
+  pop<T>(shelf: Shelf<T>): Shelf<T> | null {
+    ensure.shelf('knock over', shelf);
+    return shelfPop(shelf);
+  },
+  push<T>(value: T, shelf: Shelf<T>): Shelf<T> {
+    ensure.shelf('push', shelf);
+    return shelfPush(shelf, value);
+  },
+};
