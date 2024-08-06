@@ -166,7 +166,7 @@ function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean
   return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
 }
 
-function isShelf(value: any): boolean {
+function isShelf<T>(value: any): value is Shelf<T> {
   return typeof value == 'object'
     && value !== null
     && tag in value
@@ -201,7 +201,7 @@ function objectToBox<T>(obj: Record<string, T>): Box<T> {
   });
 }
 
-function isBox(value: any): boolean {
+function isBox<T>(value: any): value is Box<T> {
   return typeof value === 'object'
     && value !== null
     && tag in value
