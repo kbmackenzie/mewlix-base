@@ -3,26 +3,26 @@
 /* - * - * - * - * - * - * - * - *
  * Symbols (Core)
 /* - * - * - * - * - * - * - * - * */
-const tag  = Symbol('tag');
-const wake = Symbol('wake');
+export const tag  = Symbol('tag');
+export const wake = Symbol('wake');
 
 /* - * - * - * - * - * - * - * - *
  * Types (Core)
 /* - * - * - * - * - * - * - * - * */
-type Maybe<T> =
+export type Maybe<T> =
   | { type: 'some', value: T }
   | { type: 'none' };
 
-type If<T> = T | undefined;
+export type If<T> = T | undefined;
 
 type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
-type MewlixObject = { [tag]: ObjectTag };
+export type MewlixObject = { [tag]: ObjectTag };
 
-type Shelf<T> =
+export type Shelf<T> =
   | Readonly<{ [tag]: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
   | Readonly<{ [tag]: 'shelf', kind: 'bottom', }>;
 
-type Box<T> = Readonly<{
+export type Box<T> = Readonly<{
   [tag]: 'box',
   bindings: Record<string, T>;
   get(key: string): If<T>;
@@ -32,7 +32,7 @@ type Box<T> = Readonly<{
 type Initializer<T> =
   (bindings: Record<string, T>) => void;
 
-type Clowder<T> = Readonly<{
+export type Clowder<T> = Readonly<{
   [tag]: 'clowder';
   kind: symbol;
   name: string;
@@ -40,7 +40,7 @@ type Clowder<T> = Readonly<{
   initialize: Initializer<T>;
 }>;
 
-type ClowderInstance<T> = Readonly<{
+export type ClowderInstance<T> = Readonly<{
   [tag]: 'clowder instance',
   clowder: Clowder<T>;
   parent: ClowderInstance<T> | null;
@@ -50,20 +50,20 @@ type ClowderInstance<T> = Readonly<{
   outside(key: string): If<T>;
 }>;
 
-type YarnBall<T> = Readonly<{
+export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
   key: string;
   get(key: string): If<T>;
 }>;
 
-type CatTree = Readonly<{
+export type CatTree = Readonly<{
   [tag]: 'cat tree';
   name: string;
   fruits: Record<string, CatFruit>;
   get(key: string): If<CatFruit>;
 }>;
 
-type CatFruit = Readonly<{
+export type CatFruit = Readonly<{
   [tag]: 'cat fruit';
   key: string;
   value: number;
@@ -73,7 +73,7 @@ type CatFruit = Readonly<{
 /* - * - * - * - * - * - * - * - *
  * Shelf: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
-function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
+export function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
   return {
     [tag]: 'shelf',
     kind: 'node',
@@ -83,30 +83,30 @@ function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
   };
 }
 
-function shelfBottom<T>(): Shelf<T> {
+export function shelfBottom<T>(): Shelf<T> {
   return { [tag]: 'shelf', kind: 'bottom' };
 }
 
-function shelfLength<T>(shelf: Shelf<T>): number {
+export function shelfLength<T>(shelf: Shelf<T>): number {
   if (shelf.kind === 'bottom') return 0;
   return shelf.length;
 }
 
-function shelfPush<T>(shelf: Shelf<T>, value: T): Shelf<T> {
+export function shelfPush<T>(shelf: Shelf<T>, value: T): Shelf<T> {
   return newShelf(value, shelf);
 }
 
-function shelfPeek<T>(shelf: Shelf<T>): T | null {
+export function shelfPeek<T>(shelf: Shelf<T>): T | null {
   if (shelf.kind === 'bottom') return null;
   return shelf.value;
 }
 
-function shelfPop<T>(shelf: Shelf<T>): Shelf<T> | null {
+export function shelfPop<T>(shelf: Shelf<T>): Shelf<T> | null {
   if (shelf.kind === 'bottom') return null;
   return shelf.tail;
 }
 
-function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
+export function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
   let node = shelf;
   while (node.kind === 'node') {
     if (relation.equal(node.value, value)) return true;
@@ -115,7 +115,7 @@ function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolea
   return false;
 }
 
-function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
+export function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
   if (a.kind === 'bottom') return b;
   if (b.kind === 'bottom') return a;
 
@@ -127,7 +127,7 @@ function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
   return output;
 }
 
-function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
+export function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
   let output: Shelf<T> = shelfBottom();
   for (let node = shelf; node.kind === 'node'; node = node.tail) {
     output = shelfPush(output, node.value);
@@ -135,7 +135,7 @@ function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
   return output;
 }
 
-function* shelfIterator<T>(a: Shelf<T>): Generator<T, void, void> {
+export function* shelfIterator<T>(a: Shelf<T>): Generator<T, void, void> {
   let node: Shelf<T> = a;
   while (node.kind === 'node') {
     yield node.value;
@@ -143,7 +143,7 @@ function* shelfIterator<T>(a: Shelf<T>): Generator<T, void, void> {
   }
 }
 
-function shelfToArray<T>(shelf: Shelf<T>): T[] {
+export function shelfToArray<T>(shelf: Shelf<T>): T[] {
   if (shelf.kind === 'bottom') return [];
 
   const output = new Array<T>(shelf.length);
@@ -157,20 +157,20 @@ function shelfToArray<T>(shelf: Shelf<T>): T[] {
   return output;
 }
 
-function shelfFromArray<T>(array: T[]): Shelf<T> {
+export function shelfFromArray<T>(array: T[]): Shelf<T> {
   return array.reduce(
     (shelf: Shelf<T>, value: T) => shelfPush<T>(shelf, value),
     shelfBottom(),
   );
 }
 
-function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean {
+export function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean {
   if (a.kind === 'bottom') return b.kind === 'bottom';
   if (b.kind === 'bottom') return false;
   return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
 }
 
-function isShelf<T>(value: any): value is Shelf<T> {
+export function isShelf<T>(value: any): value is Shelf<T> {
   return typeof value == 'object'
     && value !== null
     && tag in value
@@ -181,7 +181,7 @@ function isShelf<T>(value: any): value is Shelf<T> {
  * Box: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-function createBox<T>(init: (box: Box<T>) => void): Box<T> {
+export function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   const innerBox: Record<string, T> = {};
   const box: Box<T> = {
     [tag]: 'box',
@@ -197,7 +197,7 @@ function createBox<T>(init: (box: Box<T>) => void): Box<T> {
   return box;
 }
 
-function objectToBox<T>(obj: Record<string, T>): Box<T> {
+export function objectToBox<T>(obj: Record<string, T>): Box<T> {
   return createBox(box => {
     for (const key in obj) {
       box.set(key, obj[key]);
@@ -205,7 +205,7 @@ function objectToBox<T>(obj: Record<string, T>): Box<T> {
   });
 }
 
-function isBox<T>(value: any): value is Box<T> {
+export function isBox<T>(value: any): value is Box<T> {
   return typeof value === 'object'
     && value !== null
     && tag in value
@@ -216,7 +216,7 @@ function isBox<T>(value: any): value is Box<T> {
  * Cat Tree: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-function createCatTree(name: string, keys: string[]): CatTree {
+export function createCatTree(name: string, keys: string[]): CatTree {
   const fruits: Record<string, CatFruit> = {};
   let i = 0;
   for (const key of keys) {
@@ -249,7 +249,7 @@ function createCatTree(name: string, keys: string[]): CatTree {
 
 type Bindings<T> = Record<string, () => T>;
 
-function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
+export function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
   return {
     [tag]: 'yarnball',
     key: key,
@@ -259,7 +259,7 @@ function createYarnBall<T>(key: string, lib: Record<string, T>): YarnBall<T> {
   };
 }
 
-function mixYarnBall<T1, T2>(key: string, a: Record<string, T1>, b: Record<string, T2>): YarnBall<T1 | T2> {
+export function mixYarnBall<T1, T2>(key: string, a: Record<string, T1>, b: Record<string, T2>): YarnBall<T1 | T2> {
   /* Mix through closures; preserve the original yarnballs. */
   return {
     [tag]: 'yarnball',
@@ -271,7 +271,7 @@ function mixYarnBall<T1, T2>(key: string, a: Record<string, T1>, b: Record<strin
   };
 }
 
-function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void): YarnBall<T> {
+export function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void): YarnBall<T> {
   const bindings: Bindings<T> = {};
   init(bindings);
   return {
@@ -287,7 +287,7 @@ function bindYarnBall<T>(key: string, init: (bind: Bindings<T>) => void): YarnBa
  * Clowders: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initializer<T>): Clowder<T> {
+export function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initializer<T>): Clowder<T> {
   return {
     [tag]: 'clowder',
     kind: Symbol(name),
@@ -297,7 +297,7 @@ function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initial
   };
 }
 
-function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
+export function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
   const bindings: Record<string, T> = {};
   clowder.initialize(bindings);
   const parent = clowder.parent && instanceClowder(clowder.parent);
@@ -321,7 +321,7 @@ function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
   };
 }
 
-function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>): boolean {
+export function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>): boolean {
   const kind = instance.clowder.kind;
   let c: Clowder<T2> | null = clowder;
   while (c) {
@@ -331,7 +331,7 @@ function instanceOf<T1, T2>(instance: ClowderInstance<T1>, clowder: Clowder<T2>)
   return false;
 }
 
-function isClowderInstance<T>(value: any): value is ClowderInstance<T> {
+export function isClowderInstance<T>(value: any): value is ClowderInstance<T> {
   return typeof value === 'object'
     && value !== null
     && tag in value
@@ -342,14 +342,14 @@ function isClowderInstance<T>(value: any): value is ClowderInstance<T> {
  * Namespace: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-type Namespace<T> = Readonly<{
+export type Namespace<T> = Readonly<{
   [tag]: 'namespace',
   name: string;
   cache: Map<string, T>;
   modules: Map<string, () => T>;
 }>;
 
-function createNamespace<T>(name: string): Namespace<T> {
+export function createNamespace<T>(name: string): Namespace<T> {
   return {
     [tag]: 'namespace',
     name: name,
@@ -358,14 +358,14 @@ function createNamespace<T>(name: string): Namespace<T> {
   };
 }
 
-function getModule<T>(namespace: Namespace<T>, name: string): T | undefined {
+export function getModule<T>(namespace: Namespace<T>, name: string): T | undefined {
   if (namespace.cache.has(name)) return namespace.cache.get(name);
   const mod = namespace.modules.get(name);
   if (!mod) return mod;
   return mod();
 }
 
-function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void {
+export function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void {
   namespace.modules.set(name, mod);
   if (namespace.cache.has(name)) {
     namespace.cache.delete(name);
@@ -376,7 +376,7 @@ function addModule<T>(namespace: Namespace<T>, name: string, mod: () => T): void
  * Errors: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-enum ErrorCode {
+export enum ErrorCode {
   TypeMismatch,
   InvalidOperation,
   InvalidConversion,
@@ -388,7 +388,7 @@ enum ErrorCode {
   ExternalError,
 };
 
-const errorToString: Record<ErrorCode, string> = {
+export const errorToString: Record<ErrorCode, string> = {
   [ErrorCode.TypeMismatch]:      'type mismatch',
   [ErrorCode.InvalidOperation]:  'invalid operation',
   [ErrorCode.InvalidConversion]: 'invalid conversion',
@@ -400,7 +400,7 @@ const errorToString: Record<ErrorCode, string> = {
   [ErrorCode.ExternalError]:     'external error',
 };
 
-class MewlixError extends Error {
+export class MewlixError extends Error {
   name: string;
   code: ErrorCode;
   constructor(errorCode: ErrorCode, message: string) {
@@ -414,9 +414,9 @@ class MewlixError extends Error {
 /* - * - * - * - * - * - * - * - *
  * Types (Value)
 /* - * - * - * - * - * - * - * - * */
-type MewlixFunction = (...args: any[]) => MewlixValue;
+export type MewlixFunction = (...args: any[]) => MewlixValue;
 
-type MewlixValue =
+export type MewlixValue =
   | number
   | string
   | boolean
@@ -430,7 +430,7 @@ type MewlixValue =
  * Utilities
 /* - * - * - * - * - * - * - * - * */
 
-function getEntries<T>(record: Record<string, T>): [string, T][] {
+export function getEntries<T>(record: Record<string, T>): [string, T][] {
   const entries: [string, T][] = [];
   for (const key in record) {
     entries.push([key, record[key]]);
@@ -476,7 +476,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
   },
 };
 
-function purrify(value: any): string {
+export function purrify(value: any): string {
   if (typeof value === 'object' && value !== null && tag in value) {
     return purrifyTable[value[tag] as ObjectTag](value);
   }
@@ -487,7 +487,7 @@ function purrify(value: any): string {
 /* - * - * - * - * - * - * - * - *
  * JSON Conversion
 /* - * - * - * - * - * - * - * - * */
-type JSONValue =
+export type JSONValue =
   | number
   | string
   | boolean
@@ -495,7 +495,7 @@ type JSONValue =
   | JSONValue[]
   | JSONObject;
 
-type JSONObject = {
+export type JSONObject = {
   [key: string]: JSONValue;
 };
 
@@ -518,7 +518,7 @@ const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
   'yarnball': (_) => null,
 };
 
-function toJSON(value: any): JSONValue {
+export function toJSON(value: any): JSONValue {
   if (typeof value === 'object' && value !== null && tag in value) {
     return mewlixToJSON[value[tag] as ObjectTag](value);
   }
@@ -546,7 +546,7 @@ function objectToJSON(obj: object): JSONValue {
   return output;
 }
 
-function fromJSON(value: JSONValue): MewlixValue {
+export function fromJSON(value: JSONValue): MewlixValue {
   if (Array.isArray(value)) {
     return shelfFromArray(value.map(fromJSON));
   }
@@ -570,13 +570,13 @@ function fromJSON(value: JSONValue): MewlixValue {
 /* - * - * - * - * - * - * - * - *
  * Comparisons
 /* - * - * - * - * - * - * - * - * */
-enum Ordering {
+export enum Ordering {
   Less,
   Equal,
   Greater,
 }
 
-const compare = {
+export const compare = {
   less(o: Ordering): boolean {
     return o === Ordering.Less;
   },
@@ -597,7 +597,7 @@ const compare = {
 /* - * - * - * - * - * - * - * - *
  * Conversions
 /* - * - * - * - * - * - * - * - * */
-const convert = {
+export const convert = {
   bool(x: any): boolean {
     if (x === false || x === null || x === undefined) return false;
     return true;
@@ -623,7 +623,7 @@ const convert = {
  * Reflection
 /* - * - * - * - * - * - * - * - * */
 
-const reflection = {
+export const reflection = {
   typeOf(a: any): string {
     switch (typeof a) {
       case 'number' : return 'number';
@@ -657,7 +657,7 @@ const reflection = {
  * Relation + Comparison
 /* - * - * - * - * - * - * - * - * */
 
-const relation = {
+export const relation = {
   equal(a: MewlixValue, b: MewlixValue): boolean {
     if (isNothing(a)) return isNothing(b);
     if (isNothing(b)) return isNothing(a);
@@ -693,11 +693,11 @@ const relation = {
  * Value Utils
 /* - * - * - * - * - * - * - * - * */
 
-function isNothing(x: any): boolean {
+export function isNothing(x: any): boolean {
   return x === null || x === undefined;
 }
 
-function clamp_(value: number, min: number, max: number): number {
+export function clamp_(value: number, min: number, max: number): number {
   return (value < min) ? min : ((value > max) ? max : value);
 }
 
@@ -705,7 +705,7 @@ function clamp_(value: number, min: number, max: number): number {
  * Type Utils
 /* - * - * - * - * - * - * - * - * */
 
-const ensure = {
+export const ensure = {
   number(where: string, a: any): void {
     if (typeof a === 'number') return;
     throw typeError(where, a, 'number');
@@ -739,7 +739,7 @@ function typeError(where: string, value: any, targetType: string): MewlixError {
  * Basic Operations
 /* - * - * - * - * - * - * - * - * */
 
-const numbers = {
+export const numbers = {
   add(a: number, b: number): number {
     ensure.number('+', a);
     ensure.number('+', b);
@@ -797,7 +797,7 @@ const numbers = {
   },
 };
 
-const boolean = {
+export const boolean = {
   not(a: any): boolean {
     return !convert.bool(a);
   },
@@ -812,13 +812,13 @@ const boolean = {
   },
 };
 
-const strings = {
+export const strings = {
   concat(a: MewlixValue, b: MewlixValue): string {
     return purrify(a) + purrify(b);
   },
 };
 
-const shelves = {
+export const shelves = {
   peek<T>(shelf: Shelf<T>): T | null {
     ensure.shelf('paw at', shelf);
     return shelfPeek(shelf);
@@ -833,7 +833,7 @@ const shelves = {
   },
 };
 
-const collections = {
+export const collections = {
   length<T>(value: Shelf<T> | string): number {
     if (typeof value === 'string') return value.length;
     if (typeof value === 'object'
@@ -868,7 +868,7 @@ const collections = {
   },
 };
 
-const boxes = {
+export const boxes = {
   pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
     ensure.box('claw at', value);
     return shelfFromArray(getEntries(value.bindings).map(
@@ -884,7 +884,7 @@ const boxes = {
  * Internal
 /* - * - * - * - * - * - * - * - * */
 
-const internal = {
+export const internal = {
   chase,
   pounce,
   assertionFail,
@@ -920,13 +920,13 @@ function assertionFail(message: string): void {
  * IO
 /* - * - * - * - * - * - * - * - * */
 
-type MeowFunc = (input: string) => string;
+export type MeowFunc = (input: string) => string;
 
 /* - * - * - * - * - * - * - * - *
  * API
 /* - * - * - * - * - * - * - * - * */
 
-function wrap<T>(record: Record<string, T>): Box<T> {
+export function wrap<T>(record: Record<string, T>): Box<T> {
   return {
     [tag]: 'box',
     bindings: {},
@@ -1844,3 +1844,5 @@ const createMewlix = function() {
     run,
   };
 }
+
+export default createMewlix;
