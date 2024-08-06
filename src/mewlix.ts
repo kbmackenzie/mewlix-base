@@ -767,7 +767,7 @@ const relation = {
       && tag in b!
       && a[tag] === 'shelf'
       && b[tag] === 'shelf') {
-        return shelfEquality(a, b);
+        return shelfEquality(a as Shelf<MewlixValue>, b as Shelf<MewlixValue>);
     }
     return a === b;
   },
