@@ -266,7 +266,7 @@ function createClowder<T>(name: string, parent: Clowder<T> | null, init: Initial
 function instanceClowder<T>(clowder: Clowder<T>): ClowderInstance<T> {
   const bindings: Record<string, T> = {};
   clowder.initialize(bindings);
-  const parent = clowder.parent && instanceClowder(clowder.parent)
+  const parent = clowder.parent && instanceClowder(clowder.parent);
   return {
     [tag]: 'clowder instance',
     clowder: clowder,
