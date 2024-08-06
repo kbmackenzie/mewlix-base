@@ -527,6 +527,33 @@ function fromJSON(value: JSONValue): MewlixValue {
 }
 
 /* - * - * - * - * - * - * - * - *
+ * Comparisons
+/* - * - * - * - * - * - * - * - * */
+enum Ordering {
+  Less,
+  Equal,
+  Greater,
+}
+
+const compare = {
+  less(o: Ordering): boolean {
+    return o === Ordering.Less;
+  },
+  equal(o: Ordering): boolean {
+    return o === Ordering.Equal;
+  },
+  greater(o: Ordering): boolean {
+    return o === Ordering.Greater;
+  },
+  lessOrEqual(o: Ordering): boolean {
+    return o === Ordering.Less || o === Ordering.Equal;
+  },
+  greaterOrEqual(o: Ordering): boolean {
+    return o === Ordering.Greater || o === Ordering.Equal;
+  },
+};
+
+/* - * - * - * - * - * - * - * - *
  * Value Utils
 /* - * - * - * - * - * - * - * - * */
 
