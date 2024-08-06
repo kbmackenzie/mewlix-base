@@ -1630,4 +1630,139 @@ const createMewlix = function() {
     error,
   };
   const std = createYarnBall('std', base)
+
+  /* Note: When currying overloaded functions, the type system gets quirky.
+   * Although I can type-cast it away, I chose not to.
+   * I prefer to write unique overloaded wrappers for all overloaded functions.
+   *
+   * Although the wrappers below are slightly repetitive, it's worth it to 
+   * ensure type safety and avoid type-casting. */
+
+  function pokeCurry(value: string): (index: number) => string | null;
+  function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
+  function pokeCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(index: number) { return poke(value, index); }
+      : function(index: number) { return poke(value, index); };
+  }
+
+  function joinCurry(a: string): (b: string) => string;
+  function joinCurry<T>(a: Shelf<T>): (b: Shelf<T>) => Shelf<T>;
+  function joinCurry<T>(a: string | Shelf<T>) {
+    return (typeof a === 'string')
+      ? function(b: string)   { return join(a, b); }
+      : function(b: Shelf<T>) { return join(a, b); }
+  }
+
+  function takeCurry(value: string): (amount: number) => string;
+  function takeCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
+  function takeCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(amount: number) { return take(value, amount); }
+      : function(amount: number) { return take(value, amount); };
+  }
+
+  function dropCurry(value: string): (amount: number) => string;
+  function dropCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
+  function dropCurry<T>(value: string | Shelf<T>) {
+    return (typeof value === 'string')
+      ? function(amount: number) { return drop(value, amount); }
+      : function(amount: number) { return drop(value, amount); };
+  }
+
+  const baseCurry = {
+    tear: (str: string) =>
+      (start: number) =>
+        (end: number) =>
+          tear(str, start, end),
+
+    poke: pokeCurry,
+    join: joinCurry,
+    take: takeCurry,
+    drop: dropCurry,
+
+    insert: <T>(shelf: Shelf<T>) =>
+      (value: T) =>
+        (index: number) =>
+          insert(shelf, value, index),
+
+    remove: <T>(shelf: Shelf<T>) =>
+      (index: number) =>
+        remove(shelf, index),
+
+    map: <T1, T2>(callback: (x: T1) => T2) =>
+      (shelf: Shelf<T1>) =>
+        map(callback, shelf),
+
+    filter: <T1>(predicate: (x: T1) => boolean) =>
+      (shelf: Shelf<T1>) =>
+        filter(predicate, shelf),
+
+    fold: <T1, T2>(callback: (acc: T2, x: T1) => T2) =>
+      (initial: T2) =>
+        (shelf: Shelf<T1>) =>
+          fold(callback, initial, shelf),
+
+    any: <T>(predicate: (x: T) => boolean) =>
+      (shelf: Shelf<T>) =>
+        any(predicate, shelf),
+
+    all: <T>(predicate: (x: T) => boolean) =>
+      (shelf: Shelf<T>) =>
+        all(predicate, shelf),
+
+    zip: <T1, T2>(a: Shelf<T1>) =>
+      (b: Shelf<T2>) =>
+        zip(a, b),
+
+    repeat: (number: number) =>
+      (callback: (i?: number) => void) =>
+        repeat(number, callback),
+
+    foreach: <T>(callback: (x: T) => void) =>
+      (shelf: Shelf<T>) =>
+        foreach(callback, shelf),
+
+    tuple: (a: MewlixValue) =>
+      (b: MewlixValue) =>
+        tuple(a, b),
+
+    min: (a: number) =>
+      (b: number) =>
+        min(a, b),
+
+    max: (a: number) =>
+      (b: number) =>
+        max(a, b),
+
+    clamp: (value: number) =>
+      (min: number) =>
+        (max: number) =>
+          clamp(value, min, max),
+
+    logn: (value: number) =>
+      (base: number) =>
+        logn(value, base),
+
+    atan: (y: number) =>
+      (x: number) =>
+        atan2(y, x),
+
+    truncate: (value: number) =>
+      (places: number) =>
+        truncate(value, places),
+
+    random_int: (min: number) =>
+      (max: number) =>
+        random_int(min, max),
+
+    count: (start: number) =>
+      (end: number) =>
+        count(start, end),
+
+    save: (key: string) =>
+      (contents: string) =>
+        save(key, contents),
+  };
+  const stdCurry = mixYarnBall('std.curry', base, baseCurry);
 }
