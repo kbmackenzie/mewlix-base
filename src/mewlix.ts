@@ -853,7 +853,7 @@ const collections = {
         return collection.includes(value);
       }
       if (isBox(collection) || isClowderInstance(collection)) {
-        return collection.get(value) !== undefined;
+        return value in collection.bindings;
       }
     }
     const typeOfA = reflection.typeOf(value);
