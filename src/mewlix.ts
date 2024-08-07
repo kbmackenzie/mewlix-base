@@ -850,7 +850,8 @@ export const strings = {
   },
 };
 
-export const shelves = {
+export const shelf = {
+  create: shelfFromArray,
   peek<T>(shelf: Shelf<T>): T | null {
     ensure.shelf('paw at', shelf);
     return shelfPeek(shelf);
@@ -900,7 +901,8 @@ export const collections = {
   },
 };
 
-export const boxes = {
+export const box = {
+  create: createBox,
   pairs<T>(value: Box<T>): Shelf<Box<string | T>> {
     ensure.box('claw at', value);
     return shelfFromArray(getEntries(value.bindings).map(
@@ -1838,7 +1840,7 @@ const createMewlix = function() {
         save(key, contents),
   };
   const stdCurry = mixYarnBall('std.curry', base, baseCurry);
-  lib.stdCurry = stdCurry;
+  lib['std.curry'] = stdCurry;
 
   /* - * - * - * - * - * - * - * - *
    * Final Touches
@@ -1864,9 +1866,9 @@ const createMewlix = function() {
     boolean,
     compare,
     strings,
-    shelves,
+    shelf,
     reflection,
-    boxes,
+    box,
     convert,
     internal,
     meow: (x: string) => meowFunc(x),
