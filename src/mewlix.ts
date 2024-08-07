@@ -51,6 +51,10 @@ export type ClowderBindings<T> = Record<string, T> & {
   [wake]: (...args: any[]) => void;
 };
 
+export type ClowderInstanceOf<T1 extends Clowder<T2>, T2> = Clowder<T2> & {
+  readonly clowder: T1;
+};
+
 export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
   key: string;
