@@ -3,20 +3,25 @@
 import {
   Mewlix,
   Shelf,
-  Clowder,
-  YarnBall,
   ErrorCode,
   MewlixError,
   MewlixValue,
   Box,
-  GenericBox,
-  BoxLike,
   reflection,
-  opaque,
   wake,
   ensure,
   clamp_,
   purrify,
+  createClowder,
+  instantiate,
+  isBox,
+  isClowderInstance,
+  shelfIterator,
+  ClowderBindings,
+  ClowderInstance,
+  createBox,
+  createYarnBall,
+  mixYarnBall,
 } from './mewlix.js';
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -70,13 +75,13 @@ export function hexToRGB(str: string): RGB | null {
   return null; /* Theoretically unreachable. */
 }
 
-export function hexToColor(str: string): Color {
+export function hexToColor(str: string) {
   const rgb = hexToRGB(str);
   if (rgb === null) {
     throw new MewlixError(ErrorCode.Graphic,
       `Couldn't parse string '${str}' as a valid hex code!`);
   }
-  return new Color()[wake](
+  return instantiate(Color)(
     parseInt(rgb.red  , 16),
     parseInt(rgb.green, 16),
     parseInt(rgb.blue , 16),
@@ -97,286 +102,232 @@ export const toColor: unique symbol = Symbol('toColor');
 
 export function withColor(value: string | Color): string {
   if (typeof value === 'string') return value;    
-  if (typeof value === 'object' && toColor in value) {
-    return value[toColor]();
+  if (isClowderInstance(value) || isBox(value)) {
+    return colorToStyle(value);
   }
-
   const typeOfValue = reflection.typeOf(value);
   throw new MewlixError(ErrorCode.Graphic,
     `Expected color value, received value of type "${typeOfValue}": ${value}`);
 }
 
-/* An interface for clowders that can self-validate.
- * (As in: Perform runtime type-checking on their own properties!)  */
-interface SelfValidate {
-  validate(): void;
-}
+/* - * - * - * - * - * - * - * - *
+ * Vector2:
+ * - * - * - * - * - * - * - * - * */
+export type Vector2 = ClowderInstance<Vector2Bindings>;
 
-function validateAll(...args: SelfValidate[]): void {
-  args.forEach(x => x.validate());
-}
-
-/* ----------------------
- * Clowders:
- * ---------------------- */
-/* Note: Clowders are a little hard to add typings for, as they're very unique.
- *
- * Clodwer types are declared in an unique way.
- * - The type of _box should be: <specific-type> & GenericBox
- *
- * The struggles of writing the base library for dynamic language in statically typed one.*/
-
-interface Vector2Like {
+type Vector2Bindings = {
+  [wake](this: Vector2, x: number, y: number): void;
   x: number;
   y: number;
+  add(this: Vector2, that: Vector2): Vector2;
+  mul(this: Vector2, that: Vector2): Vector2;
+  distance(this: Vector2, that: Vector2): number;
+  dot(this: Vector2, that: Vector2): number;
+  clamp(this: Vector2, min: Vector2, max: Vector2): Vector2;
 };
 
-export class Vector2 extends Clowder<MewlixValue> implements SelfValidate {
-  [wake]: (x: number, y: number) => Vector2;
-  _box: Vector2Like & GenericBox;
-
-  box() {
-    return this._box;
-  }
-
-  validate() {
-    ensure.number('Vector2.x', this.box().x);
-    ensure.number('Vector2.y', this.box().y);
-  }
-
-  constructor() {
-    super();
-    this._box = { x: 0, y: 0 };
-
-    this[wake] = (x: number, y: number) => {
-      this.box().x = x;
-      this.box().y = y;
-      this.validate();
-      return this;
-    };
-
-    this.box().add = (that: Vector2) => {
-      validateAll(this, that);
-      const { x: ax, y: ay } = this.box();
-      const { x: bx, y: by } = that.box();
-      return new Vector2()[wake](ax + bx, ay + by);
-    };
-
-    this.box().mul = (that: Vector2) => {
-      validateAll(this, that);
-      const { x: ax, y: ay } = this.box();
-      const { x: bx, y: by } = that.box();
-      return new Vector2()[wake](ax * bx, ay * by);
-    };
-
-    this.box().distance = (that: Vector2) => {
-      validateAll(this, that);
-      const { x: ax, y: ay } = this.box();
-      const { x: bx, y: by } = that.box();
+export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
+  return {
+    x: 0,
+    y: 0,
+    [wake](this: Vector2, x: number, y: number) {
+      this.bindings.x = x;
+      this.bindings.y = y;
+    },
+    add(this: Vector2, that: Vector2): Vector2 {
+      return instantiate(Vector2)(
+        this.bindings.x + that.bindings.x,
+        this.bindings.y + that.bindings.y,
+      );
+    },
+    mul(this: Vector2, that: Vector2): Vector2 {
+      return instantiate(Vector2)(
+        this.bindings.x * that.bindings.x,
+        this.bindings.y * that.bindings.y,
+      );
+    },
+    distance(this: Vector2, that: Vector2): number {
+      const ax = this.bindings.x;
+      const ay = this.bindings.y;
+      const bx = that.bindings.x;
+      const by = that.bindings.y;
       return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
-    };
-
-    this.box().dot = (that: Vector2) => {
-      validateAll(this, that);
-      const { x: ax, y: ay } = this.box();
-      const { x: bx, y: by } = that.box();
+    },
+    dot(this: Vector2, that: Vector2): number {
+      const ax = this.bindings.x;
+      const ay = this.bindings.y;
+      const bx = that.bindings.x;
+      const by = that.bindings.y;
       return ax * bx + ay * by;
-    };
+    },
+    clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
+      return instantiate(Vector2)(
+        clamp_(this.bindings.x, min.bindings.x, max.bindings.x),
+        clamp_(this.bindings.y, min.bindings.y, max.bindings.y),
+      );
+    },
+   }
+});
 
-    this.box().clamp = (min: Vector2, max: Vector2) => {
-      validateAll(this, min, max);
-      const { x, y } = this.box();
-      const { x: minX, y: minY } = min.box();
-      const { x: maxX, y: maxY } = max.box();
-      [x, y, minX, minY, maxX, maxY].forEach(value => {
-        ensure.number('Vector2.clamp', value);
-      });
-    };
-  }
+function ensureVector2(value: Vector2): void {
+  ensure.number('Vector2.x', value.bindings.x);
+  ensure.number('Vector2.y', value.bindings.x);
 }
 
-interface RectangleLike {
+/* - * - * - * - * - * - * - * - *
+ * Rectangle:
+ * - * - * - * - * - * - * - * - * */
+type Rectangle = ClowderInstance<RectangleBindings>;
+
+type RectangleBindings = {
+  [wake](this: Rectangle, x: number, y: number, width: number, height: number): void;
   x: number;
   y: number;
   width: number;
   height: number;
+  contains(this: Rectangle, point: Vector2): boolean;
+  collides(this: Rectangle, that: Rectangle): boolean;
 };
 
-export class Rectangle extends Clowder<MewlixValue> implements SelfValidate {
-  [wake]: (x: number, y: number, width: number, height: number) => Rectangle;
-  _box: RectangleLike & GenericBox;
-
-  box() {
-    return this._box;
-  }
-
-  validate() {
-    ensure.number('Rectangle.x'     , this.box().x    );
-    ensure.number('Rectangle.y'     , this.box().y    );
-    ensure.number('Rectangle.width' , this.box().width);
-    ensure.number('Rectangle.height', this.box().width);
-  }
-
-  constructor() {
-    super();
-    this._box = {
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0
-    };
-
-    this[wake] = (x: number, y: number, width: number, height: number) => {
-      this.box().x = x;
-      this.box().y = y;
-      this.box().width = width;
-      this.box().height = height;
-      this.validate();
-      return this;
-    };
-
-    this.box().contains = (point: Vector2) => {
-      validateAll(this, point);
-      const { x: rx, y: ry, width: rw, height: rh } = this.box();
-      const { x: px, y: py } = point.box();
-      return (px >= rx) && (py >= ry) && (px < rx + rw) && (py < ry + rh);
-    };
-
-    this.box().collides = (that: Rectangle) => {
-      validateAll(this, that);
-      const { x: ax, y: ay, width: aw, height: ah } = this.box();
-      const { x: bx, y: by, width: bw, height: bh } = that.box();
+const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
+  return {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    [wake](this: Rectangle, x: number, y: number, width: number, height: number) {
+      this.bindings.x = x;
+      this.bindings.y = y;
+      this.bindings.width = width;
+      this.bindings.height = height;
+    },
+    contains(this: Rectangle, point: Vector2): boolean {
+      const { x: px, y: py } = point.bindings;
+      const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
+      return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
+    },
+    collides(this: Rectangle, that: Rectangle): boolean {
+      const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
+      const { x: bx, y: by, width: bw, height: bh } = that.bindings;
       return (bx < ax + aw)
         && (bx + bw > ax)
         && (by < ay + ah)
         && (by + bh > ay);
-    };
-  }
+    },
+  };
+});
+
+function ensureRectangle(rect: Rectangle): void {
+  ensure.number('Rectangle.x'     , rect.bindings.x);
+  ensure.number('Rectangle.y'     , rect.bindings.y);
+  ensure.number('Rectangle.width' , rect.bindings.width );
+  ensure.number('Rectangle.height', rect.bindings.height);
 }
 
-interface GridSlotLike {
-  row: number;
+/* - * - * - * - * - * - * - * - *
+ * Grid Slot:
+ * - * - * - * - * - * - * - * - * */
+type GridSlot = ClowderInstance<GridSlotLike>;
+
+type GridSlotLike = {
+  [wake](this: GridSlot, x: number, y: number): void;
+  row:    number;
   column: number;
+  position(this: GridSlot): number;
 };
 
-export class GridSlot extends Clowder<MewlixValue> implements SelfValidate {
-  [wake]: (row: number, column: number) => GridSlot;
-  _box: GridSlotLike & GenericBox;
+const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
+  return {
+    row: 0,
+    column: 0,
+    [wake](this: GridSlot, row: number, column: number): void {
+      this.bindings.row    = row;
+      this.bindings.column = column;
+    },
+    position(this: GridSlot) {
+      return 0; /* todo! */
+    },
+  };
+});
 
-  box() {
-    return this._box;
-  }
-
-  validate() {
-    ensure.number('GridSlot.row'   , this.box().row   );
-    ensure.number('GridSlot.column', this.box().column);
-  }
-
-  constructor() {
-    super();
-    this._box = { row: 0, column: 0 };
-
-    this[wake] = (row: number, column: number) => {
-      this.box().row    = clamp_(row,    0, gridRows - 1);
-      this.box().column = clamp_(column, 0, gridColumns - 1);
-      this.validate();
-      return this;
-    };
-
-    this.box().position = () => {
-      this.validate();
-      gridSlotToPosition(this);
-    };
-  }
+function ensureGridSlot(slot: GridSlot): void {
+  ensure.number('GridSlot.row'   , slot.bindings.row   );
+  ensure.number('GridSlot.column', slot.bindings.column);
 }
 
-export function positionToGridSlot(point: Vector2): GridSlot {
-  const { x: px, y: py } = point.box();
-
-  const row = Math.min(py / gridSlotHeight);
-  const col = Math.min(px / gridSlotWidth);
-  return new GridSlot()[wake](row, col);
+export function positionToGridSlot(point: Vector2) {
+  ensureVector2(point);
+  const row = point.bindings.x / gridSlotHeight;
+  const col = point.bindings.y / gridSlotWidth;
+  return instantiate(GridSlot)(row, col);
 }
 
-export function gridSlotToPosition(slot: GridSlot): Vector2 {
-  const { row, column } = slot.box();
-
-  return new Vector2()[wake](
-    column * gridSlotWidth,
-    row * gridSlotHeight,
+export function gridSlotToPosition(slot: GridSlot) {
+  ensureGridSlot(slot);
+  return instantiate(Vector2)(
+    slot.bindings.column * gridSlotWidth,
+    slot.bindings.row * gridSlotHeight,
   );
 }
 
+/* - * - * - * - * - * - * - * - *
+ * Color:
+ * - * - * - * - * - * - * - * - * */
 /* Color container, wrapping a RGBA color value.
  * It accepts an opacity value too, in percentage. */
-interface ColorLike {
-  red: number;
-  green: number;
-  blue: number;
+type Color = ClowderInstance<ColorLike>;
+
+type ColorLike = {
+  [wake]: (this: Color, red: number, green: number, blue: number, opacity: number) => void;
+  red:     number;
+  green:   number;
+  blue:    number;
   opacity: number;
-  alpha(): number;
+  alpha(this: Color): number;
 };
 
-export class Color extends Clowder<MewlixValue> implements SelfValidate {
-  [wake]: (red: number, green: number, blue: number, opacity?: number) => Color;
-  _box: ColorLike & GenericBox;
-
-  box() {
-    return this._box;
+const Color = createClowder<ColorLike>('Color', null, () => {
+  return {
+    red:     0,
+    green:   0,
+    blue:    0,
+    opacity: 0,
+    [wake](this: Color, red: number, green: number, blue: number, opacity: number = 100): void {
+      this.bindings.red = red;
+      this.bindings.green = green;
+      this.bindings.blue = blue;
+      this.bindings.opacity = opacity;
+    },
+    alpha(this: Color): number {
+      return percentageToByte(this.bindings.opacity);
+    },
+    to_hex(this: Color): string {
+      const { red, green, blue } = this.bindings;
+      return `#${red}${green}${blue}`;
+    }
   }
+});
 
-  validate() {
-    ensure.number('Color.red'    , this.box().red    );
-    ensure.number('Color.green'  , this.box().green  );
-    ensure.number('Color.blue'   , this.box().blue   );
-    ensure.number('Color.opacity', this.box().opacity);
-  }
+function ensureColor(color: Color) {
+  ensure.number('Color.red'    , color.bindings.red    );
+  ensure.number('Color.green'  , color.bindings.green  );
+  ensure.number('Color.blue'   , color.bindings.blue   );
+  ensure.number('Color.opacity', color.bindings.opacity);
+}
 
-  constructor() {
-    super();
-    this._box = {
-      red: 0,
-      green: 0,
-      blue: 0,
-      opacity: 0,
-      alpha() { return 0; },
-    };
-
-    this[wake] = (red: number, green: number, blue: number, opacity: number = 100) => {
-      this.box().red     = clamp_(red, 0, 255);
-      this.box().green   = clamp_(green, 0, 255);
-      this.box().blue    = clamp_(blue, 0, 255);
-      this.box().opacity = clamp_(opacity, 0, 100);
-      this.validate();
-      return this;
-    };
-
-    this.box().alpha = () => {
-      ensure.number('Color.alpha', this.box().opacity);
-      return percentageToByte(this.box().opacity);
-    };
-
-    this.box().to_hex = () => {
-      this.validate()
-      const { red, green, blue } = this.box();
-      const r = red.toString(16);
-      const g = green.toString(16);
-      const b = blue.toString(16);
-        return `#${r}${g}${b}`;
-    };
-  }
-
-  [toColor](): string {
-    this.validate()
-    const { red, green, blue, opacity } = this.box();
-    return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
-  }
+function colorToStyle(color: Color) {
+  ensureColor(color);
+  const red     = color.bindings.red;
+  const green   = color.bindings.green;
+  const blue    = color.bindings.blue;
+  const opacity = color.bindings.opacity;
+  return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
 }
 
 export default function(mewlix: Mewlix): void {
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Initializing Canvas:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const canvas  = document.getElementById('game-canvas') as HTMLCanvasElement;
   const context = canvas.getContext('2d')!;
   context.imageSmoothingEnabled = false;
@@ -388,16 +339,20 @@ export default function(mewlix: Mewlix): void {
   const spriteMap = new Map<string, ImageBitmap>();
   const audioMap  = new Map<string, AudioBuffer>();
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Loading Images:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   /* Load an image file as ImageBitmap. */
   const loadImage = (path: string, rect?: Rectangle) => fetch(path)
     .then(response => response.blob())
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
-      const { x, y, width, height } = rect.box();
-      return createImageBitmap(blob, x, y, width, height);
+      return createImageBitmap(blob,
+        rect.bindings.x,
+        rect.bindings.y,
+        rect.bindings.width,
+        rect.bindings.height,
+      );
     });
 
   /* Load an image file as a sprite + add it to spriteMap. */
@@ -413,19 +368,20 @@ export default function(mewlix: Mewlix): void {
   };
 
   /* Load a spritesheet image and divide it into sprites. */
-  async function fromSpritesheet(path: string, frames: Shelf<BoxLike<SpriteDetails>>) {
+  async function fromSpritesheet(path: string, frames: Shelf<Box<SpriteDetails>>) {
     const sheet = await loadImage(path);
-    for (const frame of frames) {
-      const { key, rect } = frame.box();
-      const { x, y, width, height } = rect.box();
+    const iterator = shelfIterator(frames)
+    for (const frame of iterator) {
+      const { key, rect } = frame.bindings;
+      const { x, y, width, height } = rect.bindings;
       const sprite = await createImageBitmap(sheet, x, y, width, height);
       spriteMap.set(key, sprite);
     }
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Drawing:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   function getSprite(key: string): ImageBitmap {
     if (!spriteMap.has(key)) {
       throw new MewlixError(ErrorCode.Graphic,
@@ -447,7 +403,7 @@ export default function(mewlix: Mewlix): void {
 
   function drawRect(rect: Rectangle, color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
-    const { x, y, width, height } = rect.box();
+    const { x, y, width, height } = rect.bindings;
     context.fillRect(
       x      * sizeModifier,
       y      * sizeModifier,
@@ -461,18 +417,18 @@ export default function(mewlix: Mewlix): void {
     context.fillRect(0, 0, canvasWidth, canvasHeight);
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Loading Fonts:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const loadFont = (name: string, url: string): Promise<void> => new FontFace(name, `url(${url})`)
     .load()
     .then(font => {
       document.fonts.add(font);
     });
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Drawing Fonts:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const defaultFont = 'Munro';
   const defaultFontSize = 8;
 
@@ -501,22 +457,22 @@ export default function(mewlix: Mewlix): void {
     );
   }
 
-  function measureText(message: string, options: TextOptions | null = null): Box<number> {
+  function measureText(message: string, options: TextOptions | null = null) {
     setupText(options);
     const metrics = context.measureText(message);
 
     const width  = metrics.width / sizeModifier;
     const height = (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / sizeModifier;
 
-    return new Box<number>([
-      ["width"  , Math.round(width)  ],
-      ["height" , Math.round(height) ],
-    ]);
+    return createBox({
+      width:  Math.round(width),
+      height: Math.round(height),
+    });
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Initializing Audio:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const audioContext = new AudioContext();
   const masterVolume = audioContext.createGain();
   const compressor   = audioContext.createDynamicsCompressor();
@@ -530,9 +486,9 @@ export default function(mewlix: Mewlix): void {
   sfxVolume.connect(masterVolume);
   masterVolume.gain.setValueAtTime(0.5, audioContext.currentTime);
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Loading Audio:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const loadAudio = (key: string, path: string): Promise<AudioBuffer> => fetch(path)
     .then(response => response.arrayBuffer())
     .then(buffer => audioContext.decodeAudioData(buffer))
@@ -549,9 +505,9 @@ export default function(mewlix: Mewlix): void {
     return audioMap.get(key)!;
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Playing Music:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   type MusicChannel = {
     track: AudioBufferSourceNode | null;
   };
@@ -578,9 +534,9 @@ export default function(mewlix: Mewlix): void {
     musicChannel.track = null;
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Playing Music:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   type SoundChannel = AudioBufferSourceNode | null;
 
   const soundChannelCount = 8;
@@ -620,9 +576,9 @@ export default function(mewlix: Mewlix): void {
     soundChannels.fill(null);
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Volume Control:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   let mute: boolean = false;
 
   function setVolumeOf(node: GainNode, volume: number) {
@@ -662,9 +618,9 @@ export default function(mewlix: Mewlix): void {
     },
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Sound Button:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const soundButton = document.getElementById('game-sound') as HTMLButtonElement;
 
   soundButton.addEventListener('click', () => {
@@ -680,9 +636,9 @@ export default function(mewlix: Mewlix): void {
     gameVolume.update();
   });
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Generic Loading:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   let imageExtensions = new Set([
     'png',
     'jpg',
@@ -733,9 +689,9 @@ export default function(mewlix: Mewlix): void {
       `Unrecognized file format "${extension}" in 'load' function!`);
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Resource Queue:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
 
   /* A queue to store data about resources to be loaded.
    * Items queued will be loaded when graphic.init() is called!
@@ -751,7 +707,7 @@ export default function(mewlix: Mewlix): void {
   type Resource =
     | { type: 'generic'; key: string; path: string; options?: Rectangle }
     | { type: 'canvas'; key: string; data: ImageData; }
-    | { type: 'spritesheet'; path: string; frames: Shelf<BoxLike<SpriteDetails>>; }
+    | { type: 'spritesheet'; path: string; frames: Shelf<Box<SpriteDetails>>; }
 
   const resourceQueue: Resource[] = [];
 
@@ -778,9 +734,9 @@ export default function(mewlix: Mewlix): void {
     resourceQueue.length = 0;
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Keyboard Events
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const keysDown = new Set<string>();
   const keyQueue = new Set<string>();
 
@@ -802,9 +758,9 @@ export default function(mewlix: Mewlix): void {
     keyQueue.clear();
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Mouse Events:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   let mouseX: number = 0;
   let mouseY: number = 0;
 
@@ -840,111 +796,94 @@ export default function(mewlix: Mewlix): void {
     mouseClick = false;
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Utility Clowders:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   /* A pixel canvas for efficiently creating sprites.
    * The .to_image() creates a new sprite and adds it to spriteMap. */
-  class PixelCanvas extends Clowder<MewlixValue> {
-    [wake]: (width: number, height: number) => PixelCanvas;
-    width: number;
+  type PixelCanvas = ClowderInstance<PixelCanvasLike>;
+
+  type PixelCanvasLike = {
+    [wake](this: PixelCanvas, width: number, height: number): void;
+    width:  number;
     height: number;
-    data: Uint8ClampedArray | null;
+    fill(this: PixelCanvas, color: Color): void;
+    set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void;
+    get_pixel(this: PixelCanvas, x: number, y: number): Color;
+    to_sprite(this: PixelCanvas, key: string): void;
+  };
 
-    constructor() {
-      super();
-      this.width = 0;
-      this.height = 0;
-      this.data = null;
+  const PixelCanvas = createClowder('PixelCanvas', null, () => {
+    let data: Uint8ClampedArray | null;
+    return {
+      [wake](this: PixelCanvas, width: number, height: number) {
+        this.bindings.width  = width;
+        this.bindings.height = height;
+        data = new Uint8ClampedArray(width * height * 4);
+      },
+      width:  0,
+      height: 0,
+      fill(this: PixelCanvas, color: Color): void {
+        if (!data) throw pixelCanvasError();
+        const { red, green, blue } = color.bindings;
+        const alpha = color.bindings.alpha.call(color);
 
-      this[wake] = (width: number, height: number) => {
-        ensure.number('PixelCanvas.wake', width);
-        ensure.number('PixelCanvas.wake', height);
-
-        this.width  = width;
-        this.height = height;
-        this.data   = new Uint8ClampedArray(width * height * 4);
-        opaque(this.data!);
-        return this;
-      };
-
-      this.box().fill = (color: Color) => {
-        if (!this.data) {
-          throw new MewlixError(ErrorCode.InvalidOperation,
-            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
-        };
-        color.validate();
-
-        const { red, green, blue } = color.box();
-        const alpha = color.box().alpha();
-
-        for (let i = 0; i < this.data.length; i += 4) {
-          this.data[i]     = red;
-          this.data[i + 1] = green;
-          this.data[i + 2] = blue;
-          this.data[i + 3] = alpha;
+        for (let i = 0; i < data.length; i += 4) {
+          data[i]     = red;
+          data[i + 1] = green;
+          data[i + 2] = blue;
+          data[i + 3] = alpha;
         }
-      };
+      },
+      set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
+        if (!data) throw pixelCanvasError();
+        ensure.number('PixelCanvas.x', x);
+        ensure.number('PixelCanvas.y', y);
 
-      this.box().set_pixel = (x: number, y: number, color: Color) => {
-        if (!this.data) {
-          throw new MewlixError(ErrorCode.InvalidOperation,
-            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
-        };
+        const { red, green, blue } = color.bindings;
+        const alpha = color.bindings.alpha.call(color);
 
-        ensure.number('PixelCanvas.set_pixel', x);
-        ensure.number('PixelCanvas.set_pixel', y);
-        color.validate();
+        const i = (x * this.bindings.width + y) * 4;
+        data[i]     = red;
+        data[i + 1] = green;
+        data[i + 2] = blue;
+        data[i + 3] = alpha;
+      },
+      get_pixel(this: PixelCanvas, x: number, y: number): Color {
+        if (!data) throw pixelCanvasError();
+        ensure.number('PixelCanvas.x', x);
+        ensure.number('PixelCanvas.y', y);
 
-        const { red, green, blue } = color.box();
-        const alpha = color.box().alpha();
-
-        const index = (x * this.width + y) * 4;
-        this.data[index]     = red;
-        this.data[index + 1] = green;
-        this.data[index + 2] = blue;
-        this.data[index + 3] = alpha;
-      };
-
-      this.box().get_pixel = (x: number, y: number) => {
-        ensure.number('PixelCanvas.get_pixel', x);
-        ensure.number('PixelCanvas.get_pixel', y);
-
-        if (!this.data) {
-          throw new MewlixError(ErrorCode.InvalidOperation,
-            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
-        };
-
-        const index = (x * this.width + y) * 4;
-        return new Color()[wake](
-          this.data[index],
-          this.data[index + 1],
-          this.data[index + 2],
-          byteToPercentage(this.data[index + 3])
+        const i = (x * this.bindings.width + y) * 4;
+        return instantiate(Color)(
+          data[i],
+          data[i + 1],
+          data[i + 2],
+          data[i + 3],
         );
-      };
-
-      this.box().to_sprite = (key: string) => {
+      },
+      to_sprite(this: PixelCanvas, key: string): void {
+        if (!data) throw pixelCanvasError();
         ensure.string('PixelCanvas.to_sprite', key);
 
-        if (!this.data) {
-          throw new MewlixError(ErrorCode.InvalidOperation,
-            'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
-        };
-
-        const copy = new Uint8ClampedArray(this.data);
+        const copy = new Uint8ClampedArray(data);
         resourceQueue.push({
           type: 'canvas',
           key: key,
-          data: new ImageData(copy, this.width, this.height),
+          data: new ImageData(copy, this.bindings.width, this.bindings.height),
         });
-      };
-    }
+      },
+    };
+  });
+
+  function pixelCanvasError(): MewlixError {
+    return new MewlixError(ErrorCode.InvalidOperation,
+      'PixelCanvas\'s "data" field hasn\'t been properly initialized!');
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Game Loop
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   type GameLoop = (delta?: number) => void;
 
   let deltaTime: number = 0;        // Delta time, in seconds!
@@ -1035,9 +974,9 @@ export default function(mewlix: Mewlix): void {
     console.warn(`[mewlix] Resosurce "${resource}" will not be loaded.`);
   }
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Meow Expression
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   type MeowOptions = TextOptions & {
     x?: number;
     y?: number;
@@ -1055,9 +994,9 @@ export default function(mewlix: Mewlix): void {
     return message;
   });
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Standard library:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   /* The std.graphic library documentation can be found on the wiki:
    * > https://github.com/kbmackenzie/mewlix/wiki/Graphic#the-stdgraphic-yarn-ball <
    *
@@ -1080,7 +1019,7 @@ export default function(mewlix: Mewlix): void {
 
     delta: () => deltaTime,
 
-    load(key: string, path: string, options?: BoxLike<Rectangle>): void {
+    load(key: string, path: string, options?: Box<Rectangle>): void {
       if (initialized) {
         resourceError('graphic.load', path);
         return;
@@ -1091,7 +1030,7 @@ export default function(mewlix: Mewlix): void {
         type: 'generic',
         key: key,
         path: path, 
-        options: options?.box(),
+        options: options?.bindings,
       });
     },
 
@@ -1100,7 +1039,7 @@ export default function(mewlix: Mewlix): void {
       setThumbnail(fn)
     },
 
-    spritesheet(path: string, frames: Shelf<BoxLike<SpriteDetails>>): void {
+    spritesheet(path: string, frames: Shelf<Box<SpriteDetails>>): void {
       if (initialized) {
         resourceError('graphic.spritesheet', path);
         return;
@@ -1123,10 +1062,10 @@ export default function(mewlix: Mewlix): void {
 
     measure(key: string) {
       const image = getSprite(key);
-      return new Box<number>([
-        ["width"  , image.width ],
-        ["height" , image.height]
-      ]);
+      return createBox({
+        width:  image.width,
+        height: image.height,
+      });
     },
 
     rect(rect: Rectangle, color: string | Color): void {
@@ -1136,19 +1075,19 @@ export default function(mewlix: Mewlix): void {
 
     paint: fillCanvas,
 
-    write(value: MewlixValue, x: number = 0, y: number = 0, options?: BoxLike<TextOptions>) {
+    write(value: MewlixValue, x: number = 0, y: number = 0, options?: Box<TextOptions>) {
       ensure.number('graphic.write', x);
       ensure.number('graphic.write', y);
-      return drawText(purrify(value), x, y, options?.box());
+      return drawText(purrify(value), x, y, options?.bindings);
     },
 
-    measure_text(value: MewlixValue, options?: BoxLike<TextOptions>) {
-      return measureText(purrify(value), options?.box());
+    measure_text(value: MewlixValue, options?: Box<TextOptions>) {
+      return measureText(purrify(value), options?.bindings);
     },
 
-    meow_options(box: BoxLike<MeowOptions>): void {
+    meow_options(box: Box<MeowOptions>): void {
       ensure.box('graphic.meow_options', box);
-      meowOptions = box.box();
+      meowOptions = box.bindings;
     },
 
     key_pressed(key: string) {
@@ -1161,20 +1100,23 @@ export default function(mewlix: Mewlix): void {
       return isKeyDown(key);
     },
 
-    keys: new Box<string>([
-      ["space"  , " "         ],
-      ["enter"  , "Enter"     ],
-      ["left"   , "ArrowLeft" ],
-      ["right"  , "ArrowRight"],
-      ["up"     , "ArrowUp"   ],
-      ["down"   , "ArrowDown" ],
-    ]),
+    keys: createBox({
+      space: ' ',
+      enter: 'Enter',
+      left : 'ArrowLeft',
+      right: 'ArrowRight',
+      up   : 'ArrowUp',
+      down : 'ArrowDown',
+    }),
 
     mouse_click: isMousePressed,
 
     mouse_down: isMouseDown,
 
-    mouse_position: () => new Vector2()[wake](mouseX, mouseY),
+    mouse_position: () => instantiate(Vector2)(
+      mouseX,
+      mouseY,
+    ),
 
     play_music(key: string) {
       ensure.string('graphic.play_music', key);
@@ -1238,23 +1180,22 @@ export default function(mewlix: Mewlix): void {
       document.body.style.backgroundColor = withColor(color);
     },
   };
-  const GraphicYarnBall = new YarnBall('std.graphic', Graphic);
-  mewlix.Graphic = GraphicYarnBall;
+  mewlix.lib['std.graphic'] = createYarnBall('std.graphic', Graphic);
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Standard library - Curry:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const GraphicCurry = (() => {
     const graphic = Graphic;
 
     return {
       load: (key: string) =>
         (path: string) =>
-          (options?: BoxLike<Rectangle>) =>
+          (options?: Box<Rectangle>) =>
             graphic.load(key, path, options),
 
       spritesheet: (path: string) =>
-        (frames: Shelf<BoxLike<SpriteDetails>>) =>
+        (frames: Shelf<Box<SpriteDetails>>) =>
           graphic.spritesheet(path, frames),
 
       draw: (key: string) =>
@@ -1269,11 +1210,11 @@ export default function(mewlix: Mewlix): void {
       write: (value: MewlixValue) =>
         (x: number) =>
           (y: number) =>
-            (options: BoxLike<TextOptions>) =>
+            (options: Box<TextOptions>) =>
               graphic.write(value, x, y, options),
 
       measure_text: (value: MewlixValue) =>
-        (options: BoxLike<TextOptions>) =>
+        (options: Box<TextOptions>) =>
           graphic.measure_text(value, options),
     
       play_sfx: (key: string) =>
@@ -1286,13 +1227,11 @@ export default function(mewlix: Mewlix): void {
             graphic.lerp(start, end, x),
     };
   })();
+  mewlix.lib['std.graphic.curry'] = mixYarnBall('std.graphic.curry', Graphic, GraphicCurry);
 
-  const GraphicCurryYarnBall = YarnBall.mix('std.graphic.curry', GraphicYarnBall, GraphicCurry);
-  mewlix.GraphicCurry = GraphicCurryYarnBall;
-
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Run Console:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   mewlix.run = async (func) => {
     try {
       return func();
@@ -1303,9 +1242,9 @@ export default function(mewlix: Mewlix): void {
     }
   };
 
-  /* -----------------------------------
+  /* - * - * - * - * - * - * - * - *
    * Prevent arrow-key scrolling:
-   * ----------------------------------- */
+   * - * - * - * - * - * - * - * - * */
   const preventKeys = new Set<string>([
     'Space',
     'ArrowLeft',
