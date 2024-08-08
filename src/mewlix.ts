@@ -37,21 +37,18 @@ export type Clowder<T extends ClowderBindings> = Readonly<{
 
 export type ClowderInstance<T extends ClowderBindings> = Readonly<{
   [tag]: 'clowder instance',
-  clowder: Clowder<T>;
+  name: string;
+  kind: symbol;
   bindings: T;
   parent: ClowderInstance<T> | null;
   get(key: string): TryGet<ValueOf<T>>;
   set(key: string, value: ValueOf<T>): void;
-  outside(key: string): TryGet<T>;
+  outside(key: string): TryGet<ValueOf<T>>;
 }>;
 
 export type ClowderBindings = {
   [wake]: (...args: any[]) => void;
   [key: string]: any;
-};
-
-export type ClowderInstanceOf<T1 extends Clowder<T2>, T2 extends ClowderBindings> = ClowderInstance<T2> & {
-  readonly clowder: T1;
 };
 
 export type YarnBall<T extends StringKeyed> = Readonly<{
@@ -324,7 +321,8 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
   const bindings = clowder.initialize();
   const instance: ClowderInstance<T> = {
     [tag]: 'clowder instance',
-    clowder: clowder,
+    name: clowder.name,
+    kind: clowder.kind,
     parent: parent,
     bindings: bindings,
     get(key: string): TryGet<ValueOf<T>> {
@@ -336,8 +334,7 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
       bindings[key] = value;
     },
     outside(key: string): TryGet<ValueOf<T>> {
-      if (parent) return parent.get(key);
-      return undefined;
+      return parent?.get(key);
     },
   };
   bindings[wake].bind(instance);
@@ -360,12 +357,12 @@ export function instantiate<T extends ClowderBindings>(
   };
 }
 
-export function instanceOf<T1 extends ClowderBindings, T2 extends ClowderBindings>(
-  instance: ClowderInstance<T1>,
-  clowder: Clowder<T2>
+export function instanceOf<T extends ClowderBindings>(
+  instance: ClowderInstance<T>,
+  clowder: Clowder<T>
 ): boolean {
-  const kind = instance.clowder.kind;
-  let c: Clowder<T2> | null = clowder;
+  const kind = instance.kind;
+  let c: Clowder<T> | null = clowder;
   while (c) {
     if (c.kind === kind) return true;
     c = clowder.parent;
@@ -517,7 +514,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
     const items = getEntries(instance.bindings)
       .map(([key, value]) => `"${key}": ${purrify(value)}`)
       .join(', ');
-    return `clowder ${instance.clowder.name} [${items}]`;
+    return `clowder instance ${instance.name} [${items}]`;
   },
   'yarnball': function<T extends StringKeyed>(yarnball: YarnBall<T>): string {
     return `yarnball ${yarnball.key}`;
@@ -911,7 +908,11 @@ export const collections = {
   },
   contains<T extends MewlixValue>(
     value: T,
-    collection: Shelf<T> | Box<Record<string, T>> | ClowderInstance<ClowderBindings> | string
+    collection:
+      | Shelf<T>
+      | Box<Record<string, T>>
+      | ClowderInstance<ClowderBindings & Record<string, T>>
+      | string
   ): boolean {
     if (isShelf(collection)) {
       return shelfContains(collection, value);
@@ -1429,7 +1430,7 @@ const createMewlix = function() {
         table.delete(key);
         return box;
       },
-      set(key: MewlixValue) {
+      clear() {
         table.clear();
         return box;
       },
