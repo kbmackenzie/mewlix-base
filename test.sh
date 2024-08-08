@@ -28,7 +28,7 @@ TEMPLATES='console graphic'
 # Yarn ball for testing:
 TEST_YARNBALL=$(cat << EOF
 export default function(mewlix) {
-  mewlix.modules.addModule("main", () => {
+  mewlix.modules.add("main", () => {
     /* Make 'mewlix' object globally available (for testing). */
     globalThis.mewlix = mewlix;
   });
