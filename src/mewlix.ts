@@ -201,11 +201,6 @@ export function createBox<T>(init: T, copy: boolean = false,): Box<T> {
   return box;
 }
 
-/* todo: rename this to 'boxFromObject' */
-export function objectToBox<T>(obj: Record<string, T>): Box<typeof obj> {
-  return createBox(obj);
-}
-
 export function isBox<T>(value: any): value is Box<T> {
   return typeof value === 'object'
     && value !== null
@@ -1006,10 +1001,8 @@ const createMewlix = function() {
   // mewlix.api: The API exposed to users.
   const api = {
     arrayToShelf: shelfFromArray,
-    box: objectToBox,
-    shelf<T>(...items: T[]): Shelf<T> {
-      return shelfFromArray(items);
-    },
+    box: <T>(obj: T) => createBox(obj, true),
+    shelf: <T>(...items: T[]) => shelfFromArray(items),
     inject<T>(key: string, record: Record<string, T>): void {
       addModule(modules, key, () => record);
     },
