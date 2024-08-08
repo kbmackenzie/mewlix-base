@@ -22,7 +22,7 @@ describe('mewlix console template', () => {
   it('should set console title', async () => {
     const hasSetName = await page.evaluate(() => {
       const name = 'console test suite';
-      globalThis.mewlix.Console.box().name(name);
+      globalThis.mewlix.lib['std.console'].get('name')(name);
       return document.getElementById('project-name').innerText === name;
     });
     expect(hasSetName).toBe(true);
@@ -30,7 +30,7 @@ describe('mewlix console template', () => {
 
   it('should toggle input highlight', async () => {
     const hasSetHighlight = await page.evaluate(() => {
-      globalThis.mewlix.Console.box().highlight(true);
+      globalThis.mewlix.lib['std.console'].get('highlight')(true);
       return document.getElementById('show-highlight').checked;
     });
     expect(hasSetHighlight).toBe(true);
@@ -39,7 +39,7 @@ describe('mewlix console template', () => {
   it('should set console color', async () => {
     const hasSetColor = await page.evaluate(() => {
       const color = '#fb2bff';
-      globalThis.mewlix.Console.box().set_color(color);
+      globalThis.mewlix.lib['std.console'].get('set_color')(color);
       return document.getElementById('select-color').value === color;
     });
     expect(hasSetColor).toBe(true);
@@ -48,8 +48,8 @@ describe('mewlix console template', () => {
   it('should set accepted file extensions', async () => {
     const hasSetExtensions = await page.evaluate(() => {
       const extensions = mewlix.api.shelf('.txt', '.md');
-      globalThis.mewlix.Console.box().accepted_files(extensions);
-      return document.getElementById('file-input').accept === extensions.toArray().join(', ');
+      globalThis.mewlix.lib['std.console'].get('accepted_files')(extensions);
+      return document.getElementById('file-input').accept === mewlix.shelf.toArray(extensions).join(', ');
     });
     expect(hasSetExtensions).toBe(true);
   });
@@ -68,7 +68,7 @@ describe('mewlix console template', () => {
 
   it('should clear the console', async () => {
     const hasCleared = await page.evaluate(() => {
-      globalThis.mewlix.Console.box().clear();
+      globalThis.mewlix.lib['std.console'].get('clear')();
       return document.getElementById('console-lines').childNodes.length === 0;
     });
     expect(hasCleared).toBe(true);
@@ -79,7 +79,7 @@ describe('mewlix console template', () => {
     const contents = 'hello world!';
     const fileDownload = await page.evaluate(
       async (filename, contents) => {
-        globalThis.mewlix.Console.box().write_file(filename, contents);
+        globalThis.mewlix.lib['std.console'].get('write_file')(filename, contents);
         const lastLine = document.getElementById('console-lines').lastChild;
         const button   = lastLine.querySelector('a');
 
