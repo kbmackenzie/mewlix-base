@@ -459,18 +459,6 @@ export type MewlixValue =
   | undefined
   | Promise<void>;
 
-export type Gettable<T> = {
-  [tag]: 'box' | 'clowder instance';
-  get(key: string): TryGet<T>;
-};
-
-export function isGettable<T>(a: any): a is Gettable<T> {
-  return typeof a === 'object'
-    && a !== null
-    && tag in a
-    && (a[tag] === 'box' || a[tag] === 'clowder instance');
-}
-
 /* - * - * - * - * - * - * - * - *
  * Utilities
 /* - * - * - * - * - * - * - * - * */
@@ -767,10 +755,6 @@ export const ensure = {
   box(where: string, a: any): void {
     if (isBox(a)) return;
     throw typeError(where, a, 'box');
-  },
-  gettable(where: string, a: any): void {
-    if (isGettable(a)) return;
-    throw typeError(where, a, 'gettable');
   },
   func(where: string, a: any): void {
     if (typeof a === 'function') return;
