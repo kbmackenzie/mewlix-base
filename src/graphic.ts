@@ -277,7 +277,7 @@ export function gridSlotToPosition(slot: GridSlot) {
 type Color = ClowderInstance<ColorLike>;
 
 type ColorLike = {
-  [wake]: (this: Color, red: number, green: number, blue: number, opacity: number) => void;
+  [wake]: (this: Color, red: number, green: number, blue: number, opacity?: number) => void;
   red:     number;
   green:   number;
   blue:    number;
