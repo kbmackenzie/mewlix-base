@@ -29,5 +29,5 @@ export default async function(callback) {
     setDescription(meta.description);
   }
   const entrypoint = meta.entrypoint || 'main';
-  return mewlix.run(() => mewlix.modules.getModule(entrypoint));
+  return mewlix.run(() => mewlix.modules.get(entrypoint));
 }
