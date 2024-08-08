@@ -11,7 +11,6 @@ export const wake = Symbol('wake');
 /* - * - * - * - * - * - * - * - * */
 export type ValueOf<T> = T[keyof T];
 export type TryGet<T> = T | undefined;
-export type StringKeyed = { [key: string]: any };
 
 type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
 export type MewlixObject = { [tag]: ObjectTag };
@@ -20,11 +19,11 @@ export type Shelf<T> =
   | Readonly<{ [tag]: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
   | Readonly<{ [tag]: 'shelf', kind: 'bottom', }>;
 
-export type Box<T extends StringKeyed> = Readonly<{
+export type Box<T> = Readonly<{
   [tag]: 'box',
   bindings: T;
-  get(key: string): ValueOf<T>;
-  set(key: string, value: ValueOf<T>): void;
+  get(key: keyof T): ValueOf<T>;
+  set(key: keyof T, value: ValueOf<T>): void;
 }>;
 
 export type Clowder<T extends ClowderBindings> = Readonly<{
@@ -41,20 +40,19 @@ export type ClowderInstance<T extends ClowderBindings> = Readonly<{
   kind: symbol;
   bindings: T;
   parent: ClowderInstance<T> | null;
-  get(key: string): TryGet<ValueOf<T>>;
-  set(key: string, value: ValueOf<T>): void;
-  outside(key: string): TryGet<ValueOf<T>>;
+  get(key: keyof T): TryGet<ValueOf<T>>;
+  set(key: keyof T, value: ValueOf<T>): void;
+  outside(key: keyof T): TryGet<ValueOf<T>>;
 }>;
 
 export type ClowderBindings = {
   [wake]: (...args: any[]) => void;
-  [key: string]: any;
 };
 
-export type YarnBall<T extends StringKeyed> = Readonly<{
+export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
   key: string;
-  get(key: string): ValueOf<T>;
+  get(key: keyof T): ValueOf<T>;
 }>;
 
 export type CatTree = Readonly<{
@@ -188,10 +186,7 @@ export function isShelf<T>(value: any): value is Shelf<T> {
  * Box: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-export function createBox<T extends StringKeyed>(
-  init: T,
-  copy: boolean = false,
-): Box<T> {
+export function createBox<T>(init: T, copy: boolean = false,): Box<T> {
   const innerBox = copy ? {...init} : init;
   const box: Box<T> = {
     [tag]: 'box',
@@ -211,7 +206,7 @@ export function objectToBox<T>(obj: Record<string, T>): Box<typeof obj> {
   return createBox(obj);
 }
 
-export function isBox<T extends StringKeyed>(value: any): value is Box<T> {
+export function isBox<T>(value: any): value is Box<T> {
   return typeof value === 'object'
     && value !== null
     && tag in value
@@ -255,7 +250,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
  * Yarn Ball: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-export function createYarnBall<T extends StringKeyed>(key: string, lib: T): YarnBall<T> {
+export function createYarnBall<T>(key: string, lib: T): YarnBall<T> {
   return {
     [tag]: 'yarnball',
     key: key,
@@ -265,17 +260,13 @@ export function createYarnBall<T extends StringKeyed>(key: string, lib: T): Yarn
   };
 }
 
-export function mixYarnBall<T1 extends StringKeyed, T2 extends StringKeyed>(
-  key: string,
-  a: T1,
-  b: T2
-): YarnBall<T1 & T2> {
+export function mixYarnBall<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2> {
   const lib: T1 & T2 = { ...a, ...b };
   return {
     [tag]: 'yarnball',
     key: key,
-    get(key: string): ValueOf<T1 & T2> {
-      return lib[key];
+    get(key: keyof T1 | keyof T2): ValueOf<T1 & T2> {
+      return lib[key] as any; /* todo: improve this */
     },
   };
 }
@@ -325,15 +316,15 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
     kind: clowder.kind,
     parent: parent,
     bindings: bindings,
-    get(key: string): TryGet<ValueOf<T>> {
+    get(key: keyof T): TryGet<ValueOf<T>> {
       if (key in bindings) return bindings[key];
       if (parent) return parent.get(key);
       return undefined;
     },
-    set(key: keyof typeof bindings, value: ValueOf<T>): void {
+    set(key: keyof T, value: ValueOf<T>): void {
       bindings[key] = value;
     },
-    outside(key: string): TryGet<ValueOf<T>> {
+    outside(key: keyof T): TryGet<ValueOf<T>> {
       return parent?.get(key);
     },
   };
@@ -501,7 +492,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
     const items = shelfToArray(shelf).map(purrify).join(', ');
     return `[${items}]`;
   },
-  'box': function<T extends StringKeyed>(box: Box<T>): string {
+  'box': function<T extends { [key: string]: any }>(box: Box<T>): string {
     const items = getEntries(box.bindings)
       .map(([key, value]) => `"${key}": ${purrify(value)}`)
       .join(', ');
@@ -516,7 +507,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
       .join(', ');
     return `clowder instance ${instance.name} [${items}]`;
   },
-  'yarnball': function<T extends StringKeyed>(yarnball: YarnBall<T>): string {
+  'yarnball': function<T>(yarnball: YarnBall<T>): string {
     return `yarnball ${yarnball.key}`;
   },
   'cat tree': function(tree: CatTree): string {
@@ -557,7 +548,7 @@ const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
   'shelf': function<T>(shelf: Shelf<T>): JSONValue {
     return shelfToArray(shelf).map(toJSON);
   },
-  'box': function<T extends StringKeyed>(box: Box<T>): JSONValue {
+  'box': function<T extends { [key: string]: any }>(box: Box<T>): JSONValue {
     return objectToJSON(box.bindings);
   },
   'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): JSONValue {
@@ -934,7 +925,7 @@ export const collections = {
 
 export const box = {
   create: createBox,
-  pairs<T extends StringKeyed>(value: Box<Record<string, T>>) {
+  pairs<T>(value: Box<Record<string, T>>) {
     ensure.box('claw at', value);
 
     type Pair = { key: string; value: T; };
@@ -1003,7 +994,7 @@ export type MeowFunc = (input: string) => string;
  * API
 /* - * - * - * - * - * - * - * - * */
 
-export function wrap<T extends StringKeyed>(object: T, copy: boolean = false): Box<T> {
+export function wrap<T>(object: T, copy: boolean = false): Box<T> {
   const wrapped: T = copy ? {...object} : object;
   return {
     [tag]: 'box',
