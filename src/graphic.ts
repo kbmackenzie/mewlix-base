@@ -17,7 +17,6 @@ import {
   isBox,
   isClowderInstance,
   shelfIterator,
-  ClowderBindings,
   ClowderInstance,
   createBox,
   createYarnBall,
