@@ -864,6 +864,7 @@ export const shelf = {
     return shelfPush(shelf, value);
   },
   toArray: shelfToArray,
+  fromArray: shelfFromArray,
 };
 
 export const collections = {
@@ -1004,7 +1005,6 @@ const createMewlix = function() {
 
   // mewlix.api: The API exposed to users.
   const api = {
-    arrayToShelf: shelfFromArray,
     box: <T>(obj: T) => createBox(obj, true),
     shelf: <T>(...items: T[]) => shelfFromArray(items),
     inject<T>(key: string, record: Record<string, T>): void {
@@ -1907,6 +1907,7 @@ const createMewlix = function() {
     shelf,
     collections,
     yarnball,
+    relation,
     reflection,
     convert,
     box,
