@@ -868,6 +868,7 @@ export const shelf = {
     ensure.shelf('push', shelf);
     return shelfPush(shelf, value);
   },
+  toArray: shelfToArray,
 };
 
 export const collections = {
