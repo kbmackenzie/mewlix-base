@@ -132,20 +132,24 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
     [wake](this: Vector2, x: number, y: number) {
       this.bindings.x = x;
       this.bindings.y = y;
+      ensureVector2(this);
     },
     add(this: Vector2, that: Vector2): Vector2 {
+      ensureVector2(this); ensureVector2(that);
       return instantiate(Vector2)(
         this.bindings.x + that.bindings.x,
         this.bindings.y + that.bindings.y,
       );
     },
     mul(this: Vector2, that: Vector2): Vector2 {
+      ensureVector2(this); ensureVector2(that);
       return instantiate(Vector2)(
         this.bindings.x * that.bindings.x,
         this.bindings.y * that.bindings.y,
       );
     },
     distance(this: Vector2, that: Vector2): number {
+      ensureVector2(this); ensureVector2(that);
       const ax = this.bindings.x;
       const ay = this.bindings.y;
       const bx = that.bindings.x;
@@ -153,6 +157,7 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
       return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
     },
     dot(this: Vector2, that: Vector2): number {
+      ensureVector2(this); ensureVector2(that);
       const ax = this.bindings.x;
       const ay = this.bindings.y;
       const bx = that.bindings.x;
@@ -160,6 +165,7 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
       return ax * bx + ay * by;
     },
     clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
+      ensureVector2(this); ensureVector2(min); ensureVector2(max);
       return instantiate(Vector2)(
         clamp_(this.bindings.x, min.bindings.x, max.bindings.x),
         clamp_(this.bindings.y, min.bindings.y, max.bindings.y),
@@ -199,13 +205,16 @@ const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
       this.bindings.y = y;
       this.bindings.width = width;
       this.bindings.height = height;
+      ensureRectangle(this);
     },
     contains(this: Rectangle, point: Vector2): boolean {
+      ensureRectangle(this); ensureVector2(point);
       const { x: px, y: py } = point.bindings;
       const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
       return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
     },
     collides(this: Rectangle, that: Rectangle): boolean {
+      ensureRectangle(this); ensureRectangle(that);
       const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
       const { x: bx, y: by, width: bw, height: bh } = that.bindings;
       return (bx < ax + aw)
@@ -232,7 +241,7 @@ type GridSlotLike = {
   [wake](this: GridSlot, x: number, y: number): void;
   row:    number;
   column: number;
-  position(this: GridSlot): number;
+  position(this: GridSlot): Vector2;
 };
 
 const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
@@ -242,9 +251,10 @@ const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
     [wake](this: GridSlot, row: number, column: number): void {
       this.bindings.row    = row;
       this.bindings.column = column;
+      ensureGridSlot(this);
     },
-    position(this: GridSlot) {
-      return 0; /* todo! */
+    position(this: GridSlot): Vector2 {
+      return gridSlotToPosition(this);
     },
   };
 });
@@ -296,11 +306,14 @@ const Color = createClowder<ColorLike>('Color', null, () => {
       this.bindings.green = green;
       this.bindings.blue = blue;
       this.bindings.opacity = opacity;
+      ensureColor(this);
     },
     alpha(this: Color): number {
+      ensureColor(this);
       return percentageToByte(this.bindings.opacity);
     },
     to_hex(this: Color): string {
+      ensureColor(this);
       const { red, green, blue } = this.bindings;
       return `#${red}${green}${blue}`;
     }
@@ -819,11 +832,14 @@ export default function(mewlix: Mewlix): void {
         this.bindings.width  = width;
         this.bindings.height = height;
         data = new Uint8ClampedArray(width * height * 4);
+        ensurePixelCanvas(this);
       },
       width:  0,
       height: 0,
       fill(this: PixelCanvas, color: Color): void {
         if (!data) throw pixelCanvasError();
+        ensurePixelCanvas(this);
+
         const { red, green, blue } = color.bindings;
         const alpha = color.bindings.alpha.call(color);
 
@@ -836,8 +852,9 @@ export default function(mewlix: Mewlix): void {
       },
       set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
         if (!data) throw pixelCanvasError();
-        ensure.number('PixelCanvas.x', x);
-        ensure.number('PixelCanvas.y', y);
+        ensurePixelCanvas(this);
+        ensure.number('PixelCanvas.set_pixel', x);
+        ensure.number('PixelCanvas.set_pixel', y);
 
         const { red, green, blue } = color.bindings;
         const alpha = color.bindings.alpha.call(color);
@@ -850,8 +867,9 @@ export default function(mewlix: Mewlix): void {
       },
       get_pixel(this: PixelCanvas, x: number, y: number): Color {
         if (!data) throw pixelCanvasError();
-        ensure.number('PixelCanvas.x', x);
-        ensure.number('PixelCanvas.y', y);
+        ensurePixelCanvas(this);
+        ensure.number('PixelCanvas.get_pixel', x);
+        ensure.number('PixelCanvas.get_pixel', y);
 
         const i = (x * this.bindings.width + y) * 4;
         return instantiate(Color)(
@@ -863,6 +881,7 @@ export default function(mewlix: Mewlix): void {
       },
       to_sprite(this: PixelCanvas, key: string): void {
         if (!data) throw pixelCanvasError();
+        ensurePixelCanvas(this);
         ensure.string('PixelCanvas.to_sprite', key);
 
         const copy = new Uint8ClampedArray(data);
@@ -874,6 +893,11 @@ export default function(mewlix: Mewlix): void {
       },
     };
   });
+
+  function ensurePixelCanvas(canvas: PixelCanvas): void {
+    ensure.number('PixelCanvas.width',  canvas.bindings.width );
+    ensure.number('PixelCanvas.height', canvas.bindings.height);
+  }
 
   function pixelCanvasError(): MewlixError {
     return new MewlixError(ErrorCode.InvalidOperation,
