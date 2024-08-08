@@ -338,9 +338,11 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
   return instance;
 }
 
+export type WakeParams<T extends ClowderBindings> = Parameters<T[typeof wake]>;
+
 export function instantiate<T extends ClowderBindings>(
   clowder: Clowder<T>
-): (...args: any[]) => ClowderInstance<T> {
+): (...args: WakeParams<T>) => ClowderInstance<T> {
   const instance = instanceClowder(clowder);
   return (...args) => {
     instance.bindings[wake](...args);
