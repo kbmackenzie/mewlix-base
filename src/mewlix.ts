@@ -1914,7 +1914,15 @@ const createMewlix = function() {
     ErrorCode,
     MewlixError,
     purrify,
-    modules,
+    modules: {
+      namespace: modules,
+      get(key: string) {
+        return getModule(modules, key);
+      },
+      add(key: string, value: () => MewlixObject) {
+        return addModule(modules, key, value);
+      },
+    },
     wake,
     fromJSON,
     numbers,
