@@ -377,7 +377,7 @@ export default function(mewlix: Mewlix): void {
     },
   };
 
-  mewlix.lib.console = createYarnBall('std.console', consoleLib);
+  mewlix.lib['std.console'] = createYarnBall('std.console', consoleLib);
 
   /* - * - * - * - * - * - * - * - *
    * Standard library - Curry:
@@ -391,7 +391,7 @@ export default function(mewlix: Mewlix): void {
       (contents: string) =>
         consoleLib.write_file(filename, contents),
   };
-  mewlix.lib.consoleCurry = mixYarnBall('std.console.curry', consoleLib, consoleCurry);
+  mewlix.lib['std.console.curry'] = mixYarnBall('std.console.curry', consoleLib, consoleCurry);
 
   /* - * - * - * - * - * - * - * - *
    * Run Console:
