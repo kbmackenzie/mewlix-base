@@ -30,8 +30,8 @@ describe('mewlix graphic template', () => {
   it.each(colors)('parses a color', async ({ hexcode, values }) => {
     const color = await page.evaluate(
       (hexcode) => {
-        const color = globalThis.mewlix.Graphic.box().hex(hexcode);
-        const { red, green, blue } = color.box();
+        const color = globalThis.mewlix.lib['std.graphic'].get('hex')(hexcode);
+        const { red, green, blue } = color.bindings;
         return [red, green, blue];
       },
       hexcode,
