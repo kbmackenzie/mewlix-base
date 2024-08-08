@@ -328,7 +328,7 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
       return parent?.get(key);
     },
   };
-  bindings[wake].bind(instance);
+  bindings[wake] = bindings[wake].bind(instance);
   for (const key in bindings) {
     const value = bindings[key];
     if (typeof value === 'function') {
