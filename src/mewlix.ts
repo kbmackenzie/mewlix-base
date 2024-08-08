@@ -924,6 +924,10 @@ export const box = {
   },
 };
 
+export const yarnball = {
+  bind: bindYarnBall,
+};
+
 /* - * - * - * - * - * - * - * - *
  * Internal
 /* - * - * - * - * - * - * - * - * */
@@ -1901,9 +1905,11 @@ const createMewlix = function() {
     compare,
     strings,
     shelf,
+    collections,
+    yarnball,
     reflection,
-    box,
     convert,
+    box,
     internal,
     meow: (x: string) => meowFunc(x),
     setMeow,
