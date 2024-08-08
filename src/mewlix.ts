@@ -332,7 +332,7 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
   for (const key in bindings) {
     const value = bindings[key];
     if (typeof value === 'function') {
-      value.bind(instance);
+      bindings[key] = value.bind(instance);
     }
   }
   return instance;
