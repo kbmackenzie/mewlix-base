@@ -1911,6 +1911,7 @@ const createMewlix = function() {
     shelf,
     box,
     clowder,
+    catTree,
     collections,
     yarnball,
     compare,
