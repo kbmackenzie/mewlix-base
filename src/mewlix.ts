@@ -926,6 +926,10 @@ export const clowder = {
   instantiate: instantiate,
 };
 
+export const catTree = {
+  create: createCatTree,
+};
+
 export const yarnball = {
   bind: bindYarnBall,
 };
