@@ -265,15 +265,14 @@ export function mixYarnBall<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2
   };
 }
 
-type Bindings<T> = Record<string, () => T>;
-type BindingMap<T> = Record<string, T>;
+type BindingMap<T> = [string, () => T][];
+type Bindings<T>   = Record<string, () => T>;
 
-export function bindYarnBall<T>(
-  key: string,
-  init: (bind: Bindings<T>
-) => void): YarnBall<BindingMap<T>> {
+export function bindYarnBall<T>(key: string, map: BindingMap<T>): YarnBall<Record<string, T>> {
   const bindings: Bindings<T> = {};
-  init(bindings);
+  for (const [key, value] of map) {
+    bindings[key] = value;
+  }
   return {
     [tag]: 'yarnball',
     key: key,
