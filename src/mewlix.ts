@@ -753,14 +753,14 @@ export const ensure = {
     if (isShelf(a)) return;
     throw typeError(where, a, 'shelf');
   },
-  box(where: string, a: any): void {
-    if (isBox(a)) return;
-    throw typeError(where, a, 'box');
-  },
   func(where: string, a: any): void {
     if (typeof a === 'function') return;
     throw typeError(where, a, 'function');
-  }
+  },
+  gettable(where: string, a: any): void {
+    if (isBox(a) || isClowderInstance(a)) return;
+    throw typeError(where, a, 'box or clowder instance');
+  },
 };
 
 function typeError(where: string, value: any, targetType: string): MewlixError {
@@ -913,7 +913,7 @@ export const collections = {
 export const box = {
   create: createBox,
   pairs<T>(value: Box<Record<string, T>>) {
-    ensure.box('claw at', value);
+    ensure.gettable('claw at', value);
 
     type Pair = { key: string; value: T; };
     let pairs: Shelf<Box<Pair>> = shelfBottom();
