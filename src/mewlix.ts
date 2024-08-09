@@ -921,6 +921,11 @@ export const box = {
   },
 };
 
+export const clowder = {
+  create: createClowder,
+  instantiate: instantiate,
+};
+
 export const yarnball = {
   bind: bindYarnBall,
 };
