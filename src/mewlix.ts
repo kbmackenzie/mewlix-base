@@ -1403,7 +1403,7 @@ const createMewlix = function() {
 
   function table() {
     const table = new Map<MewlixValue, MewlixValue>();
-    return createBox({
+    const box = createBox({
       add(key: MewlixValue, value: MewlixValue) {
         table.set(key, value);
         return box;
@@ -1423,11 +1423,12 @@ const createMewlix = function() {
         return box;
       },
     });
+    return box;
   };
 
   function set() {
     const set = new Set<MewlixValue>();
-    return createBox({
+    const box = createBox({
       add(value: MewlixValue) {
         set.add(value);
         return box;
@@ -1444,6 +1445,7 @@ const createMewlix = function() {
         return box;
       },
     });
+    return box;
   };
 
   function slap(value: MewlixValue): number {
@@ -1676,7 +1678,7 @@ const createMewlix = function() {
       const key = ErrorCode[code];
       bindings[key] = code;
     }
-    createBox(bindings);
+    return createBox(bindings);
   })();
 
   const base = {
