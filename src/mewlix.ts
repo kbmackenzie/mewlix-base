@@ -506,7 +506,16 @@ export function purrify(value: any): string {
     return purrifyTable[value[tag] as ObjectTag](value);
   }
   if (value === null || value === undefined) { return 'nothing'; }
-  return String(value);
+  switch (typeof value) {
+    case 'number':
+    case 'string':
+    case 'boolean':
+      return String(value);
+    case 'function':
+        return '<function>';
+    default:
+      return 'unrecognized';
+  }
 }
 
 /* - * - * - * - * - * - * - * - *
