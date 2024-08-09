@@ -319,7 +319,7 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
       bindings[key] = value;
     },
   };
-  bindings[wake] = bindings[wake].bind(instance);
+  bindings[wake] = bindings[wake]?.bind(instance);
   for (const key in bindings) {
     const value = bindings[key];
     if (typeof value === 'function') {
@@ -336,7 +336,7 @@ export function instantiate<T extends ClowderBindings>(
 ): (...args: WakeParams<T>) => ClowderInstance<T> {
   const instance = instanceClowder(clowder);
   return (...args) => {
-    instance.bindings[wake](...args);
+    instance.bindings[wake]?.(...args);
     return instance;
   };
 }
