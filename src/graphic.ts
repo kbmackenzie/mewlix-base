@@ -1092,7 +1092,8 @@ export default function(mewlix: Mewlix): void {
     },
 
     rect(rect: Rectangle, color: string | Color): void {
-      ensure.box('graphic.rect', rect);
+      ensure.gettable('graphic.rect', rect);
+      ensureRectangle(rect);
       return drawRect(rect, color);
     },
 
@@ -1109,7 +1110,7 @@ export default function(mewlix: Mewlix): void {
     },
 
     meow_options(box: Box<MeowOptions>): void {
-      ensure.box('graphic.meow_options', box);
+      ensure.gettable('graphic.meow_options', box);
       meowOptions = box.bindings;
     },
 
