@@ -1037,15 +1037,14 @@ const createMewlix = function() {
   // meow.lib: core libraries
   const lib: Record<string, YarnBall<any>> = {};
 
-  // meow.lib.std: the base library
+  /* - * - * - * - * - * - * - * - *
+   * Standard Library
+  /* - * - * - * - * - * - * - * - * */
 
-  /* The std library documentation can be found on the wiki:
-   * > https://github.com/kbmackenzie/mewlix/wiki/std <
+  /* The std library documentation can be found in... (see readme).
    *
    * It won't be included in this source file to avoid clutter.
-   *
-   * All standard library functions *should use snake_case*, as
-   * they're going to be accessible from within Mewlix. */
+   * All standard library functions *should use snake_case*. */
 
   function purr(value: MewlixValue): string {
     return purrify(value);
