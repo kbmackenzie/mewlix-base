@@ -97,45 +97,94 @@ describe('mewlix base library', () => {
     });
   });
 
-  describe('shelf operations: insertion and removal', () => {
-    it('creates a shelf and inserts an item into it', async () => {
-      const output = await page.evaluate(() => {
-        const mewlix = globalThis.mewlix;
-        const shelfA = mewlix.shelf.create([1, 2, 3]);
-        const shelfB = mewlix.lib['std'].get('insert')(shelfA, 4, 1);
-        return mewlix.shelf.toArray(shelfB);
-      });
-      expect(output).toStrictEqual([1, 2, 4, 3]);
-    });
+  describe('shelf operations: insertion', () => {
+    const insertions = [
+      {
+        input: [1, 2, 3],
+        value: 4,
+        at: 0,
+        result: [1, 2, 3, 4],
+      },
+      {
+        input: [1, 2, 3],
+        value: 4,
+        at: -1,
+        result: [4, 1, 2, 3],
+      },
+      {
+        input: [1, 2, 3],
+        value: 4,
+        at: 1,
+        result: [1, 2, 4, 3],
+      },
+      {
+        input: [1, 2, 3],
+        value: 4,
+        at: -2,
+        result: [1, 4, 2, 3],
+      },
+      {
+        input: [1, 2, 3],
+        value: 4,
+        at: 6, /* outside of boundaries */
+        result: [4, 1, 2, 3],
+      },
+    ];
 
-    it('creates a shelf and removes an item from it', async () => {
-      const output = await page.evaluate(() => {
-        const mewlix = globalThis.mewlix;
-        const shelfA = mewlix.shelf.create([1, 2, 3]);
-        const shelfB = mewlix.lib['std'].get('remove')(shelfA, 1);
-        return mewlix.shelf.toArray(shelfB);
-      });
-      expect(output).toStrictEqual([1, 3]);
+    test.each(insertions)('inserts a value into a shelf', async ({ input, value, at, result }) => {
+      const output = await page.evaluate(
+        (input, value, at) => {
+          const mewlix = globalThis.mewlix;
+          const shelf  = mewlix.shelf.create(input);
+          const output = mewlix.lib['std'].get('insert')(shelf, value, at);
+          return mewlix.shelf.toArray(output);
+        },
+        input, value, at
+      );
+      expect(output).toStrictEqual(result);
     });
+  });
 
-    it('tries to insert an item outside a shelf', async () => {
-      const output = await page.evaluate(() => {
-        const mewlix = globalThis.mewlix;
-        const shelfA = mewlix.shelf.create([1, 2, 3]);
-        const shelfB = mewlix.lib['std'].get('insert')(shelfA, 'outside boundaries', 6);
-        return mewlix.shelf.toArray(shelfB);
-      });
-      expect(output).toStrictEqual(['outside boundaries', 1, 2, 3])
-    });
+  describe('shelf operation: removal', () => {
+    const removals = [
+      {
+        input: [1, 2, 3],
+        at: 0,
+        result: [1, 2],
+      },
+      {
+        input: [1, 2, 3],
+        at: -1,
+        result: [2, 3],
+      },
+      {
+        input: [1, 2, 3],
+        at: 1,
+        result: [1, 3],
+      },
+      {
+        input: [1, 2, 3],
+        at: -2,
+        result: [1, 3],
+      },
+      {
+        input: [1, 2, 3],
+        at: 6,
+        result: [1, 2, 3],
+      },
+    ];
 
-    it('tries to remove an item outside a shelf', async () => {
-      const output = await page.evaluate(() => {
-        const mewlix = globalThis.mewlix;
-        const shelfA = mewlix.shelf.create([1, 2, 3]);
-        const shelfB = mewlix.lib['std'].get('remove')(shelfA, 6);
-        return mewlix.shelf.toArray(shelfB);
-      });
-      expect(output).toStrictEqual([1, 2, 3])
+    test.each(removals)('removes a value from a shelf', async ({ input, at, result }) => {
+      const output = await page.evaluate(
+        (input, at) => {
+          const mewlix = globalThis.mewlix;
+          const shelf  = mewlix.shelf.create(input);
+          const output = mewlix.lib['std'].get('remove')(shelf, at);
+          return mewlix.shelf.toArray(output);
+        },
+        input, at
+      );
+      expect(output).toStrictEqual(result);
     });
   });
 });
