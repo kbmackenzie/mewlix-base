@@ -75,11 +75,14 @@ describe('mewlix base library', () => {
     const compareShelves = [
       { a: [1, 2, 3], b: [1, 2, 3] , result: true  },
       { a: [1, 2, 3], b: [1, 2]    , result: false },
+      { a: [1, 2],    b: [1, 2, 3] , result: false },
       { a: [1, 2, 3], b: [1, 3, 4] , result: false },
       { a: []       , b: []        , result: true  },
+      { a: [1, 2, 3], b: []        , result: false },
+      { a: []       , b: [1, 2, 3] , result: false },
     ];
 
-    it.each(compareShelves)('compares two shelves', async ({ a, b, result }) => {
+    test.each(compareShelves)('compares two shelves', async ({ a, b, result }) => {
       const output = await page.evaluate(
         (a, b) => {
           const mewlix = globalThis.mewlix;
