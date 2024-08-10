@@ -111,5 +111,26 @@ describe('mewlix base library', () => {
       });
       expect(output).toStrictEqual([1, 2, 3])
     });
+
+    const compareShelves = [
+      { a: [1, 2, 3], b: [1, 2, 3] , result: true  },
+      { a: [1, 2, 3], b: [1, 2]    , result: false },
+      { a: [1, 2, 3], b: [1, 3, 4] , result: false },
+      { a: []       , b: []        , result: true  },
+    ];
+
+    it.each(compareShelves)('compares two shelves', async ({ a, b, result }) => {
+      const output = await page.evaluate(
+        (a, b) => {
+          const mewlix = globalThis.mewlix;
+          const shelfA = mewlix.shelf.create(a);
+          const shelfB = mewlix.shelf.create(b);
+          return mewlix.relation.equal(shelfA, shelfB);
+        },
+        a,
+        b,
+      );
+      expect(output).toBe(result);
+    });
   });
 });
