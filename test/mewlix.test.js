@@ -16,60 +16,58 @@ describe('mewlix base library', () => {
   });
 
   describe('shelf creation ', () => {
-    const inputs = [
-      { input: [1, 2, 3, 4, 5, 6]          },
-      { input: ['hello', 'world']          },
-      { input: [1, 2, 3, 'hello', 4, 5, 6] },
-      { input: [[1, 2, 3], [4, 5, 6]]      },
+    const arrayInput = [
+      {
+        input: [],
+        head: null,
+        length: 0,
+        empty: true,
+      },
+      {
+        input: [1, 2, 3, 4, 5, 6],
+        length: 6,
+        head: 6,
+        empty: false,
+      },
+      {
+        input: ['hello', 'world'],
+        length: 2,
+        head: 'world',
+        empty: false,
+      },
+      {
+        input: [1, 2, 3, 'hello', 4, 5, 6],
+        length: 7,
+        head: 6,
+        empty: false,
+      },
     ];
 
-    it('creates an empty shelf', async () => {
-      const output = await page.evaluate(() => {
-        const shelf = mewlix.shelf.create([]);
-        return {
-          length: mewlix.collections.length(shelf),
-          isEmpty: mewlix.lib['std'].get('empty')(shelf),
-        };
-      });
-      expect(output.length).toBe(0);
-      expect(output.isEmpty).toBe(true);
-    });
-
-    it.each(inputs)('creates a shelf from an array', async ({ input }) => {
+    test.each(arrayInput)('creates a shelf from an array', async (input) => {
       const output = await page.evaluate(
         (array) => {
           const mewlix = globalThis.mewlix;
 
-          const shelf = mewlix.shelf.create(array);
-          return {
-            length: mewlix.collections.length(shelf),
-            head: mewlix.shelf.peek(shelf),
-            array: mewlix.shelf.toArray(shelf),
-          };
-        },
-        input,
-      );
-      expect(output.length).toBe(input.length);
-      expect(output.array).toStrictEqual(input);
-      expect(output.head).toStrictEqual(input[input.length - 1]);
-    });
-
-    it.each(inputs)('creates a shelf and reverses it', async ({ input }) => {
-      const output = await page.evaluate(
-        (array) => {
-          const mewlix = globalThis.mewlix;
-
-          const shelf = mewlix.shelf.create(array);
+          const shelf    = mewlix.shelf.create(array);
+          const head     = mewlix.shelf.peek(shelf);
+          const empty    = mewlix.lib['std'].get('empty')(shelf);
           const reversed = mewlix.lib['std'].get('reverse')(shelf);
           return {
-            head: mewlix.shelf.peek(reversed),
-            array: mewlix.shelf.toArray(reversed),
+            output: mewlix.shelf.toArray(shelf),
+            length: mewlix.collections.length(shelf),
+            head: head,
+            empty: empty,
+            reversed: mewlix.shelf.toArray(reversed),
           };
         },
-        input
+        input.input,
       );
-      expect(output.head).toStrictEqual(input[0]);
-      expect(output.array).toStrictEqual([...input].reverse());
+
+      expect(output.output).toStrictEqual(input.input);
+      expect(output.length).toBe(input.length);
+      expect(output.head).toStrictEqual(input.head);
+      expect(output.empty).toBe(input.empty);
+      expect(output.reversed).toStrictEqual([...input.input].reverse());
     });
   });
 
