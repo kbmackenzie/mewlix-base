@@ -17,30 +17,12 @@ describe('mewlix base library', () => {
 
   describe('shelf creation ', () => {
     const arrayInput = [
-      {
-        input: [],
-        head: null,
-        length: 0,
-        empty: true,
-      },
-      {
-        input: [1, 2, 3, 4, 5, 6],
-        length: 6,
-        head: 6,
-        empty: false,
-      },
-      {
-        input: ['hello', 'world'],
-        length: 2,
-        head: 'world',
-        empty: false,
-      },
-      {
-        input: [1, 2, 3, 'hello', 4, 5, 6],
-        length: 7,
-        head: 6,
-        empty: false,
-      },
+      { input: []                 , length: 0, head: null    , empty: true,  },
+      { input: [1, 2, 3, 4, 5, 6] , length: 6, head: 6       , empty: false, },
+      { input: ['hello', 'world'] , length: 2, head: 'world' , empty: false, },
+      { input: [1, 2, 3, 'hello'] , length: 4, head: 'hello' , empty: false, },
+      { input: [1]                , length: 1, head: 1       , empty: false, },
+      { input: [null]             , length: 1, head: null    , empty: false, },
     ];
 
     test.each(arrayInput)('creates a shelf from an array', async (input) => {
@@ -90,8 +72,7 @@ describe('mewlix base library', () => {
           const shelfB = mewlix.shelf.create(b);
           return mewlix.relation.equal(shelfA, shelfB);
         },
-        a,
-        b,
+        a, b,
       );
       expect(output).toBe(result);
     });
