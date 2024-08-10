@@ -99,36 +99,12 @@ describe('mewlix base library', () => {
 
   describe('shelf operations: insertion', () => {
     const insertions = [
-      {
-        input: [1, 2, 3],
-        value: 4,
-        at: 0,
-        result: [1, 2, 3, 4],
-      },
-      {
-        input: [1, 2, 3],
-        value: 4,
-        at: -1,
-        result: [4, 1, 2, 3],
-      },
-      {
-        input: [1, 2, 3],
-        value: 4,
-        at: 1,
-        result: [1, 2, 4, 3],
-      },
-      {
-        input: [1, 2, 3],
-        value: 4,
-        at: -2,
-        result: [1, 4, 2, 3],
-      },
-      {
-        input: [1, 2, 3],
-        value: 4,
-        at: 6, /* outside of boundaries */
-        result: [4, 1, 2, 3],
-      },
+      { input: [1, 2, 3], value: 4, at: 0   , result: [1, 2, 3, 4], },
+      { input: [1, 2, 3], value: 4, at: -1  , result: [4, 1, 2, 3], },
+      { input: [1, 2, 3], value: 4, at: 1   , result: [1, 2, 4, 3], },
+      { input: [1, 2, 3], value: 4, at: -2  , result: [1, 4, 2, 3], },
+      { input: [1, 2, 3], value: 4, at: 6   , result: [4, 1, 2, 3], }, /* outside of boundaries */ 
+      { input: [1, 2, 3], value: 4, at: -6  , result: [1, 2, 3, 4], },
     ];
 
     test.each(insertions)('inserts a value into a shelf', async ({ input, value, at, result }) => {
@@ -147,31 +123,12 @@ describe('mewlix base library', () => {
 
   describe('shelf operation: removal', () => {
     const removals = [
-      {
-        input: [1, 2, 3],
-        at: 0,
-        result: [1, 2],
-      },
-      {
-        input: [1, 2, 3],
-        at: -1,
-        result: [2, 3],
-      },
-      {
-        input: [1, 2, 3],
-        at: 1,
-        result: [1, 3],
-      },
-      {
-        input: [1, 2, 3],
-        at: -2,
-        result: [1, 3],
-      },
-      {
-        input: [1, 2, 3],
-        at: 6,
-        result: [1, 2, 3],
-      },
+      { input: [1, 2, 3], at: 0   , result: [1, 2],    },
+      { input: [1, 2, 3], at: -1  , result: [2, 3],    },
+      { input: [1, 2, 3], at: 1   , result: [1, 3],    },
+      { input: [1, 2, 3], at: -2  , result: [1, 3],    },
+      { input: [1, 2, 3], at: 6   , result: [1, 2, 3], },
+      { input: [1, 2, 3], at: -6  , result: [1, 2],    },
     ];
 
     test.each(removals)('removes a value from a shelf', async ({ input, at, result }) => {
