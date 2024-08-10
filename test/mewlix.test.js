@@ -15,7 +15,7 @@ describe('mewlix base library', () => {
     );
   });
 
-  describe('shelf operations', () => {
+  describe('shelf creation ', () => {
     const inputs = [
       { input: [1, 2, 3, 4, 5, 6]          },
       { input: ['hello', 'world']          },
@@ -71,7 +71,32 @@ describe('mewlix base library', () => {
       expect(output.head).toStrictEqual(input[0]);
       expect(output.array).toStrictEqual([...input].reverse());
     });
+  });
 
+  describe('shelf equality', () => {
+    const compareShelves = [
+      { a: [1, 2, 3], b: [1, 2, 3] , result: true  },
+      { a: [1, 2, 3], b: [1, 2]    , result: false },
+      { a: [1, 2, 3], b: [1, 3, 4] , result: false },
+      { a: []       , b: []        , result: true  },
+    ];
+
+    it.each(compareShelves)('compares two shelves', async ({ a, b, result }) => {
+      const output = await page.evaluate(
+        (a, b) => {
+          const mewlix = globalThis.mewlix;
+          const shelfA = mewlix.shelf.create(a);
+          const shelfB = mewlix.shelf.create(b);
+          return mewlix.relation.equal(shelfA, shelfB);
+        },
+        a,
+        b,
+      );
+      expect(output).toBe(result);
+    });
+  });
+
+  describe('shelf operations: insertion and removal', () => {
     it('creates a shelf and inserts an item into it', async () => {
       const output = await page.evaluate(() => {
         const mewlix = globalThis.mewlix;
@@ -110,27 +135,6 @@ describe('mewlix base library', () => {
         return mewlix.shelf.toArray(shelfB);
       });
       expect(output).toStrictEqual([1, 2, 3])
-    });
-
-    const compareShelves = [
-      { a: [1, 2, 3], b: [1, 2, 3] , result: true  },
-      { a: [1, 2, 3], b: [1, 2]    , result: false },
-      { a: [1, 2, 3], b: [1, 3, 4] , result: false },
-      { a: []       , b: []        , result: true  },
-    ];
-
-    it.each(compareShelves)('compares two shelves', async ({ a, b, result }) => {
-      const output = await page.evaluate(
-        (a, b) => {
-          const mewlix = globalThis.mewlix;
-          const shelfA = mewlix.shelf.create(a);
-          const shelfB = mewlix.shelf.create(b);
-          return mewlix.relation.equal(shelfA, shelfB);
-        },
-        a,
-        b,
-      );
-      expect(output).toBe(result);
     });
   });
 });
