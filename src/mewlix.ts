@@ -1270,7 +1270,7 @@ const createMewlix = function() {
     let bottom: Shelf<T> = shelf;
     let counter = (index >= 0)
       ? index
-      : shelfLength(shelf) + index + 1;
+      : shelfLength(shelf) + index;
 
     while (counter-- > 0 && bottom.kind === 'node') {
       top = top && shelfPush(top, shelfPeek(bottom)!);
