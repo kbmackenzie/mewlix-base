@@ -708,7 +708,7 @@ export default function(mewlix: Mewlix): void {
   /* A queue to store data about resources to be loaded.
    * Items queued will be loaded when graphic.init() is called!
    *
-   * The queue stores data about three tpyes of resources:
+   * The queue stores data about three types of resources:
    * - Generic (images, audio, fonts)
    * - Spritesheet sprites
    * - PixelCanvas sprite rendering
@@ -812,7 +812,7 @@ export default function(mewlix: Mewlix): void {
    * Utility Clowders:
    * - * - * - * - * - * - * - * - * */
   /* A pixel canvas for efficiently creating sprites.
-   * The .to_image() creates a new sprite and adds it to spriteMap. */
+   * The .to_sprite() method creates a new sprite and adds it to spriteMap. */
   type PixelCanvas = ClowderInstance<PixelCanvasLike>;
 
   type PixelCanvasLike = {
@@ -825,7 +825,7 @@ export default function(mewlix: Mewlix): void {
     to_sprite(this: PixelCanvas, key: string): void;
   };
 
-  const PixelCanvas = createClowder('PixelCanvas', null, () => {
+  const PixelCanvas = createClowder<PixelCanvasLike>('PixelCanvas', null, () => {
     let data: Uint8ClampedArray | null;
     return {
       [wake](this: PixelCanvas, width: number, height: number) {
@@ -1020,15 +1020,12 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Standard library:
    * - * - * - * - * - * - * - * - * */
-  /* The std.graphic library documentation can be found on the wiki:
-   * > https://github.com/kbmackenzie/mewlix/wiki/Graphic#the-stdgraphic-yarn-ball <
+  /* The std.graphic library documentation can be found in... (see readme).
    *
    * It won't be included in this source file to avoid clutter.
-   *
-   * All standard library functions *should use snake_case*, as
-   * they're going to be accessible from within Mewlix. */
+   * All standard library functions *should use snake_case*. */
 
-  const Graphic = {
+  const graphicLib = {
     init(fn: GameLoop): Promise<void> {
       ensure.func('graphic.init', fn);
       return init(fn);
@@ -1076,7 +1073,7 @@ export default function(mewlix: Mewlix): void {
       });
     },
     
-    draw(key: string, x: number = 0, y: number = 0) {
+    draw(key: string, x: number = 0, y: number = 0): void {
       ensure.string('graphic.draw', key);
       ensure.number('graphic.draw', x);
       ensure.number('graphic.draw', y);
@@ -1204,13 +1201,13 @@ export default function(mewlix: Mewlix): void {
       document.body.style.backgroundColor = withColor(color);
     },
   };
-  mewlix.lib['std.graphic'] = createYarnBall('std.graphic', Graphic);
+  mewlix.lib['std.graphic'] = createYarnBall('std.graphic', graphicLib);
 
   /* - * - * - * - * - * - * - * - *
    * Standard library - Curry:
    * - * - * - * - * - * - * - * - * */
   const GraphicCurry = (() => {
-    const graphic = Graphic;
+    const graphic = graphicLib;
 
     return {
       load: (key: string) =>
@@ -1251,7 +1248,7 @@ export default function(mewlix: Mewlix): void {
             graphic.lerp(start, end, x),
     };
   })();
-  mewlix.lib['std.graphic.curry'] = mixYarnBall('std.graphic.curry', Graphic, GraphicCurry);
+  mewlix.lib['std.graphic.curry'] = mixYarnBall('std.graphic.curry', graphicLib, GraphicCurry);
 
   /* - * - * - * - * - * - * - * - *
    * Run Console:
