@@ -312,13 +312,11 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Standard library:
    * - * - * - * - * - * - * - * - * */
-  /* The std.console library documentation can be found on the wiki:
-   * > https://github.com/kbmackenzie/mewlix/wiki/Console#the-stdconsole-yarn-ball <
+
+  /* The std library documentation can be found in... (see readme).
    *
    * It won't be included in this source file to avoid clutter.
-   *
-   * All standard library functions *should use snake_case*, as
-   * they're going to be accessible from within Mewlix. */
+   * All standard library functions *should use snake_case*. */
 
   const consoleLib = {
     clear: clearConsole,
