@@ -490,6 +490,9 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
     return `clowder ${clowder.name}`;
   },
   'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): string {
+    if (instance.meta.purr) {
+      return purrify(instance.meta.purr());
+    }
     const items = getEntries(instance.bindings)
       .map(([key, value]) => `"${key}": ${purrify(value)}`)
       .join(', ');
