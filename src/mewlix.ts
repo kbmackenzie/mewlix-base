@@ -42,6 +42,9 @@ export type ClowderInstance<T extends ClowderBindings> = Readonly<{
   parent: ClowderInstance<T> | null;
   get(key: keyof T): TryGet<ValueOf<T>>;
   set(key: keyof T, value: ValueOf<T>): void;
+  meta: {
+    purr?: () => any;
+  },
 }>;
 
 export type ClowderBindings = {
@@ -317,12 +320,17 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
     set(key: keyof T, value: ValueOf<T>): void {
       bindings[key] = value;
     },
+    meta: {},
   };
   bindings[wake] = bindings[wake]?.bind(instance);
   for (const key in bindings) {
     const value = bindings[key];
     if (typeof value === 'function') {
-      bindings[key] = value.bind(instance);
+      const func = value.bind(instance);
+      if (key === 'purr') {
+        instance.meta.purr = func;
+      }
+      bindings[key] = func;
     }
   }
   return instance;
