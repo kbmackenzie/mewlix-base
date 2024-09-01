@@ -177,6 +177,13 @@ export function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): 
   return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
 }
 
+export function shelfCompare<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): Ordering {
+  if (a.kind === 'bottom') return b.kind === 'bottom' ? Ordering.Equal : Ordering.Less;
+  if (b.kind === 'bottom') return Ordering.Greater;
+  const ord = relation.ordering(a.value, b.value);
+  return ord == Ordering.Equal ? shelfCompare(a.tail, b.tail) : ord;
+}
+
 export function isShelf<T>(value: any): value is Shelf<T> {
   return typeof value == 'object'
     && value !== null
@@ -714,6 +721,9 @@ export const relation = {
     return a === b;
   },
   ordering(a: MewlixValue, b: MewlixValue): Ordering {
+    if (isShelf<MewlixValue>(a) && isShelf<MewlixValue>(b)) {
+      return shelfCompare(a, b);
+    }
     if (typeof a !== typeof b) {
       const typeofA = reflection.typeOf(a);
       const typeofB = reflection.typeOf(b);
