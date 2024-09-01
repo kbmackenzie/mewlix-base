@@ -359,11 +359,10 @@ export function instanceOf<T extends ClowderBindings>(
   instance: ClowderInstance<T>,
   clowder: Clowder<T>
 ): boolean {
-  const kind = instance.kind;
-  let c: Clowder<T> | null = clowder;
-  while (c) {
-    if (c.kind === kind) return true;
-    c = clowder.parent;
+  let i: ClowderInstance<T> | null = instance;
+  while (i) {
+    if (i.kind === clowder.kind) return true;
+    i = i.parent;
   }
   return false;
 }
