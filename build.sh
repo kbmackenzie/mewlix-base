@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPT_NAME='build.sh'
+
 rm -rf './build'
 mkdir  './build'
 
@@ -15,12 +17,12 @@ PROJECT_DIRECTORY=$(pwd)
 
 # Write a log message to stdout.
 log_message() {
-  echo "[build.sh] $1"
+  echo "[$SCRIPT_NAME] $1"
 }
 
 # Write an error message to stderr.
 log_error() {
-  echo "[build.sh] $1" 1>&2
+  echo "[$SCRIPT_NAME] $1" 1>&2
 }
 
 # Dependency Management
