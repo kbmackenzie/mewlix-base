@@ -75,7 +75,7 @@ WAIT_DURATION=3
 LONG_OPTIONS='help,rebuild,wait:,no-run'
 SHORT_OPTIONS='hrw:n'
 
-OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n 'test.sh' -- "$@")
+OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n "$SCRIPT_NAME" -- "$@")
 eval set -- "$OPTS"
 
 while true; do
