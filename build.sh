@@ -47,7 +47,7 @@ minify_js() {
   npx terser "$1" --config-file "$TERSER_CONFIG"
 }
 
-# Compile a SASS stylesheet to a CSS stylesheet.
+# Compile a Sass stylesheet to a CSS stylesheet.
 compile_sass() {
   npx sass "$1/style.sass" "$1/style.css" --style=compressed --no-source-map
 }
