@@ -5,6 +5,8 @@
   "scripts": {
     "build": "./build.sh",
     "test": "./test.sh",
+    "console": "./view.sh console",
+    "graphic": "./view.sh graphic",
     "clean": "rm -rf ./build",
     "typecheck": "tsc --noEmit"
   },
