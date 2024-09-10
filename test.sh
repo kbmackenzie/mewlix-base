@@ -1,13 +1,31 @@
 #!/bin/bash
 
+SCRIPT_NAME='test.sh'
+HELP_MESSAGE=$(cat << EOM
+Usage: test [-h|--help] [-r|--rebuild] [-w|--wait <SECONDS>] [-n|--no-run]
+
+  Build and run tests for Mewlix's templates.
+
+Available options:
+  -h, --help            Display this help message
+  -r, --rebuild         Rebuild templates before running tests.
+  -w, --wait <SECONDS>  How long to wait for servers before running Jest.
+  -n, --no-run          Build tests, but do not run them. Implies --rebuild.
+EOM
+)
+
 # Write a log message to stdout.
 log_message() {
-  echo "[test.sh] $1"
+  echo "[$SCRIPT_NAME] $1"
 }
 
 # Write an error message to stderr.
 log_error() {
-  echo "[test.sh] $1" 1>&2
+  echo "[$SCRIPT_NAME] $1" 1>&2
+}
+
+help_message() {
+  echo "$HELP_MESSAGE"
 }
 
 if [ ! -d './build' ]; then
@@ -54,21 +72,24 @@ WAIT_DURATION=3
 # ------------------------------
 # Parse command-line arguments:
 # ------------------------------
-LONG_OPTIONS='rebuild,wait:,dont-run'
-SHORT_OPTIONS='rw:d'
+LONG_OPTIONS='help,rebuild,wait:,no-run'
+SHORT_OPTIONS='hrw:n'
 
 OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n 'test.sh' -- "$@")
 eval set -- "$OPTS"
 
 while true; do
   case "$1" in
+    -h | --help)
+      help_message
+      exit ;;
     -r | --rebuild)
       REBUILD=true
       shift ;;
     -w | --wait)
       WAIT_DURATION="$2"
       shift 2 ;;
-    -d | --dont-run)
+    -n | --no-run)
       RUN_TESTS=false
       shift ;;
     --)
