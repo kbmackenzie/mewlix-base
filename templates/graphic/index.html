@@ -10,24 +10,35 @@
     <link rel="icon" href="./favicon.svg" type="image/x-icon">
 
     <script type="module">
-      import run from './index.js'
-      run()
+      import run from './index.js';
+      run();
     </script>
   </head>
   <body>
-    <main class="game">
+    <main class="container">
       <canvas
         id="game-canvas"
         width="1024"
         height="1024"
-        class="game-canvas"
-        ></canvas>
-      <button id="game-sound" class="game-sound"> </button>
+        class="game-canvas">
+        Game canvas. If you're seeing this, your browser does not support the canvas element!
+      </canvas>
+      <ul class="navigation">
+        <li title="sound settings">
+          <button id="game-sound"></button>
+        </li>
+        <li title="pause/play game">
+          <button id="game-pause"></button>
+        </li>
+        <li title="take a screenshot">
+          <button id="game-screenshot"></button>
+        </li>
+      </ul>
+      <img
+        id="loading"
+        src="./core-assets/mewlix-load.png"
+        alt="A pixel art animation of a cat with text that says 'Loading...'."
+        class="loading">
     </main>
-    <img
-      id="loading-overlay"
-      src="./core-assets/mewlix-load.png"
-      alt="A pixel art animation of a cat with text that says 'Loading...'."
-      class="loading-overlay">
   </body>
 </html>
