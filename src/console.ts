@@ -63,7 +63,7 @@ export default function(mewlix: Mewlix): void {
   const settingsMenu  = document.getElementById('settings')           as HTMLElement;
   const setColor      = document.getElementById('select-color')       as HTMLInputElement;
   const setErrorColor = document.getElementById('select-error-color') as HTMLInputElement;
-  const showHighlight = document.getElementById('show-highlight')     as HTMLInputElement;
+  const setInputFocus = document.getElementById('set-input-focus')    as HTMLInputElement;
   const saveLogButton = document.getElementById('save-log')           as HTMLButtonElement;
 
   /* - * - * - * - * - * - * - * - *
@@ -184,8 +184,8 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Additional utils:
    * - * - * - * - * - * - * - * - * */
-  function toggleHighlight(highlight: boolean): void {
-    if (highlight) {
+  function toggleInputFocus(focus: boolean): void {
+    if (focus) {
       input.classList.add('highlight');
     }
     else {
@@ -287,8 +287,8 @@ export default function(mewlix: Mewlix): void {
     }, 300);
   });
 
-  showHighlight.addEventListener('change', () => {
-    toggleHighlight(showHighlight.checked);
+  setInputFocus.addEventListener('change', () => {
+    toggleInputFocus(setInputFocus.checked);
   });
 
   saveLogButton.addEventListener('click', () => {
@@ -298,7 +298,7 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Initialization (electric boogaloo):
    * - * - * - * - * - * - * - * - * */
-  toggleHighlight(showHighlight.checked);
+  toggleInputFocus(setInputFocus.checked);
 
   /* - * - * - * - * - * - * - * - *
    * Override 'meow':
@@ -345,9 +345,9 @@ export default function(mewlix: Mewlix): void {
       setProjectName(name);
     },
 
-    highlight(enable: boolean): void {
-      showHighlight.checked = convert.bool(enable);
-      toggleHighlight(enable);
+    input_focus(enable: boolean): void {
+      setInputFocus.checked = convert.bool(enable);
+      toggleInputFocus(enable);
     },
 
     set_color(color: string): void {
