@@ -931,7 +931,7 @@ export default function(mewlix: Mewlix): void {
   }
 
   function removeLoadingOverlay(): void {
-    document.getElementById('loading-overlay')?.remove();
+    document.getElementById('loading')?.remove();
   }
 
   async function drawPlay(): Promise<void> {
