@@ -631,24 +631,6 @@ export default function(mewlix: Mewlix): void {
   }
 
   /* - * - * - * - * - * - * - * - *
-   * Sound Button:
-   * - * - * - * - * - * - * - * - * */
-  const soundButton = document.getElementById('game-sound') as HTMLButtonElement;
-
-  soundButton.addEventListener('click', () => {
-    mute = !mute;
-
-    if (mute) {
-      soundButton.classList.add('muted');
-    }
-    else {
-      soundButton.classList.remove('muted');
-    }
-
-    gameVolume.update();
-  });
-
-  /* - * - * - * - * - * - * - * - *
    * Generic Loading:
    * - * - * - * - * - * - * - * - * */
   let imageExtensions = new Set([
@@ -913,6 +895,9 @@ export default function(mewlix: Mewlix): void {
   let thumbnail: GameLoop | null;   // Callback function to generate a thumbnail;
   let initialized: boolean = false; // Flag indicating whether .init() has been called
 
+  let paused: boolean = false;      // "Is the game paused?"
+  let screenshot: boolean = false;  // "Should a screenshot be taken this frame?"
+
   function setThumbnail(fn: GameLoop): void {
     if (initialized) {
       console.warn('[mewlix] Setting thumbnail after .init() has no effect!');
@@ -1015,6 +1000,42 @@ export default function(mewlix: Mewlix): void {
       meowOptions
     );
     return message;
+  });
+
+  /* - * - * - * - * - * - * - * - *
+   * Navigation Buttons:
+   * - * - * - * - * - * - * - * - * */
+  const soundButton  = document.getElementById('game-sound') as HTMLButtonElement;
+  const pauseButton  = document.getElementById('game-pause') as HTMLButtonElement;
+  const cameraButton = document.getElementById('game-screenshot') as HTMLButtonElement;
+
+  soundButton.addEventListener('click', event => {
+    event.preventDefault();
+    mute = !mute;
+    if (mute) {
+      soundButton.classList.add('muted');
+    }
+    else {
+      soundButton.classList.remove('muted');
+    }
+    gameVolume.update();
+  });
+
+  pauseButton.addEventListener('click', event => {
+    event.preventDefault();
+    paused = !paused;
+    if (paused) {
+      pauseButton.classList.add('paused');
+    }
+    else {
+      pauseButton.classList.remove('paused');
+    }
+  });
+
+  cameraButton.addEventListener('click', event => {
+    event.preventDefault();
+    /* We ~always~ want to screenshot when this button is clicked. */
+    screenshot = true;
   });
 
   /* - * - * - * - * - * - * - * - *
