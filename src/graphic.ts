@@ -791,6 +791,46 @@ export default function(mewlix: Mewlix): void {
   }
 
   /* - * - * - * - * - * - * - * - *
+   * Screenshots:
+   * - * - * - * - * - * - * - * - * */
+  async function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+    return new Promise(resolve => canvas.toBlob(blob => resolve(blob)));
+  }
+
+  function screenshotName(date: Date): string {
+    const prefix = 'mewlix-screenshot';
+    const day   = date.getDate();
+    const month = date.getMonth() + 1;
+    const year  = date.getFullYear();
+    const hour  = date.getHours();
+    const seconds = date.getSeconds();
+    return `${prefix}-${month}-${day}-${year}-at-${hour}-${seconds}.png`;
+  }
+
+  async function takeScreenshot(): Promise<void> {
+    const blob = await canvasBlob(canvas);
+    const url  = blob && URL.createObjectURL(blob);
+    if (!url) {
+      throw new MewlixError(ErrorCode.Graphic,
+        `Couldn't take screenshot: couldn't generate canvas blob!`);
+    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = screenshotName(new Date());
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    /* Q: "Can you really revoke the object URL yet?"
+     * A: Hopefully, in theory...?
+     * https://github.com/whatwg/html/issues/954#issue-144165132
+     * I am setting a little timeout purely to be safe. c': */
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
+  /* - * - * - * - * - * - * - * - *
    * Utility Clowders:
    * - * - * - * - * - * - * - * - * */
   /* A pixel canvas for efficiently creating sprites.
@@ -961,6 +1001,10 @@ export default function(mewlix: Mewlix): void {
           if (!paused) {
             context.clearRect(0, 0, canvasWidth, canvasHeight);
             fn(deltaTime);
+          }
+          if (screenshot) {
+            await takeScreenshot();
+            screenshot = false;
           }
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
