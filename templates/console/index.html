@@ -27,7 +27,11 @@
           placeholder="Enter input here..."
           class="fira-mono console-input"
           disabled></textarea>
-      <button id="console-file" class="clickable vector-button center-items console-file" disabled>
+      <button
+        id="console-file"
+        class="clickable vector-button center-items console-file"
+        title="upload file"
+        disabled>
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.1068">
             <path d="m10.627 1.0888h-8.2973v13.822h11.341v-11.826z"/>
@@ -37,12 +41,16 @@
       </button>
       <input
         type="file"
-          class="hide"
-          accept=".txt"
-          id="file-input"
-          name="file-input"
-          disabled>
-      <button id="console-arrow" class="clickable vector-button center-items console-arrow" disabled>
+        class="hide"
+        accept=".txt"
+        id="file-input"
+        name="file-input"
+        disabled>
+      <button
+        id="console-arrow"
+        class="clickable vector-button center-items console-arrow"
+        title="send input"
+        disabled>
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <g transform="matrix(1.4738 0 0 1.4098 -3.2684 -.31964)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1px">
             <path d="m3.117 9.5183h6.8052v-7.2341"/>
@@ -50,7 +58,10 @@
           </g>
         </svg>
       </button>
-      <button id="show-settings" class="clickable vector-button center-items console-settings">
+      <button
+        id="show-settings"
+        class="clickable vector-button center-items console-settings"
+        title="show settings window">
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <g transform="translate(-.019263 .040135)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.9197">
             <path d="m1.9213 3.9599h12.157"/>
@@ -62,7 +73,10 @@
     </main>
     <aside id="settings" class="settings hide">
       <h1 class="fira-mono center-items settings-title">mewlix</h1>
-      <button id="hide-settings" class="clickable vector-button center-items settings-exit">
+      <button
+        id="hide-settings"
+        class="clickable vector-button center-items settings-exit"
+        title="hide settings window">
         <svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
             <path d="m1.9951 14.005 12.01-12.01"/>
@@ -71,19 +85,19 @@
         </svg>
       </button>
       <ul class="fira-mono settings-options">
-        <li class="settings-option">
+        <li class="settings-option" title="select color">
           <label for="select-color">Prompt color:</label>
           <input type="color" value="#f6d52d" name="select-color" id="select-color">
         </li>
-        <li class="settings-option">
+        <li class="settings-option" title="select error color">
           <label for="select-error-color">Error color:</label>
           <input type="color" value="#ff214e" name="select-error-color" id="select-error-color">
         </li>
-        <li class="settings-option">
+        <li class="settings-option" title="highlight input box">
           <label for="show-highlight">Highlight input:</label>
           <input type="checkbox" name="show-highlight" id="show-highlight">
         </li>
-        <li class="center-items settings-savelog">
+        <li class="center-items settings-savelog" title="save console log">
           <button id="save-log" class="clickable fira-mono">Save Logs</button>
         </li>
       </ul>
