@@ -958,8 +958,10 @@ export default function(mewlix: Mewlix): void {
         flushKeyQueue(); flushClick();
 
         while (true) {
-          context.clearRect(0, 0, canvasWidth, canvasHeight);
-          fn(deltaTime);
+          if (!paused) {
+            context.clearRect(0, 0, canvasWidth, canvasHeight);
+            fn(deltaTime);
+          }
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
           lastFrame ??= now;
@@ -1024,11 +1026,18 @@ export default function(mewlix: Mewlix): void {
   pauseButton.addEventListener('click', event => {
     event.preventDefault();
     paused = !paused;
+    /* When pausing a game, pause audio context too. */
     if (paused) {
       pauseButton.classList.add('paused');
+      if (audioContext.state === 'running') {
+        audioContext.suspend();
+      }
     }
     else {
       pauseButton.classList.remove('paused');
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
     }
   });
 
