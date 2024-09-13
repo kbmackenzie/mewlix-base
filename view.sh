@@ -49,8 +49,17 @@ export default function(mewlix) {
     globalThis.mewlix = mewlix;
 
     const graphic = mewlix.lib['std.graphic'];
+    const std = mewlix.lib['std'];
+    let timer = 0, x = 0, y = 0;
+
     graphic.get('init')(() => {
-      graphic.get('write')(':3', 0, 0);
+      timer += graphic.get('delta')();
+      if (timer >= 1) {
+        timer = 0;
+        x = std.get('random_int')(0, 127);
+        y = std.get('random_int')(0, 127);
+      }
+      graphic.get('write')('miaou', x, y);
     });
   });
 }
