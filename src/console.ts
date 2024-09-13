@@ -262,8 +262,7 @@ export default function(mewlix: Mewlix): void {
     input.dispatchEvent(inputReceived());
   });
 
-  fileButton.addEventListener('click', event => {
-    event.preventDefault();
+  fileButton.addEventListener('click', () => {
     fileInput.click();
   });
 
