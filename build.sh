@@ -127,5 +127,8 @@ package_all() {
   package_template 'node'
 }
 
+log_message 'Compiling...'
 build
+
+log_message 'Packaging...'
 package_all
