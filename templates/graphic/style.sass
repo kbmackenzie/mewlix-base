@@ -55,18 +55,20 @@ body
     box-shadow: 1px 3px 3px $icon-background
     background-color: $icon-background
 
+    opacity: 50%
+    transition: opacity 0.5s
+    &:hover
+      opacity: 100%
+
   li > button
     $button-size: 2rem
 
     width: $button-size
     height: $button-size
-
     border: none
-    opacity: 100%
 
     &:hover
       cursor: pointer
-      opacity: 50%
 
 #game-sound
   $speaker: get-asset('icons/speaker.svg')
