@@ -52,7 +52,7 @@ export default function(mewlix) {
     const std = mewlix.lib['std'];
     let timer = 0, x = 0, y = 0;
 
-    graphic.get('init')(() => {
+    const init = () => graphic.get('init')(() => {
       timer += graphic.get('delta')();
       if (timer >= 1) {
         timer = 0;
@@ -61,6 +61,8 @@ export default function(mewlix) {
       }
       graphic.get('write')('miaou', x, y);
     });
+    setTimeout(init, 3000);
+    //init();
   });
 }
 EOF
