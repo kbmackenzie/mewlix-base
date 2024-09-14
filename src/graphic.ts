@@ -110,6 +110,36 @@ export function withColor(value: string | Color): string {
 }
 
 /* - * - * - * - * - * - * - * - *
+ * Configuration:
+ * - * - * - * - * - * - * - * - * */
+type GraphicConfig = {
+  mute?:  boolean;
+  pause?: boolean;
+};
+const configKey = '_mewlix-graphic-config';
+
+function readConfig(): GraphicConfig {
+  const json   = globalThis.localStorage.getItem(configKey);
+  const config = json && JSON.parse(json) as GraphicConfig;
+  if (!config || typeof config !== 'object') {
+    console.error('Couldn\'t load config from local storage!');
+    return {};
+  }
+  return config;
+}
+
+function writeConfig(data: GraphicConfig): void {
+  const config: GraphicConfig = {
+    mute:  Boolean(data.mute),
+    pause: Boolean(data.pause),
+  };
+  globalThis.localStorage.setItem(
+    configKey,
+    JSON.stringify(config),
+  );
+}
+
+/* - * - * - * - * - * - * - * - *
  * Vector2:
  * - * - * - * - * - * - * - * - * */
 export type Vector2 = ClowderInstance<Vector2Bindings>;
