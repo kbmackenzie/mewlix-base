@@ -118,9 +118,17 @@ type GraphicConfig = {
 };
 const configKey = '_mewlix-graphic-config';
 
+function tryParseJson<T>(input: string): T | null {
+  /* We don't really care about JSON parser errors; just return 'null'.
+   * Users will never write their own config manually.
+   *
+   * We're only try/catch-ing to be sure this won't blow up on users. */
+  try { return JSON.parse(input) as T; } catch { return null; }
+}
+
 function readConfig(): GraphicConfig {
   const json   = globalThis.localStorage.getItem(configKey);
-  const config = json && JSON.parse(json) as GraphicConfig;
+  const config = json && tryParseJson<GraphicConfig>(json);
   if (!config || typeof config !== 'object') {
     console.error('Couldn\'t load config from local storage!');
     return {};
