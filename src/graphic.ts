@@ -139,7 +139,6 @@ function readConfig(): GraphicConfig {
 function writeConfig(data: GraphicConfig): void {
   const config: GraphicConfig = {
     mute:  Boolean(data.mute),
-    pause: Boolean(data.pause),
   };
   globalThis.localStorage.setItem(
     configKey,
@@ -973,8 +972,10 @@ export default function(mewlix: Mewlix): void {
   let thumbnail: GameLoop | null;   // Callback function to generate a thumbnail;
   let initialized: boolean = false; // Flag indicating whether .init() has been called
 
+  const config = readConfig();      // Graphic config!
   let paused: boolean = false;      // "Is the game paused?"
   let screenshot: boolean = false;  // "Should a screenshot be taken this frame?"
+  let saveConfig: boolean = false;  // "Should graphic config (e.g. sound muting) be saved?"
 
   function setThumbnail(fn: GameLoop): void {
     if (initialized) {
@@ -1047,6 +1048,10 @@ export default function(mewlix: Mewlix): void {
             await takeScreenshot();
             screenshot = false;
           }
+          if (saveConfig) {
+            writeConfig(config);
+            saveConfig = false;
+          }
           flushKeyQueue(); flushClick();
           const now = await nextFrame();
           lastFrame ??= now;
@@ -1096,10 +1101,8 @@ export default function(mewlix: Mewlix): void {
   const pauseButton  = document.getElementById('game-pause') as HTMLButtonElement;
   const cameraButton = document.getElementById('game-screenshot') as HTMLButtonElement;
 
-  /* Page-specific config! */
-  const config = readConfig();
-  config.mute  && soundToggle();
-  config.pause && pauseToggle();
+  /* Make changes to page from config! */
+  if (config.mute) { soundToggle() };
 
   function soundToggle(): void {
     config.mute = !mute;
@@ -1111,7 +1114,7 @@ export default function(mewlix: Mewlix): void {
       soundButton.classList.remove('muted');
     }
     gameVolume.update();
-  };
+  }
 
   function pauseToggle(): void {
     config.pause = !paused;
@@ -1129,17 +1132,17 @@ export default function(mewlix: Mewlix): void {
         audioContext.resume();
       }
     }
-  };
+  }
 
   soundButton.addEventListener('click', event => {
     event.preventDefault();
     soundToggle();
-    writeConfig(config);
+    saveConfig = true;
   });
   pauseButton.addEventListener('click', event => {
     event.preventDefault();
     pauseToggle();
-    writeConfig(config);
+    saveConfig = true;
   });
   cameraButton.addEventListener('click', event => {
     event.preventDefault();
