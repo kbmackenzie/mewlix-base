@@ -1096,8 +1096,13 @@ export default function(mewlix: Mewlix): void {
   const pauseButton  = document.getElementById('game-pause') as HTMLButtonElement;
   const cameraButton = document.getElementById('game-screenshot') as HTMLButtonElement;
 
-  soundButton.addEventListener('click', event => {
-    event.preventDefault();
+  /* Page-specific config! */
+  const config = readConfig();
+  config.mute  && soundToggle();
+  config.pause && pauseToggle();
+
+  function soundToggle(): void {
+    config.mute = !mute;
     mute = !mute;
     if (mute) {
       soundButton.classList.add('muted');
@@ -1106,10 +1111,10 @@ export default function(mewlix: Mewlix): void {
       soundButton.classList.remove('muted');
     }
     gameVolume.update();
-  });
+  };
 
-  pauseButton.addEventListener('click', event => {
-    event.preventDefault();
+  function pauseToggle(): void {
+    config.pause = !paused;
     paused = !paused;
     /* When pausing a game, pause audio context too. */
     if (paused) {
@@ -1124,8 +1129,18 @@ export default function(mewlix: Mewlix): void {
         audioContext.resume();
       }
     }
-  });
+  };
 
+  soundButton.addEventListener('click', event => {
+    event.preventDefault();
+    soundToggle();
+    writeConfig(config);
+  });
+  pauseButton.addEventListener('click', event => {
+    event.preventDefault();
+    pauseToggle();
+    writeConfig(config);
+  });
   cameraButton.addEventListener('click', event => {
     event.preventDefault();
     /* We ~always~ want to screenshot when this button is clicked. */
