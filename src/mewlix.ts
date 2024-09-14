@@ -1628,13 +1628,13 @@ const createMewlix = function() {
 
   function read(key: string): string | null {
     ensure.string('std.read', key);
-    return localStorage.getItem(key);
+    return globalThis.localStorage.getItem(key);
   };
 
   function save(key: string, contents: string): void {
     ensure.string('std.save', key);
     ensure.string('std.save', contents);
-    localStorage.setItem(key, contents);
+    globalThis.localStorage.setItem(key, contents);
   };
 
   type DateInfo = {
