@@ -1105,8 +1105,8 @@ export default function(mewlix: Mewlix): void {
   if (config.mute) { soundToggle() };
 
   function soundToggle(): void {
-    config.mute = !mute;
     mute = !mute;
+    config.mute = mute;
     if (mute) {
       soundButton.classList.add('muted');
     }
@@ -1117,8 +1117,9 @@ export default function(mewlix: Mewlix): void {
   }
 
   function pauseToggle(): void {
-    config.pause = !paused;
     paused = !paused;
+    config.pause = paused;
+
     /* When pausing a game, pause audio context too. */
     if (paused) {
       pauseButton.classList.add('paused');
