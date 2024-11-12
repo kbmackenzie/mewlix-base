@@ -1167,7 +1167,7 @@ export default function(mewlix: Mewlix): void {
 
     init_(fn: GameLoop): Promise<void> {
       ensure.func('graphic.init_', fn);
-      setThumbnail(fn);
+      setThumbnail(() => fn(0));
       return init(fn);
     },
 
