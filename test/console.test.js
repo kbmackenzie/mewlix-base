@@ -30,8 +30,8 @@ describe('mewlix console template', () => {
 
   it('should toggle input highlight', async () => {
     const hasSetHighlight = await page.evaluate(() => {
-      globalThis.mewlix.lib['std.console'].get('highlight')(true);
-      return document.getElementById('show-highlight').checked;
+      globalThis.mewlix.lib['std.console'].get('input_focus')(true);
+      return document.getElementById('set-input-focus').checked;
     });
     expect(hasSetHighlight).toBe(true);
   });
