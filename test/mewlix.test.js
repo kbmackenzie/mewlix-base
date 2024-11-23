@@ -125,4 +125,36 @@ describe('mewlix base library', () => {
       expect(output).toStrictEqual(result);
     });
   });
+
+  describe('shelf operation: find', () => {
+    const finds = [
+      { input: [1, 2, 3] , search: 3 , result: 0    },
+      { input: [1, 2, 3] , search: 1 , result: 2    },
+      { input: [1, 2]    , search: 3 , result: null },
+      { input: []        , search: 3 , result: null },
+    ];
+
+    test.each(finds)('searches for a value in a shelf', async ({ input, search, result }) => {
+      const output = await page.evaluate(
+        (input, search) => {
+          const mewlix = globalThis.mewlix;
+          const shelf  = mewlix.shelf.create(input);
+          const output = mewlix.lib['std'].get('find')(x => x == search, shelf);
+          return output;
+        },
+        input, search
+      );
+      expect(output).toStrictEqual(result);
+    });
+
+    test('handles truthy predicate values properly', async () => {
+      const output = await page.evaluate(() => {
+        const mewlix = globalThis.mewlix;
+        const shelf  = mewlix.shelf.create([1, 2, 3]);
+        const output = mewlix.lib['std'].get('find')(_ => "", shelf);
+        return output;
+      });
+      expect(output).toStrictEqual(0);
+    });
+  });
 });
