@@ -966,7 +966,7 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Game Loop
    * - * - * - * - * - * - * - * - * */
-  type GameLoop = (delta?: number) => void;
+  type GameLoop = (delta: number) => void;
 
   let deltaTime: number = 0;        // Delta time, in seconds!
   let thumbnail: GameLoop | null;   // Callback function to generate a thumbnail;
@@ -1034,7 +1034,7 @@ export default function(mewlix: Mewlix): void {
         removeLoadingOverlay();
         context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        thumbnail?.();
+        thumbnail?.(0);
         await drawPlay();
         await awaitClick();
         flushKeyQueue(); flushClick();
@@ -1167,7 +1167,7 @@ export default function(mewlix: Mewlix): void {
 
     init_(fn: GameLoop): Promise<void> {
       ensure.func('graphic.init_', fn);
-      setThumbnail(() => fn(0));
+      setThumbnail(fn);
       return init(fn);
     },
 
