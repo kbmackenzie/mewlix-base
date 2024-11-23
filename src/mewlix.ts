@@ -1259,6 +1259,17 @@ const createMewlix = function() {
     return shelfFromArray(output);
   };
 
+  function find<T>(predicate: (t: T) => boolean, shelf: Shelf<T>): number | null {
+    ensure.shelf('std.find', shelf);
+    ensure.func('std.find', predicate);
+
+    for (let node = shelf, i = 0; node.kind === 'node'; node = node.tail, i++) {
+      const result = predicate(node.value);
+      if (convert.bool(result)) return i;
+    }
+    return null;
+  }
+
   function insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
     ensure.shelf('std.insert', shelf);
     ensure.number('std.insert', index);
@@ -1327,7 +1338,8 @@ const createMewlix = function() {
     const iterator = shelfIterator(shelf);
 
     for (const value of iterator) {
-      if (predicate(value)) {
+      const result = predicate(value);
+      if (convert.bool(result)) {
         bucket = shelfPush(bucket, value);
       }
     }
@@ -1353,7 +1365,8 @@ const createMewlix = function() {
 
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
-      if (predicate(value)) { return true; }
+      const result = predicate(value);
+      if (convert.bool(result)) { return true; }
     }
     return false;
   };
@@ -1364,7 +1377,8 @@ const createMewlix = function() {
 
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
-      if (!(predicate(value))) { return false; }
+      const result = predicate(value);
+      if (convert.bool(result)) { return false; }
     }
     return true;
   };
@@ -1718,6 +1732,7 @@ const createMewlix = function() {
     reverse,
     sort,
     shuffle,
+    find,
     insert,
     remove,
     map,
