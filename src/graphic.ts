@@ -57,9 +57,9 @@ export function hexToRGB(str: string): RGB | null {
 
   const hexcode = matches[1];
   if (hexcode.length === 6) return {
-    red:   matches[1].slice(0, 2) as Byte,
-    green: matches[1].slice(2, 4) as Byte,
-    blue:  matches[1].slice(4, 6) as Byte,
+    red:   hexcode.slice(0, 2) as Byte,
+    green: hexcode.slice(2, 4) as Byte,
+    blue:  hexcode.slice(4, 6) as Byte,
   };
 
   if (hexcode.length === 3) {
