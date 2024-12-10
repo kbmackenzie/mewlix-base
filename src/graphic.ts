@@ -373,6 +373,14 @@ function colorToStyle(color: Color) {
   return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
 }
 
+function valueToColor(value: string | Color): Color {
+  if (typeof value === 'string') {
+    return hexToColor(value);
+  }
+  ensureColor(value);
+  return value;
+}
+
 export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Initializing Canvas:
@@ -895,12 +903,13 @@ export default function(mewlix: Mewlix): void {
       },
       width:  0,
       height: 0,
-      fill(this: PixelCanvas, color: Color): void {
+      fill(this: PixelCanvas, color: string | Color): void {
         if (!data) throw pixelCanvasError();
         ensurePixelCanvas(this);
 
-        const { red, green, blue } = color.bindings;
-        const alpha = color.bindings.alpha.call(color);
+        const trueColor = valueToColor(color);
+        const { red, green, blue } = trueColor.bindings;
+        const alpha = trueColor.bindings.alpha.call(trueColor);
 
         for (let i = 0; i < data.length; i += 4) {
           data[i]     = red;
@@ -909,14 +918,15 @@ export default function(mewlix: Mewlix): void {
           data[i + 3] = alpha;
         }
       },
-      set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void {
+      set_pixel(this: PixelCanvas, x: number, y: number, color: string | Color): void {
         if (!data) throw pixelCanvasError();
         ensurePixelCanvas(this);
         ensure.number('PixelCanvas.set_pixel', x);
         ensure.number('PixelCanvas.set_pixel', y);
 
-        const { red, green, blue } = color.bindings;
-        const alpha = color.bindings.alpha.call(color);
+        const trueColor = valueToColor(color);
+        const { red, green, blue } = trueColor.bindings;
+        const alpha = trueColor.bindings.alpha.call(trueColor);
 
         const i = (x * this.bindings.width + y) * 4;
         data[i]     = red;
