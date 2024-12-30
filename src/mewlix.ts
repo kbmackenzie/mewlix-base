@@ -47,8 +47,11 @@ export type ClowderInstance<T extends ClowderBindings> = Readonly<{
   },
 }>;
 
+// A very lenient dummy type for the occasion.
+export type Wake = (...args: any[]) => void;
+
 export type ClowderBindings = {
-  [wake]: (...args: any[]) => void;
+  [wake]?: Wake;
 };
 
 export type YarnBall<T> = Readonly<{
@@ -310,6 +313,12 @@ export function createClowder<T extends ClowderBindings>(
   };
 }
 
+function getConstructor<T extends ClowderBindings>(clowder: ClowderInstance<T>): Wake | undefined {
+  if (wake in clowder.bindings) return clowder.bindings[wake];
+  if (!clowder.parent) return undefined;
+  return getConstructor(clowder.parent);
+}
+
 function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): ClowderInstance<T> {
   const parent   = clowder.parent && instanceClowder(clowder.parent);
   const bindings = clowder.initialize();
@@ -329,7 +338,9 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
     },
     meta: {},
   };
-  bindings[wake] = bindings[wake]?.bind(instance);
+  bindings[wake] = (wake in bindings)
+    ? bindings[wake]?.bind(instance)
+    : getConstructor(instance)
   for (const key in bindings) {
     const value = bindings[key];
     if (typeof value === 'function') {
@@ -343,11 +354,11 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
   return instance;
 }
 
-export type WakeParams<T extends ClowderBindings> = Parameters<T[typeof wake]>;
+export type WakeParams = Parameters<Wake>;
 
 export function instantiate<T extends ClowderBindings>(
   clowder: Clowder<T>
-): (...args: WakeParams<T>) => ClowderInstance<T> {
+): (...args: WakeParams) => ClowderInstance<T> {
   const instance = instanceClowder(clowder);
   return (...args) => {
     instance.bindings[wake]?.(...args);
