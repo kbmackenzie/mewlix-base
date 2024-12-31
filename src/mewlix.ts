@@ -1409,13 +1409,22 @@ const createMewlix = function() {
     return shelfFromArray(output);
   };
 
-  function repeat(number: number, callback: (i?: number) => void): void {
-    typeof number === 'number'     || report.number('std.repeat', number);
+  function repeat<T>(callback: (i?: number) => T, number: number): Shelf<T> {
+    typeof number   === 'number'   || report.number('std.repeat', number);
     typeof callback === 'function' || report.func('std.repeat', callback);
+
+    let shelf: Shelf<T> = { [tag]: 'shelf', kind: 'bottom' };
     for (let i = 0; i < number; i++) {
-      callback(i);
+      shelf = shelfPush(shelf, callback(i));
     }
+    return shelf;
   };
+
+  function sequence<T>(callback: (i?: number) => T, number: number): void {
+    typeof number   === 'number'   || report.number('std.sequence', number);
+    typeof callback === 'function' || report.func('std.sequence', callback);
+    for (let i = 0; i < number; i++) { void callback(i); }
+  }
 
   function foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
     typeof callback === 'function' || report.func('std.foreach', callback);
@@ -1867,9 +1876,13 @@ const createMewlix = function() {
       (b: Shelf<T2>) =>
         zip(a, b),
 
-    repeat: (number: number) =>
-      (callback: (i?: number) => void) =>
-        repeat(number, callback),
+    repeat: <T>(callback: (i?: number) => T) =>
+      (number: number) =>
+        repeat(callback, number),
+
+    sequence: <T>(callback: (i?: number) => T) =>
+      (number: number) =>
+        sequence(callback, number),
 
     foreach: <T>(callback: (x: T) => void) =>
       (shelf: Shelf<T>) =>
