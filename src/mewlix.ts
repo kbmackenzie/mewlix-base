@@ -1640,13 +1640,13 @@ const createMewlix = function() {
 
   function read(key: string): string | null {
     typeof key === 'string' || report.string('std.read', key);
-    return globalThis.localStorage.getItem(key);
+    return globalThis.localStorage?.getItem(key);
   };
 
   function save(key: string, contents: string): void {
     typeof key === 'string'      || report.string('std.save', key);
     typeof contents === 'string' || report.string('std.save', contents);
-    globalThis.localStorage.setItem(key, contents);
+    globalThis.localStorage?.setItem(key, contents);
   };
 
   type DateInfo = {
