@@ -9,7 +9,7 @@ import {
   Box,
   reflection,
   wake,
-  ensure,
+  report,
   clamp_,
   purrify,
   createClowder,
@@ -21,6 +21,8 @@ import {
   createBox,
   createYarnBall,
   mixYarnBall,
+  isShelf,
+  isGettable,
 } from './mewlix.js';
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -169,24 +171,24 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
     [wake](this: Vector2, x: number, y: number) {
       this.bindings.x = x;
       this.bindings.y = y;
-      ensureVector2(this);
+      validateVector2(this);
     },
     add(this: Vector2, that: Vector2): Vector2 {
-      ensureVector2(this); ensureVector2(that);
+      validateVector2(this); validateVector2(that);
       return instantiate(Vector2)(
         this.bindings.x + that.bindings.x,
         this.bindings.y + that.bindings.y,
       );
     },
     mul(this: Vector2, that: Vector2): Vector2 {
-      ensureVector2(this); ensureVector2(that);
+      validateVector2(this); validateVector2(that);
       return instantiate(Vector2)(
         this.bindings.x * that.bindings.x,
         this.bindings.y * that.bindings.y,
       );
     },
     distance(this: Vector2, that: Vector2): number {
-      ensureVector2(this); ensureVector2(that);
+      validateVector2(this); validateVector2(that);
       const ax = this.bindings.x;
       const ay = this.bindings.y;
       const bx = that.bindings.x;
@@ -194,7 +196,7 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
       return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
     },
     dot(this: Vector2, that: Vector2): number {
-      ensureVector2(this); ensureVector2(that);
+      validateVector2(this); validateVector2(that);
       const ax = this.bindings.x;
       const ay = this.bindings.y;
       const bx = that.bindings.x;
@@ -202,7 +204,7 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
       return ax * bx + ay * by;
     },
     clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
-      ensureVector2(this); ensureVector2(min); ensureVector2(max);
+      validateVector2(this); validateVector2(min); validateVector2(max);
       return instantiate(Vector2)(
         clamp_(this.bindings.x, min.bindings.x, max.bindings.x),
         clamp_(this.bindings.y, min.bindings.y, max.bindings.y),
@@ -211,9 +213,10 @@ export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
    }
 });
 
-function ensureVector2(value: Vector2): void {
-  ensure.number('Vector2.x', value.bindings.x);
-  ensure.number('Vector2.y', value.bindings.x);
+function validateVector2(value: Vector2): void {
+  const { x, y } = value.bindings;
+  typeof x === 'number' || report.number('Vector2.x', x);
+  typeof y === 'number' || report.number('Vector2.y', y);
 }
 
 /* - * - * - * - * - * - * - * - *
@@ -242,16 +245,16 @@ const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
       this.bindings.y = y;
       this.bindings.width = width;
       this.bindings.height = height;
-      ensureRectangle(this);
+      validateRectangle(this);
     },
     contains(this: Rectangle, point: Vector2): boolean {
-      ensureRectangle(this); ensureVector2(point);
+      validateRectangle(this); validateVector2(point);
       const { x: px, y: py } = point.bindings;
       const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
       return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
     },
     collides(this: Rectangle, that: Rectangle): boolean {
-      ensureRectangle(this); ensureRectangle(that);
+      validateRectangle(this); validateRectangle(that);
       const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
       const { x: bx, y: by, width: bw, height: bh } = that.bindings;
       return (bx < ax + aw)
@@ -262,11 +265,12 @@ const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
   };
 });
 
-function ensureRectangle(rect: Rectangle): void {
-  ensure.number('Rectangle.x'     , rect.bindings.x);
-  ensure.number('Rectangle.y'     , rect.bindings.y);
-  ensure.number('Rectangle.width' , rect.bindings.width );
-  ensure.number('Rectangle.height', rect.bindings.height);
+function validateRectangle(rect: Rectangle): void {
+  const { x, y, width, height } = rect.bindings;
+  typeof x === 'number'      || report.number('Rectangle.x', x);
+  typeof y === 'number'      || report.number('Rectangle.y', y);
+  typeof width === 'number'  || report.number('Rectangle.width', width);
+  typeof height === 'number' || report.number('Rectangle.height', height);
 }
 
 /* - * - * - * - * - * - * - * - *
@@ -288,7 +292,7 @@ const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
     [wake](this: GridSlot, row: number, column: number): void {
       this.bindings.row    = row;
       this.bindings.column = column;
-      ensureGridSlot(this);
+      validateGridSlot(this);
     },
     position(this: GridSlot): Vector2 {
       return gridSlotToPosition(this);
@@ -296,20 +300,21 @@ const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
   };
 });
 
-function ensureGridSlot(slot: GridSlot): void {
-  ensure.number('GridSlot.row'   , slot.bindings.row   );
-  ensure.number('GridSlot.column', slot.bindings.column);
+function validateGridSlot(slot: GridSlot): void {
+  const { row, column } = slot.bindings;
+  typeof row    === 'number' || report.number('GridSlot.row', row);
+  typeof column === 'number' || report.number('GridSlot.column', column);
 }
 
 export function positionToGridSlot(point: Vector2) {
-  ensureVector2(point);
+  validateVector2(point);
   const row = point.bindings.x / gridSlotHeight;
   const col = point.bindings.y / gridSlotWidth;
   return instantiate(GridSlot)(row, col);
 }
 
 export function gridSlotToPosition(slot: GridSlot) {
-  ensureGridSlot(slot);
+  validateGridSlot(slot);
   return instantiate(Vector2)(
     slot.bindings.column * gridSlotWidth,
     slot.bindings.row * gridSlotHeight,
@@ -343,29 +348,30 @@ const Color = createClowder<ColorLike>('Color', null, () => {
       this.bindings.green = green;
       this.bindings.blue = blue;
       this.bindings.opacity = opacity;
-      ensureColor(this);
+      validateColor(this);
     },
     alpha(this: Color): number {
-      ensureColor(this);
+      validateColor(this);
       return percentageToByte(this.bindings.opacity);
     },
     to_hex(this: Color): string {
-      ensureColor(this);
+      validateColor(this);
       const { red, green, blue } = this.bindings;
       return `#${red}${green}${blue}`;
     }
   }
 });
 
-function ensureColor(color: Color) {
-  ensure.number('Color.red'    , color.bindings.red    );
-  ensure.number('Color.green'  , color.bindings.green  );
-  ensure.number('Color.blue'   , color.bindings.blue   );
-  ensure.number('Color.opacity', color.bindings.opacity);
+function validateColor(color: Color) {
+  const { red, green, blue, opacity } = color.bindings;
+  typeof red === 'number'     || report.number('Color.red', red);
+  typeof green === 'number'   || report.number('Color.green', green);
+  typeof blue === 'number'    || report.number('Color.blue', blue);
+  typeof opacity === 'number' || report.number('Color.opacity', opacity);
 }
 
 function colorToStyle(color: Color) {
-  ensureColor(color);
+  validateColor(color);
   const red     = color.bindings.red;
   const green   = color.bindings.green;
   const blue    = color.bindings.blue;
@@ -377,7 +383,7 @@ function valueToColor(value: string | Color): Color {
   if (typeof value === 'string') {
     return hexToColor(value);
   }
-  ensureColor(value);
+  validateColor(value);
   return value;
 }
 
@@ -899,13 +905,13 @@ export default function(mewlix: Mewlix): void {
         this.bindings.width  = width;
         this.bindings.height = height;
         data = new Uint8ClampedArray(width * height * 4);
-        ensurePixelCanvas(this);
+        validatePixelCanvas(this);
       },
       width:  0,
       height: 0,
       fill(this: PixelCanvas, color: string | Color): void {
         if (!data) throw pixelCanvasError();
-        ensurePixelCanvas(this);
+        validatePixelCanvas(this);
 
         const trueColor = valueToColor(color);
         const { red, green, blue } = trueColor.bindings;
@@ -920,9 +926,9 @@ export default function(mewlix: Mewlix): void {
       },
       set_pixel(this: PixelCanvas, x: number, y: number, color: string | Color): void {
         if (!data) throw pixelCanvasError();
-        ensurePixelCanvas(this);
-        ensure.number('PixelCanvas.set_pixel', x);
-        ensure.number('PixelCanvas.set_pixel', y);
+        validatePixelCanvas(this);
+        typeof x === 'number' || report.number('PixelCanvas.set_pixel', x);
+        typeof y === 'number' || report.number('PixelCanvas.set_pixel', y);
 
         const trueColor = valueToColor(color);
         const { red, green, blue } = trueColor.bindings;
@@ -936,9 +942,9 @@ export default function(mewlix: Mewlix): void {
       },
       get_pixel(this: PixelCanvas, x: number, y: number): Color {
         if (!data) throw pixelCanvasError();
-        ensurePixelCanvas(this);
-        ensure.number('PixelCanvas.get_pixel', x);
-        ensure.number('PixelCanvas.get_pixel', y);
+        validatePixelCanvas(this);
+        typeof x === 'number' || report.number('PixelCanvas.get_pixel', x);
+        typeof y === 'number' || report.number('PixelCanvas.get_pixel', y);
 
         const i = (x * this.bindings.width + y) * 4;
         return instantiate(Color)(
@@ -950,8 +956,8 @@ export default function(mewlix: Mewlix): void {
       },
       to_sprite(this: PixelCanvas, key: string): void {
         if (!data) throw pixelCanvasError();
-        ensurePixelCanvas(this);
-        ensure.string('PixelCanvas.to_sprite', key);
+        validatePixelCanvas(this);
+        typeof key === 'string' || report.string('PixelCanvas.to_sprite', key);
 
         const copy = new Uint8ClampedArray(data);
         resourceQueue.push({
@@ -963,9 +969,10 @@ export default function(mewlix: Mewlix): void {
     };
   });
 
-  function ensurePixelCanvas(canvas: PixelCanvas): void {
-    ensure.number('PixelCanvas.width',  canvas.bindings.width );
-    ensure.number('PixelCanvas.height', canvas.bindings.height);
+  function validatePixelCanvas(canvas: PixelCanvas): void {
+    const { width, height } = canvas.bindings;
+    typeof width === 'number'  || report.number('PixelCanvas.width', width);
+    typeof height === 'number' || report.number('PixelCanvas.height', height);
   }
 
   function pixelCanvasError(): MewlixError {
@@ -1171,12 +1178,12 @@ export default function(mewlix: Mewlix): void {
 
   const graphicLib = {
     init(fn: GameLoop): Promise<void> {
-      ensure.func('graphic.init', fn);
+      typeof fn === 'function' || report.func('graphic.init', fn);
       return init(fn);
     },
 
     init_(fn: GameLoop): Promise<void> {
-      ensure.func('graphic.init_', fn);
+      typeof fn === 'function' || report.func('graphic.init_', fn);
       setThumbnail(fn);
       return init(fn);
     },
@@ -1188,8 +1195,8 @@ export default function(mewlix: Mewlix): void {
         resourceError('graphic.load', path);
         return;
       }
-      ensure.string('graphic.load', key);
-      ensure.string('graphic.load', path);
+      typeof key  === 'string' || report.string('graphic.load', key);
+      typeof path === 'string' || report.string('graphic.load', path);
       resourceQueue.push({
         type: 'generic',
         key: key,
@@ -1199,7 +1206,7 @@ export default function(mewlix: Mewlix): void {
     },
 
     thumbnail(fn: GameLoop): void {
-      ensure.func('graphic.thumbnail', fn);
+      typeof fn === 'function' || report.func('graphic.thumbnail', fn);
       setThumbnail(fn)
     },
 
@@ -1208,8 +1215,8 @@ export default function(mewlix: Mewlix): void {
         resourceError('graphic.spritesheet', path);
         return;
       }
-      ensure.string('graphic.spritesheet', path);
-      ensure.shelf('graphic.spritesheet', frames);
+      typeof path === 'string' || report.string('graphic.spritesheet', path);
+      isShelf(frames)          || report.shelf('graphic.spritesheet', frames)
       resourceQueue.push({
         type: 'spritesheet',
         path: path,
@@ -1218,9 +1225,9 @@ export default function(mewlix: Mewlix): void {
     },
     
     draw(key: string, x: number = 0, y: number = 0): void {
-      ensure.string('graphic.draw', key);
-      ensure.number('graphic.draw', x);
-      ensure.number('graphic.draw', y);
+      typeof key === 'string' || report.string('graphic.draw', key);
+      typeof x === 'number'   || report.number('graphic.draw', x);
+      typeof y === 'number'   || report.number('graphic.draw', y);
       return drawSprite(key, x, y);
     },
 
@@ -1233,16 +1240,16 @@ export default function(mewlix: Mewlix): void {
     },
 
     rect(rect: Rectangle, color: string | Color): void {
-      ensure.gettable('graphic.rect', rect);
-      ensureRectangle(rect);
+      isGettable(rect) || report.gettable('graphic.rect', rect);
+      validateRectangle(rect);
       return drawRect(rect, color);
     },
 
     paint: fillCanvas,
 
     write(value: MewlixValue, x: number = 0, y: number = 0, options?: Box<TextOptions>) {
-      ensure.number('graphic.write', x);
-      ensure.number('graphic.write', y);
+      typeof x === 'number' || report.number('graphic.write', x);
+      typeof y === 'number' || report.number('graphic.write', y);
       return drawText(purrify(value), x, y, options?.bindings);
     },
 
@@ -1251,17 +1258,17 @@ export default function(mewlix: Mewlix): void {
     },
 
     meow_options(box: Box<MeowOptions>): void {
-      ensure.gettable('graphic.meow_options', box);
+      isGettable(box) || report.gettable('graphic.meow_options', box);
       meowOptions = box.bindings;
     },
 
     key_pressed(key: string) {
-      ensure.string('graphic.key_pressed', key);
+      typeof key === 'string' || report.string('graphic.key_pressed', key);
       return isKeyPressed(key);
     },
 
     key_down(key: string) {
-      ensure.string('graphic.key_down', key);
+      typeof key === 'string' || report.string('graphic.key_down', key);
       return isKeyDown(key);
     },
 
@@ -1284,30 +1291,30 @@ export default function(mewlix: Mewlix): void {
     ),
 
     play_music(key: string) {
-      ensure.string('graphic.play_music', key);
+      typeof key === 'string' || report.string('graphic.play_music', key);
       return playMusic(key);
     },
 
     play_sfx(key: string, channel: number = 0) {
-      ensure.string('graphic.play_sfx', key);
-      ensure.number('graphic.play_sfx', channel);
+      typeof key     === 'string' || report.string('graphic.play_sfx', key);
+      typeof channel === 'number' || report.string('graphic.play_sfx', channel);
       return playSfx(key, channel);
     },
 
     volume(value: number) {
-      ensure.number('graphic.volume', value);
+      typeof value === 'number' || report.string('graphic.volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.master.set(value);
     },
 
     music_volume(value: number) {
-      ensure.number('graphic.music_volume', value);
+      typeof value === 'number' || report.string('graphic.music_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.music.set(value);
     },
 
     sfx_volume(value: number) {
-      ensure.number('graphic.sfx_volume', value);
+      typeof value === 'number' || report.string('graphic.sfx_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.sfx.set(value);
     },
@@ -1315,21 +1322,21 @@ export default function(mewlix: Mewlix): void {
     stop_music: stopMusic,
 
     stop_sfx(channel: number) {
-      ensure.number('graphic.stop_sfx', channel);
+      typeof channel === 'number' || report.string('graphic.stop_sfx', channel);
       return stopSfx(channel);
     },
 
     stop_all_sfx: stopAllSfx,
 
     lerp(start: number, end: number, x: number): number {
-      ensure.number('graphic.lerp', start);
-      ensure.number('graphic.lerp', end);
-      ensure.number('graphic.lerp', x);
+      typeof start === 'number' || report.number('graphic.lerp', start);
+      typeof end   === 'number' || report.number('graphic.lerp', end);
+      typeof x     === 'number' || report.number('graphic.lerp', x);
       return lerp(start, end, x);
     },
 
     hex(str: string): Color {
-      ensure.string('graphic.hex', str);
+      typeof str === 'string' || report.string('graphic.hex', str);
       return hexToColor(str);
     },
 

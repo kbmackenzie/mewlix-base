@@ -6,10 +6,11 @@ import {
   purrify,
   convert,
   isNothing,
-  ensure,
+  report,
   shelfToArray,
   createYarnBall,
   mixYarnBall,
+  isShelf,
 } from './mewlix.js';
 
 export function isEmptyLine(line: string): boolean {
@@ -321,7 +322,7 @@ export default function(mewlix: Mewlix): void {
     clear: clearConsole,
 
     async run(func: (x: string) => string, opener?: () => string): Promise<void> {
-      ensure.func('console.run', func);
+      typeof func === 'function' || report.func('console.run', func);
       try { 
         while (true) {
           if (!isNothing(opener)) {
@@ -341,7 +342,7 @@ export default function(mewlix: Mewlix): void {
     },
 
     name(name: string): void {
-      ensure.string('console.name', name);
+      typeof name === 'string' || report.string('console.name', name);
       setProjectName(name);
     },
 
@@ -351,24 +352,24 @@ export default function(mewlix: Mewlix): void {
     },
 
     set_color(color: string): void {
-      ensure.string('console.set_color', color);
+      typeof color === 'string' || report.string('console.set_color', color);
       setColor.value = color;
     },
 
     set_error_color(color: string): void {
-      ensure.string('console.set_error_color', color);
+      typeof color === 'string' || report.string('console.set_error_color', color);
       setErrorColor.value = color;
     },
 
     accepted_files(accepted: Shelf<string>): void {
-      ensure.shelf('console.accepted_files', accepted);
+      isShelf(accepted) || report.shelf('console.accepted_files', accepted);
       setAcceptedFiles(shelfToArray(accepted));
     },
 
     write_file(filename: string | null, contents: string): void {
-      ensure.string('console.write_file', contents);
+      typeof contents === 'string' || report.string('console.write_file', contents);
       if (filename) {
-        ensure.string('console.write_file', filename);
+        typeof filename === 'string' || report.string('console.write_file', filename);
       }
       addDownloadButton(contents, filename);
     },

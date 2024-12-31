@@ -387,6 +387,10 @@ export function isClowderInstance<T extends ClowderBindings>(
     && value[tag] === 'clowder instance';
 }
 
+export function isGettable(a: any) {
+  return isBox(a) || isClowderInstance(a);
+}
+
 /* - * - * - * - * - * - * - * - *
  * Namespace: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
@@ -771,25 +775,20 @@ export function clamp_(value: number, min: number, max: number): number {
  * Type Utils
 /* - * - * - * - * - * - * - * - * */
 
-export const ensure = {
+export const report = {
   number(where: string, a: any): void {
-    if (typeof a === 'number') return;
     throw typeError(where, a, 'number');
   },
   string(where: string, a: any): void {
-    if (typeof a === 'string') return;
     throw typeError(where, a, 'string');
   },
   shelf(where: string, a: any): void {
-    if (isShelf(a)) return;
     throw typeError(where, a, 'shelf');
   },
   func(where: string, a: any): void {
-    if (typeof a === 'function') return;
     throw typeError(where, a, 'function');
   },
   gettable(where: string, a: any): void {
-    if (isBox(a) || isClowderInstance(a)) return;
     throw typeError(where, a, 'box or clowder instance');
   },
 };
@@ -807,23 +806,23 @@ function typeError(where: string, value: any, targetType: string): MewlixError {
 
 export const numbers = {
   add(a: number, b: number): number {
-    ensure.number('+', a);
-    ensure.number('+', b);
+    typeof a === 'number' || report.number('+', a);
+    typeof b === 'number' || report.number('+', b);
     return a + b;
   },
   sub(a: number, b: number): number {
-    ensure.number('-', a);
-    ensure.number('-', b);
+    typeof a === 'number' || report.number('-', a);
+    typeof b === 'number' || report.number('-', b);
     return a - b;
   },
   mul(a: number, b: number): number {
-    ensure.number('*', a);
-    ensure.number('*', b);
+    typeof a === 'number' || report.number('*', a);
+    typeof b === 'number' || report.number('*', b);
     return a * b;
   },
   div(a: number, b: number): number {
-    ensure.number('/', a);
-    ensure.number('/', b);
+    typeof a === 'number' || report.number('/', a);
+    typeof b === 'number' || report.number('/', b);
     if (b === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `/: Attempted to divide ${a} by ${b}!`);
@@ -831,8 +830,8 @@ export const numbers = {
     return a / b;
   },
   floordiv(a: number, b: number): number {
-    ensure.number('//', a);
-    ensure.number('//', b);
+    typeof a === 'number' || report.number('//', a);
+    typeof b === 'number' || report.number('//', b);
     if (b == 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `//: Attempted to divide ${a} by ${b}!`);
@@ -840,8 +839,8 @@ export const numbers = {
     return Math.floor(a / b);
   },
   mod(a: number, b: number): number {
-    ensure.number('%', a);
-    ensure.number('%', b);
+    typeof a === 'number' || report.number('%', a);
+    typeof b === 'number' || report.number('%', b);
     if (b === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `%: Attempted to divide ${a} by ${b}!`);
@@ -849,16 +848,16 @@ export const numbers = {
     return ((a % b) + b) % b;
   },
   pow(a: number, b: number): number {
-    ensure.number('^', a);
-    ensure.number('^', b);
+    typeof a === 'number' || report.number('^', a);
+    typeof b === 'number' || report.number('^', b);
     return a ** b;
   },
   plus(a: number): number {
-    ensure.number('+', a);
+    typeof a === 'number' || report.number('+', a);
     return +a;
   },
   minus(a: number): number {
-    ensure.number('-', a);
+    typeof a === 'number' || report.number('-', a);
     return -a;
   },
 };
@@ -887,15 +886,15 @@ export const strings = {
 export const shelf = {
   create: shelfFromArray,
   peek<T>(shelf: Shelf<T>): T | null {
-    ensure.shelf('paw at', shelf);
+    isShelf(shelf) || report.shelf('paw at', shelf);
     return shelfPeek(shelf);
   },
   pop<T>(shelf: Shelf<T>): Shelf<T> | null {
-    ensure.shelf('knock over', shelf);
+    isShelf(shelf) || report.shelf('knock over', shelf);
     return shelfPop(shelf);
   },
   push<T>(value: T, shelf: Shelf<T>): Shelf<T> {
-    ensure.shelf('push', shelf);
+    isShelf(shelf) || report.shelf('push', shelf);
     return shelfPush(shelf, value);
   },
   toArray: shelfToArray,
@@ -944,8 +943,7 @@ export const collections = {
 export const box = {
   create: createBox,
   pairs<T>(value: Box<Record<string, T>>) {
-    ensure.gettable('claw at', value);
-
+    isGettable(value) || report.gettable('claw at', value);
     type Pair = { key: string; value: T; };
     let pairs: Shelf<Box<Pair>> = shelfBottom();
 
@@ -1082,7 +1080,7 @@ const createMewlix = function() {
   };
 
   function cat(shelf: Shelf<string>): string {
-    ensure.shelf('std.cat', shelf);
+    isShelf(shelf) || report.shelf('std.cat', shelf);
     const iterator = shelfIterator(shelf);
     let acc = '';
     for (const value of iterator) {
@@ -1092,32 +1090,31 @@ const createMewlix = function() {
   };
 
   function trim(str: string): string {
-    ensure.string('std.trim', str)
+    typeof str === 'string' || report.string('std.trim', str);
     return str.trim();
   };
 
   function tear(str: string, start: number, end: number): string {
-    ensure.string('std.tear', str);
-    ensure.number('std.tear', start);
-    ensure.number('std.tear', end);
-
+    typeof str   === 'string' || report.string('std.tear', str);
+    typeof start === 'string' || report.string('std.tear', start);
+    typeof end   === 'string' || report.string('std.tear', end);
     return str.substring(start, end);
   };
 
   function push_down(str: string): string {
-    ensure.string('std.push_down', str);
+    typeof str === 'string' || report.string('std.push_down', str);
     return str.toLowerCase();
   };
 
   function push_up(str: string): string {
-    ensure.string('std.push_up', str);
+    typeof str === 'string' || report.string('std.push_up', str);
     return str.toUpperCase();
   };
 
   function poke(value: string, index: number): string | null;
   function poke<T>(value: Shelf<T>, index: number): T | null;
   function poke<T>(value: string | Shelf<T>, index: number = 0) {
-    ensure.number('std.poke', index);
+    typeof index === 'number' || report.number('std.poke', index);
     if (typeof value === 'string') {
       const strIndex = (index < 0)
         ? Math.max(0, value.length + index)
@@ -1140,7 +1137,7 @@ const createMewlix = function() {
   };
 
   function char(value: number): string {
-    ensure.number('std.char', value);
+    typeof value === 'number' || report.number('std.char', value);
     if (value < 0 || value > 65535) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `std.char: Value outside of valid character range: ${value}`);
@@ -1149,7 +1146,7 @@ const createMewlix = function() {
   };
 
   function bap(value: string): number {
-    ensure.string('std.bap', value);
+    typeof value === 'string' || report.string('std.bap', value);
     if (value.length === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         'std.bap: Expected character; received empty string!');
@@ -1196,7 +1193,7 @@ const createMewlix = function() {
   function take(value: string, amount: number): string;
   function take<T>(value: Shelf<T>, amount: number): Shelf<T>;
   function take<T>(value: string | Shelf<T>, amount: number): string | Shelf<T> {
-    ensure.number('std.take', amount);
+    typeof amount === 'number' || report.number('std.take', amount);
     if (typeof value === 'string') {
       return value.slice(0, amount);
     }
@@ -1220,7 +1217,7 @@ const createMewlix = function() {
   function drop(value: string, amount: number): string;
   function drop<T>(value: Shelf<T>, amount: number): Shelf<T>;
   function drop<T>(value: string | Shelf<T>, amount: number): string | Shelf<T> {
-    ensure.number('std.drop', amount);
+    typeof amount === 'number' || report.number('std.drop', amount);
     if (typeof value === 'string') {
       return value.slice(amount);
     }
@@ -1249,7 +1246,7 @@ const createMewlix = function() {
   };
 
   function sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
-    ensure.shelf('std.sort', shelf);
+    isShelf(shelf) || report.shelf('std.sort', shelf);
     return shelfFromArray(
       shelfToArray(shelf)
         .sort((a, b) => relation.ordering(a, b))
@@ -1257,8 +1254,7 @@ const createMewlix = function() {
   };
 
   function shuffle<T>(shelf: Shelf<T>): Shelf<T> {
-    ensure.shelf('std.shuffle', shelf);
-
+    isShelf(shelf) || report.shelf('std.shuffle', shelf);
     const output = shelfToArray(shelf);
     for (let i = output.length - 1; i > 0; i--) {
       const j = random_int(0, i);
@@ -1271,8 +1267,8 @@ const createMewlix = function() {
   };
 
   function find<T>(predicate: (t: T) => boolean, shelf: Shelf<T>): number | null {
-    ensure.shelf('std.find', shelf);
-    ensure.func('std.find', predicate);
+    isShelf(shelf)                  || report.shelf('std.find', shelf);
+    typeof predicate === 'function' || report.func('std.find', predicate);
 
     for (let node = shelf, i = 0; node.kind === 'node'; node = node.tail, i++) {
       const result = predicate(node.value);
@@ -1282,9 +1278,8 @@ const createMewlix = function() {
   }
 
   function insert<T>(shelf: Shelf<T>, value: T, index: number = 0): Shelf<T> {
-    ensure.shelf('std.insert', shelf);
-    ensure.number('std.insert', index);
-
+    isShelf(shelf)            || report.shelf('std.insert', shelf);
+    typeof index === 'number' || report.number('std.insert', index);
     let top: Shelf<T> | null = shelfBottom();
     let bottom: Shelf<T> = shelf;
     let counter = (index >= 0)
@@ -1305,9 +1300,8 @@ const createMewlix = function() {
   };
 
   function remove<T>(shelf: Shelf<T>, index: number = 0): Shelf<T> {
-    ensure.shelf('std.remove', shelf);
-    ensure.number('std.remove', index);
-
+    isShelf(shelf)            || report.shelf('std.remove', shelf);
+    typeof index === 'number' || report.number('std.remove', index);
     let top: Shelf<T> | null = shelfBottom();
     let bottom: Shelf<T> = shelf;
     let counter = (index >= 0)
@@ -1328,9 +1322,8 @@ const createMewlix = function() {
   };
 
   function map<T1, T2>(callback: (x: T1) => T2, shelf: Shelf<T1>): Shelf<T2> {
-    ensure.func('std.map', callback);
-    ensure.shelf('std.map', shelf);
-
+    typeof callback === 'function' || report.func('std.map', callback);
+    isShelf(shelf)                 || report.shelf('std.map', shelf);
     const output = new Array(shelfLength(shelf));
     let i = shelfLength(shelf) - 1;
     const iterator = shelfIterator(shelf);
@@ -1342,9 +1335,8 @@ const createMewlix = function() {
   };
 
   function filter<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): Shelf<T> {
-    ensure.func('std.filter', predicate);
-    ensure.shelf('std.filter', shelf);
-
+    typeof predicate === 'function' || report.func('std.filter', predicate);
+    isShelf(shelf)                  || report.shelf('std.filter', shelf);
     let bucket = shelfBottom<T>();
     const iterator = shelfIterator(shelf);
 
@@ -1358,9 +1350,8 @@ const createMewlix = function() {
   };
 
   function fold<T1, T2>(callback: (acc: T2, x: T1) => T2, initial: T2, shelf: Shelf<T1>) {
-    ensure.func('std.fold', callback);
-    ensure.shelf('std.fold', shelf);
-
+    typeof callback === 'function' || report.func('std.fold', callback);
+    isShelf(shelf)                 || report.shelf('std.fold', shelf);
     let accumulator: T2 = initial;
     const iterator = shelfIterator(shelf);
 
@@ -1371,9 +1362,8 @@ const createMewlix = function() {
   };
 
   function any<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
-    ensure.func('std.any', predicate);
-    ensure.shelf('std.any', shelf);
-
+    typeof predicate === 'function' || report.func('std.any', predicate);
+    isShelf(shelf)                  || report.shelf('std.any', shelf);
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
       const result = predicate(value);
@@ -1383,9 +1373,8 @@ const createMewlix = function() {
   };
 
   function all<T>(predicate: (x: T) => boolean, shelf: Shelf<T>): boolean {
-    ensure.func('std.all', predicate);
-    ensure.shelf('std.all', shelf);
-
+    typeof predicate === 'function' || report.func('std.all', predicate);
+    isShelf(shelf)                  || report.shelf('std.all', shelf);
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
       const result = predicate(value);
@@ -1400,9 +1389,8 @@ const createMewlix = function() {
   };
 
   function zip<T1, T2>(a: Shelf<T1>, b: Shelf<T2>): Shelf<Box<ZipPair<T1, T2>>> {
-    ensure.shelf('std.zip', a);
-    ensure.shelf('std.zip', b);
-
+    isShelf(a) || report.shelf('std.zip', a);
+    isShelf(b) || report.shelf('std.zip', b);
     const length = Math.min(shelfLength(a), shelfLength(b));
     const output = new Array(length);
     let i = length - 1;
@@ -1422,16 +1410,16 @@ const createMewlix = function() {
   };
 
   function repeat(number: number, callback: (i?: number) => void): void {
-    ensure.number('std.repeat', number);
-    ensure.func('std.repeat', callback);
+    typeof number === 'number'     || report.number('std.repeat', number);
+    typeof callback === 'function' || report.func('std.repeat', callback);
     for (let i = 0; i < number; i++) {
       callback(i);
     }
   };
 
   function foreach<T>(callback: (x: T) => void, shelf: Shelf<T>): void {
-    ensure.func('std.foreach', callback);
-    ensure.shelf('std.foreach', shelf);
+    typeof callback === 'function' || report.func('std.foreach', callback);
+    isShelf(shelf)                 || report.shelf('std.foreach', shelf);
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
       callback(value);
@@ -1497,42 +1485,41 @@ const createMewlix = function() {
   };
 
   function round(value: number): number {
-    ensure.number('std.round', value);
+    typeof value === 'number' || report.number('std.round', value);
     return Math.round(value);
   };
 
   function floor(value: number): number {
-    ensure.number('std.floor', value);
+    typeof value === 'number' || report.number('std.floor', value);
     return Math.floor(value);
   };
 
   function ceiling(value: number): number {
-    ensure.number('std.ceiling', value);
+    typeof value === 'number' || report.number('std.ceiling', value);
     return Math.ceil(value);
   };
 
   function min(a: number, b: number): number {
-    ensure.number('std.min', a);
-    ensure.number('std.min', b);
+    typeof a === 'number' || report.number('std.min', a);
+    typeof b === 'number' || report.number('std.min', b);
     return Math.min(a, b);
   };
 
   function max(a: number, b: number): number {
-    ensure.number('std.max', a);
-    ensure.number('std.max', b);
+    typeof a === 'number' || report.number('std.max', a);
+    typeof b === 'number' || report.number('std.max', b);
     return Math.max(a, b);
   };
 
   function clamp(value: number, min: number, max: number): number {
-    ensure.number('std.clamp', value);
-    ensure.number('std.clamp', min);
-    ensure.number('std.clamp', max);
-
+    typeof value === 'number' || report.number('std.clamp', value);
+    typeof min   === 'number' || report.number('std.clamp', min);
+    typeof max   === 'number' || report.number('std.clamp', max);
     return clamp_(value, min, max);
   };
 
   function abs(value: number): number {
-    ensure.number('std.abs', value);
+    typeof value === 'number' || report.number('std.abs', value);
     return Math.abs(value);
   };
 
@@ -1540,7 +1527,7 @@ const createMewlix = function() {
   const e  = Math.E;
 
   function sqrt(value: number): number {
-    ensure.number('std.sqrt', value);
+    typeof value === 'number' || report.number('std.sqrt', value);
     if (value < 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `std.sqrt: Cannot calculate square root of negative number ${value}!`);
@@ -1549,7 +1536,7 @@ const createMewlix = function() {
   };
 
   function logn(value: number, base: number): number {
-    ensure.number('std.logn', value);
+    typeof value === 'number' || report.number('std.logn', value);
     if (value <= 0) {
       const logType = isNothing(base)
         ? 'natural logarithm'
@@ -1560,7 +1547,7 @@ const createMewlix = function() {
     if (base === undefined) {
       return Math.log(value);
     }
-    ensure.number('std.logn', base);
+    typeof base === 'number' || report.number('std.logn', base);
     if (base <= 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `std.logn: Invalid base for logarithm: ${base}!`);
@@ -1569,44 +1556,44 @@ const createMewlix = function() {
   };
 
   function acos(value: number): number {
-    ensure.number('std.acos', value);
+    typeof value === 'number' || report.number('std.acos', value);
     return Math.acos(value);
   };
 
   function asin(value: number): number {
-    ensure.number('std.asin', value);
+    typeof value === 'number' || report.number('std.asin', value);
     return Math.asin(value);
   };
 
   function atan(value: number): number {
-    ensure.number('std.atan', value);
+    typeof value === 'number' || report.number('std.atan', value);
     return Math.atan(value);
   };
 
   function cos(value: number): number {
-    ensure.number('std.cos', value);
+    typeof value === 'number' || report.number('std.cos', value);
     return Math.cos(value);
   };
 
   function sin(value: number): number {
-    ensure.number('std.sin', value);
+    typeof value === 'number' || report.number('std.sin', value);
     return Math.sin(value);
   };
 
   function tan(value: number): number {
-    ensure.number('std.tan', value);
+    typeof value === 'number' || report.number('std.tan', value);
     return Math.tan(value);
   };
 
   function atan2(y: number, x: number): number {
-    ensure.number('std.atan2', y);
-    ensure.number('std.atan2', x);
+    typeof y === 'number' || report.number('std.atan2', y);
+    typeof x === 'number' || report.number('std.atan2', x);
     return Math.atan2(y, x);
   };
 
   function truncate(value: number, places: number = 0): number {
-    ensure.number('std.truncate', value);
-    ensure.number('std.truncate', places);
+    typeof value === 'number'  || report.number('std.truncate', value);
+    typeof places === 'number' || report.number('std.truncate', places);
     if (places < 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `std.truncate: Value of places should be greater than 0; received ${places}`);
@@ -1624,8 +1611,8 @@ const createMewlix = function() {
       max = min;
       min = 0;
     }
-    ensure.number('std.random_int', min);
-    ensure.number('std.random_int', max);
+    typeof min === 'number' || report.number('std.random_int', min);
+    typeof max === 'number' || report.number('std.random_int', max);
     return Math.floor(Math.random() * (max - min + 1) + min);
   };
 
@@ -1634,8 +1621,8 @@ const createMewlix = function() {
       end = start;
       start = 0;
     }
-    ensure.number('std.count', start);
-    ensure.number('std.count', end);
+    typeof start === 'number' || report.number('std.count', start);
+    typeof end   === 'number' || report.number('std.count', end);
 
     start = Math.floor(start);
     end   = Math.floor(end);
@@ -1652,13 +1639,13 @@ const createMewlix = function() {
   };
 
   function read(key: string): string | null {
-    ensure.string('std.read', key);
+    typeof key === 'string' || report.string('std.read', key);
     return globalThis.localStorage.getItem(key);
   };
 
   function save(key: string, contents: string): void {
-    ensure.string('std.save', key);
-    ensure.string('std.save', contents);
+    typeof key === 'string'      || report.string('std.save', key);
+    typeof contents === 'string' || report.string('std.save', contents);
     globalThis.localStorage.setItem(key, contents);
   };
 
@@ -1696,7 +1683,7 @@ const createMewlix = function() {
   };
 
   function from_json(value: string): MewlixValue {
-    ensure.string('std.from_json', value);
+    typeof value === 'string' || report.string('std.from_json', value);
     return fromJSON(JSON.parse(value));
   };
 
