@@ -866,15 +866,6 @@ export const boolean = {
   not(a: any): boolean {
     return !convert.bool(a);
   },
-  or(a: any, fb: () => any): any {
-    return convert.bool(a) ? a : fb();
-  },
-  and(a: any, fb: () => any): any {
-    return convert.bool(a) ? fb() : a;
-  },
-  ternary(condition: any, fa: () => any, fb: () => any): any {
-    return convert.bool(condition) ? fa() : fb();
-  },
 };
 
 export const strings = {
