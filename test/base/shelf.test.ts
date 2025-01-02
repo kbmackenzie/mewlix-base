@@ -3,7 +3,7 @@ import { shelf, relation, collections, compare, standardLibrary } from '../../sr
 describe('shelf operations', () => {
   const {
     empty, insert, remove, reverse, find, map, filter, fold,
-    join, poke, drop, take
+    join, poke, drop, take, all, any
   } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
@@ -260,6 +260,39 @@ describe('shelf operations', () => {
         drop(shelf.create(input), amount)
       );
       expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: all', () => {
+    const inputs = [
+      { input: [1, 2, 3, 4, 5], predicate: (x: number) => x % 2 === 0, result: false },
+      { input: [2, 4, 6]      , predicate: (x: number) => x % 2 === 0, result: true  },
+      { input: [2]            , predicate: (x: number) => x % 2 === 0, result: true  },
+      { input: [3]            , predicate: (x: number) => x % 2 === 0, result: false },
+      { input: []             , predicate: (x: number) => x % 2 === 0, result: true  },
+      { input: [1, 3, 5]      , predicate: (x: number) => x % 2 !== 0, result: true  },
+      { input: [1]            , predicate: (x: number) => x % 2 !== 0, result: true  },
+    ];
+
+    test.each(inputs)('see if all values in shelf satisfy predicate', ({ input, predicate, result }) => {
+      const output = all(predicate, shelf.create(input));
+      expect(output).toBe(result);
+    });
+  });
+
+  describe('shelf operation: any', () => {
+    const inputs = [
+      { input: [1, 2, 3, 4, 5], predicate: (x: number) => x % 2 === 0, result: true  },
+      { input: [1, 3, 4]      , predicate: (x: number) => x % 2 === 0, result: true  },
+      { input: [1, 3, 5]      , predicate: (x: number) => x % 2 === 0, result: false },
+      { input: []             , predicate: (x: number) => x % 2 === 0, result: false },
+      { input: [1, 2, 3]      , predicate: (x: number) => x % 2 !== 0, result: true  },
+      { input: [2, 4, 6]      , predicate: (x: number) => x % 2 !== 0, result: false },
+    ];
+
+    test.each(inputs)('see if any value in shelf satisfies predicate', ({ input, predicate, result }) => {
+      const output = any(predicate, shelf.create(input));
+      expect(output).toBe(result);
     });
   });
 });
