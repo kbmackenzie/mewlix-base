@@ -1,7 +1,7 @@
 import { shelf, relation, collections, standardLibrary } from '../../src/mewlix';
 
 describe('shelf operations', () => {
-  const { empty, reverse, insert, remove, find } = standardLibrary();
+  const { empty, reverse, insert, remove, find, map, filter, fold } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
 
@@ -115,6 +115,50 @@ describe('shelf operations', () => {
     test('handles truthy predicate values properly', () => {
       const output = find(_ => '' as any, shelf.create([1, 2, 3]));
       expect(output).toStrictEqual(0);
+    });
+  });
+
+  describe('shelf operation: map', () => {
+    const inputs = [
+      { input: [1, 2, 3], func: (x: number) => x ** 2, result: [1, 4, 9] },
+      { input: []       , func: (x: number) => x ** 2, result: []        },
+      { input: [1]      , func: (x: number) => x + 10, result: [11]      },
+    ];
+
+    test.each(inputs)('applies function over values in shelf', ({ input, func, result }) => {
+      const output = shelf.toArray(
+        map(func, shelf.create(input))
+      );
+      expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: filter', () => {
+    const inputs = [
+      { input: [1, 2, 3, 4, 5], predicate: (x: number) => x % 2 === 0, result: [2, 4] },
+      { input: [1, 3, 5]      , predicate: (x: number) => x % 2 === 0, result: []     },
+      { input: [2, 4]         , predicate: (x: number) => x % 2 === 0, result: [2, 4] },
+      { input: []             , predicate: (x: number) => x % 2 === 0, result: []     },
+      { input: [6]            , predicate: (x: number) => x % 2 === 0, result: [6]    },
+    ];
+
+    test.each(inputs)('filters values in shelf by predicate', ({ input, predicate, result }) => {
+      const output = shelf.toArray(
+        filter(predicate, shelf.create(input))
+      );
+      expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: fold', () => {
+    const inputs = [
+      { input: ['t', 'a', 'c'], func: (acc: string, x: string) => acc + x, initial: '', result: 'cat' },
+      { input: []             , func: (acc: string, x: string) => acc + x, initial: '', result: ''    },
+    ];
+
+    test.each(inputs)('folds values in shelf with function', ({ input, func, initial, result }) => {
+      const output = fold(func, initial, shelf.create(input));
+      expect(output).toStrictEqual(result);
     });
   });
 });
