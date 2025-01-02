@@ -1,7 +1,7 @@
 import { shelf, relation, collections, compare, standardLibrary } from '../../src/mewlix';
 
 describe('shelf operations', () => {
-  const { empty, reverse, insert, remove, find, map, filter, fold, join } = standardLibrary();
+  const { empty, reverse, insert, remove, find, map, filter, fold, join, poke } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
 
@@ -204,6 +204,24 @@ describe('shelf operations', () => {
         join(shelfA, shelfB)
       );
       expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: poke', () => {
+    const inputs = [
+      { input: [1, 3, 4], index:  0, result: 4    },
+      { input: [1, 3, 4], index:  1, result: 3    },
+      { input: [1, 3, 4], index:  2, result: 1    },
+      { input: [1, 3, 4], index:  3, result: null },
+      { input: [1, 3, 4], index: -1, result: 1    },
+      { input: [1, 3, 4], index: -2, result: 3    },
+      { input: [1, 3, 4], index: -3, result: 4    },
+      { input: []       , index:  0, result: null },
+    ];
+
+    test.each(inputs)('poke value in shelf', ({ input, index, result }) => {
+      const output = poke(shelf.create(input), index);
+      expect(output).toBe(result);
     });
   });
 });
