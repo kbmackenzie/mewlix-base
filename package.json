@@ -8,7 +8,7 @@
     "console": "./view.sh console",
     "graphic": "./view.sh graphic",
     "clean": "rm -rf ./build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
   "author": "kbmackenzie <kelly.a.betty@gmail.com>",
   "license": "GPL-3.0-only",
