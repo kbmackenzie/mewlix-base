@@ -1323,7 +1323,7 @@ export function standardLibrary(meowFunc?: MeowFunc) {
     const iterator = shelfIterator(shelf);
     for (const value of iterator) {
       const result = predicate(value);
-      if (convert.bool(result)) { return false; }
+      if (!convert.bool(result)) { return false; }
     }
     return true;
   };
