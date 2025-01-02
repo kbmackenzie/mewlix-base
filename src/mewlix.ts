@@ -1011,56 +1011,9 @@ function assertionFail(message: string): void {
 export type MeowFunc = (input: string) => string;
 
 /* - * - * - * - * - * - * - * - *
- * API
+ * Standard Library
 /* - * - * - * - * - * - * - * - * */
-
-export function wrap<T>(object: T, copy: boolean = false): Box<T> {
-  const wrapped: T = copy ? {...object} : object;
-  return {
-    [tag]: 'box',
-    bindings: wrapped,
-    get(key: keyof T): ValueOf<T> {
-      return wrapped[key];
-    },
-    set(key: keyof T, value: ValueOf<T>): void {
-      wrapped[key] = value;
-    },
-  };
-}
-
-/* - * - * - * - * - * - * - * - *
- * Create Mewlix - Logic
-/* - * - * - * - * - * - * - * - * */
-
-const createMewlix = function() {
-  // mewlix.modules: default namespace
-  const modules = createNamespace<MewlixObject>('default');
-
-  // mewlix.api: The API exposed to users.
-  const api = {
-    box: <T>(obj: T) => createBox(obj, true),
-    shelf: <T>(...items: T[]) => shelfFromArray(items),
-    inject<T>(key: string, record: Record<string, T>): void {
-      addModule(modules, key, () => record);
-    },
-  };
-
-  // a default 'meow' implementation
-  let meowFunc: MeowFunc = function(_) {
-    throw new MewlixError(ErrorCode.CriticalError,
-      'meow: Core function \'meow\' hasn\'t been implemented!');
-  };
-  function setMeow(func: MeowFunc): void {
-    meowFunc = func;
-  }
-
-  // meow.lib: core libraries
-  const lib: Record<string, YarnBall<any>> = {};
-
-  /* - * - * - * - * - * - * - * - *
-   * Standard Library
-  /* - * - * - * - * - * - * - * - * */
-
+export function standardLibrary(meowFunc?: MeowFunc) {
   /* The std library documentation can be found in... (see readme).
    *
    * It won't be included in this source file to avoid clutter.
@@ -1675,7 +1628,9 @@ const createMewlix = function() {
   };
 
   function meowf(value: MewlixValue): string {
-    return meowFunc(purrify(value));
+    const message = purrify(value);
+    meowFunc?.(message);
+    return message;
   };
 
   function to_json(value: MewlixValue): string {
@@ -1740,6 +1695,7 @@ const createMewlix = function() {
     all,
     zip,
     repeat,
+    sequence,
     foreach,
     tuple,
     table,
@@ -1777,6 +1733,58 @@ const createMewlix = function() {
     log,
     error,
   };
+  return base;
+}
+
+/* - * - * - * - * - * - * - * - *
+ * API
+/* - * - * - * - * - * - * - * - * */
+
+export function wrap<T>(object: T, copy: boolean = false): Box<T> {
+  const wrapped: T = copy ? {...object} : object;
+  return {
+    [tag]: 'box',
+    bindings: wrapped,
+    get(key: keyof T): ValueOf<T> {
+      return wrapped[key];
+    },
+    set(key: keyof T, value: ValueOf<T>): void {
+      wrapped[key] = value;
+    },
+  };
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Create Mewlix - Logic
+/* - * - * - * - * - * - * - * - * */
+
+const createMewlix = function() {
+  // mewlix.modules: default namespace
+  const modules = createNamespace<MewlixObject>('default');
+
+  // mewlix.api: The API exposed to users.
+  const api = {
+    box: <T>(obj: T) => createBox(obj, true),
+    shelf: <T>(...items: T[]) => shelfFromArray(items),
+    inject<T>(key: string, record: Record<string, T>): void {
+      addModule(modules, key, () => record);
+    },
+  };
+
+  // a default 'meow' implementation
+  let meowFunc: MeowFunc = function(_) {
+    throw new MewlixError(ErrorCode.CriticalError,
+      'meow: Core function \'meow\' hasn\'t been implemented!');
+  };
+  function setMeow(func: MeowFunc): void {
+    meowFunc = func;
+  }
+
+  // meow.lib: Core libraries.
+  const lib: Record<string, YarnBall<any>> = {};
+
+  // meow.lib.std: Standard library.
+  const base = standardLibrary(meowFunc);
   const std = createYarnBall('std', base)
   lib.std = std;
 
@@ -1794,39 +1802,39 @@ const createMewlix = function() {
   function pokeCurry<T>(value: Shelf<T>): (index: number) => T | null;
   function pokeCurry<T>(value: string | Shelf<T>) {
     return (typeof value === 'string')
-      ? function(index: number) { return poke(value, index); }
-      : function(index: number) { return poke(value, index); };
+      ? function(index: number) { return base.poke(value, index); }
+      : function(index: number) { return base.poke(value, index); };
   }
 
   function joinCurry(a: string): (b: string) => string;
   function joinCurry<T>(a: Shelf<T>): (b: Shelf<T>) => Shelf<T>;
   function joinCurry<T>(a: string | Shelf<T>) {
     return (typeof a === 'string')
-      ? function(b: string)   { return join(a, b); }
-      : function(b: Shelf<T>) { return join(a, b); }
+      ? function(b: string)   { return base.join(a, b); }
+      : function(b: Shelf<T>) { return base.join(a, b); }
   }
 
   function takeCurry(value: string): (amount: number) => string;
   function takeCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
   function takeCurry<T>(value: string | Shelf<T>) {
     return (typeof value === 'string')
-      ? function(amount: number) { return take(value, amount); }
-      : function(amount: number) { return take(value, amount); };
+      ? function(amount: number) { return base.take(value, amount); }
+      : function(amount: number) { return base.take(value, amount); };
   }
 
   function dropCurry(value: string): (amount: number) => string;
   function dropCurry<T>(value: Shelf<T>): (amount: number) => Shelf<T>;
   function dropCurry<T>(value: string | Shelf<T>) {
     return (typeof value === 'string')
-      ? function(amount: number) { return drop(value, amount); }
-      : function(amount: number) { return drop(value, amount); };
+      ? function(amount: number) { return base.drop(value, amount); }
+      : function(amount: number) { return base.drop(value, amount); };
   }
 
   const baseCurry = {
     tear: (str: string) =>
       (start: number) =>
         (end: number) =>
-          tear(str, start, end),
+          base.tear(str, start, end),
 
     poke: pokeCurry,
     join: joinCurry,
@@ -1836,89 +1844,89 @@ const createMewlix = function() {
     insert: <T>(shelf: Shelf<T>) =>
       (value: T) =>
         (index: number) =>
-          insert(shelf, value, index),
+          base.insert(shelf, value, index),
 
     remove: <T>(shelf: Shelf<T>) =>
       (index: number) =>
-        remove(shelf, index),
+        base.remove(shelf, index),
 
     map: <T1, T2>(callback: (x: T1) => T2) =>
       (shelf: Shelf<T1>) =>
-        map(callback, shelf),
+        base.map(callback, shelf),
 
     filter: <T1>(predicate: (x: T1) => boolean) =>
       (shelf: Shelf<T1>) =>
-        filter(predicate, shelf),
+        base.filter(predicate, shelf),
 
     fold: <T1, T2>(callback: (acc: T2, x: T1) => T2) =>
       (initial: T2) =>
         (shelf: Shelf<T1>) =>
-          fold(callback, initial, shelf),
+          base.fold(callback, initial, shelf),
 
     any: <T>(predicate: (x: T) => boolean) =>
       (shelf: Shelf<T>) =>
-        any(predicate, shelf),
+        base.any(predicate, shelf),
 
     all: <T>(predicate: (x: T) => boolean) =>
       (shelf: Shelf<T>) =>
-        all(predicate, shelf),
+        base.all(predicate, shelf),
 
     zip: <T1, T2>(a: Shelf<T1>) =>
       (b: Shelf<T2>) =>
-        zip(a, b),
+        base.zip(a, b),
 
     repeat: <T>(callback: (i?: number) => T) =>
       (number: number) =>
-        repeat(callback, number),
+        base.repeat(callback, number),
 
     sequence: <T>(callback: (i?: number) => T) =>
       (number: number) =>
-        sequence(callback, number),
+        base.sequence(callback, number),
 
     foreach: <T>(callback: (x: T) => void) =>
       (shelf: Shelf<T>) =>
-        foreach(callback, shelf),
+        base.foreach(callback, shelf),
 
     tuple: (a: MewlixValue) =>
       (b: MewlixValue) =>
-        tuple(a, b),
+        base.tuple(a, b),
 
     min: (a: number) =>
       (b: number) =>
-        min(a, b),
+        base.min(a, b),
 
     max: (a: number) =>
       (b: number) =>
-        max(a, b),
+        base.max(a, b),
 
     clamp: (value: number) =>
       (min: number) =>
         (max: number) =>
-          clamp(value, min, max),
+          base.clamp(value, min, max),
 
     logn: (value: number) =>
-      (base: number) =>
-        logn(value, base),
+      (base_: number) =>
+        base.logn(value, base_),
 
     atan: (y: number) =>
       (x: number) =>
-        atan2(y, x),
+        base.atan2(y, x),
 
     truncate: (value: number) =>
       (places: number) =>
-        truncate(value, places),
+        base.truncate(value, places),
 
     random_int: (min: number) =>
       (max: number) =>
-        random_int(min, max),
+        base.random_int(min, max),
 
     count: (start: number) =>
       (end: number) =>
-        count(start, end),
+        base.count(start, end),
 
     save: (key: string) =>
       (contents: string) =>
-        save(key, contents),
+        base.save(key, contents),
   };
   const stdCurry = mixYarnBall('std.curry', base, baseCurry);
   lib['std.curry'] = stdCurry;
