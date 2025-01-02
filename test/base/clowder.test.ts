@@ -35,6 +35,16 @@ describe('clowder operations', () => {
     },
   }) as CatLike);
 
+  type CharlieLike = CatLike & {
+    sound(this: ClowderInstance<CharlieLike>): string;
+  };
+
+  const Charlie = clowder.create<CharlieLike>('Charlie', Cat, () => ({
+    sound(this: ClowderInstance<CharlieLike>): string {
+      return 'hello!!';
+    },
+  }) as CharlieLike);
+
   test('clowder instance calls constructor correctly', () => {
     const owl = clowder.instantiate<AnimalLike>(Animal)('Tyto alba');
     expect(owl.get('species')).toBe('Tyto alba');
@@ -51,5 +61,18 @@ describe('clowder operations', () => {
     expect(
       method.call(cat)
     ).toBe('meow');
+  });
+
+  test('clowder instance inherits contructor from parent', () => {
+    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    expect(charlie.get('species')).toBe('Felis catus');
+  });
+
+  test('child clowders can override methods from parent clowders', () => {
+    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    const method  = charlie.get('sound') as CharlieLike['sound'];
+    expect(
+      method.call(charlie)
+    ).toBe('hello!!');
   });
 });
