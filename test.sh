@@ -152,7 +152,11 @@ run_server() {
   ( npx http-server "./build/test/$TEMPLATE/" --port "$PORT" >"$LOG_FILE" 2>&1 ) &
 }
 
-run_tests() {
+run_base_tests() {
+  npx jest --verbose --config=test/base.jest.config.js
+}
+
+run_template_tests() {
   SERVER_PIDS=()
 
   for TEMPLATE in $1; do
@@ -170,7 +174,7 @@ run_tests() {
 
   # Run jest
   sleep "$WAIT_DURATION"
-  npx jest
+  npx jest --verbose --config=test/templates.jest.config.js
 
   # Kill servers
   for SERVER_PID in "${SERVER_PIDS[@]}"; do
@@ -179,5 +183,6 @@ run_tests() {
 }
 
 if [ "$RUN_TESTS" = 'true' ]; then
-  run_tests "$TEMPLATES"
+  run_base_tests
+  run_template_tests "$TEMPLATES"
 fi
