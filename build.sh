@@ -41,7 +41,7 @@ check_dependency 'npx' || exit 1
 
 # Compile all .ts files in ./src/
 compile_ts() {
-  npx tsc --outDir "$COMPILED"
+  npx tsc -p ./tsconfig.build.json --outDir "$COMPILED"
 }
 
 # Minify a .js file (writes output to stdout)
