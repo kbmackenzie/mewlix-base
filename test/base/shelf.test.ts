@@ -1,4 +1,4 @@
-import { shelf, relation, collections, standardLibrary } from '../../src/mewlix';
+import { shelf, relation, collections, compare, standardLibrary } from '../../src/mewlix';
 
 describe('shelf operations', () => {
   const { empty, reverse, insert, remove, find, map, filter, fold } = standardLibrary();
@@ -60,6 +60,34 @@ describe('shelf operations', () => {
       const shelfA = shelf.create(a);
       const shelfB = shelf.create(b);
       expect(equal(shelfA, shelfB)).toBe(result);
+    });
+  });
+
+  describe('shelf ordering', () => {
+    const comparisons = [
+      { a: [1, 3, 4], b: [1, 2, 3] , func: compare.greater        , result: true  },
+      { a: [1, 2, 3], b: [1, 2]    , func: compare.greater        , result: true  },
+      { a: [1, 2, 3], b: [1, 3, 4] , func: compare.less           , result: true  },
+      { a: [1, 2, 3], b: [1, 2]    , func: compare.less           , result: false },
+      { a: [1, 2],    b: [1, 2, 3] , func: compare.less           , result: true  },
+      { a: [1, 2, 3], b: [1, 2, 3] , func: compare.lessOrEqual    , result: true  },
+      { a: [1, 2, 3], b: [1, 2, 3] , func: compare.greaterOrEqual , result: true  },
+      { a: [1, 2, 3], b: [1, 3, 4] , func: compare.greaterOrEqual , result: false },
+      { a: [1, 3, 4], b: [1, 2, 3] , func: compare.greaterOrEqual , result: true  },
+      { a: []       , b: []        , func: compare.greaterOrEqual , result: true  },
+      { a: []       , b: []        , func: compare.lessOrEqual    , result: true  },
+      { a: []       , b: []        , func: compare.less           , result: false },
+      { a: []       , b: []        , func: compare.greater        , result: false },
+      { a: [1, 2, 3], b: []        , func: compare.less           , result: false },
+      { a: []       , b: [1, 2, 3] , func: compare.greater        , result: false },
+    ];
+
+    test.each(comparisons)('compares shelves\' by ordering', ({ a, b, func, result }) => {
+      const shelfA = shelf.create(a);
+      const shelfB = shelf.create(b);
+      expect(
+        func(relation.ordering(shelfA, shelfB))
+      ).toBe(result);
     });
   });
 
