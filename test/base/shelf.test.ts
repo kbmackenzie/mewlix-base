@@ -3,7 +3,7 @@ import { shelf, relation, collections, compare, standardLibrary } from '../../sr
 describe('shelf operations', () => {
   const {
     empty, insert, remove, reverse, find, map, filter, fold,
-    join, poke, drop, take, all, any
+    join, poke, drop, take, all, any, zip
   } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
@@ -293,6 +293,44 @@ describe('shelf operations', () => {
     test.each(inputs)('see if any value in shelf satisfies predicate', ({ input, predicate, result }) => {
       const output = any(predicate, shelf.create(input));
       expect(output).toBe(result);
+    });
+  });
+
+  describe('shelf operation: zip', () => {
+    const inputs = [
+      { a: [1, 2, 3], b: [1, 3, 4] },
+      { a: [1, 2]   , b: [1, 3, 4] },
+      { a: []       , b: [1, 3]    },
+      { a: [1, 2]   , b: []        },
+      { a: [1, 3, 4], b: [1, 2]    },
+    ];
+    
+    test.each(inputs)('zips two shelves together', ({ a, b }) => {
+      let shelfA = shelf.create(a);
+      let shelfB = shelf.create(b);
+      let zipped = zip(shelfA, shelfB);
+
+      const expectedLength = Math.min(
+        length(shelfA),
+        length(shelfB),
+      );
+      expect(
+        length(zipped)
+      ).toBe(expectedLength);
+
+      while (zipped.kind !== 'bottom') {
+        const head = shelf.peek(zipped)!;
+        expect(
+          head.get('first')
+        ).toStrictEqual(shelf.peek(shelfA))
+        expect(
+          head.get('second')
+        ).toStrictEqual(shelf.peek(shelfB))
+
+        zipped = shelf.pop(zipped)!;
+        shelfA = shelf.pop(shelfA)!;
+        shelfB = shelf.pop(shelfB)!;
+      }
     });
   });
 });
