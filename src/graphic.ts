@@ -82,7 +82,7 @@ export function hexToColor(str: string) {
     throw new MewlixError(ErrorCode.Graphic,
       `Couldn't parse string '${str}' as a valid hex code!`);
   }
-  return instantiate(Color)(
+  return instantiate<ColorLike>(Color)(
     parseInt(rgb.red  , 16),
     parseInt(rgb.green, 16),
     parseInt(rgb.blue , 16),
@@ -151,9 +151,9 @@ function writeConfig(data: GraphicConfig): void {
 /* - * - * - * - * - * - * - * - *
  * Vector2:
  * - * - * - * - * - * - * - * - * */
-export type Vector2 = ClowderInstance<Vector2Bindings>;
+export type Vector2 = ClowderInstance<Vector2Like>;
 
-type Vector2Bindings = {
+type Vector2Like = {
   [wake](this: Vector2, x: number, y: number): void;
   x: number;
   y: number;
@@ -164,57 +164,65 @@ type Vector2Bindings = {
   clamp(this: Vector2, min: Vector2, max: Vector2): Vector2;
 };
 
-export const Vector2 = createClowder<Vector2Bindings>('Vector2', null, () => {
+export const Vector2 = createClowder<Vector2Like>('Vector2', null, () => {
   return {
     x: 0,
     y: 0,
     [wake](this: Vector2, x: number, y: number) {
-      this.bindings.x = x;
-      this.bindings.y = y;
+      this.set('x', x);
+      this.set('y', y);
       validateVector2(this);
     },
     add(this: Vector2, that: Vector2): Vector2 {
       validateVector2(this); validateVector2(that);
-      return instantiate(Vector2)(
-        this.bindings.x + that.bindings.x,
-        this.bindings.y + that.bindings.y,
+      return instantiate<Vector2Like>(Vector2)(
+        (this.get('x') as Vector2Like['x']) + (that.get('x') as Vector2Like['x']),
+        (this.get('y') as Vector2Like['y']) + (that.get('y') as Vector2Like['y']),
       );
     },
     mul(this: Vector2, that: Vector2): Vector2 {
       validateVector2(this); validateVector2(that);
-      return instantiate(Vector2)(
-        this.bindings.x * that.bindings.x,
-        this.bindings.y * that.bindings.y,
+      return instantiate<Vector2Like>(Vector2)(
+        (this.get('x') as Vector2Like['x']) + (that.get('x') as Vector2Like['x']),
+        (this.get('y') as Vector2Like['y']) + (that.get('y') as Vector2Like['y']),
       );
     },
     distance(this: Vector2, that: Vector2): number {
       validateVector2(this); validateVector2(that);
-      const ax = this.bindings.x;
-      const ay = this.bindings.y;
-      const bx = that.bindings.x;
-      const by = that.bindings.y;
+      const ax = this.get('x') as Vector2Like['x'];
+      const ay = this.get('y') as Vector2Like['y'];
+      const bx = that.get('x') as Vector2Like['x'];
+      const by = that.get('y') as Vector2Like['y'];
       return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
     },
     dot(this: Vector2, that: Vector2): number {
       validateVector2(this); validateVector2(that);
-      const ax = this.bindings.x;
-      const ay = this.bindings.y;
-      const bx = that.bindings.x;
-      const by = that.bindings.y;
+      const ax = this.get('x') as Vector2Like['x'];
+      const ay = this.get('y') as Vector2Like['y'];
+      const bx = that.get('x') as Vector2Like['x'];
+      const by = that.get('y') as Vector2Like['y'];
       return ax * bx + ay * by;
     },
     clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
       validateVector2(this); validateVector2(min); validateVector2(max);
-      return instantiate(Vector2)(
-        clamp_(this.bindings.x, min.bindings.x, max.bindings.x),
-        clamp_(this.bindings.y, min.bindings.y, max.bindings.y),
+      const x = clamp_(
+        this.get('x') as Vector2Like['x'],
+        min.get('x') as Vector2Like['x'],
+        min.get('y') as Vector2Like['y'],
       );
+      const y = clamp_(
+        this.get('y') as Vector2Like['y'],
+        max.get('x') as Vector2Like['x'],
+        max.get('y') as Vector2Like['y'],
+      );
+      return instantiate<Vector2Like>(Vector2)(x, y);
     },
    }
 });
 
 function validateVector2(value: Vector2): void {
-  const { x, y } = value.bindings;
+  const x = value.get('x');
+  const y = value.get('y');
   typeof x === 'number' || report.number('Vector2.x', x);
   typeof y === 'number' || report.number('Vector2.y', y);
 }
@@ -222,9 +230,9 @@ function validateVector2(value: Vector2): void {
 /* - * - * - * - * - * - * - * - *
  * Rectangle:
  * - * - * - * - * - * - * - * - * */
-type Rectangle = ClowderInstance<RectangleBindings>;
+type Rectangle = ClowderInstance<RectangleLike>;
 
-type RectangleBindings = {
+type RectangleLike = {
   [wake](this: Rectangle, x: number, y: number, width: number, height: number): void;
   x: number;
   y: number;
@@ -234,29 +242,48 @@ type RectangleBindings = {
   collides(this: Rectangle, that: Rectangle): boolean;
 };
 
-const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
+const Rectangle = createClowder<RectangleLike>('Rectangle', null, () => {
   return {
     x: 0,
     y: 0,
     width: 0,
     height: 0,
     [wake](this: Rectangle, x: number, y: number, width: number, height: number) {
-      this.bindings.x = x;
-      this.bindings.y = y;
-      this.bindings.width = width;
-      this.bindings.height = height;
+      this.set('x', x);
+      this.set('y', y);
+      this.set('width', width);
+      this.set('height', height);
       validateRectangle(this);
     },
     contains(this: Rectangle, point: Vector2): boolean {
       validateRectangle(this); validateVector2(point);
-      const { x: px, y: py } = point.bindings;
-      const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
+      /* Point */
+      const px = point.get('x') as Vector2Like['x'];
+      const py = point.get('y') as Vector2Like['y'];
+
+      /* Rectangle */
+      const ax = this.get('x') as RectangleLike['x'];
+      const ay = this.get('y') as RectangleLike['y'];
+      const aw = this.get('width') as RectangleLike['width'];
+      const ah = this.get('height') as RectangleLike['height'];
+
       return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
     },
     collides(this: Rectangle, that: Rectangle): boolean {
       validateRectangle(this); validateRectangle(that);
-      const { x: ax, y: ay, width: aw, height: ah } = this.bindings;
-      const { x: bx, y: by, width: bw, height: bh } = that.bindings;
+
+      /* Rectangle A */
+      const ax = this.get('x') as RectangleLike['x'];
+      const ay = this.get('y') as RectangleLike['y'];
+      const aw = this.get('width') as RectangleLike['width'];
+      const ah = this.get('height') as RectangleLike['height'];
+
+      /* Rectangle B */
+      const bx = that.get('x') as RectangleLike['x'];
+      const by = that.get('y') as RectangleLike['y'];
+      const bw = that.get('width') as RectangleLike['width'];
+      const bh = that.get('height') as RectangleLike['height'];
+
       return (bx < ax + aw)
         && (bx + bw > ax)
         && (by < ay + ah)
@@ -266,7 +293,10 @@ const Rectangle = createClowder<RectangleBindings>('Rectangle', null, () => {
 });
 
 function validateRectangle(rect: Rectangle): void {
-  const { x, y, width, height } = rect.bindings;
+  const x = rect.get('x');
+  const y = rect.get('y');
+  const width  = rect.get('width');
+  const height = rect.get('height');
   typeof x === 'number'      || report.number('Rectangle.x', x);
   typeof y === 'number'      || report.number('Rectangle.y', y);
   typeof width === 'number'  || report.number('Rectangle.width', width);
@@ -290,8 +320,8 @@ const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
     row: 0,
     column: 0,
     [wake](this: GridSlot, row: number, column: number): void {
-      this.bindings.row    = row;
-      this.bindings.column = column;
+      this.set('row', row);
+      this.set('column', column);
       validateGridSlot(this);
     },
     position(this: GridSlot): Vector2 {
@@ -301,23 +331,24 @@ const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
 });
 
 function validateGridSlot(slot: GridSlot): void {
-  const { row, column } = slot.bindings;
+  const row    = slot.get('row');
+  const column = slot.get('column');
   typeof row    === 'number' || report.number('GridSlot.row', row);
   typeof column === 'number' || report.number('GridSlot.column', column);
 }
 
 export function positionToGridSlot(point: Vector2) {
   validateVector2(point);
-  const row = point.bindings.x / gridSlotHeight;
-  const col = point.bindings.y / gridSlotWidth;
-  return instantiate(GridSlot)(row, col);
+  const row = point.get('x') as Vector2Like['x'] / gridSlotHeight;
+  const col = point.get('y') as Vector2Like['y'] / gridSlotWidth;
+  return instantiate<GridSlotLike>(GridSlot)(row, col);
 }
 
 export function gridSlotToPosition(slot: GridSlot) {
   validateGridSlot(slot);
-  return instantiate(Vector2)(
-    slot.bindings.column * gridSlotWidth,
-    slot.bindings.row * gridSlotHeight,
+  return instantiate<Vector2Like>(Vector2)(
+    slot.get('column') as GridSlotLike['column'] * gridSlotWidth,
+    slot.get('row') as GridSlotLike['row'] * gridSlotHeight,
   );
 }
 
@@ -344,26 +375,31 @@ const Color = createClowder<ColorLike>('Color', null, () => {
     blue:    0,
     opacity: 0,
     [wake](this: Color, red: number, green: number, blue: number, opacity: number = 100): void {
-      this.bindings.red = red;
-      this.bindings.green = green;
-      this.bindings.blue = blue;
-      this.bindings.opacity = opacity;
+      this.set('red', red);
+      this.set('green', green);
+      this.set('blue', blue);
+      this.set('opacity', opacity);
       validateColor(this);
     },
     alpha(this: Color): number {
       validateColor(this);
-      return percentageToByte(this.bindings.opacity);
+      return percentageToByte(this.get('opacity') as ColorLike['opacity']);
     },
     to_hex(this: Color): string {
       validateColor(this);
-      const { red, green, blue } = this.bindings;
+      const red   = this.get('red')   as ColorLike['red'];
+      const green = this.get('green') as ColorLike['green'];
+      const blue  = this.get('blue')  as ColorLike['blue'];
       return `#${red}${green}${blue}`;
     }
   }
 });
 
 function validateColor(color: Color) {
-  const { red, green, blue, opacity } = color.bindings;
+  const red     = color.get('red');
+  const green   = color.get('green');
+  const blue    = color.get('blue');
+  const opacity = color.get('opacity');
   typeof red === 'number'     || report.number('Color.red', red);
   typeof green === 'number'   || report.number('Color.green', green);
   typeof blue === 'number'    || report.number('Color.blue', blue);
@@ -372,10 +408,10 @@ function validateColor(color: Color) {
 
 function colorToStyle(color: Color) {
   validateColor(color);
-  const red     = color.bindings.red;
-  const green   = color.bindings.green;
-  const blue    = color.bindings.blue;
-  const opacity = color.bindings.opacity;
+  const red     = color.get('red')     as ColorLike['red'];
+  const green   = color.get('green')   as ColorLike['green'];
+  const blue    = color.get('blue')    as ColorLike['blue'];
+  const opacity = color.get('opacity') as ColorLike['opacity'];
   return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
 }
 
@@ -411,10 +447,10 @@ export default function(mewlix: Mewlix): void {
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
       return createImageBitmap(blob,
-        rect.bindings.x,
-        rect.bindings.y,
-        rect.bindings.width,
-        rect.bindings.height,
+        rect.get('x')      as RectangleLike['x'],
+        rect.get('y')      as RectangleLike['y'],
+        rect.get('width')  as RectangleLike['width'],
+        rect.get('height') as RectangleLike['height'],
       );
     });
 
@@ -435,11 +471,27 @@ export default function(mewlix: Mewlix): void {
     const sheet = await loadImage(path);
     const iterator = shelfIterator(frames)
     for (const frame of iterator) {
-      const { key, rect } = frame.bindings;
-      const { x, y, width, height } = rect.bindings;
-      const sprite = await createImageBitmap(sheet, x, y, width, height);
+      validateSpriteDetails(frame);
+      const key  = frame.get('key')  as SpriteDetails['key'];
+      const rect = frame.get('rect') as SpriteDetails['rect'];
+      const sprite = await createImageBitmap(
+        sheet,
+        rect.get('x')      as RectangleLike['x'],
+        rect.get('y')      as RectangleLike['y'],
+        rect.get('width')  as RectangleLike['width'],
+        rect.get('height') as RectangleLike['height'],
+      );
       spriteMap.set(key, sprite);
     }
+  }
+
+  function validateSpriteDetails(details: Box<SpriteDetails>) {
+    isGettable(details) || report.gettable('SpriteDetails', details);
+    const key  = details.get('key')  as SpriteDetails['key'];
+    const rect = details.get('rect') as SpriteDetails['rect'];
+    typeof key === 'string' || report.string('SpriteDetails.key', key);
+    isGettable(rect)        || report.gettable('SpriteDetails.rect', rect);
+    validateRectangle(rect);
   }
 
   /* - * - * - * - * - * - * - * - *
@@ -466,7 +518,10 @@ export default function(mewlix: Mewlix): void {
 
   function drawRect(rect: Rectangle, color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
-    const { x, y, width, height } = rect.bindings;
+    const x = rect.get('x') as RectangleLike['x'];
+    const y = rect.get('y') as RectangleLike['y'];
+    const width  = rect.get('width') as RectangleLike['width'];
+    const height = rect.get('height') as RectangleLike['height'];
     context.fillRect(
       x      * sizeModifier,
       y      * sizeModifier,
@@ -902,8 +957,8 @@ export default function(mewlix: Mewlix): void {
     let data: Uint8ClampedArray | null;
     return {
       [wake](this: PixelCanvas, width: number, height: number) {
-        this.bindings.width  = width;
-        this.bindings.height = height;
+        this.set('width', width);
+        this.set('height', height);
         data = new Uint8ClampedArray(width * height * 4);
         validatePixelCanvas(this);
       },
@@ -914,8 +969,12 @@ export default function(mewlix: Mewlix): void {
         validatePixelCanvas(this);
 
         const trueColor = valueToColor(color);
-        const { red, green, blue } = trueColor.bindings;
-        const alpha = trueColor.bindings.alpha.call(trueColor);
+        const red   = trueColor.get('red')   as ColorLike['red'];
+        const green = trueColor.get('green') as ColorLike['green'];
+        const blue  = trueColor.get('blue')  as ColorLike['blue'];
+
+        const getAlpha = trueColor.get('alpha') as ColorLike['alpha'];
+        const alpha = getAlpha.call(trueColor);
 
         for (let i = 0; i < data.length; i += 4) {
           data[i]     = red;
@@ -931,10 +990,15 @@ export default function(mewlix: Mewlix): void {
         typeof y === 'number' || report.number('PixelCanvas.set_pixel', y);
 
         const trueColor = valueToColor(color);
-        const { red, green, blue } = trueColor.bindings;
-        const alpha = trueColor.bindings.alpha.call(trueColor);
+        const red   = trueColor.get('red')   as ColorLike['red'];
+        const green = trueColor.get('green') as ColorLike['green'];
+        const blue  = trueColor.get('blue')  as ColorLike['blue'];
 
-        const i = (x * this.bindings.width + y) * 4;
+        const getAlpha = trueColor.get('alpha') as ColorLike['alpha'];
+        const alpha = getAlpha.call(trueColor);
+
+        const width = this.get('width') as PixelCanvasLike['width'];
+        const i = (x * width + y) * 4;
         data[i]     = red;
         data[i + 1] = green;
         data[i + 2] = blue;
@@ -946,8 +1010,9 @@ export default function(mewlix: Mewlix): void {
         typeof x === 'number' || report.number('PixelCanvas.get_pixel', x);
         typeof y === 'number' || report.number('PixelCanvas.get_pixel', y);
 
-        const i = (x * this.bindings.width + y) * 4;
-        return instantiate(Color)(
+        const width = this.get('width') as PixelCanvasLike['width'];
+        const i = (x * width + y) * 4;
+        return instantiate<ColorLike>(Color)(
           data[i],
           data[i + 1],
           data[i + 2],
@@ -959,18 +1024,21 @@ export default function(mewlix: Mewlix): void {
         validatePixelCanvas(this);
         typeof key === 'string' || report.string('PixelCanvas.to_sprite', key);
 
+        const width  = this.get('width')  as PixelCanvasLike['width'];
+        const height = this.get('height') as PixelCanvasLike['height'];
         const copy = new Uint8ClampedArray(data);
         resourceQueue.push({
           type: 'canvas',
           key: key,
-          data: new ImageData(copy, this.bindings.width, this.bindings.height),
+          data: new ImageData(copy, width, height),
         });
       },
     };
   });
 
   function validatePixelCanvas(canvas: PixelCanvas): void {
-    const { width, height } = canvas.bindings;
+    const width  = canvas.get('width');
+    const height = canvas.get('height');
     typeof width === 'number'  || report.number('PixelCanvas.width', width);
     typeof height === 'number' || report.number('PixelCanvas.height', height);
   }
@@ -1285,7 +1353,7 @@ export default function(mewlix: Mewlix): void {
 
     mouse_down: isMouseDown,
 
-    mouse_position: () => instantiate(Vector2)(
+    mouse_position: () => instantiate<Vector2Like>(Vector2)(
       mouseX,
       mouseY,
     ),
