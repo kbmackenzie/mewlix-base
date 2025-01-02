@@ -34,6 +34,21 @@ describe('reflection', () => {
     expect(
       reflection.instanceOf(testInstance, testClowder)
     ).toBe(true);
+
+    const testClowder2  = clowder.create('Test2', testClowder, () => ({}));
+    const testInstance2 = clowder.instantiate(testClowder2)();
+
+    expect(
+      reflection.instanceOf(testInstance2, testClowder2)
+    ).toBe(true);
+
+    expect(
+      reflection.instanceOf(testInstance2, testClowder)
+    ).toBe(true);
+
+    expect(
+      reflection.instanceOf(testInstance, testClowder2)
+    ).toBe(false);
   });
 
   test('has cat tree type correctly identified', () => {
