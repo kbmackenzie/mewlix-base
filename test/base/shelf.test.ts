@@ -1,7 +1,7 @@
 import { shelf, relation, collections, compare, standardLibrary } from '../../src/mewlix';
 
 describe('shelf operations', () => {
-  const { empty, reverse, insert, remove, find, map, filter, fold } = standardLibrary();
+  const { empty, reverse, insert, remove, find, map, filter, fold, join } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
 
@@ -186,6 +186,23 @@ describe('shelf operations', () => {
 
     test.each(inputs)('folds values in shelf with function', ({ input, func, initial, result }) => {
       const output = fold(func, initial, shelf.create(input));
+      expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: join', () => {
+    const inputs = [
+      { a: [1, 2, 3], b: [1, 3, 4], result: [1, 2, 3, 1, 3, 4] },
+      { a: [1, 2, 3], b: []       , result: [1, 2, 3]          },
+      { a: []       , b: [1, 3, 4], result: [1, 3, 4]          },
+    ];
+
+    test.each(inputs)('join two shelves', ({ a, b, result }) => {
+      const shelfA = shelf.create(a);
+      const shelfB = shelf.create(b);
+      const output = shelf.toArray(
+        join(shelfA, shelfB)
+      );
       expect(output).toStrictEqual(result);
     });
   });
