@@ -9,26 +9,24 @@ import { ClowderInstance, clowder, wake } from '../../src/mewlix';
 
 describe('clowder operations', () => {
   type AnimalLike = {
-    [wake](this: ClowderInstance<AnimalLike>, species: string): ClowderInstance<AnimalLike>;
+    [wake](this: ClowderInstance<AnimalLike>, species: string): void;
     species: string;
   };
 
   const Animal = clowder.create<AnimalLike>('Animal', null, () => ({
     [wake](this: ClowderInstance<AnimalLike>, species: string) {
       this.set('species', species);
-      return this;
     },
   }) as AnimalLike);
 
   type CatLike = AnimalLike & {
-    [wake](this: ClowderInstance<CatLike>): ClowderInstance<CatLike>;
+    [wake](this: ClowderInstance<CatLike>): void;
     sound(this: ClowderInstance<CatLike>): string;
   };
 
   const Cat = clowder.create<CatLike>('Cat', Animal as any, () => ({
     [wake](this: ClowderInstance<CatLike>) {
       (this.parent as any).bindings[wake]!('Felis catus');
-      return this;
     },
     sound(this: ClowderInstance<CatLike>) {
       return 'meow';
