@@ -697,10 +697,11 @@ export const reflection = {
       case 'string' : return 'string';
       case 'boolean': return 'boolean';
       case 'object' :
-        if (a === null) return 'null';
+        if (a === null) return 'nothing';
         if (tag in a) return a[tag] as string;
         break;
       case 'function': return 'function';
+      case 'undefined': return 'nothing';
       default: break;
     }
     return 'unrecognized';
