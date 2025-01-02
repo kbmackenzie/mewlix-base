@@ -30,7 +30,7 @@ export type Clowder<T extends ClowderBindings> = Readonly<{
   [tag]: 'clowder';
   kind: symbol;
   name: string;
-  parent: Clowder<T> | null;
+  parent: Clowder<Partial<T>> | null;
   initialize: () => T;
 }>;
 
@@ -39,7 +39,7 @@ export type ClowderInstance<T extends ClowderBindings> = Readonly<{
   name: string;
   kind: symbol;
   bindings: T;
-  parent: ClowderInstance<T> | null;
+  parent: ClowderInstance<Partial<T>> | null;
   get(key: keyof T): TryGet<ValueOf<T>>;
   set(key: keyof T, value: ValueOf<T>): void;
   meta: {
@@ -320,7 +320,7 @@ function getConstructor<T extends ClowderBindings>(clowder: ClowderInstance<T>):
 }
 
 function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): ClowderInstance<T> {
-  const parent   = clowder.parent && instanceClowder(clowder.parent);
+  const parent   = clowder.parent && instanceClowder<Partial<T>>(clowder.parent);
   const bindings = clowder.initialize();
   const instance: ClowderInstance<T> = {
     [tag]: 'clowder instance',
@@ -359,7 +359,7 @@ export type WakeParams = Parameters<Wake>;
 export function instantiate<T extends ClowderBindings>(
   clowder: Clowder<T>
 ): (...args: WakeParams) => ClowderInstance<T> {
-  const instance = instanceClowder(clowder);
+  const instance = instanceClowder<T>(clowder);
   return (...args) => {
     instance.bindings[wake]?.(...args);
     return instance;
@@ -370,7 +370,7 @@ export function instanceOf<T extends ClowderBindings>(
   instance: ClowderInstance<T>,
   clowder: Clowder<T>
 ): boolean {
-  let i: ClowderInstance<T> | null = instance;
+  let i: ClowderInstance<Partial<T>> | null = instance;
   while (i) {
     if (i.kind === clowder.kind) return true;
     i = i.parent;
