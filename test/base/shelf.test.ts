@@ -1,7 +1,10 @@
 import { shelf, relation, collections, compare, standardLibrary } from '../../src/mewlix';
 
 describe('shelf operations', () => {
-  const { empty, reverse, insert, remove, find, map, filter, fold, join, poke } = standardLibrary();
+  const {
+    empty, insert, remove, reverse, find, map, filter, fold,
+    join, poke, drop, take
+  } = standardLibrary();
   const { length } = collections;
   const { equal  } = relation;
 
@@ -222,6 +225,41 @@ describe('shelf operations', () => {
     test.each(inputs)('poke value in shelf', ({ input, index, result }) => {
       const output = poke(shelf.create(input), index);
       expect(output).toBe(result);
+    });
+  });
+
+  describe('shelf operation: take', () => {
+    const inputs = [
+      { input: [1, 2, 3, 4, 5], amount: 3, result: [3, 4, 5]       },
+      { input: [1, 2, 3, 4, 5], amount: 1, result: [5]             },
+      { input: [1, 2, 3, 4, 5], amount: 0, result: []              },
+      { input: [1, 2, 3, 4, 5], amount: 6, result: [1, 2, 3, 4, 5] },
+      { input: []             , amount: 1, result: []              },
+    ];
+
+    test.each(inputs)('take n values from a shelf', ({ input, amount, result }) => {
+      const output = shelf.toArray(
+        take(shelf.create(input), amount)
+      );
+      expect(output).toStrictEqual(result);
+    });
+  });
+
+  describe('shelf operation: drop', () => {
+    const inputs = [
+      { input: [1, 2, 3, 4, 5], amount: 3, result: [1, 2]          },
+      { input: [1, 2, 3, 4, 5], amount: 4, result: [1]             },
+      { input: [1, 2, 3, 4, 5], amount: 0, result: [1, 2, 3, 4, 5] },
+      { input: [1, 2, 3, 4, 5], amount: 5, result: []              },
+      { input: [1, 2, 3, 4, 5], amount: 6, result: []              },
+      { input: []             , amount: 1, result: []              },
+    ];
+
+    test.each(inputs)('drop n values from a shelf', ({ input, amount, result }) => {
+      const output = shelf.toArray(
+        drop(shelf.create(input), amount)
+      );
+      expect(output).toStrictEqual(result);
     });
   });
 });
