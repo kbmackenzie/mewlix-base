@@ -589,6 +589,18 @@ export default function(mewlix: Mewlix): void {
   }
 
   /* - * - * - * - * - * - * - * - *
+   * Loading Text Assets:
+   * - * - * - * - * - * - * - * - * */
+  const textMap: Map<string, string> = new Map();
+
+  const loadText = (path: string): Promise<string> => fetch(path)
+    .then(response => response.text())
+    .then(text => {
+      textMap.set(path, text);
+      return text;
+    });
+
+  /* - * - * - * - * - * - * - * - *
    * Initializing Audio:
    * - * - * - * - * - * - * - * - * */
   const audioContext = new AudioContext();
@@ -808,6 +820,7 @@ export default function(mewlix: Mewlix): void {
     | { type: 'generic'; key: string; path: string; options?: Rectangle }
     | { type: 'canvas'; key: string; data: ImageData; }
     | { type: 'spritesheet'; path: string; frames: Shelf<Box<SpriteDetails>>; }
+    | { type: 'text'; path: string; }
 
   const resourceQueue: Resource[] = [];
 
@@ -824,6 +837,10 @@ export default function(mewlix: Mewlix): void {
     else if (resource.type === 'spritesheet') {
       const { path, frames } = resource;
       await fromSpritesheet(path, frames);
+    }
+    else if (resource.type === 'text') {
+      const { path } = resource;
+      await loadText(path);
     }
   }
 
@@ -1291,7 +1308,7 @@ export default function(mewlix: Mewlix): void {
         frames: frames,
       });
     },
-    
+
     draw(key: string, x: number = 0, y: number = 0): void {
       typeof key === 'string' || report.string('graphic.draw', key);
       typeof x === 'number'   || report.number('graphic.draw', x);
@@ -1323,6 +1340,32 @@ export default function(mewlix: Mewlix): void {
 
     measure_text(value: MewlixValue, options?: Box<TextOptions>) {
       return measureText(purrify(value), options?.bindings);
+    },
+
+    load_text(path: string): void {
+      typeof path === 'string' || report.string('graphic.load_text', path);
+      if (initialized) {
+        resourceError('graphic.load_text', path);
+        return;
+      }
+      resourceQueue.push({
+        type: 'text',
+        path: path,
+      });
+    },
+
+    get_text(path: string): string {
+      typeof path === 'string' || report.string('graphic.get_text', path);
+      if (!initialized) {
+        throw new MewlixError(ErrorCode.Graphic,
+          `Can't load text asset after initialization: ${path}`);
+      }
+      const text = textMap.get(path);
+      if (text === undefined) {
+        throw new MewlixError(ErrorCode.Graphic,
+          `Can't load text asset: no asset matches key: ${path}`);
+      }
+      return text;
     },
 
     meow_options(box: Box<MeowOptions>): void {
