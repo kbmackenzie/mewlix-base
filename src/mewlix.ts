@@ -1649,7 +1649,7 @@ export function standardLibrary(meowFunc?: MeowFunc) {
 
   function log(value: MewlixValue): void {
     const message = purrify(value);
-    console?.log(`[Mewlix] ${message}`);
+    console?.log(`[mewlix] ${message}`);
   };
 
   const error = (function() {
