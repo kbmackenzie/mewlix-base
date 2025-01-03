@@ -921,8 +921,12 @@ export const collections = {
       if (typeof collection === 'string') {
         return collection.includes(value);
       }
-      if (isBox(collection) || isClowderInstance(collection)) {
+      if (isBox(collection)) {
         return value in collection.bindings;
+      }
+      if (isClowderInstance(collection)) {
+        return value in collection.bindings
+          || (!!collection.parent && collections.contains(value, collection.parent));
       }
     }
     const typeOfA = reflection.typeOf(value);
