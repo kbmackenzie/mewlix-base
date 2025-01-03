@@ -1,4 +1,4 @@
-import { ClowderInstance, clowder, wake } from '../../src/mewlix';
+import { ClowderInstance, clowder, wake, collections } from '../../src/mewlix';
 
 /* A lot of type casting here, wow! _(:3」∠)_
  *
@@ -72,5 +72,12 @@ describe('clowder operations', () => {
     expect(
       method.call(charlie)
     ).toBe('hello!!');
+  });
+
+  test('child clowders contain value from parent clowder', () => {
+    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    expect(
+      collections.contains('species', charlie)
+    ).toBe(true);
   });
 });
