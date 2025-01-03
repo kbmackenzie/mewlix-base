@@ -138,7 +138,7 @@ fi
 # ------------------------------
 get_port() {
   TEMPLATE="$1"
-  cat './test-config.json' | npx json "ports.${TEMPLATE}"
+  cat './test/test-config.json' | npx json "ports.${TEMPLATE}"
 }
 
 run_server() {
@@ -153,7 +153,7 @@ run_server() {
 }
 
 run_base_tests() {
-  npx jest --verbose --config=test/base.jest.config.js
+  npx jest --verbose --config=./test/base.jest.config.js
 }
 
 run_template_tests() {
@@ -174,7 +174,7 @@ run_template_tests() {
 
   # Run jest
   sleep "$WAIT_DURATION"
-  npx jest --verbose --config=test/templates.jest.config.js
+  npx jest --verbose --config=./test/templates.jest.config.js
 
   # Kill servers
   for SERVER_PID in "${SERVER_PIDS[@]}"; do
