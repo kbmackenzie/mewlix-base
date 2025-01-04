@@ -1535,7 +1535,8 @@ export default function(mewlix: Mewlix): void {
    * Prevent arrow-key scrolling:
    * - * - * - * - * - * - * - * - * */
   const preventKeys = new Set<string>([
-    'Space',
+    ' ',
+    'Spacebar',
     'ArrowLeft',
     'ArrowRight',
     'ArrowUp',
@@ -1543,7 +1544,7 @@ export default function(mewlix: Mewlix): void {
   ]);
 
   window.addEventListener('keydown', event => {
-    if (preventKeys.has(event.code)) {
+    if (preventKeys.has(event.key)) {
       event.preventDefault();
     }
   }, { passive: false });
