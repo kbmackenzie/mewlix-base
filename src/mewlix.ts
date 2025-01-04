@@ -623,15 +623,19 @@ export function fromSerializable(value: Serializable): MewlixValue {
       return value;
     case 'object': {
       if (value === null) return null;
-      const bindings: Record<string, MewlixValue> = {};
-      for (const key in value) {
-        bindings[key] = fromSerializable(value[key]);
-      }
-      return createBox(bindings);
+      return fromSerializableObject(value);
     }
     default:
       return null;
   }
+}
+
+function fromSerializableObject(object: SerializableObject): Box<Record<string, MewlixValue>> {
+  const bindings: Record<string, MewlixValue> = {};
+  for (const key in object) {
+    bindings[key] = fromSerializable(object[key]);
+  }
+  return createBox(bindings);
 }
 
 /* - * - * - * - * - * - * - * - *
