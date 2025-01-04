@@ -390,7 +390,13 @@ const Color = createClowder<ColorLike>('Color', null, () => {
       const red   = this.get('red')   as ColorLike['red'];
       const green = this.get('green') as ColorLike['green'];
       const blue  = this.get('blue')  as ColorLike['blue'];
-      return `#${red}${green}${blue}`;
+      return [red, green, blue].reduce(
+        (acc, x) => {
+          const color = x.toString(16);
+          return acc + (color.length < 2 ? '0' : '') + color;
+        },
+        '#'
+      );
     }
   }
 });
