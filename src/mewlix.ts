@@ -553,29 +553,29 @@ export function purrify(value: any): string {
 /* - * - * - * - * - * - * - * - *
  * JSON Conversion
 /* - * - * - * - * - * - * - * - * */
-export type JSONValue =
+export type Serializable =
   | number
   | string
   | boolean
   | null
-  | JSONValue[]
-  | JSONObject;
+  | Serializable[]
+  | SerializableObject;
 
-export type JSONObject = {
-  [key: string]: JSONValue;
+export type SerializableObject = {
+  [key: string]: Serializable;
 };
 
-const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
-  'shelf': function<T>(shelf: Shelf<T>): JSONValue {
-    return shelfToArray(shelf).map(toJSON);
+const mewlixSerialize: Record<ObjectTag, (a: any) => Serializable> = {
+  'shelf': function<T>(shelf: Shelf<T>): Serializable {
+    return shelfToArray(shelf).map(toSerializable);
   },
-  'box': function<T extends { [key: string]: any }>(box: Box<T>): JSONValue {
-    return objectToJSON(box.bindings);
+  'box': function<T extends { [key: string]: any }>(box: Box<T>): Serializable {
+    return makeObjectSerializable(box.bindings);
   },
-  'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): JSONValue {
-    return objectToJSON(instance.bindings);
+  'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): Serializable {
+    return makeObjectSerializable(instance.bindings);
   },
-  'cat fruit': function(fruit: CatFruit): JSONValue {
+  'cat fruit': function(fruit: CatFruit): Serializable {
     return fruit.key;
   },
   /* Not convertible: */
@@ -584,12 +584,12 @@ const mewlixToJSON: Record<ObjectTag, (a: any) => JSONValue> = {
   'yarnball': (_) => null,
 };
 
-export function toJSON(value: any): JSONValue {
+export function toSerializable(value: any): Serializable {
   if (typeof value === 'object' && value !== null && tag in value) {
-    return mewlixToJSON[value[tag] as ObjectTag](value);
+    return mewlixSerialize[value[tag] as ObjectTag](value);
   }
   if (Array.isArray(value)) {
-    return value.map(toJSON);
+    return value.map(toSerializable);
   }
   switch (typeof value) {
     case 'number':
@@ -598,23 +598,23 @@ export function toJSON(value: any): JSONValue {
       return value;
     case 'object':
       if (value === null) return null;
-      return objectToJSON(value);
+      return makeObjectSerializable(value);
     default:
       return null;
   }
 }
 
-function objectToJSON(obj: object): JSONValue {
-  const output: Record<string, JSONValue> = {};
-  for (const key in obj) {
-    output[key] = toJSON(key);
+function makeObjectSerializable(object: Record<string, any>): Serializable {
+  const output: Record<string, Serializable> = {};
+  for (const key in object) {
+    output[key] = toSerializable(object[key]);
   }
   return output;
 }
 
-export function fromJSON(value: JSONValue): MewlixValue {
+export function fromSerializable(value: Serializable): MewlixValue {
   if (Array.isArray(value)) {
-    return shelfFromArray(value.map(fromJSON));
+    return shelfFromArray(value.map(fromSerializable));
   }
   switch (typeof value) {
     case 'number':
@@ -625,7 +625,7 @@ export function fromJSON(value: JSONValue): MewlixValue {
       if (value === null) return null;
       const bindings: Record<string, MewlixValue> = {};
       for (const key in value) {
-        bindings[key] = fromJSON(value[key]);
+        bindings[key] = fromSerializable(value[key]);
       }
       return createBox(bindings);
     }
@@ -1639,12 +1639,12 @@ export function standardLibrary(meowFunc?: MeowFunc) {
   };
 
   function to_json(value: MewlixValue): string {
-    return JSON.stringify(toJSON(value));
+    return JSON.stringify(toSerializable(value));
   };
 
   function from_json(value: string): MewlixValue {
     typeof value === 'string' || report.string('std.from_json', value);
-    return fromJSON(JSON.parse(value));
+    return fromSerializable(JSON.parse(value));
   };
 
   function log(value: MewlixValue): void {
@@ -1963,7 +1963,7 @@ const createMewlix = function() {
       },
     },
     wake,
-    fromJSON,
+    fromJSON: fromSerializable,
     numbers,
     boolean,
     strings,
