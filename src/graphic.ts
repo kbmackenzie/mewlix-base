@@ -1127,15 +1127,19 @@ export default function(mewlix: Mewlix): void {
     setTimeout(() => loading.remove(), 1200);
   }
 
+  function coreAsset(path: string): string {
+    return './core-assets/' + path;
+  }
+
   async function drawPlay(): Promise<void> {
-    const image = await loadImage('./core-assets/mewlix-play.png');
+    const image = await loadImage(coreAsset('mewlix-play.png'));
     context.fillStyle = 'rgb(0 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
   }
 
   async function drawError(): Promise<void> {
-    const image = await loadImage('./core-assets/mewlix-error.png');
+    const image = await loadImage(coreAsset('mewlix-error.png'));
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
@@ -1144,7 +1148,7 @@ export default function(mewlix: Mewlix): void {
 
   async function init(fn: GameLoop): Promise<void> {
     initialized = true;
-    await loadFont('Munro', './core-assets/fonts/Munro/munro.ttf');
+    await loadFont('Munro', coreAsset('fonts/Munro/munro.ttf'));
 
     function nextFrame(): Promise<number> {
       return new Promise(resolve => {
