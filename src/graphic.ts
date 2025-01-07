@@ -390,13 +390,10 @@ const Color = createClowder<ColorLike>('Color', null, () => {
       const red   = this.get('red')   as ColorLike['red'];
       const green = this.get('green') as ColorLike['green'];
       const blue  = this.get('blue')  as ColorLike['blue'];
-      return [red, green, blue].reduce(
-        (acc, x) => {
-          const color = x.toString(16);
-          return acc + (color.length < 2 ? '0' : '') + color;
-        },
-        '#'
-      );
+      return [red, green, blue].reduce((acc, x) => {
+        const color = x.toString(16);
+        return acc + (color.length < 2 ? '0' : '') + color;
+      }, '#');
     }
   }
 });
@@ -427,6 +424,27 @@ function valueToColor(value: string | Color): Color {
   }
   validateColor(value);
   return value;
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Initialization:
+ * - * - * - * - * - * - * - * - * */
+
+function preventArrowKeys() {
+  const preventKeys = new Set<string>([
+    ' ',
+    'Spacebar',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowUp',
+    'ArrowDown',
+  ]);
+
+  window.addEventListener('keydown', event => {
+    if (preventKeys.has(event.key)) {
+      event.preventDefault();
+    }
+  }, { passive: false });
 }
 
 export default function(mewlix: Mewlix): void {
@@ -1134,10 +1152,11 @@ export default function(mewlix: Mewlix): void {
       });
     }
 
-    async function run() {
-      let lastFrame: number; // Last frame's timestamp, in milliseconds.
+    async function initLoop() {
+      let lastFrame: number; /* Last frame's timestamp, in milliseconds. */
 
       try {
+        preventArrowKeys();
         await loadResources();
         removeLoadingOverlay();
         context.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -1174,7 +1193,7 @@ export default function(mewlix: Mewlix): void {
       }
     }
 
-    await run();
+    await initLoop();
   }
 
   function resourceError(func: string, resource: string): void {
@@ -1530,22 +1549,4 @@ export default function(mewlix: Mewlix): void {
       throw error;
     }
   };
-
-  /* - * - * - * - * - * - * - * - *
-   * Prevent arrow-key scrolling:
-   * - * - * - * - * - * - * - * - * */
-  const preventKeys = new Set<string>([
-    ' ',
-    'Spacebar',
-    'ArrowLeft',
-    'ArrowRight',
-    'ArrowUp',
-    'ArrowDown',
-  ]);
-
-  window.addEventListener('keydown', event => {
-    if (preventKeys.has(event.key)) {
-      event.preventDefault();
-    }
-  }, { passive: false });
 }
