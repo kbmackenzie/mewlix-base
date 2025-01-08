@@ -1165,11 +1165,20 @@ export default function(mewlix: Mewlix): void {
     });
   }
 
-  async function drawPlay(): Promise<void> {
-    const image = await loadImage(coreAsset('mewlix-play.png'));
+  async function awaitStart() {
+    /* Load image asset. */
+    const play = await loadImage(coreAsset('mewlix-play.png'));
+
+    /* Draw 'play' screen once everything is ready. */
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+    thumbnail?.(0);
     context.fillStyle = 'rgb(0 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
-    context.drawImage(image, 0, 0);
+    context.drawImage(play, 0, 0);
+
+    /* Await click. Once clicked, conclude. */
+    await awaitClick();
+    play.close();
   }
 
   async function drawError(): Promise<void> {
@@ -1198,10 +1207,7 @@ export default function(mewlix: Mewlix): void {
       await loadResources();
 
       /* Show 'play' screen; await a click. */
-      context.clearRect(0, 0, canvasWidth, canvasHeight);
-      thumbnail?.(0);
-      await drawPlay();
-      await awaitClick();
+      await awaitStart();
 
       /* Store last frame's timestamp, in milliseconds. */
       let lastFrame: number; 
