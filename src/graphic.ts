@@ -40,6 +40,58 @@ export function lerp(start: number, end: number, x: number): number {
   return start + (end - start) * x;
 }
 
+/* - * - * - * - * - * - * - * - *
+ * Resource Queue:
+ * - * - * - * - * - * - * - * - * */
+
+/* A queue to store data about resources to be loaded.
+ * Items queued will be loaded when graphic.init() is called!
+ *
+ * The queue stores data about three types of resources:
+ * - Generic (images, audio, fonts)
+ * - Spritesheet sprites
+ * - PixelCanvas sprite rendering
+ * - Text files
+ *
+ * The 'type' attribute in each object stored in the queue
+ * indicates the type of resource it represents. */
+
+export type Resource =
+  | { type: 'generic'; key: string; path: string; options?: Rectangle }
+  | { type: 'canvas'; key: string; data: ImageData; }
+  | { type: 'spritesheet'; path: string; frames: Shelf<SpritesheetCutout>; }
+  | { type: 'text'; path: string; }
+
+export type SpritesheetCutout = Box<{
+  key:  string;
+  rect: Rectangle;
+}>;
+
+export type ResourceLoader = (resource: Resource) => Promise<void>;
+
+/* - * - * - * - * - * - * - * - *
+ * Canvas Constants:
+ * - * - * - * - * - * - * - * - * */
+const virtualWidth  = 128;
+const virtualHeight = 128;
+
+const canvasWidth  = 1024;
+const canvasHeight = 1024;
+const sizeModifier = Math.floor(canvasWidth / virtualWidth);
+
+const gridSlotWidth  = 16;
+const gridSlotHeight = 16;
+
+/* - * - * - * - * - * - * - * - *
+ * Assets:
+ * - * - * - * - * - * - * - * - * */
+function coreAsset(path: string): string {
+  return './core-assets/' + path;
+}
+
+/* - * - * - * - * - * - * - * - *
+ * Colors:
+ * - * - * - * - * - * - * - * - * */
 export type HexadecimalChar =
   '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
 
@@ -72,7 +124,6 @@ export function hexToRGB(str: string): RGB | null {
       blue:  b + b as Byte,
     };
   }
-
   return null; /* Theoretically unreachable. */
 }
 
@@ -89,16 +140,6 @@ export function hexToColor(str: string) {
   );
 }
 
-/* Canvas constants: */
-export const virtualWidth  = 128;
-export const virtualHeight = 128;
-
-export const gridSlotWidth  = 16;
-export const gridSlotHeight = 16;
-export const gridColumns = Math.floor(virtualWidth  / gridSlotWidth );
-export const gridRows    = Math.floor(virtualHeight / gridSlotHeight);
-
-/* Colors: */
 export const toColor: unique symbol = Symbol('toColor');
 
 export function withColor(value: string | Color): string {
@@ -149,7 +190,7 @@ function writeConfig(data: GraphicConfig): void {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Vector2:
+ * Vector2 Clowder:
  * - * - * - * - * - * - * - * - * */
 export type Vector2 = ClowderInstance<Vector2Like>;
 
@@ -228,7 +269,7 @@ function validateVector2(value: Vector2): void {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Rectangle:
+ * Rectangle Clowder:
  * - * - * - * - * - * - * - * - * */
 type Rectangle = ClowderInstance<RectangleLike>;
 
@@ -304,7 +345,7 @@ function validateRectangle(rect: Rectangle): void {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Grid Slot:
+ * Grid Slot Clowder:
  * - * - * - * - * - * - * - * - * */
 type GridSlot = ClowderInstance<GridSlotLike>;
 
@@ -353,7 +394,7 @@ export function gridSlotToPosition(slot: GridSlot) {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Color:
+ * Color Clowder:
  * - * - * - * - * - * - * - * - * */
 /* Color container, wrapping a RGBA color value.
  * It accepts an opacity value too, in percentage. */
@@ -427,9 +468,8 @@ function valueToColor(value: string | Color): Color {
 }
 
 /* - * - * - * - * - * - * - * - *
- * Initialization:
+ * Page Preparations:
  * - * - * - * - * - * - * - * - * */
-
 function preventArrowKeys() {
   const preventKeys = new Set<string>([
     ' ',
@@ -447,20 +487,29 @@ function preventArrowKeys() {
   }, { passive: false });
 }
 
+/* - * - * - * - * - * - * - * - *
+ * Initializing Canvas:
+ * - * - * - * - * - * - * - * - * */
 export default function(mewlix: Mewlix): void {
-  /* - * - * - * - * - * - * - * - *
-   * Initializing Canvas:
-   * - * - * - * - * - * - * - * - * */
-  const canvas  = document.getElementById('game-canvas') as HTMLCanvasElement;
+  const canvas  = document.createElement('canvas');
+  canvas.id     = 'game-canvas';
+  canvas.width  = canvasWidth;
+  canvas.height = canvasHeight;
+  canvas.classList.add('contained', 'game-canvas');
+
   const context = canvas.getContext('2d')!;
   context.imageSmoothingEnabled = false;
 
-  const canvasWidth  = canvas.width;
-  const canvasHeight = canvas.height;
-  const sizeModifier = Math.floor(canvas.width / virtualWidth);
-
   const spriteMap = new Map<string, ImageBitmap>();
   const audioMap  = new Map<string, AudioBuffer>();
+
+  let inDOM = false;
+  function addCanvasToDOM() {
+    if (inDOM) return;
+    inDOM = true;
+    const container = document.getElementById('container') as HTMLDivElement;
+    container.appendChild(canvas);
+  }
 
   /* - * - * - * - * - * - * - * - *
    * Loading Images:
@@ -554,7 +603,7 @@ export default function(mewlix: Mewlix): void {
     );
   }
 
-  function fillCanvas(color: Color): void {
+  function fillCanvas(color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
     context.fillRect(0, 0, canvasWidth, canvasHeight);
   }
@@ -828,24 +877,6 @@ export default function(mewlix: Mewlix): void {
   /* - * - * - * - * - * - * - * - *
    * Resource Queue:
    * - * - * - * - * - * - * - * - * */
-
-  /* A queue to store data about resources to be loaded.
-   * Items queued will be loaded when graphic.init() is called!
-   *
-   * The queue stores data about three types of resources:
-   * - Generic (images, audio, fonts)
-   * - Spritesheet sprites
-   * - PixelCanvas sprite rendering
-   *
-   * The 'type' attribute in each object stored in the queue
-   * indicates the type of resource it represents. */
-
-  type Resource =
-    | { type: 'generic'; key: string; path: string; options?: Rectangle }
-    | { type: 'canvas'; key: string; data: ImageData; }
-    | { type: 'spritesheet'; path: string; frames: Shelf<Box<SpriteDetails>>; }
-    | { type: 'text'; path: string; }
-
   const resourceQueue: Resource[] = [];
 
   async function loadResource(resource: Resource) {
@@ -868,11 +899,24 @@ export default function(mewlix: Mewlix): void {
     }
   }
 
-  async function loadResources(): Promise<void> {
+  async function loadResources() {
+    const loadingCat = document.getElementById('loading-cat') as HTMLImageElement;
+    context.drawImage(loadingCat, 0, 0, canvasWidth, canvasHeight);
+
+    /* Add canvas to DOM once we're ready to draw. */
+    addCanvasToDOM();
+    loadingCat.remove();
+
+    function drawProgressBar(progress: number) {
+      const width = Math.floor((progress * 512) / resourceQueue.length);
+      context.rect(768, 256, width, 24);
+    }
+
+    let progress = 0;
     for (const resource of resourceQueue) {
       await loadResource(resource);
+      drawProgressBar(progress++);
     }
-    resourceQueue.length = 0;
   }
 
   /* - * - * - * - * - * - * - * - *
@@ -1094,14 +1138,14 @@ export default function(mewlix: Mewlix): void {
    * - * - * - * - * - * - * - * - * */
   type GameLoop = (delta: number) => void;
 
-  let deltaTime: number = 0;        // Delta time, in seconds!
-  let thumbnail: GameLoop | null;   // Callback function to generate a thumbnail;
-  let initialized: boolean = false; // Flag indicating whether .init() has been called
+  let deltaTime: number = 0;        /* Δt (delta time), in seconds. */
+  let thumbnail: GameLoop | null;   /* Function for generating a game preview. */
+  let initialized: boolean = false; /* Flag indicating whether .init() has been called. */
 
-  const config = readConfig();      // Graphic config!
-  let paused: boolean = false;      // "Is the game paused?"
-  let screenshot: boolean = false;  // "Should a screenshot be taken this frame?"
-  let saveConfig: boolean = false;  // "Should graphic config (e.g. sound muting) be saved?"
+  const config = readConfig();      /* Graphic config (e.g. sound settings). */
+  let paused: boolean = false;      /* "Is the game paused?" */
+  let screenshot: boolean = false;  /* "Should a screenshot be taken this frame?" */
+  let saveConfig: boolean = false;  /* "Should graphic config (e.g. sound settings) be saved?" */
 
   function setThumbnail(fn: GameLoop): void {
     if (initialized) {
@@ -1120,17 +1164,6 @@ export default function(mewlix: Mewlix): void {
     });
   }
 
-  function removeLoadingOverlay(): void {
-    const loading = document.getElementById('loading');
-    if (!loading) return;
-    loading.classList.add('close');
-    setTimeout(() => loading.remove(), 1200);
-  }
-
-  function coreAsset(path: string): string {
-    return './core-assets/' + path;
-  }
-
   async function drawPlay(): Promise<void> {
     const image = await loadImage(coreAsset('mewlix-play.png'));
     context.fillStyle = 'rgb(0 0 0 / 50%)';
@@ -1143,66 +1176,80 @@ export default function(mewlix: Mewlix): void {
     context.fillStyle = 'rgb(255 0 0 / 50%)';
     context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.drawImage(image, 0, 0);
-    removeLoadingOverlay();
   }
 
   async function init(fn: GameLoop): Promise<void> {
     initialized = true;
+    preventArrowKeys();
+
+    /* Load core font. */
     await loadFont('Munro', coreAsset('fonts/Munro/munro.ttf'));
 
+    /* Wait for next frame. */
     function nextFrame(): Promise<number> {
       return new Promise(resolve => {
         window.requestAnimationFrame(resolve);
       });
     }
 
-    async function initLoop() {
-      let lastFrame: number; /* Last frame's timestamp, in milliseconds. */
+    try {
+      /* Run resources, dynamically update progress bar. */
+      await loadResources();
 
-      try {
-        preventArrowKeys();
-        await loadResources();
-        removeLoadingOverlay();
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+      /* Show 'play' screen; await a click. */
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+      thumbnail?.(0);
+      await drawPlay();
+      await awaitClick();
 
-        thumbnail?.(0);
-        await drawPlay();
-        await awaitClick();
-        flushKeyQueue(); flushClick();
+      /* Store last frame's timestamp, in milliseconds. */
+      let lastFrame: number; 
 
-        while (true) {
-          if (!paused) {
-            context.clearRect(0, 0, canvasWidth, canvasHeight);
-            fn(deltaTime);
-          }
-          if (screenshot) {
-            await takeScreenshot();
-            screenshot = false;
-          }
-          if (saveConfig) {
-            writeConfig(config);
-            saveConfig = false;
-          }
-          flushKeyQueue(); flushClick();
-          const now = await nextFrame();
-          lastFrame ??= now;
+      /* Flush key queues, in case they're dirty. XP */
+      flushKeyQueue();
+      flushClick();
 
-          deltaTime = (now - lastFrame) / 1000;
-          lastFrame = now;
+      /* Run game loop. */
+      while (true) {
+        if (!paused) {
+          context.clearRect(0, 0, canvasWidth, canvasHeight);
+          fn(deltaTime);
         }
-      }
-      catch(error) {
-        await drawError();
-        throw error;
+        if (screenshot) {
+          await takeScreenshot();
+          screenshot = false;
+        }
+        if (saveConfig) {
+          writeConfig(config);
+          saveConfig = false;
+        }
+
+        /* Flush key queue every frame. */
+        flushKeyQueue();
+        flushClick();
+
+        /* Calculate Δt (delta time). */
+        const now = await nextFrame();
+        lastFrame ??= now;
+
+        deltaTime = (now - lastFrame) / 1000;
+        lastFrame = now;
       }
     }
-
-    await initLoop();
+    catch(error) {
+      await drawError();
+      throw error;
+    }
   }
 
   function resourceError(func: string, resource: string): void {
-    console.warn(`[mewlix] Function ${func} cannot be called after .init().`);
-    console.warn(`[mewlix] Resosurce "${resource}" will not be loaded.`);
+    throw new MewlixError(ErrorCode.Graphic,
+      `Couldn't load resource "${resource}" with ${func}: Resources cannot be called after .init().`);
+  }
+
+  function noGameLoopError(func: string): void {
+    throw new MewlixError(ErrorCode.Graphic,
+      `Couldn't call function ${func}: Game loop not yet initialized!`);
   }
 
   /* - * - * - * - * - * - * - * - *
@@ -1271,11 +1318,13 @@ export default function(mewlix: Mewlix): void {
     soundToggle();
     saveConfig = true;
   });
+
   pauseButton.addEventListener('click', event => {
     event.preventDefault();
     pauseToggle();
     saveConfig = true;
   });
+
   cameraButton.addEventListener('click', event => {
     event.preventDefault();
     /* We ~always~ want to screenshot when this button is clicked. */
@@ -1293,6 +1342,10 @@ export default function(mewlix: Mewlix): void {
   const graphicLib = {
     init(fn: GameLoop): Promise<void> {
       typeof fn === 'function' || report.func('graphic.init', fn);
+      if (initialized) {
+        throw new MewlixError(ErrorCode.Graphic,
+          'Cannot call .init(): Game loop has already been initialized!');
+      }
       return init(fn);
     },
 
@@ -1305,12 +1358,9 @@ export default function(mewlix: Mewlix): void {
     delta: () => deltaTime,
 
     load(key: string, path: string, options?: Box<Rectangle>): void {
-      if (initialized) {
-        resourceError('graphic.load', path);
-        return;
-      }
       typeof key  === 'string' || report.string('graphic.load', key);
       typeof path === 'string' || report.string('graphic.load', path);
+      !initialized || resourceError('graphic.load', path);
       resourceQueue.push({
         type: 'generic',
         key: key,
@@ -1325,12 +1375,9 @@ export default function(mewlix: Mewlix): void {
     },
 
     spritesheet(path: string, frames: Shelf<Box<SpriteDetails>>): void {
-      if (initialized) {
-        resourceError('graphic.spritesheet', path);
-        return;
-      }
       typeof path === 'string' || report.string('graphic.spritesheet', path);
       isShelf(frames)          || report.shelf('graphic.spritesheet', frames)
+      !initialized || resourceError('graphic.spritesheet', path);
       resourceQueue.push({
         type: 'spritesheet',
         path: path,
@@ -1342,6 +1389,7 @@ export default function(mewlix: Mewlix): void {
       typeof key === 'string' || report.string('graphic.draw', key);
       typeof x === 'number'   || report.number('graphic.draw', x);
       typeof y === 'number'   || report.number('graphic.draw', y);
+      initialized || noGameLoopError('graphic.draw');
       return drawSprite(key, x, y);
     },
 
@@ -1356,14 +1404,19 @@ export default function(mewlix: Mewlix): void {
     rect(rect: Rectangle, color: string | Color): void {
       isGettable(rect) || report.gettable('graphic.rect', rect);
       validateRectangle(rect);
+      initialized || noGameLoopError('graphic.rect');
       return drawRect(rect, color);
     },
 
-    paint: fillCanvas,
+    paint(color: string | Color): void {
+      initialized || noGameLoopError('graphic.color');
+      return fillCanvas(color);
+    },
 
     write(value: MewlixValue, x: number = 0, y: number = 0, options?: Box<TextOptions>) {
       typeof x === 'number' || report.number('graphic.write', x);
       typeof y === 'number' || report.number('graphic.write', y);
+      initialized || noGameLoopError('graphic.write');
       return drawText(purrify(value), x, y, options?.bindings);
     },
 
@@ -1373,10 +1426,7 @@ export default function(mewlix: Mewlix): void {
 
     load_text(path: string): void {
       typeof path === 'string' || report.string('graphic.load_text', path);
-      if (initialized) {
-        resourceError('graphic.load_text', path);
-        return;
-      }
+      !initialized || resourceError('graphic.load_text', path)
       resourceQueue.push({
         type: 'text',
         path: path,
@@ -1385,10 +1435,7 @@ export default function(mewlix: Mewlix): void {
 
     get_text(path: string): string {
       typeof path === 'string' || report.string('graphic.get_text', path);
-      if (!initialized) {
-        throw new MewlixError(ErrorCode.Graphic,
-          `Can't load text asset after initialization: ${path}`);
-      }
+      initialized || noGameLoopError('graphic.load_text')
       const text = textMap.get(path);
       if (text === undefined) {
         throw new MewlixError(ErrorCode.Graphic,
@@ -1404,11 +1451,13 @@ export default function(mewlix: Mewlix): void {
 
     key_pressed(key: string) {
       typeof key === 'string' || report.string('graphic.key_pressed', key);
+      initialized || noGameLoopError('graphic.key_pressed')
       return isKeyPressed(key);
     },
 
     key_down(key: string) {
       typeof key === 'string' || report.string('graphic.key_down', key);
+      initialized || noGameLoopError('graphic.key_down')
       return isKeyDown(key);
     },
 
@@ -1422,7 +1471,6 @@ export default function(mewlix: Mewlix): void {
     }),
 
     mouse_click: isMousePressed,
-
     mouse_down: isMouseDown,
 
     mouse_position: () => instantiate<Vector2Like>(Vector2)(
@@ -1432,12 +1480,14 @@ export default function(mewlix: Mewlix): void {
 
     play_music(key: string) {
       typeof key === 'string' || report.string('graphic.play_music', key);
+      initialized || noGameLoopError('graphic.play_music')
       return playMusic(key);
     },
 
     play_sfx(key: string, channel: number = 0) {
       typeof key     === 'string' || report.string('graphic.play_sfx', key);
       typeof channel === 'number' || report.string('graphic.play_sfx', channel);
+      initialized || noGameLoopError('graphic.play_sfx')
       return playSfx(key, channel);
     },
 

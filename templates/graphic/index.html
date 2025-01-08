@@ -20,30 +20,23 @@
     </script>
   </head>
   <body>
-    <main class="container">
-      <canvas
-        id="game-canvas"
-        width="1024"
-        height="1024"
-        class="game-canvas">
-        Game canvas. If you're seeing this, your browser does not support the canvas element!
-      </canvas>
+    <main id="container" class="container">
       <ul class="navigation">
-        <li title="sound settings">
-          <button id="game-sound"></button>
+        <li title="sound settings" class="navigation-item">
+          <button id="game-sound" class="game-button"></button>
         </li>
-        <li title="pause/play game">
-          <button id="game-pause"></button>
+        <li title="pause/play game" class="navigation-item">
+          <button id="game-pause" class="game-button"></button>
         </li>
-        <li title="take a screenshot">
-          <button id="game-screenshot"></button>
+        <li title="take a screenshot" class="navigation-item">
+          <button id="game-screenshot" class="game-button"></button>
         </li>
       </ul>
       <img
-        id="loading"
-        src="./core-assets/mewlix-loading.webp"
-        alt="A pixel art animation of a cat with text that says 'Loading...'."
-        class="loading">
+        id="loading-cat"
+        src="./core-assets/loading-cat.png"
+        alt="Pixel art of a cat with text that says 'loading'."
+        class="contained" />
     </main>
   </body>
 </html>

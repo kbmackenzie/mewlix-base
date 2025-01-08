@@ -16,66 +16,56 @@ body
 
 .container
   position: relative
-  width: 100vmin
+  width:  100vmin
   height: 100vmin
   margin: 0 auto
 
-.game-canvas
+.contained
   position: absolute
   top:  0
   left: 0
   width: 100%
   height: 100%
+
+.game-canvas
+  z-index: 0
   image-rendering: pixelated
 
-.loading
+.navigation
   position: absolute
   top: 0
-  left: 0
-  width: 100%
-  height: 100%
-
-  opacity: 100%
-  transition: opacity 1s
-
-  &.close
-    opacity: 0%
-
-.navigation
-  position: absolute 
-  top: 0
   right: 0
-  list-style: none
+  padding: 0.5rem
 
   display: flex
   gap: 0.5rem
-  justify-content: flex-end
 
+  z-index: 3
+  list-style: none
+
+.navigation-item
   padding: 0.5rem
+  margin: 0
+  border-radius: 1rem
 
-  li
-    padding: 0.5rem
-    margin: 0
-    border-radius: 1rem
+  $icon-background: rgb(0 0 0 / 20%)
+  box-shadow: 1px 3px 3px $icon-background
+  background-color: $icon-background
 
-    $icon-background: rgb(0 0 0 / 20%)
-    box-shadow: 1px 3px 3px $icon-background
-    background-color: $icon-background
+  opacity: 50%
+  transition: opacity 0.5s
 
-    opacity: 50%
-    transition: opacity 0.5s
-    &:hover
-      opacity: 100%
+  &:hover
+    opacity: 100%
 
-  li > button
-    $button-size: 2rem
+.game-button
+  $button-size: 2rem
+  width:  $button-size
+  height: $button-size
 
-    width: $button-size
-    height: $button-size
-    border: none
-
-    &:hover
-      cursor: pointer
+  border: none
+  &:hover
+    cursor: pointer
 
 #game-sound
   $speaker: get-asset('icons/speaker.svg')
