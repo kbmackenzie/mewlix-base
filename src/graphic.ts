@@ -908,8 +908,9 @@ export default function(mewlix: Mewlix): void {
     loadingCat.remove();
 
     function drawProgressBar(progress: number) {
-      const width = Math.floor((progress * 512) / resourceQueue.length);
-      context.rect(768, 256, width, 24);
+      const width = (progress * 512) / (resourceQueue.length - 1);
+      context.fillStyle = '#5F4375';
+      context.fillRect(256, 668, Math.floor(width), 24);
     }
 
     let progress = 0;
