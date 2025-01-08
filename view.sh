@@ -50,9 +50,28 @@ export default function(mewlix) {
 
     const graphic = mewlix.lib['std.graphic'];
     const std = mewlix.lib['std'];
-    let timer = 0, x = 0, y = 0;
 
+    function range(n) {
+      const output = [];
+      for (let i = 0; i < n; i++) {
+        output.push(i);
+      }
+      return output;
+    }
+
+    range(10).forEach(x => {
+      graphic.get('load_text')('/' + x + '.txt');
+    });
+
+    let timer = 0, x = 0, y = 0, textLog = false;
     const init = () => graphic.get('init')(() => {
+      if (!textLog) {
+        range(10).forEach(x => {
+          const contents = graphic.get('get_text')('/' + x + '.txt');
+          console.log(x, ':', contents.substring(0, 34) + '...')
+        });
+        textLog = true;
+      }
       timer += graphic.get('delta')();
       if (timer >= 1) {
         timer = 0;
@@ -61,8 +80,7 @@ export default function(mewlix) {
       }
       graphic.get('write')('miaou', x, y);
     });
-    setTimeout(init, 3000);
-    //init();
+    init();
   });
 }
 EOF
@@ -126,7 +144,11 @@ case "$1" in
   graphic)
     cp -r './build/test/graphic' './build/run/graphic'
     echo "$YARNBALL_GRAPHIC" > './build/run/graphic/yarnball/yarnball.js'
-    SERVER_TARGET='./build/run/graphic' ;;
+    SERVER_TARGET='./build/run/graphic'
+
+    for NUMBER in $(seq 0 9); do
+      npx lorem-ipsum 3 paragraphs > "./build/run/graphic/${NUMBER}.txt"
+    done ;;
   *)
     log_error "Invalid template choice: \"$1\"!"
     exit 1 ;;
