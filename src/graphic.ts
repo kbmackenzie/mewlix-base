@@ -249,11 +249,11 @@ export const Vector2 = createClowder<Vector2Like>('Vector2', null, () => {
       const x = clamp_(
         this.get('x') as Vector2Like['x'],
         min.get('x') as Vector2Like['x'],
-        min.get('y') as Vector2Like['y'],
+        max.get('x') as Vector2Like['x'],
       );
       const y = clamp_(
         this.get('y') as Vector2Like['y'],
-        max.get('x') as Vector2Like['x'],
+        min.get('y') as Vector2Like['y'],
         max.get('y') as Vector2Like['y'],
       );
       return instantiate<Vector2Like>(Vector2)(x, y);
