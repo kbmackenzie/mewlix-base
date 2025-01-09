@@ -130,5 +130,30 @@ describe('mewlix graphic template', () => {
       );
       expect(result).toBe(distance);
     });
+
+    const clampInput = [
+      { input: [ 1,  2], min: [0, 0], max: [10, 10], expected: [1, 2] },
+      { input: [ 3,  4], min: [0, 0], max: [ 3,  3], expected: [3, 3] },
+      { input: [10,  3], min: [0, 0], max: [ 4,  4], expected: [4, 3] },
+      { input: [ 0,  3], min: [1, 1], max: [ 2,  2], expected: [1, 2] },
+      { input: [-1, -4], min: [0, 2], max: [ 3,  3], expected: [0, 2] },
+      { input: [12, 20], min: [3, 3], max: [ 3,  4], expected: [3, 4] },
+      { input: [ 4,  3], min: [0, 3], max: [ 4,  3], expected: [4, 3] },
+    ];
+
+    test.each(clampInput)('vector2 clamp', async ({ input, min, max, expected }) => {
+      const result = await page.evaluate(
+        ([inputX, inputY], [minX, minY], [maxX, maxY]) => {
+          const Vector2 = mewlix.lib['std.graphic'].get('Vector2');
+          const input = mewlix.clowder.instantiate(Vector2)(inputX, inputY);
+          const min   = mewlix.clowder.instantiate(Vector2)(minX, minY);
+          const max   = mewlix.clowder.instantiate(Vector2)(maxX, maxY);
+          const result = input.get('clamp')(min, max);
+          return [result.get('x'), result.get('y')];
+        },
+        input, min, max
+      );
+      expect(result).toStrictEqual(expected);
+    });
   });
 });
