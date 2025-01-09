@@ -224,8 +224,8 @@ export const Vector2 = createClowder<Vector2Like>('Vector2', null, () => {
     mul(this: Vector2, that: Vector2): Vector2 {
       validateVector2(this); validateVector2(that);
       return instantiate<Vector2Like>(Vector2)(
-        (this.get('x') as Vector2Like['x']) + (that.get('x') as Vector2Like['x']),
-        (this.get('y') as Vector2Like['y']) + (that.get('y') as Vector2Like['y']),
+        (this.get('x') as Vector2Like['x']) * (that.get('x') as Vector2Like['x']),
+        (this.get('y') as Vector2Like['y']) * (that.get('y') as Vector2Like['y']),
       );
     },
     distance(this: Vector2, that: Vector2): number {
