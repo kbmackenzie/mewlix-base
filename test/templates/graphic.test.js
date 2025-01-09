@@ -63,4 +63,72 @@ describe('mewlix graphic template', () => {
       expect(hex).toBe(hexcode);
     });
   });
+
+  describe('vector2', () => {
+    const inputs = [
+      { a: [1, 2], b: [1, 3], sum: [2, 5], product: [1, 6]  , dot: 7  , distance: 1    },
+      { a: [3, 3], b: [2, 4], sum: [5, 7], product: [6, 12] , dot: 18 , distance: 1.41 },
+      { a: [3, 4], b: [3, 4], sum: [6, 8], product: [9, 16] , dot: 25 , distance: 0    },
+      { a: [3, 4], b: [1, 1], sum: [4, 5], product: [3, 4]  , dot: 7  , distance: 3.61 },
+      { a: [1, 1], b: [3, 4], sum: [4, 5], product: [3, 4]  , dot: 7  , distance: 3.61 },
+    ];
+
+    test.each(inputs)('vector2 addition', async ({ a, b, sum }) => {
+      const result = await page.evaluate(
+        ([ax, ay], [bx, by]) => {
+          const Vector2 = mewlix.lib['std.graphic'].get('Vector2');
+          const a = mewlix.clowder.instantiate(Vector2)(ax, ay);
+          const b = mewlix.clowder.instantiate(Vector2)(bx, by);
+          const result = a.get('add')(b);
+          return [result.get('x'), result.get('y')];
+        },
+        a, b
+      );
+      expect(result).toStrictEqual(sum);
+    });
+
+    test.each(inputs)('vector2 multiplication', async ({ a, b, product }) => {
+      const result = await page.evaluate(
+        ([ax, ay], [bx, by]) => {
+          const Vector2 = mewlix.lib['std.graphic'].get('Vector2');
+          const a = mewlix.clowder.instantiate(Vector2)(ax, ay);
+          const b = mewlix.clowder.instantiate(Vector2)(bx, by);
+          const result = a.get('mul')(b);
+          return [result.get('x'), result.get('y')];
+        },
+        a, b
+      );
+      expect(result).toStrictEqual(product);
+    });
+
+    test.each(inputs)('vector2 dot', async ({ a, b, dot }) => {
+      const result = await page.evaluate(
+        ([ax, ay], [bx, by]) => {
+          const Vector2 = mewlix.lib['std.graphic'].get('Vector2');
+          const a = mewlix.clowder.instantiate(Vector2)(ax, ay);
+          const b = mewlix.clowder.instantiate(Vector2)(bx, by);
+          return a.get('dot')(b);
+        },
+        a, b
+      );
+      expect(result).toBe(dot);
+    });
+
+    test.each(inputs)('vector2 distance', async ({ a, b, distance }) => {
+      const result = await page.evaluate(
+        ([ax, ay], [bx, by]) => {
+          function to2Places(number) {
+            return Math.round(number * 100) / 100;
+          }
+          const Vector2 = mewlix.lib['std.graphic'].get('Vector2');
+          const a = mewlix.clowder.instantiate(Vector2)(ax, ay);
+          const b = mewlix.clowder.instantiate(Vector2)(bx, by);
+          const result = a.get('distance')(b);
+          return to2Places(result);
+        },
+        a, b
+      );
+      expect(result).toBe(distance);
+    });
+  });
 });
