@@ -137,6 +137,13 @@ export function hexToColor(str: string) {
   );
 }
 
+export function rgbToHex(red: number, green: number, blue: number): string {
+  return [red, green, blue].reduce((acc, x) => {
+    const color = x.toString(16);
+    return acc + (color.length < 2 ? '0' : '') + color;
+  }, '#');
+}
+
 export const toColor: unique symbol = Symbol('toColor');
 
 export function withColor(value: string | Color): string {
@@ -379,10 +386,7 @@ const Color = createClowder<ColorLike>('Color', null, () => {
       const red   = this.get('red')   as ColorLike['red'];
       const green = this.get('green') as ColorLike['green'];
       const blue  = this.get('blue')  as ColorLike['blue'];
-      return [red, green, blue].reduce((acc, x) => {
-        const color = x.toString(16);
-        return acc + (color.length < 2 ? '0' : '') + color;
-      }, '#');
+      return rgbToHex(red, green, blue);
     }
   }
 });
