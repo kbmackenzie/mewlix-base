@@ -79,9 +79,6 @@ const canvasWidth  = 1024;
 const canvasHeight = 1024;
 const sizeModifier = Math.floor(canvasWidth / virtualWidth);
 
-const gridSlotWidth  = 16;
-const gridSlotHeight = 16;
-
 /* - * - * - * - * - * - * - * - *
  * Assets:
  * - * - * - * - * - * - * - * - * */
@@ -342,55 +339,6 @@ function validateRectangle(rect: Rectangle): void {
   typeof y === 'number'      || report.number('Rectangle.y', y);
   typeof width === 'number'  || report.number('Rectangle.width', width);
   typeof height === 'number' || report.number('Rectangle.height', height);
-}
-
-/* - * - * - * - * - * - * - * - *
- * Grid Slot Clowder:
- * - * - * - * - * - * - * - * - * */
-type GridSlot = ClowderInstance<GridSlotLike>;
-
-type GridSlotLike = {
-  [wake](this: GridSlot, x: number, y: number): void;
-  row:    number;
-  column: number;
-  position(this: GridSlot): Vector2;
-};
-
-const GridSlot = createClowder<GridSlotLike>('GridSlot', null, () => {
-  return {
-    row: 0,
-    column: 0,
-    [wake](this: GridSlot, row: number, column: number): void {
-      this.set('row', row);
-      this.set('column', column);
-      validateGridSlot(this);
-    },
-    position(this: GridSlot): Vector2 {
-      return gridSlotToPosition(this);
-    },
-  };
-});
-
-function validateGridSlot(slot: GridSlot): void {
-  const row    = slot.get('row');
-  const column = slot.get('column');
-  typeof row    === 'number' || report.number('GridSlot.row', row);
-  typeof column === 'number' || report.number('GridSlot.column', column);
-}
-
-export function positionToGridSlot(point: Vector2) {
-  validateVector2(point);
-  const row = point.get('x') as Vector2Like['x'] / gridSlotHeight;
-  const col = point.get('y') as Vector2Like['y'] / gridSlotWidth;
-  return instantiate<GridSlotLike>(GridSlot)(row, col);
-}
-
-export function gridSlotToPosition(slot: GridSlot) {
-  validateGridSlot(slot);
-  return instantiate<Vector2Like>(Vector2)(
-    slot.get('column') as GridSlotLike['column'] * gridSlotWidth,
-    slot.get('row') as GridSlotLike['row'] * gridSlotHeight,
-  );
 }
 
 /* - * - * - * - * - * - * - * - *
@@ -1539,9 +1487,6 @@ export default function(mewlix: Mewlix): void {
 
     Vector2: Vector2,
     Rectangle: Rectangle,
-    GridSlot: GridSlot,
-    grid_slot: positionToGridSlot,
-    slot_point: gridSlotToPosition,
     Color: Color,
     PixelCanvas: PixelCanvas,
 
