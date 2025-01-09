@@ -340,15 +340,15 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
   };
   bindings[wake] = (wake in bindings)
     ? bindings[wake]?.bind(instance)
-    : getConstructor(instance)
+    : getConstructor(instance);
+
   for (const key in bindings) {
     const value = bindings[key];
+
     if (typeof value === 'function') {
       const func = value.bind(instance);
-      if (key === 'purr') {
-        instance.meta.purr = func;
-      }
       bindings[key] = func;
+      if (key === 'purr') { instance.meta.purr = func; }
     }
   }
   return instance;
