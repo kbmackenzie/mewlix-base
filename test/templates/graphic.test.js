@@ -156,4 +156,59 @@ describe('mewlix graphic template', () => {
       expect(result).toStrictEqual(expected);
     });
   });
+
+  describe('rectangle', () => {
+    const pointTests = [
+      { rect: [1, 1, 20, 20], point: [ 3,  4], contained: true  },
+      { rect: [1, 1, 20, 20], point: [-1,  4], contained: false },
+      { rect: [1, 1, 20, 20], point: [ 3, -1], contained: false },
+      { rect: [1, 1, 20, 20], point: [10, 10], contained: true  },
+      { rect: [1, 1, 20, 20], point: [ 1, 20], contained: true  },
+      { rect: [1, 1, 20, 20], point: [20,  1], contained: true  },
+      { rect: [1, 1, 20, 20], point: [21,  1], contained: false },
+      { rect: [1, 1, 20, 20], point: [ 1, 30], contained: false },
+      { rect: [1, 1,  5,  5], point: [ 1,  6], contained: false },
+      { rect: [1, 1,  5,  5], point: [ 6,  1], contained: false },
+      { rect: [1, 1,  5,  5], point: [ 3,  4], contained: true  },
+    ];
+
+    test.each(pointTests)('rect contains point', async ({ rect, point, contained }) => {
+      const result = await page.evaluate(
+        ([ax, ay, aw, ah], [px, py]) => {
+          const Rectangle = mewlix.lib['std.graphic'].get('Rectangle');
+          const Vector2   = mewlix.lib['std.graphic'].get('Vector2');
+          const rect  = mewlix.clowder.instantiate(Rectangle)(ax, ay, aw, ah);
+          const point = mewlix.clowder.instantiate(Vector2)(px, py);
+          return rect.get('contains')(point);
+        },
+        rect, point
+      );
+      expect(result).toBe(contained);
+    });
+
+    const collisionTests = [
+      { a: [ 1,  2, 20, 20], b: [ 3,  3, 20, 20], collides: true  },
+      { a: [ 1,  2, 20, 20], b: [ 0,  1,  1,  1], collides: false },
+      { a: [ 1,  2, 20, 20], b: [21, 21,  1,  1], collides: false },
+      { a: [ 1,  2,  5,  5], b: [ 2,  2,  1,  1], collides: true  },
+      { a: [-5,  2,  5,  5], b: [ 2,  2,  1,  1], collides: false },
+      { a: [ 3,  4, 30, 40], b: [12, 15, 20, 30], collides: true  },
+      { a: [ 3,  4, 30, 40], b: [ 2, -9,  5,  5], collides: false },
+      { a: [ 3,  4, 30, 40], b: [12, 15, 20, 30], collides: true  },
+      { a: [ 4,  3, 30, 40], b: [34,  3, 30, 30], collides: false },
+    ];
+
+    test.each(collisionTests)('rect collides with another', async ({ a, b, collides }) => {
+      const result = await page.evaluate(
+        ([ax, ay, aw, ah], [bx, by, bw, bh]) => {
+          const Rectangle = mewlix.lib['std.graphic'].get('Rectangle');
+          const a = mewlix.clowder.instantiate(Rectangle)(ax, ay, aw, ah);
+          const b = mewlix.clowder.instantiate(Rectangle)(bx, by, bw, bh);
+          return a.get('collides')(b);
+        },
+        a, b
+      );
+      expect(result).toBe(collides);
+    });
+  });
 });
