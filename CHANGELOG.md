@@ -11,5 +11,6 @@
 - Graphic template:
     - Added better loading screen (+ with progress bar!).
     - Fixed broken methods in the `Vector2` clowder.
+    - Added **text assets**, manageable through the `graphic.load_text` and `graphic.get_text` functions.
     - Fixed conversion from `Color` clowder to hexcode.
     - Removed `GridSlot` clowder (reason: largely unused).
