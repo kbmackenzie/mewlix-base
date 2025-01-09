@@ -1,4 +1,4 @@
-import { ClowderInstance, clowder, wake, collections } from '../../src/mewlix';
+import { ClowderInstance, clowder, wake, collections, purrify } from '../../src/mewlix';
 
 /* A lot of type casting here, wow! _(:3」∠)_
  *
@@ -35,11 +35,15 @@ describe('clowder operations', () => {
 
   type CharlieLike = CatLike & {
     sound(this: ClowderInstance<CharlieLike>): string;
+    purr(this: ClowderInstance<CharlieLike>): string;
   };
 
-  const Charlie = clowder.create<CharlieLike>('Charlie', Cat, () => ({
+  const Charlie = clowder.create<CharlieLike>('Charlie', Cat as any, () => ({
     sound(this: ClowderInstance<CharlieLike>): string {
       return 'hello!!';
+    },
+    purr(this: ClowderInstance<CharlieLike>): string {
+      return 'meow meow!';
     },
   }) as CharlieLike);
 
@@ -79,5 +83,12 @@ describe('clowder operations', () => {
     expect(
       collections.contains('species', charlie)
     ).toBe(true);
+  });
+
+  test('clowder has string representation', () => {
+    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    expect(
+      purrify(charlie)
+    ).toBe('meow meow!');
   });
 });
