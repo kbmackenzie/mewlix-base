@@ -234,7 +234,7 @@ export const Vector2 = createClowder<Vector2Like>('Vector2', null, () => {
       const ay = this.get('y') as Vector2Like['y'];
       const bx = that.get('x') as Vector2Like['x'];
       const by = that.get('y') as Vector2Like['y'];
-      return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+      return Math.sqrt((ax - bx) ** 2 + (ay - by) ** 2);
     },
     dot(this: Vector2, that: Vector2): number {
       validateVector2(this); validateVector2(that);
