@@ -83,7 +83,7 @@ const sizeModifier = Math.floor(canvasWidth / virtualWidth);
  * Assets:
  * - * - * - * - * - * - * - * - * */
 function coreAsset(path: string): string {
-  return './core-assets/' + path;
+  return './core/assets/' + path;
 }
 
 /* - * - * - * - * - * - * - * - *

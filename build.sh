@@ -97,7 +97,7 @@ package_template() {
   fi
 
   # Create 'core' folder and copy core source files.
-  mkdir "$TARGET_FOLDER/core"
+  mkdir -p "$TARGET_FOLDER/core"
   cp "$FINAL/mewlix.js" "$TARGET_FOLDER/core"
 
   # Copy template-specific source file, if any.
