@@ -8,6 +8,7 @@
     - Fixed `std.all` function.
     - Fixed how *"nothing"* values are handled by `type of`.
     - Fixed serialization for boxes.
+- Change template structure to make language extensions simpler to implement.
 - Graphic template:
     - Added better loading screen (+ with progress bar!).
     - Fixed broken methods in the `Vector2` clowder.
