@@ -81,8 +81,11 @@ package_template() {
   fi
   cp -r "$TEMPLATE" "$TARGET_FOLDER"
 
-  # Minify index.js source file.
-  minify_js "${TEMPLATE}/index.js" > "${TARGET_FOLDER}/index.js"
+  # Minify init.js source file.
+  minify_js "${TEMPLATE}/init.js" > "${TARGET_FOLDER}/init.js"
+
+  # Write index.js.
+  echo 'import init from "./init.js"; export default init;' > "${TARGET_FOLDER}/index.js"
 
   # Compile .sass stylesheets.
   if [ -f "${TARGET_FOLDER}/style.sass" ]; then

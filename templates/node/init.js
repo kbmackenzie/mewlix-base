@@ -9,7 +9,7 @@ async function readJSON(path) {
   return JSON.parse(text);
 }
 
-export default async function(callback) {
+export default async function init(callback) {
   const mewlix = createMewlix();
   if (callback) {
     await callback(mewlix);
