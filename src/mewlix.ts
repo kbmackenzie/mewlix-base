@@ -498,12 +498,12 @@ export function getEntries<T>(record: Record<string, T>): [string, T][] {
 
 const purrifyTable: Record<ObjectTag, (a: any) => string> = {
   'shelf': function<T>(shelf: Shelf<T>): string {
-    const items = shelfToArray(shelf).map(purrify).join(', ');
+    const items = shelfToArray(shelf).map(x => purrify(x, true)).join(', ');
     return `[${items}]`;
   },
   'box': function<T extends { [key: string]: any }>(box: Box<T>): string {
     const items = getEntries(box.bindings)
-      .map(([key, value]) => `"${key}": ${purrify(value)}`)
+      .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
       .join(', ');
     return `📦 [${items}]`;
   },
@@ -515,7 +515,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
       return purrify(instance.meta.purr());
     }
     const items = getEntries(instance.bindings)
-      .map(([key, value]) => `"${key}": ${purrify(value)}`)
+      .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
       .join(', ');
     return `clowder instance ${instance.name} [${items}]`;
   },
@@ -533,16 +533,17 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
   },
 };
 
-export function purrify(value: any): string {
+export function purrify(value: any, nested: boolean = false): string {
   if (typeof value === 'object' && value !== null && tag in value) {
     return purrifyTable[value[tag] as ObjectTag](value);
   }
   if (value === null || value === undefined) { return 'nothing'; }
   switch (typeof value) {
     case 'number':
-    case 'string':
     case 'boolean':
       return String(value);
+    case 'string':
+      return (nested) ? JSON.stringify(value) : value;
     case 'function':
         return '<function>';
     default:
