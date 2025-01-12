@@ -17,7 +17,7 @@ export default async function init(callback) {
   initYarnball(mewlix);
 
   mewlix.setMeow((x) => {
-    process.stdout.write(x);
+    process.stdout.write(x + '\n');
     return x;
   });
 
