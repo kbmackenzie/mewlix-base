@@ -1021,11 +1021,12 @@ function assertionFail(message: string): void {
 /* - * - * - * - * - * - * - * - * */
 
 export type MeowFunc = (input: string) => string;
+export type MeowState = { meow: MeowFunc; };
 
 /* - * - * - * - * - * - * - * - *
  * Standard Library
 /* - * - * - * - * - * - * - * - * */
-export function standardLibrary(meowFunc?: MeowFunc) {
+export function standardLibrary(meow?: MeowState) {
   /* The std library documentation can be found in... (see readme).
    *
    * It won't be included in this source file to avoid clutter.
@@ -1641,7 +1642,7 @@ export function standardLibrary(meowFunc?: MeowFunc) {
 
   function meowf(value: MewlixValue): string {
     const message = purrify(value);
-    meowFunc?.(message);
+    meow?.meow?.(message);
     return message;
   };
 
@@ -1785,19 +1786,22 @@ const createMewlix = function() {
   };
 
   // a default 'meow' implementation
-  let meowFunc: MeowFunc = function(_) {
-    throw new MewlixError(ErrorCode.CriticalError,
-      'meow: Core function \'meow\' hasn\'t been implemented!');
+  const meow: MeowState = {
+    meow(_) {
+      throw new MewlixError(ErrorCode.CriticalError,
+        'meow: Core function \'meow\' hasn\'t been implemented!');
+    }
   };
+
   function setMeow(func: MeowFunc): void {
-    meowFunc = func;
+    meow.meow = func;
   }
 
   // meow.lib: Core libraries.
   const lib: Record<string, YarnBall<any>> = {};
 
   // meow.lib.std: Standard library.
-  const base = standardLibrary(meowFunc);
+  const base = standardLibrary(meow);
   const std = createYarnBall('std', base)
   lib.std = std;
 
@@ -1986,7 +1990,7 @@ const createMewlix = function() {
     reflection,
     convert,
     internal,
-    meow: (x: string) => meowFunc(x),
+    meow: (x: string) => meow.meow(x),
     setMeow,
     wrap,
     api,
