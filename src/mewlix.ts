@@ -876,6 +876,8 @@ export const boolean = {
 
 export const strings = {
   concat(a: MewlixValue, b: MewlixValue): string {
+    if (a === '') return purrify(b);
+    if (b === '') return purrify(a);
     return purrify(a) + purrify(b);
   },
 };
