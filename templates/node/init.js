@@ -11,18 +11,16 @@ async function readJSON(path) {
 
 export default async function init(callback) {
   const mewlix = createMewlix();
+  mewlix.setMeow((x) => {
+    process.stdout.write(x + '\n');
+    return x;
+  });
   if (callback) {
     await callback(mewlix);
   }
   initYarnball(mewlix);
 
-  mewlix.setMeow((x) => {
-    process.stdout.write(x + '\n');
-    return x;
-  });
-
   const meta = await readJSON('./core/meta.json');
   const entrypoint = meta.entrypoint || 'main';
-
   return mewlix.run(() => mewlix.modules.get(entrypoint));
 }
