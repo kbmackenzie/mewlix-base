@@ -1779,7 +1779,8 @@ const createMewlix = function() {
     box: <T>(obj: T) => createBox(obj, true),
     shelf: <T>(...items: T[]) => shelfFromArray(items),
     inject<T>(key: string, record: Record<string, T>): void {
-      addModule(modules, key, () => record);
+      const yarnball = createYarnBall(key, record);
+      addModule(modules, key, () => yarnball);
     },
   };
 
