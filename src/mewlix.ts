@@ -1053,8 +1053,8 @@ export function standardLibrary(meow?: MeowState) {
 
   function tear(str: string, start: number, end: number): string {
     typeof str   === 'string' || report.string('std.tear', str);
-    typeof start === 'string' || report.string('std.tear', start);
-    typeof end   === 'string' || report.string('std.tear', end);
+    typeof start === 'number' || report.string('std.tear', start);
+    typeof end   === 'number' || report.string('std.tear', end);
     return str.substring(start, end);
   };
 
@@ -1504,7 +1504,7 @@ export function standardLibrary(meow?: MeowState) {
   function logn(value: number, base: number): number {
     typeof value === 'number' || report.number('std.logn', value);
     if (value <= 0) {
-      const logType = isNothing(base)
+      const logType = (base === undefined)
         ? 'natural logarithm'
         : `logarithm to base ${base}`;
       throw new MewlixError(ErrorCode.InvalidOperation,
