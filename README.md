@@ -1,4 +1,4 @@
-The base library + project templates for [Mewlix][1], a cat-themed esoteric programming language that compiles to vanilla Javascript and comes with templates for making little HTML5 games.
+The base library + project templates for [Mewlix][1], little a cat-themed esoteric programming language. [Learn more about it here!][3] 🐱
 
 **Note:** The [main repository][1] for the Mewlix compiler already includes all templates as `.zip` files. If you're building from source, you do **not** need to build the templates yourself.
 
@@ -12,3 +12,4 @@ To build the base library and templates, run `npm run build`. The build process 
 
 [1]: https://github.com/kbmackenzie/mewlix
 [2]: https://man.archlinux.org/man/zip.1.en
+[3]: https://kbmackenzie.xyz/projects/mewlix
