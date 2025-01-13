@@ -128,6 +128,7 @@ package_all() {
   package_template 'console'
   package_template 'graphic'
   package_template 'node'
+  package_template 'blank'
 }
 
 log_message 'Compiling...'
