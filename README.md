@@ -1,4 +1,6 @@
-The base library + project templates for [Mewlix][1], little a cat-themed esoteric programming language. [Learn more about it here!][3] 🐱
+The base library + project templates for [Mewlix][1], a little cat-themed esoteric programming language.
+
+Learn more about it [here][3]! 🐱
 
 **Note:** The [main repository][1] for the Mewlix compiler already includes all templates as `.zip` files. If you're building from source, you do **not** need to build the templates yourself.
 
