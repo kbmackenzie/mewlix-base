@@ -1445,25 +1445,25 @@ export default function(mewlix: Mewlix): void {
 
     play_sfx(key: string, channel: number = 0) {
       typeof key     === 'string' || report.string('graphic.play_sfx', key);
-      typeof channel === 'number' || report.string('graphic.play_sfx', channel);
+      typeof channel === 'number' || report.number('graphic.play_sfx', channel);
       initialized || noGameLoopError('graphic.play_sfx')
       return playSfx(key, channel);
     },
 
     volume(value: number) {
-      typeof value === 'number' || report.string('graphic.volume', value);
+      typeof value === 'number' || report.number('graphic.volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.master.set(value);
     },
 
     music_volume(value: number) {
-      typeof value === 'number' || report.string('graphic.music_volume', value);
+      typeof value === 'number' || report.number('graphic.music_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.music.set(value);
     },
 
     sfx_volume(value: number) {
-      typeof value === 'number' || report.string('graphic.sfx_volume', value);
+      typeof value === 'number' || report.number('graphic.sfx_volume', value);
       value = clamp_(value, 0, 100) / 100;
       gameVolume.sfx.set(value);
     },
@@ -1471,7 +1471,7 @@ export default function(mewlix: Mewlix): void {
     stop_music: stopMusic,
 
     stop_sfx(channel: number) {
-      typeof channel === 'number' || report.string('graphic.stop_sfx', channel);
+      typeof channel === 'number' || report.number('graphic.stop_sfx', channel);
       return stopSfx(channel);
     },
 
