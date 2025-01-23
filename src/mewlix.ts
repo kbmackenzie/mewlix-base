@@ -1586,7 +1586,7 @@ export function standardLibrary(meow?: MeowState) {
   /* ---------------------------
    * Byte streams and weirdness.
    * --------------------------- */
-  function char(shelf: Shelf<number>): string {
+  function from_bytes(shelf: Shelf<number>): string {
     if (!globalThis.TextDecoder) {
       throw new MewlixError(ErrorCode.CriticalError,
         `std.char: 'TextDecoder' constructor not available in global object!`);
@@ -1600,7 +1600,7 @@ export function standardLibrary(meow?: MeowState) {
     return new TextDecoder('utf-8').decode(bytes);
   };
 
-  function bap(value: string): Shelf<number> {
+  function to_bytes(value: string): Shelf<number> {
     if (!globalThis.TextEncoder) {
       throw new MewlixError(ErrorCode.CriticalError,
         `std.bap: 'TextDecoder' constructor not available in global object!`);
@@ -1751,8 +1751,8 @@ export function standardLibrary(meow?: MeowState) {
     random,
     random_int,
     count,
-    char,
-    bap,
+    from_bytes,
+    to_bytes,
     read,
     save,
     date,
