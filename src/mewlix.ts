@@ -1046,6 +1046,29 @@ export function standardLibrary(meow?: MeowState) {
     return acc;
   };
 
+  /* ------------------
+   * Bitwise Operations
+   * ------------------ */
+  function itty(a: number): number {
+    typeof a === 'number' || report.number('std.itty', a);
+    return ~a;
+  }
+
+  function bitty(a: number, b: number): number {
+    typeof a === 'number' || report.number('std.bitty', a);
+    typeof b === 'number' || report.number('std.bitty', b);
+    return a | b;
+  }
+
+  function kitty(a: number, b: number): number {
+    typeof a === 'number' || report.number('std.kitty', a);
+    typeof b === 'number' || report.number('std.kitty', b);
+    return a & b;
+  }
+
+  /* -----------------
+   * Strings & Shelves
+   * ----------------- */
   function trim(str: string): string {
     typeof str === 'string' || report.string('std.trim', str);
     return str.trim();
@@ -1701,6 +1724,9 @@ export function standardLibrary(meow?: MeowState) {
   const base = {
     purr,
     cat,
+    itty,
+    bitty,
+    kitty,
     trim,
     tear,
     push_down,
@@ -1866,6 +1892,14 @@ const createMewlix = function() {
   }
 
   const baseCurry = {
+    bitty: (a: number) =>
+      (b: number) =>
+        base.bitty(a, b),
+
+    kitty: (a: number) =>
+      (b: number) =>
+        base.kitty(a, b),
+
     tear: (str: string) =>
       (start: number) =>
         (end: number) =>
