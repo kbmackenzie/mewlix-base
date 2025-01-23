@@ -1591,11 +1591,12 @@ export function standardLibrary(meow?: MeowState) {
       throw new MewlixError(ErrorCode.CriticalError,
         `std.char: 'TextDecoder' constructor not available in global object!`);
     }
-    isShelf(shelf) || report.shelf('std.char', shelf);
+    isShelf(shelf) || report.shelf('std.from_bytes', shelf);
     const bytes = new Uint8Array(shelfLength(shelf));
-    let i = 0;
+    let i = bytes.length - 1;
     for (const byte of shelfIterator(shelf)) {
-      bytes[i++] = byte;
+      typeof byte === 'number' || report.number('std.from_bytes', byte);
+      bytes[i--] = byte;
     }
     return new TextDecoder('utf-8').decode(bytes);
   };
@@ -1605,7 +1606,7 @@ export function standardLibrary(meow?: MeowState) {
       throw new MewlixError(ErrorCode.CriticalError,
         `std.bap: 'TextDecoder' constructor not available in global object!`);
     }
-    typeof value === 'string' || report.string('std.bap', value);
+    typeof value === 'string' || report.string('std.to_bytes', value);
     if (value.length === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         'std.bap: Expected character; received empty string!');
