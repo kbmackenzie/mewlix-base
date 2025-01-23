@@ -1612,7 +1612,7 @@ export function standardLibrary(meow?: MeowState) {
   function from_bytes(shelf: Shelf<number>): string {
     if (!globalThis.TextDecoder) {
       throw new MewlixError(ErrorCode.CriticalError,
-        `std.char: 'TextDecoder' constructor not available in global object!`);
+        `std.from_bytes: 'TextDecoder' constructor not available in global object!`);
     }
     isShelf(shelf) || report.shelf('std.from_bytes', shelf);
     const bytes = new Uint8Array(shelfLength(shelf));
@@ -1627,13 +1627,9 @@ export function standardLibrary(meow?: MeowState) {
   function to_bytes(value: string): Shelf<number> {
     if (!globalThis.TextEncoder) {
       throw new MewlixError(ErrorCode.CriticalError,
-        `std.bap: 'TextDecoder' constructor not available in global object!`);
+        `std.to_bytes: 'TextDecoder' constructor not available in global object!`);
     }
     typeof value === 'string' || report.string('std.to_bytes', value);
-    if (value.length === 0) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        'std.bap: Expected character; received empty string!');
-    }
     const bytes = new TextEncoder().encode(value);
     let shelf = shelfBottom<number>();
     for (let i = 0; i < bytes.length; i++) {
