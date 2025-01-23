@@ -1093,30 +1093,6 @@ export function standardLibrary(meow?: MeowState) {
       `std.poke: Can't index into value of type "${typeOfValue}": ${value}`);
   };
 
-  function char(value: number): string {
-    typeof value === 'number' || report.number('std.char', value);
-    if (value < 0 || value > 65535) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        `std.char: Value outside of valid character range: ${value}`);
-    }
-    return String.fromCharCode(value);
-  };
-
-  function bap(value: string): number {
-    typeof value === 'string' || report.string('std.bap', value);
-    if (value.length === 0) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        'std.bap: Expected character; received empty string!');
-    }
-
-    const code = value.charCodeAt(0);
-    if (code < 0 || code > 65535) {
-      throw new MewlixError(ErrorCode.InvalidOperation,
-        `std.bap: Character code out of valid range: '${code}'`);
-    }
-    return code;
-  };
-
   function nuzzle(value: MewlixValue): boolean {
     return convert.bool(value);
   };
@@ -1392,6 +1368,9 @@ export function standardLibrary(meow?: MeowState) {
     }
   };
 
+  /* --------------------------
+   * Collections & Constructors
+   * -------------------------- */
   function tuple(a: MewlixValue, b: MewlixValue): Box<Tuple<MewlixValue, MewlixValue>> {
     return createBox<Tuple<MewlixValue, MewlixValue>>({
       first: a,
@@ -1604,6 +1583,44 @@ export function standardLibrary(meow?: MeowState) {
     return output;
   };
 
+  /* ---------------------------
+   * Byte streams and weirdness.
+   * --------------------------- */
+  function char(shelf: Shelf<number>): string {
+    if (!globalThis.TextDecoder) {
+      throw new MewlixError(ErrorCode.CriticalError,
+        `std.char: 'TextDecoder' constructor not available in global object!`);
+    }
+    isShelf(shelf) || report.shelf('std.char', shelf);
+    const bytes = new Uint8Array(shelfLength(shelf));
+    let i = 0;
+    for (const byte of shelfIterator(shelf)) {
+      bytes[i++] = byte;
+    }
+    return new TextDecoder('utf-8').decode(bytes);
+  };
+
+  function bap(value: string): Shelf<number> {
+    if (!globalThis.TextEncoder) {
+      throw new MewlixError(ErrorCode.CriticalError,
+        `std.bap: 'TextDecoder' constructor not available in global object!`);
+    }
+    typeof value === 'string' || report.string('std.bap', value);
+    if (value.length === 0) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        'std.bap: Expected character; received empty string!');
+    }
+    const bytes = new TextEncoder().encode(value);
+    let shelf = shelfBottom<number>();
+    for (let i = 0; i < bytes.length; i++) {
+      shelf = shelfPush(shelf, bytes[i]);
+    }
+    return shelf;
+  };
+
+  /* ---------------------------
+   * I/O operations.
+   * --------------------------- */
   function read(key: string): string | null {
     typeof key === 'string' || report.string('std.read', key);
     return globalThis.localStorage?.getItem(key);
@@ -1688,8 +1705,6 @@ export function standardLibrary(meow?: MeowState) {
     push_down,
     push_up,
     poke,
-    char,
-    bap,
     nuzzle,
     empty,
     join,
@@ -1736,6 +1751,8 @@ export function standardLibrary(meow?: MeowState) {
     random,
     random_int,
     count,
+    char,
+    bap,
     read,
     save,
     date,
