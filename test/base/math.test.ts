@@ -1,7 +1,7 @@
 import { numbers } from '../../src/mewlix';
 
 describe('arithmetic operations', () => {
-  const { add, sub, mul, div, floordiv } = numbers;
+  const { add, sub, mul, div, mod, pow, floordiv } = numbers;
 
   function randomInteger(min: number, max: number): number {
     const minBound = Math.ceil(min);
@@ -14,7 +14,7 @@ describe('arithmetic operations', () => {
     _ => randomInteger(0, 0xffffffff)
   );
 
-  test.each(testInput)('performs basic arithmetic operations', (a) => {
+  test.each(testInput)('basic arithmetic operations', (a) => {
     const b = randomInteger(0, 0xffffffff);
 
     expect(
@@ -36,5 +36,23 @@ describe('arithmetic operations', () => {
     expect(
       floordiv(a, b)
     ).toBe(Math.floor(a / b));
+
+    expect(
+      pow(a, 2)
+    ).toBe(a ** 2);
+
+    expect(
+      pow(a, 3)
+    ).toBe(a ** 3);
+  });
+
+  test('module operation', () => {
+    expect(
+      mod(15, 4)
+    ).toBe(3);
+
+    expect(
+      mod(-15, 4)
+    ).toBe(1);
   });
 });
