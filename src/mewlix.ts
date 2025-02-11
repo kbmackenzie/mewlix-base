@@ -313,14 +313,42 @@ export function createClowder<T extends ClowderBindings>(
   };
 }
 
-function getConstructor<T extends ClowderBindings>(clowder: ClowderInstance<T>): Wake | undefined {
-  if (wake in clowder.bindings) return clowder.bindings[wake];
-  if (!clowder.parent) return undefined;
-  return getConstructor(clowder.parent);
+function getConstructor<T extends ClowderBindings>(
+  instance: ClowderInstance<T>
+): Wake | undefined {
+  if (wake in instance.bindings) return instance.bindings[wake];
+  if (!instance.parent) return undefined;
+  return getConstructor(instance.parent);
 }
 
-function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): ClowderInstance<T> {
-  const parent   = clowder.parent && instanceClowder<Partial<T>>(clowder.parent);
+function bindMethods<T extends ClowderBindings>(
+  instance: ClowderInstance<T>,
+  target?: ClowderInstance<T>,
+): void {
+  const bindTo = target ?? instance;
+  instance.parent && bindMethods(instance.parent, bindTo);
+
+  instance.bindings[wake] = (wake in instance.bindings)
+    ? instance.bindings[wake]?.bind(instance)
+    : getConstructor(instance);
+
+  for (const key in instance.bindings) {
+    const value = instance.bindings[key];
+    if (typeof value === 'function') {
+      const bound = value.bind(bindTo);
+      if (key === 'purr') {
+        instance.meta.purr = bound;
+      }
+      instance.bindings[key] = bound;
+    }
+  }
+}
+
+function instanceClowder<T extends ClowderBindings>(
+  clowder: Clowder<T>,
+  isParent?: boolean
+): ClowderInstance<T> {
+  const parent   = clowder.parent && instanceClowder<Partial<T>>(clowder.parent, true);
   const bindings = clowder.initialize();
   const instance: ClowderInstance<T> = {
     [tag]: 'clowder instance',
@@ -338,18 +366,8 @@ function instanceClowder<T extends ClowderBindings>(clowder: Clowder<T>): Clowde
     },
     meta: {},
   };
-  bindings[wake] = (wake in bindings)
-    ? bindings[wake]?.bind(instance)
-    : getConstructor(instance);
-
-  for (const key in bindings) {
-    const value = bindings[key];
-
-    if (typeof value === 'function') {
-      const func = value.bind(instance);
-      bindings[key] = func;
-      if (key === 'purr') { instance.meta.purr = func; }
-    }
+  if (!isParent) {
+    bindMethods(instance);
   }
   return instance;
 }
