@@ -3,8 +3,6 @@
     "target": "es2017",                                  
     "module": "es6",
     "removeComments": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
