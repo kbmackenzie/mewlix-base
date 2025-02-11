@@ -138,7 +138,7 @@ fi
 # ------------------------------
 get_port() {
   TEMPLATE="$1"
-  cat './test/test-config.json' | npx json "ports.${TEMPLATE}"
+  npx json "ports.${TEMPLATE}" -f './test/test-config.json'
 }
 
 run_server() {
