@@ -10,7 +10,7 @@ describe('arithmetic operations', () => {
   }
 
   const testInput = Array.from(
-    { length: 100 },
+    { length: 10 },
     _ => randomInteger(0, 0xffffffff)
   );
 

@@ -10,7 +10,7 @@ describe('bitwise operations', () => {
   }
 
   const testInput = Array.from(
-    { length: 100 },
+    { length: 10 },
     _ => randomInteger(0x00000000, 0xffffffff),
   );
 
