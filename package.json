@@ -5,8 +5,8 @@
   "scripts": {
     "build": "./build.sh",
     "test": "./test.sh",
-    "console": "./view.sh console",
-    "graphic": "./view.sh graphic",
+    "console": "./demo.sh console",
+    "graphic": "./demo.sh graphic",
     "clean": "rm -rf ./build",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },

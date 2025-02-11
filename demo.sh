@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPT_NAME='view.sh'
+SCRIPT_NAME='demo.sh'
 HELP_MESSAGE=$(cat << EOM
-Usage: view <console|graphic> [-h|--help] [-r|--rebuild]
+Usage: demo <console|graphic> [-h|--help] [-r|--rebuild]
 
   View template by running a local server.
 
