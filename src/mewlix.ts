@@ -3,8 +3,9 @@
 /* - * - * - * - * - * - * - * - *
  * Symbols (Core)
 /* - * - * - * - * - * - * - * - * */
-export const tag  = Symbol('tag');
-export const wake = Symbol('wake');
+export const tag     = Symbol('tag');
+export const wake    = Symbol('wake');
+export const outside = Symbol('outside');
 
 /* - * - * - * - * - * - * - * - *
  * Types (Core)
@@ -26,33 +27,34 @@ export type Box<T> = Readonly<{
   set(key: keyof T, value: ValueOf<T>): void;
 }>;
 
-export type Clowder<T extends ClowderBindings> = Readonly<{
-  [tag]: 'clowder';
-  kind: symbol;
-  name: string;
-  parent: Clowder<Partial<T>> | null;
-  initialize: () => T;
-}>;
-
-export type ClowderInstance<T extends ClowderBindings> = Readonly<{
-  [tag]: 'clowder instance',
-  name: string;
-  kind: symbol;
-  bindings: T;
-  parent: ClowderInstance<Partial<T>> | null;
-  get(key: keyof T): TryGet<ValueOf<T>>;
-  set(key: keyof T, value: ValueOf<T>): void;
-  meta: {
-    purr?: () => any;
-  },
-}>;
-
-// A very lenient dummy type for the occasion.
 export type Wake = (...args: any[]) => void;
 
 export type ClowderBindings = {
   [wake]?: Wake;
+  [key: string]: MewlixValue;
 };
+
+export type Clowder = Readonly<{
+  [tag]: 'clowder';
+  kind: symbol;
+  name: string;
+  parent: Clowder | null;
+  blueprint: ClowderBindings;
+}>;
+
+export type ClowderInstance = Readonly<{
+  [tag]: 'clowder instance',
+  name: string;
+  kind: symbol;
+  home: ClowderBindings & {
+    [outside]: ClowderInstance | null;
+  };
+  get(key: string): MewlixValue;
+  set(key: string, value: MewlixValue): void;
+  meta: {
+    purr?: () => any;
+  },
+}>;
 
 export type YarnBall<T> = Readonly<{
   [tag]: 'yarnball',
@@ -301,68 +303,61 @@ export function bindYarnBall<T>(key: string, map: BindingMap<T>): YarnBall<Recor
 
 export function createClowder<T extends ClowderBindings>(
   name: string,
-  parent: Clowder<T> | null,
-  init: () => T,
-): Clowder<T> {
+  parent: Clowder | null,
+  init: T,
+): Clowder {
   return {
     [tag]: 'clowder',
     kind: Symbol(name),
     name: name,
     parent: parent,
-    initialize: init,
+    blueprint: init,
   };
 }
 
-function getConstructor<T extends ClowderBindings>(
-  instance: ClowderInstance<T>
-): Wake | undefined {
-  if (wake in instance.bindings) return instance.bindings[wake];
-  if (!instance.parent) return undefined;
-  return getConstructor(instance.parent);
+function getConstructor(instance: ClowderInstance): Wake | undefined {
+  if (wake in instance.home) return instance.home[wake];
+  if (!instance.home[outside]) return undefined;
+  return getConstructor(instance.home[outside]);
 }
 
-function bindMethods<T extends ClowderBindings>(
-  instance: ClowderInstance<T>,
-  target?: ClowderInstance<T>,
-): void {
-  const bindTo = target ?? instance;
-  instance.parent && bindMethods(instance.parent, bindTo);
+function bindMethods(instance: ClowderInstance, child?: ClowderInstance): void {
+  const home = child ?? instance;
+  instance.home[outside] && bindMethods(instance.home[outside], home);
 
-  instance.bindings[wake] = (wake in instance.bindings)
-    ? instance.bindings[wake]?.bind(instance)
+  instance.home[wake] = (wake in instance.home)
+    ? instance.home[wake]?.bind(home)
     : getConstructor(instance);
 
-  for (const key in instance.bindings) {
-    const value = instance.bindings[key];
+  for (const key in instance.home) {
+    const value = instance.home[key];
     if (typeof value === 'function') {
-      const bound = value.bind(bindTo);
+      const bound = value.bind(home);
       if (key === 'purr') {
         instance.meta.purr = bound;
       }
-      instance.bindings[key] = bound;
+      instance.home[key] = bound;
     }
   }
 }
 
-function instanceClowder<T extends ClowderBindings>(
-  clowder: Clowder<T>,
-  isParent?: boolean
-): ClowderInstance<T> {
-  const parent   = clowder.parent && instanceClowder<Partial<T>>(clowder.parent, true);
-  const bindings = clowder.initialize();
-  const instance: ClowderInstance<T> = {
+function instanceClowder(clowder: Clowder, isParent?: boolean): ClowderInstance {
+  const parent = clowder.parent && instanceClowder(clowder.parent, true);
+  const instance: ClowderInstance = {
     [tag]: 'clowder instance',
     name: clowder.name,
     kind: clowder.kind,
-    parent: parent,
-    bindings: bindings,
-    get(key: keyof T): TryGet<ValueOf<T>> {
-      if (key in bindings) return bindings[key];
+    home: {
+      [outside]: parent,
+      ...clowder.blueprint,
+    },
+    get(key: string): MewlixValue {
+      if (key in instance.home) return instance.home[key];
       if (parent) return parent.get(key);
       return undefined;
     },
-    set(key: keyof T, value: ValueOf<T>): void {
-      bindings[key] = value;
+    set(key: string, value: MewlixValue): void {
+      instance.home[key] = value;
     },
     meta: {},
   };
@@ -374,31 +369,24 @@ function instanceClowder<T extends ClowderBindings>(
 
 export type WakeParams = Parameters<Wake>;
 
-export function instantiate<T extends ClowderBindings>(
-  clowder: Clowder<T>
-): (...args: WakeParams) => ClowderInstance<T> {
-  const instance = instanceClowder<T>(clowder);
+export function instantiate(clowder: Clowder): (...args: WakeParams) => ClowderInstance {
+  const instance = instanceClowder(clowder);
   return (...args) => {
-    instance.bindings[wake]?.(...args);
+    instance.home[wake]?.(...args);
     return instance;
   };
 }
 
-export function instanceOf<T extends ClowderBindings>(
-  instance: ClowderInstance<T>,
-  clowder: Clowder<T>
-): boolean {
-  let i: ClowderInstance<Partial<T>> | null = instance;
+export function instanceOf(instance: ClowderInstance, clowder: Clowder): boolean {
+  let i: ClowderInstance | null = instance;
   while (i) {
     if (i.kind === clowder.kind) return true;
-    i = i.parent;
+    i = i.home[outside];
   }
   return false;
 }
 
-export function isClowderInstance<T extends ClowderBindings>(
-  value: any
-): value is ClowderInstance<T> {
+export function isClowderInstance(value: any): value is ClowderInstance {
   return typeof value === 'object'
     && value !== null
     && tag in value
@@ -485,14 +473,12 @@ export class MewlixError extends Error {
 /* - * - * - * - * - * - * - * - *
  * Types (Value)
 /* - * - * - * - * - * - * - * - * */
-export type MewlixFunction = (...args: any[]) => MewlixValue;
-
 export type MewlixValue =
   | number
   | string
   | boolean
   | MewlixObject
-  | MewlixFunction
+  | Function
   | null
   | void
   | undefined
@@ -525,14 +511,14 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
       .join(', ');
     return `📦 [${items}]`;
   },
-  'clowder': function<T extends ClowderBindings>(clowder: Clowder<T>): string {
+  'clowder': function(clowder: Clowder): string {
     return `clowder ${clowder.name}`;
   },
-  'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): string {
+  'clowder instance': function(instance: ClowderInstance): string {
     if (instance.meta.purr) {
       return purrify(instance.meta.purr());
     }
-    const items = getEntries(instance.bindings)
+    const items = getEntries(instance.home)
       .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
       .join(', ');
     return `clowder instance ${instance.name} [${items}]`;
@@ -591,8 +577,8 @@ const mewlixSerialize: Record<ObjectTag, (a: any) => Serializable> = {
   'box': function<T extends { [key: string]: any }>(box: Box<T>): Serializable {
     return makeObjectSerializable(box.bindings);
   },
-  'clowder instance': function<T extends ClowderBindings>(instance: ClowderInstance<T>): Serializable {
-    return makeObjectSerializable(instance.bindings);
+  'clowder instance': function(instance: ClowderInstance): Serializable {
+    return makeObjectSerializable(instance.home);
   },
   'cat fruit': function(fruit: CatFruit): Serializable {
     return fruit.key;
@@ -936,7 +922,7 @@ export const collections = {
     collection:
       | Shelf<T>
       | Box<Record<string, T>>
-      | ClowderInstance<ClowderBindings & Record<string, T>>
+      | ClowderInstance
       | string
   ): boolean {
     if (isShelf(collection)) {
@@ -950,8 +936,10 @@ export const collections = {
         return value in collection.bindings;
       }
       if (isClowderInstance(collection)) {
-        return value in collection.bindings
-          || (!!collection.parent && collections.contains(value, collection.parent));
+        return value in collection.home || (
+          !!collection.home[outside]
+          && collections.contains(value, collection.home[outside])
+        );
       }
     }
     const typeOfA = reflection.typeOf(value);
