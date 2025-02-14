@@ -23,6 +23,7 @@ import {
   mixYarnBall,
   isShelf,
   isGettable,
+  ClowderBindings,
 } from './mewlix.js';
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -130,7 +131,7 @@ export function hexToColor(str: string) {
     throw new MewlixError(ErrorCode.Graphic,
       `Couldn't parse string '${str}' as a valid hex code!`);
   }
-  return instantiate<ColorLike>(Color)(
+  return instantiate(Color)(
     parseInt(rgb.red  , 16),
     parseInt(rgb.green, 16),
     parseInt(rgb.blue , 16),
@@ -196,73 +197,60 @@ function writeConfig(data: GraphicConfig): void {
 /* - * - * - * - * - * - * - * - *
  * Vector2 Clowder:
  * - * - * - * - * - * - * - * - * */
-export type Vector2 = ClowderInstance<Vector2Like>;
+type Vector2 = ClowderInstance;
 
-type Vector2Like = {
-  [wake](this: Vector2, x: number, y: number): void;
-  x: number;
-  y: number;
-  add(this: Vector2, that: Vector2): Vector2;
-  mul(this: Vector2, that: Vector2): Vector2;
-  distance(this: Vector2, that: Vector2): number;
-  dot(this: Vector2, that: Vector2): number;
-  clamp(this: Vector2, min: Vector2, max: Vector2): Vector2;
-};
-
-export const Vector2 = createClowder<Vector2Like>('Vector2', null, () => {
-  return {
-    x: 0,
-    y: 0,
-    [wake](this: Vector2, x: number, y: number) {
-      this.set('x', x);
-      this.set('y', y);
-      validateVector2(this);
-    },
-    add(this: Vector2, that: Vector2): Vector2 {
-      validateVector2(this); validateVector2(that);
-      return instantiate<Vector2Like>(Vector2)(
-        (this.get('x') as Vector2Like['x']) + (that.get('x') as Vector2Like['x']),
-        (this.get('y') as Vector2Like['y']) + (that.get('y') as Vector2Like['y']),
-      );
-    },
-    mul(this: Vector2, that: Vector2): Vector2 {
-      validateVector2(this); validateVector2(that);
-      return instantiate<Vector2Like>(Vector2)(
-        (this.get('x') as Vector2Like['x']) * (that.get('x') as Vector2Like['x']),
-        (this.get('y') as Vector2Like['y']) * (that.get('y') as Vector2Like['y']),
-      );
-    },
-    distance(this: Vector2, that: Vector2): number {
-      validateVector2(this); validateVector2(that);
-      const ax = this.get('x') as Vector2Like['x'];
-      const ay = this.get('y') as Vector2Like['y'];
-      const bx = that.get('x') as Vector2Like['x'];
-      const by = that.get('y') as Vector2Like['y'];
-      return Math.sqrt((ax - bx) ** 2 + (ay - by) ** 2);
-    },
-    dot(this: Vector2, that: Vector2): number {
-      validateVector2(this); validateVector2(that);
-      const ax = this.get('x') as Vector2Like['x'];
-      const ay = this.get('y') as Vector2Like['y'];
-      const bx = that.get('x') as Vector2Like['x'];
-      const by = that.get('y') as Vector2Like['y'];
-      return ax * bx + ay * by;
-    },
-    clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
-      validateVector2(this); validateVector2(min); validateVector2(max);
-      const x = clamp_(
-        this.get('x') as Vector2Like['x'],
-        min.get('x') as Vector2Like['x'],
-        max.get('x') as Vector2Like['x'],
-      );
-      const y = clamp_(
-        this.get('y') as Vector2Like['y'],
-        min.get('y') as Vector2Like['y'],
-        max.get('y') as Vector2Like['y'],
-      );
-      return instantiate<Vector2Like>(Vector2)(x, y);
-    },
-   }
+export const Vector2 = createClowder('Vector2', null, {
+  x: 0,
+  y: 0,
+  [wake](this: Vector2, x: number, y: number) {
+    this.set('x', x);
+    this.set('y', y);
+    validateVector2(this);
+  },
+  add(this: Vector2, that: Vector2): Vector2 {
+    validateVector2(this); validateVector2(that);
+    return instantiate(Vector2)(
+      (this.get('x') as number) + (that.get('x') as number),
+      (this.get('y') as number) + (that.get('y') as number)
+    );
+  },
+  mul(this: Vector2, that: Vector2): Vector2 {
+    validateVector2(this); validateVector2(that);
+    return instantiate(Vector2)(
+      (this.get('x') as number) * (that.get('x') as number),
+      (this.get('y') as number) * (that.get('y') as number),
+    );
+  },
+  distance(this: Vector2, that: Vector2): number {
+    validateVector2(this); validateVector2(that);
+    const ax = this.get('x') as number;
+    const ay = this.get('y') as number;
+    const bx = that.get('x') as number;
+    const by = that.get('y') as number;
+    return Math.sqrt((ax - bx) ** 2 + (ay - by) ** 2);
+  },
+  dot(this: Vector2, that: Vector2): number {
+    validateVector2(this); validateVector2(that);
+    const ax = this.get('x') as number;
+    const ay = this.get('y') as number;
+    const bx = that.get('x') as number;
+    const by = that.get('y') as number;
+    return ax * bx + ay * by;
+  },
+  clamp(this: Vector2, min: Vector2, max: Vector2): Vector2 {
+    validateVector2(this); validateVector2(min); validateVector2(max);
+    const x = clamp_(
+      this.get('x') as number,
+       min.get('x') as number,
+       max.get('x') as number,
+    );
+    const y = clamp_(
+      this.get('y') as number,
+       min.get('y') as number,
+       max.get('y') as number,
+    );
+    return instantiate(Vector2)(x, y);
+  },
 });
 
 function validateVector2(value: Vector2): void {
@@ -275,66 +263,54 @@ function validateVector2(value: Vector2): void {
 /* - * - * - * - * - * - * - * - *
  * Rectangle Clowder:
  * - * - * - * - * - * - * - * - * */
-type Rectangle = ClowderInstance<RectangleLike>;
+type Rectangle = ClowderInstance;
 
-type RectangleLike = {
-  [wake](this: Rectangle, x: number, y: number, width: number, height: number): void;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  contains(this: Rectangle, point: Vector2): boolean;
-  collides(this: Rectangle, that: Rectangle): boolean;
-};
+const Rectangle = createClowder('Rectangle', null, {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  [wake](this: Rectangle, x: number, y: number, width: number, height: number) {
+    this.set('x', x);
+    this.set('y', y);
+    this.set('width', width);
+    this.set('height', height);
+    validateRectangle(this);
+  },
+  contains(this: Rectangle, point: Vector2): boolean {
+    validateRectangle(this); validateVector2(point);
+    /* Point */
+    const px = point.get('x') as number;
+    const py = point.get('y') as number;
 
-const Rectangle = createClowder<RectangleLike>('Rectangle', null, () => {
-  return {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    [wake](this: Rectangle, x: number, y: number, width: number, height: number) {
-      this.set('x', x);
-      this.set('y', y);
-      this.set('width', width);
-      this.set('height', height);
-      validateRectangle(this);
-    },
-    contains(this: Rectangle, point: Vector2): boolean {
-      validateRectangle(this); validateVector2(point);
-      /* Point */
-      const px = point.get('x') as Vector2Like['x'];
-      const py = point.get('y') as Vector2Like['y'];
+    /* Rectangle */
+    const ax = this.get('x') as number;
+    const ay = this.get('y') as number;
+    const aw = this.get('width') as number;
+    const ah = this.get('height') as number;
 
-      /* Rectangle */
-      const ax = this.get('x') as RectangleLike['x'];
-      const ay = this.get('y') as RectangleLike['y'];
-      const aw = this.get('width') as RectangleLike['width'];
-      const ah = this.get('height') as RectangleLike['height'];
+    return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
+  },
+  collides(this: Rectangle, that: Rectangle): boolean {
+    validateRectangle(this); validateRectangle(that);
 
-      return (px >= ax) && (py >= ay) && (px < ax + aw) && (py < ay + ah);
-    },
-    collides(this: Rectangle, that: Rectangle): boolean {
-      validateRectangle(this); validateRectangle(that);
+    /* Rectangle A */
+    const ax = this.get('x') as number;
+    const ay = this.get('y') as number;
+    const aw = this.get('width') as number;
+    const ah = this.get('height') as number;
 
-      /* Rectangle A */
-      const ax = this.get('x') as RectangleLike['x'];
-      const ay = this.get('y') as RectangleLike['y'];
-      const aw = this.get('width') as RectangleLike['width'];
-      const ah = this.get('height') as RectangleLike['height'];
+    /* Rectangle B */
+    const bx = that.get('x') as number;
+    const by = that.get('y') as number;
+    const bw = that.get('width') as number;
+    const bh = that.get('height') as number;
 
-      /* Rectangle B */
-      const bx = that.get('x') as RectangleLike['x'];
-      const by = that.get('y') as RectangleLike['y'];
-      const bw = that.get('width') as RectangleLike['width'];
-      const bh = that.get('height') as RectangleLike['height'];
-
-      return (bx < ax + aw)
-        && (bx + bw > ax)
-        && (by < ay + ah)
-        && (by + bh > ay);
-    },
-  };
+    return (bx < ax + aw)
+      && (bx + bw > ax)
+      && (by < ay + ah)
+      && (by + bh > ay);
+  },
 });
 
 function validateRectangle(rect: Rectangle): void {
@@ -353,41 +329,30 @@ function validateRectangle(rect: Rectangle): void {
  * - * - * - * - * - * - * - * - * */
 /* Color container, wrapping a RGBA color value.
  * It accepts an opacity value too, in percentage. */
-type Color = ClowderInstance<ColorLike>;
+type Color = ClowderInstance;
 
-type ColorLike = {
-  [wake]: (this: Color, red: number, green: number, blue: number, opacity?: number) => void;
-  red:     number;
-  green:   number;
-  blue:    number;
-  opacity: number;
-  alpha(this: Color): number;
-};
-
-const Color = createClowder<ColorLike>('Color', null, () => {
-  return {
-    red:     0,
-    green:   0,
-    blue:    0,
-    opacity: 0,
-    [wake](this: Color, red: number, green: number, blue: number, opacity: number = 100): void {
-      this.set('red', red);
-      this.set('green', green);
-      this.set('blue', blue);
-      this.set('opacity', opacity);
-      validateColor(this);
-    },
-    alpha(this: Color): number {
-      validateColor(this);
-      return percentageToByte(this.get('opacity') as ColorLike['opacity']);
-    },
-    to_hex(this: Color): string {
-      validateColor(this);
-      const red   = this.get('red')   as ColorLike['red'];
-      const green = this.get('green') as ColorLike['green'];
-      const blue  = this.get('blue')  as ColorLike['blue'];
-      return rgbToHex(red, green, blue);
-    }
+const Color = createClowder('Color', null, {
+  red:     0,
+  green:   0,
+  blue:    0,
+  opacity: 0,
+  [wake](this: Color, red: number, green: number, blue: number, opacity: number = 100): void {
+    this.set('red', red);
+    this.set('green', green);
+    this.set('blue', blue);
+    this.set('opacity', opacity);
+    validateColor(this);
+  },
+  alpha(this: Color): number {
+    validateColor(this);
+    return percentageToByte(this.get('opacity') as number);
+  },
+  to_hex(this: Color): string {
+    validateColor(this);
+    const red   = this.get('red')   as number;
+    const green = this.get('green') as number;
+    const blue  = this.get('blue')  as number;
+    return rgbToHex(red, green, blue);
   }
 });
 
@@ -404,10 +369,10 @@ function validateColor(color: Color) {
 
 function colorToStyle(color: Color) {
   validateColor(color);
-  const red     = color.get('red')     as ColorLike['red'];
-  const green   = color.get('green')   as ColorLike['green'];
-  const blue    = color.get('blue')    as ColorLike['blue'];
-  const opacity = color.get('opacity') as ColorLike['opacity'];
+  const red     = color.get('red')     as number;
+  const green   = color.get('green')   as number;
+  const blue    = color.get('blue')    as number;
+  const opacity = color.get('opacity') as number;
   return `rgb(${red} ${green} ${blue} / ${opacity}%)`;
 }
 
@@ -472,10 +437,10 @@ export default function(mewlix: Mewlix): void {
     .then(blob => {
       if (!rect) return createImageBitmap(blob);
       return createImageBitmap(blob,
-        rect.get('x')      as RectangleLike['x'],
-        rect.get('y')      as RectangleLike['y'],
-        rect.get('width')  as RectangleLike['width'],
-        rect.get('height') as RectangleLike['height'],
+        rect.get('x')      as number,
+        rect.get('y')      as number,
+        rect.get('width')  as number,
+        rect.get('height') as number,
       );
     });
 
@@ -501,10 +466,10 @@ export default function(mewlix: Mewlix): void {
       const rect = frame.get('rect') as SpriteDetails['rect'];
       const sprite = await createImageBitmap(
         sheet,
-        rect.get('x')      as RectangleLike['x'],
-        rect.get('y')      as RectangleLike['y'],
-        rect.get('width')  as RectangleLike['width'],
-        rect.get('height') as RectangleLike['height'],
+        rect.get('x')      as number,
+        rect.get('y')      as number,
+        rect.get('width')  as number,
+        rect.get('height') as number,
       );
       spriteMap.set(key, sprite);
     }
@@ -543,10 +508,10 @@ export default function(mewlix: Mewlix): void {
 
   function drawRect(rect: Rectangle, color: string | Color): void {
     context.fillStyle = withColor(color ?? 'black');
-    const x = rect.get('x') as RectangleLike['x'];
-    const y = rect.get('y') as RectangleLike['y'];
-    const width  = rect.get('width') as RectangleLike['width'];
-    const height = rect.get('height') as RectangleLike['height'];
+    const x = rect.get('x') as number;
+    const y = rect.get('y') as number;
+    const width  = rect.get('width') as number;
+    const height = rect.get('height') as number;
     context.fillRect(
       x      * sizeModifier,
       y      * sizeModifier,
@@ -979,100 +944,93 @@ export default function(mewlix: Mewlix): void {
    * - * - * - * - * - * - * - * - * */
   /* A pixel canvas for efficiently creating sprites.
    * The .to_sprite() method creates a new sprite and adds it to spriteMap. */
-  type PixelCanvas = ClowderInstance<PixelCanvasLike>;
-
-  type PixelCanvasLike = {
-    [wake](this: PixelCanvas, width: number, height: number): void;
-    width:  number;
-    height: number;
-    fill(this: PixelCanvas, color: Color): void;
-    set_pixel(this: PixelCanvas, x: number, y: number, color: Color): void;
-    get_pixel(this: PixelCanvas, x: number, y: number): Color;
-    to_sprite(this: PixelCanvas, key: string): void;
+  type PixelCanvas = ClowderInstance & {
+    data: Uint8ClampedArray;
   };
 
-  const PixelCanvas = createClowder<PixelCanvasLike>('PixelCanvas', null, () => {
-    let data: Uint8ClampedArray | null;
-    return {
-      [wake](this: PixelCanvas, width: number, height: number) {
-        this.set('width', width);
-        this.set('height', height);
-        data = new Uint8ClampedArray(width * height * 4);
-        validatePixelCanvas(this);
-      },
-      width:  0,
-      height: 0,
-      fill(this: PixelCanvas, color: string | Color): void {
-        if (!data) throw pixelCanvasError();
-        validatePixelCanvas(this);
+  const PixelCanvas = createClowder('PixelCanvas', null, {
+    [wake](this: PixelCanvas, width: number, height: number) {
+      this.set('width', width);
+      this.set('height', height);
+      this.data = new Uint8ClampedArray(width * height * 4);
+      validatePixelCanvas(this);
+    },
+    width:  0,
+    height: 0,
+    fill(this: PixelCanvas, color: string | Color): void {
+      const data = this.data;
+      if (!data) throw pixelCanvasError();
+      validatePixelCanvas(this);
 
-        const trueColor = valueToColor(color);
-        const red   = trueColor.get('red')   as ColorLike['red'];
-        const green = trueColor.get('green') as ColorLike['green'];
-        const blue  = trueColor.get('blue')  as ColorLike['blue'];
+      const trueColor = valueToColor(color);
+      const red   = trueColor.get('red')   as number;
+      const green = trueColor.get('green') as number;
+      const blue  = trueColor.get('blue')  as number;
 
-        const getAlpha = trueColor.get('alpha') as ColorLike['alpha'];
-        const alpha = getAlpha.call(trueColor);
+      const getAlpha = trueColor.get('alpha') as () => number;
+      const alpha = getAlpha();
 
-        for (let i = 0; i < data.length; i += 4) {
-          data[i]     = red;
-          data[i + 1] = green;
-          data[i + 2] = blue;
-          data[i + 3] = alpha;
-        }
-      },
-      set_pixel(this: PixelCanvas, x: number, y: number, color: string | Color): void {
-        if (!data) throw pixelCanvasError();
-        validatePixelCanvas(this);
-        typeof x === 'number' || report.number('PixelCanvas.set_pixel', x);
-        typeof y === 'number' || report.number('PixelCanvas.set_pixel', y);
-
-        const trueColor = valueToColor(color);
-        const red   = trueColor.get('red')   as ColorLike['red'];
-        const green = trueColor.get('green') as ColorLike['green'];
-        const blue  = trueColor.get('blue')  as ColorLike['blue'];
-
-        const getAlpha = trueColor.get('alpha') as ColorLike['alpha'];
-        const alpha = getAlpha.call(trueColor);
-
-        const width = this.get('width') as PixelCanvasLike['width'];
-        const i = (x * width + y) * 4;
+      for (let i = 0; i < data.length; i += 4) {
         data[i]     = red;
         data[i + 1] = green;
         data[i + 2] = blue;
         data[i + 3] = alpha;
-      },
-      get_pixel(this: PixelCanvas, x: number, y: number): Color {
-        if (!data) throw pixelCanvasError();
-        validatePixelCanvas(this);
-        typeof x === 'number' || report.number('PixelCanvas.get_pixel', x);
-        typeof y === 'number' || report.number('PixelCanvas.get_pixel', y);
+      }
+    },
+    set_pixel(this: PixelCanvas, x: number, y: number, color: string | Color): void {
+      const data = this.data;
+      if (!data) throw pixelCanvasError();
+      validatePixelCanvas(this);
+      typeof x === 'number' || report.number('PixelCanvas.set_pixel', x);
+      typeof y === 'number' || report.number('PixelCanvas.set_pixel', y);
 
-        const width = this.get('width') as PixelCanvasLike['width'];
-        const i = (x * width + y) * 4;
-        return instantiate<ColorLike>(Color)(
-          data[i],
-          data[i + 1],
-          data[i + 2],
-          data[i + 3],
-        );
-      },
-      to_sprite(this: PixelCanvas, key: string): void {
-        if (!data) throw pixelCanvasError();
-        validatePixelCanvas(this);
-        typeof key === 'string' || report.string('PixelCanvas.to_sprite', key);
+      const trueColor = valueToColor(color);
+      const red   = trueColor.get('red')   as number;
+      const green = trueColor.get('green') as number;
+      const blue  = trueColor.get('blue')  as number;
 
-        const width  = this.get('width')  as PixelCanvasLike['width'];
-        const height = this.get('height') as PixelCanvasLike['height'];
-        const copy = new Uint8ClampedArray(data);
-        resourceQueue.push({
-          type: 'canvas',
-          key: key,
-          data: new ImageData(copy, width, height),
-        });
-      },
-    };
-  });
+      const getAlpha = trueColor.get('alpha') as () => number;
+      const alpha = getAlpha();
+
+      const width = this.get('width') as number;
+      const i = (x * width + y) * 4;
+      data[i]     = red;
+      data[i + 1] = green;
+      data[i + 2] = blue;
+      data[i + 3] = alpha;
+    },
+    get_pixel(this: PixelCanvas, x: number, y: number): Color {
+      const data = this.data;
+      if (!data) throw pixelCanvasError();
+      validatePixelCanvas(this);
+      typeof x === 'number' || report.number('PixelCanvas.get_pixel', x);
+      typeof y === 'number' || report.number('PixelCanvas.get_pixel', y);
+
+      const width = this.get('width') as number;
+      const i = (x * width + y) * 4;
+      return instantiate(Color)(
+        data[i],
+        data[i + 1],
+        data[i + 2],
+        data[i + 3],
+      );
+    },
+    to_sprite(this: PixelCanvas, key: string): void {
+      const data = this.data;
+      if (!data) throw pixelCanvasError();
+      validatePixelCanvas(this);
+      typeof key === 'string' || report.string('PixelCanvas.to_sprite', key);
+
+      const width  = this.get('width')  as number;
+      const height = this.get('height') as number;
+      const copy = new Uint8ClampedArray(data);
+      resourceQueue.push({
+        type: 'canvas',
+        key: key,
+        data: new ImageData(copy, width, height),
+      });
+    },
+  } as ClowderBindings);
 
   function validatePixelCanvas(canvas: PixelCanvas): void {
     const width  = canvas.get('width');
@@ -1432,7 +1390,7 @@ export default function(mewlix: Mewlix): void {
     mouse_click: isMousePressed,
     mouse_down: isMouseDown,
 
-    mouse_position: () => instantiate<Vector2Like>(Vector2)(
+    mouse_position: () => instantiate(Vector2)(
       mouseX,
       mouseY,
     ),
