@@ -348,7 +348,7 @@ function instanceClowder(clowder: Clowder): ClowderInstance {
     wake(...args) {
       const con = getConstructor(this.clowder);
       if (con) {
-        return con.apply(this, args);
+        return con.call(this, ...args);
       }
       /* A lack of constructor is silently forgiven.
        * This could maybe change in the future...? */
@@ -366,7 +366,7 @@ function instanceClowder(clowder: Clowder): ClowderInstance {
     call(key, ...args) {
       const method = getMethod(this.clowder, key);
       if (method) {
-        return method.apply(this, args);
+        return method.call(this, ...args);
       }
       throw new MewlixError(ErrorCode.TypeMismatch,
         `Key ${key} is not a method in clowder "${clowder.name}"!`);
@@ -532,7 +532,7 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
   'clowder instance': function(instance: ClowderInstance): string {
     if (instance.clowder.meta.purr) {
       return purrify(
-        instance.clowder.meta.purr.apply(instance)
+        instance.clowder.meta.purr.call(instance)
       );
     }
     const items = getEntries(instance.home)
