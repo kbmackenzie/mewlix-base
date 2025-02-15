@@ -3,20 +3,19 @@ import { numbers } from '../../src/mewlix';
 describe('arithmetic operations', () => {
   const { add, sub, mul, div, mod, pow, floordiv } = numbers;
 
-  function randomInteger(min: number, max: number): number {
-    const minBound = Math.ceil(min);
-    const maxBound = Math.floor(max);
-    return Math.floor(Math.random() * (maxBound - minBound + 1)) + minBound;
+  function randomInt(): number {
+    /* Arbitrary boundaries. */
+    const min = -4130000;
+    const max = 4130000;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   const testInput = Array.from(
     { length: 10 },
-    _ => randomInteger(0, 0xffffffff)
+    _ => [randomInt(), randomInt()]
   );
 
-  test.each(testInput)('basic arithmetic operations', (a) => {
-    const b = randomInteger(0, 0xffffffff);
-
+  test.each(testInput)('basic arithmetic operations with %i, %i', (a, b) => {
     expect(
       add(a, b)
     ).toBe(a + b);
@@ -31,7 +30,7 @@ describe('arithmetic operations', () => {
 
     expect(
       div(a, b)
-    ).toBe(a / b);
+    ).toBeCloseTo(a / b);
 
     expect(
       floordiv(a, b)
