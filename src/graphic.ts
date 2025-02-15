@@ -23,7 +23,6 @@ import {
   mixYarnBall,
   isShelf,
   isGettable,
-  ClowderBindings,
   ClowderBlueprint,
 } from './mewlix.js';
 
