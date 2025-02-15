@@ -2,12 +2,14 @@
 
 SCRIPT_NAME='test.sh'
 HELP_MESSAGE=$(cat << EOM
-Usage: test [-h|--help] [-r|--rebuild] [-w|--wait <SECONDS>] [-n|--no-run]
+Usage: test [-h|--help] [-b|--base] [-r|--rebuild] [-w|--wait <SECONDS>]
+            [-n|--no-run]
 
   Build and run tests for Mewlix's templates.
 
 Available options:
   -h, --help            Display this help message
+  -b, --base            Run tests only for base library
   -r, --rebuild         Rebuild templates before running tests.
   -w, --wait <SECONDS>  How long to wait for servers before running Jest.
   -n, --no-run          Build tests, but do not run them. Implies --rebuild.
@@ -63,6 +65,9 @@ RUN_TESTS=true
 # Should tests be re-built?
 REBUILD=false
 
+# Should test only base library?
+BASE_ONLY=false
+
 # How long to wait for server before running jest?
 WAIT_DURATION=3
 
@@ -72,8 +77,8 @@ WAIT_DURATION=3
 # ------------------------------
 # Parse command-line arguments:
 # ------------------------------
-LONG_OPTIONS='help,rebuild,wait:,no-run'
-SHORT_OPTIONS='hrw:n'
+LONG_OPTIONS='help,base,rebuild,wait:,no-run'
+SHORT_OPTIONS='hbrw:n'
 
 OPTS=$(getopt -o "$SHORT_OPTIONS" -l "$LONG_OPTIONS" -n "$SCRIPT_NAME" -- "$@")
 eval set -- "$OPTS"
@@ -83,6 +88,9 @@ while true; do
     -h | --help)
       help_message
       exit ;;
+    -b | --base)
+      BASE_ONLY=true
+      shift ;;
     -r | --rebuild)
       REBUILD=true
       shift ;;
@@ -184,5 +192,7 @@ run_template_tests() {
 
 if [ "$RUN_TESTS" = 'true' ]; then
   run_base_tests
-  run_template_tests "$TEMPLATES"
+  if [ "$BASE_ONLY" != 'true' ]; then
+    run_template_tests "$TEMPLATES"
+  fi
 fi
