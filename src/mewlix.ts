@@ -56,6 +56,8 @@ export type ClowderInstance = Readonly<{
   get(key: string): MewlixValue;
   set(key: string, value: MewlixValue): void;
   call(key: string, ...args: MewlixValue[]): MewlixValue;
+  wake(...args: MewlixValue[]): void;
+  outside(): ClowderInstance | null;
 }>;
 
 export type YarnBall<T> = Readonly<{
@@ -329,46 +331,63 @@ function getConstructor(clowder: Clowder): Wake | Nothing {
   return clowder.parent && getConstructor(clowder.parent);
 }
 
+function getMethod(clowder: Clowder, key: string): Function | Nothing {
+  let node: Clowder | null = clowder;
+  while (node) {
+    if (key in node.blueprint) return node.blueprint[key];
+    node = node.parent;
+  }
+  return undefined;
+}
+
 function instanceClowder(clowder: Clowder): ClowderInstance {
   const instance: ClowderInstance = {
     [tag]: 'clowder instance',
     clowder: clowder,
     home: {},
-    get(key: string): MewlixValue {
-      if (key in instance.home) return instance.home[key];
-      let node: Clowder | null = clowder;
-      while (node) {
-        if (key in node.blueprint) {
-          return node.blueprint[key].bind(instance);
-        }
-        node = node.parent;
+    wake(...args) {
+      const con = getConstructor(this.clowder);
+      if (con) {
+        return con.apply(this, args);
       }
+      /* A lack of constructor is silently forgiven.
+       * This could maybe change in the future...? */
     },
-    set(key: string, value: MewlixValue): void {
-      instance.home[key] = value;
+    get(key) {
+      if (key in this.home) return this.home[key];
+      const method = getMethod(this.clowder, key);
+      return method && method.bind(this);
     },
-    call(key: string, ...args: MewlixValue[]): MewlixValue {
-      let node: Clowder | null = clowder;
-      while (node) {
-        if (key in node.blueprint) {
-          return node.blueprint[key].apply(instance, ...args);
-        }
-        node = node.parent;
+    set(key, value) {
+      this.home[key] = value;
+    },
+    /* When possible, method calls with .get() should be optimized to .call().
+     * The transpiler should take care of this. */
+    call(key, ...args) {
+      const method = getMethod(this.clowder, key);
+      if (method) {
+        return method.apply(this, args);
       }
       throw new MewlixError(ErrorCode.TypeMismatch,
-        `Key ${key} is not a method in clowder ${purrify(clowder)}!`);
-    }
+        `Key ${key} is not a method in clowder "${clowder.name}"!`);
+    },
+    /* A little costly. It doesn't matter in a silly cat esolang, though. c:
+     * And performance-sensitive code shouldn't use .outside() either way. */
+    outside() {
+      if (!this.clowder.parent) return null;
+      return {
+        ...this,
+        clowder: this.clowder.parent,
+      };
+    },
   };
   return instance;
 }
 
 export function instantiate(clowder: Clowder): (...args: MewlixValue[]) => ClowderInstance {
   const instance = instanceClowder(clowder);
-  const wake = getConstructor(clowder);
   return (...args) => {
-    if (wake) {
-      wake.apply(instance, ...args);
-    }
+    instance.wake?.(...args);
     return instance;
   };
 }
