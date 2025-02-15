@@ -5,6 +5,7 @@
   "scripts": {
     "build": "./build.sh",
     "test": "./test.sh",
+    "base": "./test.sh --base",
     "console": "./demo.sh console",
     "graphic": "./demo.sh graphic",
     "clean": "rm -rf ./build",
