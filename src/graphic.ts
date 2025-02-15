@@ -24,6 +24,7 @@ import {
   isShelf,
   isGettable,
   ClowderBindings,
+  ClowderBlueprint,
 } from './mewlix.js';
 
 /* Convert percentage value (0% - 100%) to byte (0 - 255) */
@@ -200,8 +201,6 @@ function writeConfig(data: GraphicConfig): void {
 type Vector2 = ClowderInstance;
 
 export const Vector2 = createClowder('Vector2', null, {
-  x: 0,
-  y: 0,
   [wake](this: Vector2, x: number, y: number) {
     this.set('x', x);
     this.set('y', y);
@@ -266,10 +265,6 @@ function validateVector2(value: Vector2): void {
 type Rectangle = ClowderInstance;
 
 const Rectangle = createClowder('Rectangle', null, {
-  x: 0,
-  y: 0,
-  width: 0,
-  height: 0,
   [wake](this: Rectangle, x: number, y: number, width: number, height: number) {
     this.set('x', x);
     this.set('y', y);
@@ -332,10 +327,6 @@ function validateRectangle(rect: Rectangle): void {
 type Color = ClowderInstance;
 
 const Color = createClowder('Color', null, {
-  red:     0,
-  green:   0,
-  blue:    0,
-  opacity: 0,
   [wake](this: Color, red: number, green: number, blue: number, opacity: number = 100): void {
     this.set('red', red);
     this.set('green', green);
@@ -955,8 +946,6 @@ export default function(mewlix: Mewlix): void {
       this.data = new Uint8ClampedArray(width * height * 4);
       validatePixelCanvas(this);
     },
-    width:  0,
-    height: 0,
     fill(this: PixelCanvas, color: string | Color): void {
       const data = this.data;
       if (!data) throw pixelCanvasError();
@@ -1030,7 +1019,7 @@ export default function(mewlix: Mewlix): void {
         data: new ImageData(copy, width, height),
       });
     },
-  } as ClowderBindings);
+  } as ClowderBlueprint);
 
   function validatePixelCanvas(canvas: PixelCanvas): void {
     const width  = canvas.get('width');

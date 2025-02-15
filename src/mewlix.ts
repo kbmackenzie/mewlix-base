@@ -3,13 +3,14 @@
 /* - * - * - * - * - * - * - * - *
  * Symbols (Core)
 /* - * - * - * - * - * - * - * - * */
-export const tag     = Symbol('tag');
-export const wake    = Symbol('wake');
-export const outside = Symbol('outside');
+export const tag  = Symbol('tag');
+export const wake = Symbol('wake');
 
 /* - * - * - * - * - * - * - * - *
  * Types (Core)
 /* - * - * - * - * - * - * - * - * */
+export type Nothing = null | undefined;
+
 export type ValueOf<T> = T[keyof T];
 export type TryGet<T> = T | undefined;
 
@@ -27,10 +28,15 @@ export type Box<T> = Readonly<{
   set(key: keyof T, value: ValueOf<T>): void;
 }>;
 
-export type Wake = (...args: any[]) => void;
+export type Wake = Function;
+export type Purr = Function;
+
+export type ClowderBlueprint = {
+  [wake]?: Wake;
+  [key: string]: Function;
+};
 
 export type ClowderBindings = {
-  [wake]?: Wake;
   [key: string]: MewlixValue;
 };
 
@@ -39,21 +45,17 @@ export type Clowder = Readonly<{
   kind: symbol;
   name: string;
   parent: Clowder | null;
-  blueprint: ClowderBindings;
+  blueprint: ClowderBlueprint;
+  meta: { purr?: Purr; };
 }>;
 
 export type ClowderInstance = Readonly<{
   [tag]: 'clowder instance',
-  name: string;
-  kind: symbol;
-  home: ClowderBindings & {
-    [outside]: ClowderInstance | null;
-  };
+  clowder: Clowder;
+  home: ClowderBindings;
   get(key: string): MewlixValue;
   set(key: string, value: MewlixValue): void;
-  meta: {
-    purr?: () => any;
-  },
+  call(key: string, ...args: MewlixValue[]): MewlixValue;
 }>;
 
 export type YarnBall<T> = Readonly<{
@@ -301,87 +303,81 @@ export function bindYarnBall<T>(key: string, map: BindingMap<T>): YarnBall<Recor
  * Clowders: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-export function createClowder<T extends ClowderBindings>(
-  name: string,
-  parent: Clowder | null,
-  init: T,
-): Clowder {
-  return {
+export function createClowder(name: string, parent: Clowder | null, blueprint: ClowderBlueprint): Clowder {
+  const clowder: Clowder = {
     [tag]: 'clowder',
     kind: Symbol(name),
     name: name,
     parent: parent,
-    blueprint: init,
+    blueprint: blueprint,
+    meta: {},
   };
-}
-
-function getConstructor(instance: ClowderInstance): Wake | undefined {
-  if (wake in instance.home) return instance.home[wake];
-  if (!instance.home[outside]) return undefined;
-  return getConstructor(instance.home[outside]);
-}
-
-function bindMethods(instance: ClowderInstance, child?: ClowderInstance): void {
-  const home = child ?? instance;
-  instance.home[outside] && bindMethods(instance.home[outside], home);
-
-  instance.home[wake] = (wake in instance.home)
-    ? instance.home[wake]?.bind(home)
-    : getConstructor(instance);
-
-  for (const key in instance.home) {
-    const value = instance.home[key];
-    if (typeof value === 'function') {
-      const bound = value.bind(home);
-      if (key === 'purr') {
-        instance.meta.purr = bound;
-      }
-      instance.home[key] = bound;
-    }
+  const purr = getPurr(clowder);
+  if (purr) {
+    clowder.meta.purr = purr;
   }
+  return clowder;
 }
 
-function instanceClowder(clowder: Clowder, isParent?: boolean): ClowderInstance {
-  const parent = clowder.parent && instanceClowder(clowder.parent, true);
+function getPurr(clowder: Clowder): Purr | null {
+  const hasPurr = 'purr' in clowder.blueprint && typeof clowder.blueprint.purr === 'function';
+  return (hasPurr) ? clowder.blueprint.purr : null;
+}
+
+function getConstructor(clowder: Clowder): Wake | Nothing {
+  if (wake in clowder.blueprint) return clowder.blueprint[wake];
+  return clowder.parent && getConstructor(clowder.parent);
+}
+
+function instanceClowder(clowder: Clowder): ClowderInstance {
   const instance: ClowderInstance = {
     [tag]: 'clowder instance',
-    name: clowder.name,
-    kind: clowder.kind,
-    home: {
-      [outside]: parent,
-      ...clowder.blueprint,
-    },
+    clowder: clowder,
+    home: {},
     get(key: string): MewlixValue {
       if (key in instance.home) return instance.home[key];
-      if (parent) return parent.get(key);
-      return undefined;
+      let node: Clowder | null = clowder;
+      while (node) {
+        if (key in node.blueprint) {
+          return node.blueprint[key].bind(instance);
+        }
+        node = node.parent;
+      }
     },
     set(key: string, value: MewlixValue): void {
       instance.home[key] = value;
     },
-    meta: {},
+    call(key: string, ...args: MewlixValue[]): MewlixValue {
+      let node: Clowder | null = clowder;
+      while (node) {
+        if (key in node.blueprint) {
+          return node.blueprint[key].apply(instance, ...args);
+        }
+        node = node.parent;
+      }
+      throw new MewlixError(ErrorCode.TypeMismatch,
+        `Key ${key} is not a method in clowder ${purrify(clowder)}!`);
+    }
   };
-  if (!isParent) {
-    bindMethods(instance);
-  }
   return instance;
 }
 
-export type WakeParams = Parameters<Wake>;
-
-export function instantiate(clowder: Clowder): (...args: WakeParams) => ClowderInstance {
+export function instantiate(clowder: Clowder): (...args: MewlixValue[]) => ClowderInstance {
   const instance = instanceClowder(clowder);
+  const wake = getConstructor(clowder);
   return (...args) => {
-    instance.home[wake]?.(...args);
+    if (wake) {
+      wake.apply(instance, ...args);
+    }
     return instance;
   };
 }
 
 export function instanceOf(instance: ClowderInstance, clowder: Clowder): boolean {
-  let i: ClowderInstance | null = instance;
+  let i: Clowder | null = instance.clowder;
   while (i) {
     if (i.kind === clowder.kind) return true;
-    i = i.home[outside];
+    i = i.parent;
   }
   return false;
 }
@@ -515,13 +511,15 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
     return `clowder ${clowder.name}`;
   },
   'clowder instance': function(instance: ClowderInstance): string {
-    if (instance.meta.purr) {
-      return purrify(instance.meta.purr());
+    if (instance.clowder.meta.purr) {
+      return purrify(
+        instance.clowder.meta.purr.apply(instance)
+      );
     }
     const items = getEntries(instance.home)
       .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
       .join(', ');
-    return `clowder instance ${instance.name} [${items}]`;
+    return `clowder instance ${instance.clowder.name} [${items}]`;
   },
   'yarnball': function<T>(yarnball: YarnBall<T>): string {
     return `yarnball ${yarnball.key}`;
@@ -936,10 +934,7 @@ export const collections = {
         return value in collection.bindings;
       }
       if (isClowderInstance(collection)) {
-        return value in collection.home || (
-          !!collection.home[outside]
-          && collections.contains(value, collection.home[outside])
-        );
+        return value in collection.home || collection.get(value) !== undefined;
       }
     }
     const typeOfA = reflection.typeOf(value);
