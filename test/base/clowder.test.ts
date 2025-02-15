@@ -8,85 +8,74 @@ import { ClowderInstance, clowder, wake, collections, purrify } from '../../src/
  * It's fine, though. _(;3」∠)_ */
 
 describe('clowder operations', () => {
-  type AnimalLike = {
-    [wake](this: ClowderInstance<AnimalLike>, species: string): void;
-    species: string;
-  };
+  type Animal  = ClowderInstance;
+  type Cat     = ClowderInstance;
+  type Charlie = ClowderInstance;
 
-  const Animal = clowder.create<AnimalLike>('Animal', null, () => ({
-    [wake](this: ClowderInstance<AnimalLike>, species: string) {
+  const Animal = clowder.create('Animal', null, {
+    [wake](this: Animal, species: string) {
       this.set('species', species);
     },
-  }) as AnimalLike);
+  });
 
-  type CatLike = AnimalLike & {
-    [wake](this: ClowderInstance<CatLike>): void;
-    sound(this: ClowderInstance<CatLike>): string;
-  };
-
-  const Cat = clowder.create<CatLike>('Cat', Animal as any, () => ({
-    [wake](this: ClowderInstance<CatLike>) {
-      (this.parent as any).bindings[wake]!('Felis catus');
+  const Cat = clowder.create('Cat', Animal as any, {
+    [wake](this: Cat) {
+      this.outside()!.wake('Felis catus');
     },
-    sound(this: ClowderInstance<CatLike>) {
+    sound(this: Cat) {
       return 'meow';
     },
-  }) as CatLike);
+  });
 
-  type CharlieLike = CatLike & {
-    sound(this: ClowderInstance<CharlieLike>): string;
-    purr(this: ClowderInstance<CharlieLike>): string;
-  };
-
-  const Charlie = clowder.create<CharlieLike>('Charlie', Cat as any, () => ({
-    sound(this: ClowderInstance<CharlieLike>): string {
+  const Charlie = clowder.create('Charlie', Cat as any, {
+    sound(this: Charlie): string {
       return 'hello!!';
     },
-    purr(this: ClowderInstance<CharlieLike>): string {
+    purr(this: Charlie): string {
       return 'meow meow!';
     },
-  }) as CharlieLike);
+  });
 
   test('clowder instance calls constructor correctly', () => {
-    const owl = clowder.instantiate<AnimalLike>(Animal)('Tyto alba');
+    const owl = clowder.instantiate(Animal)('Tyto alba');
     expect(owl.get('species')).toBe('Tyto alba');
   });
 
   test('clowder instance calls parent constructor', () => {
-    const cat = clowder.instantiate<CatLike>(Cat)();
+    const cat = clowder.instantiate(Cat)();
     expect(cat.get('species')).toBe('Felis catus');
   });
 
   test('clowder instance methods can be called', () => {
-    const cat    = clowder.instantiate<CatLike>(Cat)();
-    const method = cat.get('sound') as CatLike['sound'];
+    const cat    = clowder.instantiate(Cat)();
+    const method = cat.get('sound') as () => string;
     expect(
       method.call(cat)
     ).toBe('meow');
   });
 
   test('clowder instance inherits contructor from parent', () => {
-    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    const charlie = clowder.instantiate(Charlie)();
     expect(charlie.get('species')).toBe('Felis catus');
   });
 
   test('child clowders can override methods from parent clowders', () => {
-    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
-    const method  = charlie.get('sound') as CharlieLike['sound'];
+    const charlie = clowder.instantiate(Charlie)();
+    const method  = charlie.get('sound') as () => string;
     expect(
       method.call(charlie)
     ).toBe('hello!!');
   });
 
   test('child clowders contain value from parent clowder', () => {
-    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    const charlie = clowder.instantiate(Charlie)();
     expect(
       collections.contains('species', charlie)
     ).toBe(true);
   });
 
   test('clowder has string representation', () => {
-    const charlie = clowder.instantiate<CharlieLike>(Charlie)();
+    const charlie = clowder.instantiate(Charlie)();
     expect(
       purrify(charlie)
     ).toBe('meow meow!');

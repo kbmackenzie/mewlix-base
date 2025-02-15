@@ -31,7 +31,7 @@ describe('mewlix graphic template', () => {
       const color = await page.evaluate(
         (hexcode) => {
           const color = mewlix.lib['std.graphic'].get('hex')(hexcode);
-          const { red, green, blue } = color.bindings;
+          const { red, green, blue } = color.home;
           return [red, green, blue];
         },
         hexcode,
@@ -43,7 +43,7 @@ describe('mewlix graphic template', () => {
       const color = await page.evaluate(
         (hexcode) => {
           const color = mewlix.lib['std.graphic'].get('hex')(hexcode);
-          const { red, green, blue } = color.bindings;
+          const { red, green, blue } = color.home;
           return [red, green, blue];
         },
         '#000',

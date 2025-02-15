@@ -20,7 +20,7 @@ describe('reflection', () => {
   });
 
   test('has clowder type correctly identified', () => {
-    const testClowder  = clowder.create('Test', null, () => ({}));
+    const testClowder  = clowder.create('Test', null, {});
     const testInstance = clowder.instantiate(testClowder)();
 
     expect(
@@ -35,7 +35,7 @@ describe('reflection', () => {
       reflection.instanceOf(testInstance, testClowder)
     ).toBe(true);
 
-    const testClowder2  = clowder.create('Test2', testClowder, () => ({}));
+    const testClowder2  = clowder.create('Test2', testClowder, {});
     const testInstance2 = clowder.instantiate(testClowder2)();
 
     expect(
