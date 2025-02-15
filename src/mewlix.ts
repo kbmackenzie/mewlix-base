@@ -55,7 +55,6 @@ export type ClowderInstance = Readonly<{
   home: ClowderBindings;
   get(key: string): MewlixValue;
   set(key: string, value: MewlixValue): void;
-  call(key: string, ...args: MewlixValue[]): MewlixValue;
   wake(...args: MewlixValue[]): void;
   outside(): ClowderInstance | null;
 }>;
@@ -360,16 +359,6 @@ function instanceClowder(clowder: Clowder): ClowderInstance {
     },
     set(key, value) {
       this.home[key] = value;
-    },
-    /* When possible, method calls with .get() should be optimized to .call().
-     * The transpiler should take care of this. */
-    call(key, ...args) {
-      const method = getMethod(this.clowder, key);
-      if (method) {
-        return method.call(this, ...args);
-      }
-      throw new MewlixError(ErrorCode.TypeMismatch,
-        `Key ${key} is not a method in clowder "${clowder.name}"!`);
     },
     /* A little costly. It doesn't matter in a silly cat esolang, though. c:
      * And performance-sensitive code shouldn't use .outside() either way. */
