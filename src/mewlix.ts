@@ -1400,6 +1400,29 @@ export function standardLibrary(meow?: MeowState) {
     }
   };
 
+  function char(value: number): string {
+    typeof value === 'number' || report.number('std.char', value);
+    if (value < 0 || value > 65535) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `std.char: Value outside of valid character range: ${value}`);
+    }
+    return String.fromCharCode(value);
+  };
+
+  function bap(value: string): number {
+    typeof value === 'string' || report.string('std.bap', value);
+    if (value.length === 0) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        'std.bap: Expected character; received empty string!');
+    }
+    const code = value.charCodeAt(0);
+    if (code < 0 || code > 65535) {
+      throw new MewlixError(ErrorCode.InvalidOperation,
+        `std.bap: Character code out of valid range: '${code}'`);
+    }
+    return code;
+  };
+
   /* --------------------------
    * Collections & Constructors
    * -------------------------- */
@@ -1757,6 +1780,8 @@ export function standardLibrary(meow?: MeowState) {
     repeat,
     sequence,
     foreach,
+    char,
+    bap,
     tuple,
     table,
     set,
