@@ -14,12 +14,12 @@ describe('reflection', () => {
     { input: undefined                , result: 'nothing'  },
   ];
 
-  test.each(inputs)('has type correctly identified', ({ input, result }) => {
+  test.each(inputs)('identifies value as having type "$result"', ({ input, result }) => {
     const output = reflection.typeOf(input);
     expect(output).toBe(result);
   });
 
-  test('has clowder type correctly identified', () => {
+  test('identifies clowder types', () => {
     const testClowder  = clowder.create('Test', null, {});
     const testInstance = clowder.instantiate(testClowder)();
 
@@ -51,7 +51,7 @@ describe('reflection', () => {
     ).toBe(false);
   });
 
-  test('has cat tree type correctly identified', () => {
+  test('identifies cat tree types', () => {
     const testTree = catTree.create('Test', ['A', 'B']);
     expect(
       reflection.typeOf(testTree)

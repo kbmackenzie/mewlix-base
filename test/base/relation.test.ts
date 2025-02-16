@@ -25,7 +25,7 @@ describe('equality', () => {
     { a: 'null'     , b: null       , expected: false },
   ];
 
-  test.each(testInput)('should compare values for equality: %s', ({ a, b, expected }) => {
+  test.each(testInput)('check equality: $a == $b', ({ a, b, expected }) => {
     expect(
       relation.equal(a, b)
     ).toBe(expected);
@@ -51,7 +51,7 @@ describe('comparison', () => {
     { a: false      , b: true       , expected: Ordering.Less    },
   ];
 
-  test.each(testInput)('compares values: %s', ({ a, b, expected }) => {
+  test.each(testInput)('compares values $a and $b', ({ a, b, expected }) => {
     expect(
       relation.ordering(a, b)
     ).toBe(expected);

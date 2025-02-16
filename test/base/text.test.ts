@@ -10,12 +10,12 @@ describe('text & byte sequences', () => {
     { bytes: []                , string: ''     },
   ];
 
-  test.each(testInput)('generates a string from an utf-8 byte sequence', ({ bytes, string }) => {
+  test.each(testInput)('generates string "$string" from utf-8 byte sequence $bytes', ({ bytes, string }) => {
     const output = fromBytes(shelf.fromArray(bytes));
     expect(output).toBe(string);
   });
 
-  test.each(testInput)('generates an utf-8 byte sequence from a string', ({ bytes, string }) => {
+  test.each(testInput)('generates utf-8 byte sequence $bytes from string "$string"', ({ bytes, string }) => {
     const output = shelf.toArray(toBytes(string));
     expect(output).toStrictEqual(bytes);
   });

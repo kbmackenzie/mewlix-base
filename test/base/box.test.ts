@@ -15,7 +15,7 @@ describe('box operations', () => {
       { input: {}                , items: []                                                 },
     ];
 
-    test.each(inputs)('create a box from an object', ({ input, items }) => {
+    test.each(inputs)('create a box from object $input', ({ input, items }) => {
       const output = box.create(input);
       for (const [key, value, included] of items) {
         expect(key in output.bindings).toBe(included);
@@ -37,7 +37,7 @@ describe('box operations', () => {
       { input: {}                , pairs: []                   },
     ];
 
-    test.each(inputs)('gets pairs from box', ({ input, pairs }) => {
+    test.each(inputs)('gets pairs from box $input', ({ input, pairs }) => {
       const shelf = box.pairs(box.create(input));
       const table = new Map(pairs);
       expect(length(shelf)).toBe(pairs.length);

@@ -51,7 +51,7 @@ describe('json utilities', () => {
   ];
 
   describe('json serialization & deserialization', () => {
-    test.each(testInput)('correctly serializes values', ({ input, expected }) => {
+    test.each(testInput)('correctly serializes input to $expected', ({ input, expected }) => {
       const output = toJSON(input);
       expect(output).toBe(expected);
     });
@@ -85,7 +85,7 @@ describe('json utilities', () => {
       return a === b;
     }
 
-    test.each(testInput)('is equal after serialization & deserialization', ({ input }) => {
+    test.each(testInput)('is equal after serialization & deserialization: $expected', ({ input }) => {
       const output = fromJSON(toJSON(input)) as Comparable;
       expect(
         compare(input, output),
