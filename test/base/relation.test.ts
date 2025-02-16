@@ -16,8 +16,13 @@ describe('equality', () => {
     { a: false      , b: false      , expected: true  },
     { a: false      , b: null       , expected: false },
     { a: false      , b: undefined  , expected: false },
+    { a: false      , b: 0          , expected: false },
     { a: null       , b: undefined  , expected: true  },
     { a: undefined  , b: null       , expected: true  },
+    { a: ''         , b: 0          , expected: false },
+    { a: ''         , b: undefined  , expected: false },
+    { a: 0          , b: null       , expected: false },
+    { a: 'null'     , b: null       , expected: false },
   ];
 
   test.each(testInput)('should compare values for equality: %s', ({ a, b, expected }) => {
