@@ -6,7 +6,13 @@ module.exports = {
       tsconfig: 'tsconfig.test.json',
     }],
   },
-  modulePaths: ['<rootDir>/src', '<rootDir>/test/base'],
+  modulePaths: [
+    '<rootDir>/src',
+    '<rootDir>/test/base',
+  ],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
   testMatch: ['<rootDir>/test/base/**/*.test.ts'],
   rootDir: '..',
 };
