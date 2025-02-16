@@ -1,4 +1,4 @@
-import { shelf, relation, collections, compare, standardLibrary } from '../../src/mewlix';
+import { shelf, relation, collections, compare, standardLibrary } from '@/mewlix';
 
 describe('shelf operations', () => {
   const {

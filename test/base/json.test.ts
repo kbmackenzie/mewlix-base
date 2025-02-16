@@ -1,4 +1,4 @@
-import { Shelf, shelf, isShelf, box, standardLibrary, MewlixObject, Box, isBox } from '../../src/mewlix';
+import { Shelf, shelf, isShelf, box, standardLibrary, MewlixObject, Box, isBox } from '@/mewlix';
 
 describe('json utilities', () => {
   const { from_json: fromJSON, to_json: toJSON } = standardLibrary();

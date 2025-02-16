@@ -1,4 +1,4 @@
-import { box, collections, shelfIterator, ValueOf } from '../../src/mewlix';
+import { box, collections, shelfIterator, ValueOf } from '@/mewlix';
 
 describe('box operations', () => {
   const { length } = collections;

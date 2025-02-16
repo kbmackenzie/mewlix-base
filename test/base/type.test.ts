@@ -1,4 +1,4 @@
-import { shelf, box, reflection, clowder, catTree } from '../../src/mewlix';
+import { shelf, box, reflection, clowder, catTree } from '@/mewlix';
 
 describe('reflection', () => {
   const inputs = [

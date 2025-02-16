@@ -1,4 +1,4 @@
-import { ClowderInstance, clowder, wake, collections, purrify } from '../../src/mewlix';
+import { ClowderInstance, clowder, wake, collections, purrify } from '@/mewlix';
 
 /* A lot of type casting here, wow! _(:3」∠)_
  *

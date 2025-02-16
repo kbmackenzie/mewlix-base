@@ -1,4 +1,4 @@
-import { shelf, standardLibrary } from '../../src/mewlix';
+import { shelf, standardLibrary } from '@/mewlix';
 
 describe('text & byte sequences', () => {
   const { to_bytes: toBytes, from_bytes: fromBytes } = standardLibrary();

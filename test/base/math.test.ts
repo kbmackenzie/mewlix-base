@@ -1,4 +1,4 @@
-import { numbers } from '../../src/mewlix';
+import { numbers } from '@/mewlix';
 
 describe('arithmetic operations', () => {
   const { add, sub, mul, div, mod, pow, floordiv } = numbers;

@@ -1,4 +1,4 @@
-import { standardLibrary } from '../../src/mewlix';
+import { standardLibrary } from '@/mewlix';
 
 describe('bitwise operations', () => {
   const { itty: bitwiseNot, bitty: bitwiseOr, kitty: bitwiseAnd } = standardLibrary();
