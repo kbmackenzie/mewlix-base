@@ -1,12 +1,5 @@
 import { ClowderInstance, clowder, wake, collections, purrify } from '@/mewlix';
 
-/* A lot of type casting here, wow! _(:3」∠)_
- *
- * Clowders are a little too weird for TypeScript's type system.
- * A lot of 'Excessive stack depth comparing types'... Blehhhhh...
- *
- * It's fine, though. _(;3」∠)_ */
-
 describe('clowder operations', () => {
   type Animal  = ClowderInstance;
   type Cat     = ClowderInstance;
@@ -21,7 +14,7 @@ describe('clowder operations', () => {
     }
   });
 
-  const Cat = clowder.create('Cat', Animal as any, {
+  const Cat = clowder.create('Cat', Animal, {
     [wake](this: Cat) {
       this.outside()!.wake('Felis catus');
     },
@@ -30,7 +23,7 @@ describe('clowder operations', () => {
     },
   });
 
-  const Charlie = clowder.create('Charlie', Cat as any, {
+  const Charlie = clowder.create('Charlie', Cat, {
     sound(this: Charlie): string {
       return 'hello!!';
     },
