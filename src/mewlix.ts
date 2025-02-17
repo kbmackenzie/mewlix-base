@@ -9,8 +9,6 @@ export const wake = Symbol('wake');
 /* - * - * - * - * - * - * - * - *
  * Types (Core)
 /* - * - * - * - * - * - * - * - * */
-export type Nothing = null | undefined;
-
 export type ValueOf<T> = T[keyof T];
 export type TryGet<T> = T | undefined;
 
@@ -325,12 +323,12 @@ function getPurr(clowder: Clowder): Purr | null {
   return (hasPurr) ? clowder.blueprint.purr : null;
 }
 
-function getConstructor(clowder: Clowder): Wake | Nothing {
+function getConstructor(clowder: Clowder): Wake | null | undefined {
   if (wake in clowder.blueprint) return clowder.blueprint[wake];
   return clowder.parent && getConstructor(clowder.parent);
 }
 
-function getMethod(clowder: Clowder, key: string): Function | Nothing {
+function getMethod(clowder: Clowder, key: string): Function | undefined {
   let node: Clowder | null = clowder;
   while (node) {
     if (key in node.blueprint) return node.blueprint[key];
