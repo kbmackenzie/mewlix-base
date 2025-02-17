@@ -3,9 +3,9 @@
 ## 1.5.0
 
 - Base library:
-  - Add bitwise operation functions to `std`.
-  - Improve clowders! 🐱
-  - Fix innaccurate error messages.
+    - Add bitwise operation functions to `std`.
+    - Improve clowders! 🐱
+    - Fix innaccurate error messages.
 
 ## 1.4.0
 
