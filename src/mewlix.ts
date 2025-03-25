@@ -502,28 +502,32 @@ export function getEntries<T>(record: Record<string, T>): [string, T][] {
  * Strings: Logic + Operations
 /* - * - * - * - * - * - * - * - * */
 
-const purrifyTable: Record<ObjectTag, (a: any) => string> = {
-  'shelf': function<T>(shelf: Shelf<T>): string {
-    const items = shelfToArray(shelf).map(x => purrify(x, true)).join(', ');
+type RefSet = Set<MewlixObject>;
+
+const purrifyTable: Record<ObjectTag, (a: any, refs: RefSet) => string> = {
+  'shelf': function<T>(shelf: Shelf<T>, refs: RefSet): string {
+    const items = shelfToArray(shelf)
+      .map(x => purrify(x, true, refs))
+      .join(', ');
     return `[${items}]`;
   },
-  'box': function<T extends { [key: string]: any }>(box: Box<T>): string {
+  'box': function<T extends { [key: string]: any }>(box: Box<T>, refs: RefSet): string {
     const items = getEntries(box.bindings)
-      .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
+      .map(([key, value]) => `"${key}": ${purrify(value, true, refs)}`)
       .join(', ');
     return `📦 [${items}]`;
   },
   'clowder': function(clowder: Clowder): string {
     return `clowder ${clowder.name}`;
   },
-  'clowder instance': function(instance: ClowderInstance): string {
+  'clowder instance': function(instance: ClowderInstance, refs: RefSet): string {
     if (instance.clowder.meta.purr) {
       return purrify(
         instance.clowder.meta.purr.call(instance)
       );
     }
     const items = getEntries(instance.home)
-      .map(([key, value]) => `"${key}": ${purrify(value, true)}`)
+      .map(([key, value]) => `"${key}": ${purrify(value, true, refs)}`)
       .join(', ');
     return `clowder instance ${instance.clowder.name} [${items}]`;
   },
@@ -541,9 +545,12 @@ const purrifyTable: Record<ObjectTag, (a: any) => string> = {
   },
 };
 
-export function purrify(value: any, nested: boolean = false): string {
+export function purrify(value: any, nested: boolean = false, refs?: RefSet): string {
   if (typeof value === 'object' && value !== null && tag in value) {
-    return purrifyTable[value[tag] as ObjectTag](value);
+    if (refs && refs.has(value)) return '[circular reference 🔁]';
+    refs ??= new Set();
+    refs.add(value);
+    return purrifyTable[value[tag] as ObjectTag](value, refs);
   }
   if (value === null || value === undefined) { return 'nothing'; }
   switch (typeof value) {
