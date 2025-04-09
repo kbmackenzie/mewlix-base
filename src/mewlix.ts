@@ -1215,11 +1215,14 @@ export function standardLibrary(meow?: MeowState) {
       `std.reverse: Can't check emptiness of value of type "${typeOfValue}": ${value}`);
   };
 
-  function sort<T extends MewlixValue>(shelf: Shelf<T>): Shelf<T> {
+  function sort<T extends MewlixValue>(
+    shelf: Shelf<T>,
+    predicate?: (a: T, b: T) => number,
+  ): Shelf<T> {
     isShelf(shelf) || report.shelf('std.sort', shelf);
     return shelfFromArray(
       shelfToArray(shelf)
-        .sort((a, b) => relation.ordering(a, b))
+        .sort(predicate ?? ((a, b) => relation.ordering(a, b)))
     );
   };
 
