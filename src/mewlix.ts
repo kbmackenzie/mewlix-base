@@ -658,9 +658,9 @@ function fromSerializableObject(object: SerializableObject): Box<Record<string, 
  * Comparisons
 /* - * - * - * - * - * - * - * - * */
 export enum Ordering {
-  Less,
-  Equal,
-  Greater,
+  Less    = -1,
+  Equal   =  0,
+  Greater =  1,
 }
 
 export const compare = {
