@@ -1,5 +1,11 @@
 # `mewlix-base` - Changelog
 
+## 1.5.1
+
+- Base library:
+    - When pretty-printing, handle circular references gracefully.
+    - Let `std.sort` accept an optional predicate function.
+
 ## 1.5.0
 
 - Base library:
