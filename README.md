@@ -14,4 +14,4 @@ To build the base library and templates, run `npm run build`. The build process 
 
 [1]: https://github.com/kbmackenzie/mewlix
 [2]: https://man.archlinux.org/man/zip.1.en
-[3]: https://kbmackenzie.xyz/projects/mewlix
+[3]: https://kbmackenzie.dev/projects/mewlix
