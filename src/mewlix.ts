@@ -1168,13 +1168,12 @@ export function standardLibrary(meow?: MeowState) {
       return value.slice(0, amount);
     }
     if (isShelf(value)) {
-      const length = Math.min(shelfLength(value), amount);
       const iterator = shelfIterator(value);
+      const length = Math.min(shelfLength(value), amount);
       const output = new Array(length);
-      let counter = amount;
       let i = length - 1;
       for (const item of iterator) {
-        if (counter-- <= 0) break;
+        if (i < 0) break;
         output[i--] = item;
       }
       return shelfFromArray(output);
