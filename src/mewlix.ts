@@ -1430,9 +1430,9 @@ export function standardLibrary(meow?: MeowState) {
     return code;
   };
 
-  /* --------------------------
-   * Collections & Constructors
-   * -------------------------- */
+  /* -----------
+   * Collections
+   * ----------- */
   function tuple(a: MewlixValue, b: MewlixValue): Box<Tuple<MewlixValue, MewlixValue>> {
     return createBox<Tuple<MewlixValue, MewlixValue>>({
       first: a,
@@ -1440,53 +1440,9 @@ export function standardLibrary(meow?: MeowState) {
     });
   };
 
-  function table() {
-    const table = new Map<MewlixValue, MewlixValue>();
-    const box = createBox({
-      add(key: MewlixValue, value: MewlixValue) {
-        table.set(key, value);
-        return box;
-      },
-      has(key: MewlixValue) {
-        return table.has(key);
-      },
-      get(key: MewlixValue) {
-        return table.get(key);
-      },
-      remove(key: MewlixValue) {
-        table.delete(key);
-        return box;
-      },
-      clear() {
-        table.clear();
-        return box;
-      },
-    });
-    return box;
-  };
-
-  function set() {
-    const set = new Set<MewlixValue>();
-    const box = createBox({
-      add(value: MewlixValue) {
-        set.add(value);
-        return box;
-      },
-      has(value: MewlixValue) {
-        return set.has(value);
-      },
-      remove(value: MewlixValue) {
-        set.delete(value);
-        return box;
-      },
-      clear() {
-        set.clear();
-        return box;
-      },
-    });
-    return box;
-  };
-
+  /* -------
+   * Numbers
+   * ------- */
   function slap(value: MewlixValue): number {
     return convert.number(value);
   };
@@ -1645,9 +1601,9 @@ export function standardLibrary(meow?: MeowState) {
     return output;
   };
 
-  /* ---------------------------
-   * Byte streams and weirdness.
-   * --------------------------- */
+  /* -------------
+   * Byte Strings.
+   * ------------- */
   function from_bytes(shelf: Shelf<number>): string {
     if (!globalThis.TextDecoder) {
       throw new MewlixError(ErrorCode.CriticalError,
@@ -1790,8 +1746,6 @@ export function standardLibrary(meow?: MeowState) {
     char,
     bap,
     tuple,
-    table,
-    set,
     slap,
     round,
     floor,
