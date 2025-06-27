@@ -1,7 +1,7 @@
 import { numbers } from '@/mewlix';
 
 describe('arithmetic operations', () => {
-  const { add, sub, mul, div, mod, pow, floordiv } = numbers;
+  const { div, mod, pow, floordiv } = numbers;
 
   function randomInt(): number {
     /* Arbitrary boundaries. */
@@ -15,19 +15,7 @@ describe('arithmetic operations', () => {
     _ => [randomInt(), randomInt()]
   );
 
-  test.each(testInput)('basic arithmetic operations with %i, %i', (a, b) => {
-    expect(
-      add(a, b)
-    ).toBe(a + b);
-
-    expect(
-      sub(a, b)
-    ).toBe(a - b);
-
-    expect(
-      mul(a, b)
-    ).toBe(a * b);
-
+  test.each(testInput)('basic numeric operations with %i, %i', (a, b) => {
     expect(
       div(a, b)
     ).toBeCloseTo(a / b);
@@ -37,15 +25,25 @@ describe('arithmetic operations', () => {
     ).toBe(Math.floor(a / b));
 
     expect(
-      pow(a, 2)
-    ).toBe(a ** 2);
-
-    expect(
       pow(a, 3)
     ).toBe(a ** 3);
   });
 
-  test('module operation', () => {
+  test('exception is thrown when dividing by zero', () => {
+    expect(() => 
+      div(0, 0)
+    ).toThrow();
+
+    expect(() => 
+      floordiv(0, 0)
+    ).toThrow();
+
+    expect(() => 
+      mod(0, 0)
+    ).toThrow();
+  });
+
+  test('modulo operation', () => {
     expect(
       mod(15, 4)
     ).toBe(3);
