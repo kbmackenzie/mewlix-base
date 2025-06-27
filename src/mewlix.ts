@@ -828,24 +828,13 @@ function typeError(where: string, value: any, targetType: string): MewlixError {
 /* - * - * - * - * - * - * - * - * */
 
 export const numbers = {
-  add(a: number, b: number): number {
-    typeof a === 'number' || report.number('+', a);
-    typeof b === 'number' || report.number('+', b);
-    return a + b;
+  coerce(a: number): number {
+    typeof a === 'number' || report.number('coerce', a);
+    return a;
   },
-  sub(a: number, b: number): number {
-    typeof a === 'number' || report.number('-', a);
-    typeof b === 'number' || report.number('-', b);
-    return a - b;
-  },
-  mul(a: number, b: number): number {
-    typeof a === 'number' || report.number('*', a);
-    typeof b === 'number' || report.number('*', b);
-    return a * b;
-  },
+  /* Runtime type-checking in the functions below is not necessary.
+   * They will only ever receive numbers. */
   div(a: number, b: number): number {
-    typeof a === 'number' || report.number('/', a);
-    typeof b === 'number' || report.number('/', b);
     if (b === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `/: Attempted to divide ${a} by ${b}!`);
@@ -853,8 +842,6 @@ export const numbers = {
     return a / b;
   },
   floordiv(a: number, b: number): number {
-    typeof a === 'number' || report.number('//', a);
-    typeof b === 'number' || report.number('//', b);
     if (b == 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `//: Attempted to divide ${a} by ${b}!`);
@@ -862,8 +849,6 @@ export const numbers = {
     return Math.floor(a / b);
   },
   mod(a: number, b: number): number {
-    typeof a === 'number' || report.number('%', a);
-    typeof b === 'number' || report.number('%', b);
     if (b === 0) {
       throw new MewlixError(ErrorCode.InvalidOperation,
         `%: Attempted to divide ${a} by ${b}!`);
@@ -871,17 +856,7 @@ export const numbers = {
     return ((a % b) + b) % b;
   },
   pow(a: number, b: number): number {
-    typeof a === 'number' || report.number('^', a);
-    typeof b === 'number' || report.number('^', b);
-    return a ** b;
-  },
-  plus(a: number): number {
-    typeof a === 'number' || report.number('+', a);
-    return +a;
-  },
-  minus(a: number): number {
-    typeof a === 'number' || report.number('-', a);
-    return -a;
+    return Math.pow(a, b);
   },
 };
 
