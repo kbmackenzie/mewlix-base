@@ -12,8 +12,18 @@ export const wake = Symbol('wake');
 export type ValueOf<T> = T[keyof T];
 export type TryGet<T> = T | undefined;
 
-type ObjectTag = 'shelf' | 'box' | 'clowder' | 'clowder instance' | 'cat tree' | 'cat fruit' | 'yarnball';
-export type MewlixObject = { [tag]: ObjectTag };
+type ObjectTag =
+  | 'shelf' 
+  | 'box' 
+  | 'clowder' 
+  | 'clowder instance' 
+  | 'cat tree' 
+  | 'cat fruit' 
+  | 'yarnball';
+
+export type MewlixObject = {
+  [tag]: ObjectTag;
+};
 
 export type Shelf<T> =
   | Readonly<{ [tag]: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
