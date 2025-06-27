@@ -566,7 +566,7 @@ export function purrify(value: any, nested: boolean = false, refs?: RefSet): str
     case 'string':
       return (nested) ? JSON.stringify(value) : value;
     case 'function':
-        return '<function>';
+      return '<function>';
     default:
       return 'unrecognized';
   }
@@ -704,8 +704,6 @@ export const convert = {
         if (Number.isNaN(number)) break;
         return number;
       }
-      default:
-        break;
     }
     throw new MewlixError(ErrorCode.InvalidConversion,
       `Value cannot be converted to a number: ${x}`);
@@ -728,7 +726,6 @@ export const reflection = {
         break;
       case 'function': return 'function';
       case 'undefined': return 'nothing';
-      default: break;
     }
     return 'unrecognized';
   },
@@ -774,11 +771,10 @@ export const relation = {
     switch (typeof a) {
       case 'number':
       case 'string':
-      case 'boolean':
+      case 'boolean': {
         if (a === b) return Ordering.Equal;
         return (a < b!) ? Ordering.Less : Ordering.Greater;
-      default:
-        break;
+      }
     }
     const typeOfValue = reflection.typeOf(a);
     throw new MewlixError(ErrorCode.TypeMismatch,
