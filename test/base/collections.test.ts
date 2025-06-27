@@ -64,7 +64,7 @@ describe('collections', () => {
       { input: box.create({})           , value: 'b'  , expected: false },
     ];
 
-    test.each(testInput)('sees if value $value is contained in $input', ({ input, value, expected }) => {
+    test.each(testInput)('sees if value $value is contained in $input.bindings', ({ input, value, expected }) => {
       expect(
         collections.contains(value, input)
       ).toBe(expected);
