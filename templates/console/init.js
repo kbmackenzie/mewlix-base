@@ -10,7 +10,7 @@ function setDescription(content) {
   meta.content = content;
 }
 
-export default async function init(callback) {
+export default async function(callback) {
   const readMeta = () => fetch('./core/meta.json')
     .then(response => response.json());
 

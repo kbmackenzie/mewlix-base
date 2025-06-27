@@ -3,7 +3,7 @@
 import createMewlix from './core/mewlix.js';
 import initYarnball from './yarnball/yarnball.js';
 
-export default async function init(callback) {
+export default async function(callback) {
   const readMeta = () => fetch('./core/meta.json')
     .then(response => response.json());
 

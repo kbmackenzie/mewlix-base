@@ -9,7 +9,7 @@ async function readJSON(path) {
   return JSON.parse(text);
 }
 
-export default async function init(callback) {
+export default async function(callback) {
   const mewlix = createMewlix();
   mewlix.setMeow((x) => {
     process.stdout.write(x + '\n');
