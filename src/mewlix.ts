@@ -368,14 +368,10 @@ function instanceClowder(clowder: Clowder): ClowderInstance {
     set(key, value) {
       this.home[key] = value;
     },
-    /* A little costly. It doesn't matter in a silly cat esolang, though. c:
-     * And performance-sensitive code shouldn't use .outside() either way. */
     outside() {
-      if (!this.clowder.parent) return null;
-      return {
-        ...this,
-        clowder: this.clowder.parent,
-      };
+      const o = Object.create(this);
+      o.clowder = this.clowder.parent;
+      return o;
     },
   };
   return instance;
