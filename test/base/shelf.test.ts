@@ -1,4 +1,4 @@
-import { shelf, relation, collections, compare, standardLibrary } from '@/mewlix';
+import { shelf, ShelfTag, relation, collections, compare, standardLibrary } from '@/mewlix';
 
 describe('shelf operations', () => {
   const {
@@ -318,7 +318,7 @@ describe('shelf operations', () => {
         length(zipped)
       ).toBe(expectedLength);
 
-      while (zipped.kind !== 'bottom') {
+      while (zipped.kind !== ShelfTag.Bottom) {
         const head = shelf.peek(zipped)!;
         expect(
           head.get('first')

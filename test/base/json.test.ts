@@ -1,4 +1,4 @@
-import { Shelf, shelf, isShelf, box, standardLibrary, MewlixObject, Box, isBox } from '@/mewlix';
+import { Shelf, shelf, isShelf, ShelfTag, box, standardLibrary, MewlixObject, Box, isBox } from '@/mewlix';
 
 describe('json utilities', () => {
   const { from_json: fromJSON, to_json: toJSON } = standardLibrary();
@@ -67,8 +67,8 @@ describe('json utilities', () => {
     type Comparable = MewlixObject | string | boolean | number | null;
 
     function compareShelf(a: Shelf<Comparable>, b: Shelf<Comparable>): boolean {
-      if (a.kind === 'bottom') return b.kind === 'bottom';
-      if (b.kind === 'bottom') return false;
+      if (a.kind === ShelfTag.Bottom) return b.kind === ShelfTag.Bottom;
+      if (b.kind === ShelfTag.Bottom) return false;
       return compare(a.value, b.value) && compareShelf(a.tail, b.tail);
     }
 
