@@ -12,25 +12,32 @@ export const wake = Symbol('wake');
 export type ValueOf<T> = T[keyof T];
 export type TryGet<T> = T | undefined;
 
-type ObjectTag =
-  | 'shelf' 
-  | 'box' 
-  | 'clowder' 
-  | 'clowder instance' 
-  | 'cat tree' 
-  | 'cat fruit' 
-  | 'yarnball';
+export const enum MTag {
+  Shelf,
+  Box,
+  Clowder,
+  ClowderInstance,
+  CatTree,
+  CatFruit,
+  YarnBall,
+  Namespace,
+};
 
 export type MewlixObject = {
-  [tag]: ObjectTag;
+  [tag]: MTag;
+};
+
+export const enum ShelfTag {
+  Bottom,
+  Node,
 };
 
 export type Shelf<T> =
-  | Readonly<{ [tag]: 'shelf', kind: 'node', value: T, tail: Shelf<T>, length: number }>
-  | Readonly<{ [tag]: 'shelf', kind: 'bottom', }>;
+  | Readonly<{ [tag]: MTag.Shelf, kind: ShelfTag.Node, value: T, tail: Shelf<T>, length: number }>
+  | Readonly<{ [tag]: MTag.Shelf, kind: ShelfTag.Bottom, }>;
 
 export type Box<T> = Readonly<{
-  [tag]: 'box',
+  [tag]: MTag.Box,
   bindings: T;
   get(key: keyof T): ValueOf<T>;
   set(key: keyof T, value: ValueOf<T>): void;
@@ -49,7 +56,7 @@ export type ClowderBindings = {
 };
 
 export type Clowder = Readonly<{
-  [tag]: 'clowder';
+  [tag]: MTag.Clowder;
   kind: symbol;
   name: string;
   parent: Clowder | null;
@@ -58,7 +65,7 @@ export type Clowder = Readonly<{
 }>;
 
 export type ClowderInstance = Readonly<{
-  [tag]: 'clowder instance',
+  [tag]: MTag.ClowderInstance,
   clowder: Clowder;
   home: ClowderBindings;
   get(key: string): MewlixValue;
@@ -68,20 +75,20 @@ export type ClowderInstance = Readonly<{
 }>;
 
 export type YarnBall<T> = Readonly<{
-  [tag]: 'yarnball',
+  [tag]: MTag.YarnBall,
   key: string;
   get(key: keyof T): ValueOf<T>;
 }>;
 
 export type CatTree = Readonly<{
-  [tag]: 'cat tree';
+  [tag]: MTag.CatTree;
   name: string;
   fruits: Record<string, CatFruit>;
   get(key: string): TryGet<CatFruit>;
 }>;
 
 export type CatFruit = Readonly<{
-  [tag]: 'cat fruit';
+  [tag]: MTag.CatFruit;
   key: string;
   value: number;
   get(key: 'key'): string;
@@ -98,20 +105,20 @@ export type Tuple<T1, T2> = {
 /* - * - * - * - * - * - * - * - * */
 export function newShelf<T>(value: T, tail?: Shelf<T>): Shelf<T> {
   return {
-    [tag]: 'shelf',
-    kind: 'node',
+    [tag]: MTag.Shelf,
+    kind: ShelfTag.Node,
     value: value,
-    tail: tail ?? { [tag]: 'shelf', kind: 'bottom' },
+    tail: tail ?? { [tag]: MTag.Shelf, kind: ShelfTag.Bottom },
     length: tail ? shelfLength(tail) + 1 : 1,
   };
 }
 
 export function shelfBottom<T>(): Shelf<T> {
-  return { [tag]: 'shelf', kind: 'bottom' };
+  return { [tag]: MTag.Shelf, kind: ShelfTag.Bottom };
 }
 
 export function shelfLength<T>(shelf: Shelf<T>): number {
-  if (shelf.kind === 'bottom') return 0;
+  if (shelf.kind === ShelfTag.Bottom) return 0;
   return shelf.length;
 }
 
@@ -120,18 +127,18 @@ export function shelfPush<T>(shelf: Shelf<T>, value: T): Shelf<T> {
 }
 
 export function shelfPeek<T>(shelf: Shelf<T>): T | null {
-  if (shelf.kind === 'bottom') return null;
+  if (shelf.kind === ShelfTag.Bottom) return null;
   return shelf.value;
 }
 
 export function shelfPop<T>(shelf: Shelf<T>): Shelf<T> | null {
-  if (shelf.kind === 'bottom') return null;
+  if (shelf.kind === ShelfTag.Bottom) return null;
   return shelf.tail;
 }
 
 export function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T): boolean {
   let node = shelf;
-  while (node.kind === 'node') {
+  while (node.kind === ShelfTag.Node) {
     if (relation.equal(node.value, value)) return true;
     node = node.tail;
   }
@@ -139,8 +146,8 @@ export function shelfContains<T extends MewlixValue>(shelf: Shelf<T>, value: T):
 }
 
 export function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
-  if (a.kind === 'bottom') return b;
-  if (b.kind === 'bottom') return a;
+  if (a.kind === ShelfTag.Bottom) return b;
+  if (b.kind === ShelfTag.Bottom) return a;
 
   const bucket = shelfToArray(b);
   let output: Shelf<T> = a;
@@ -152,7 +159,7 @@ export function shelfConcat<T>(a: Shelf<T>, b: Shelf<T>): Shelf<T> {
 
 export function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
   let output: Shelf<T> = shelfBottom();
-  for (let node = shelf; node.kind === 'node'; node = node.tail) {
+  for (let node = shelf; node.kind === ShelfTag.Node; node = node.tail) {
     output = shelfPush(output, node.value);
   }
   return output;
@@ -160,20 +167,20 @@ export function shelfReverse<T>(shelf: Shelf<T>): Shelf<T> {
 
 export function* shelfIterator<T>(a: Shelf<T>): Generator<T, void, void> {
   let node: Shelf<T> = a;
-  while (node.kind === 'node') {
+  while (node.kind === ShelfTag.Node) {
     yield node.value;
     node = node.tail;
   }
 }
 
 export function shelfToArray<T>(shelf: Shelf<T>): T[] {
-  if (shelf.kind === 'bottom') return [];
+  if (shelf.kind === ShelfTag.Bottom) return [];
 
   const output = new Array<T>(shelf.length);
   let node: Shelf<T> = shelf;
   let i = shelf.length - 1;
 
-  while (node.kind === 'node') {
+  while (node.kind === ShelfTag.Node) {
     output[i--] = node.value;
     node = node.tail;
   }
@@ -188,14 +195,14 @@ export function shelfFromArray<T>(array: T[]): Shelf<T> {
 }
 
 export function shelfEquality<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): boolean {
-  if (a.kind === 'bottom') return b.kind === 'bottom';
-  if (b.kind === 'bottom') return false;
+  if (a.kind === ShelfTag.Bottom) return b.kind === ShelfTag.Bottom;
+  if (b.kind === ShelfTag.Bottom) return false;
   return relation.equal(a.value, b.value) && shelfEquality(a.tail, b.tail);
 }
 
 export function shelfCompare<T extends MewlixValue>(a: Shelf<T>, b: Shelf<T>): Ordering {
-  if (a.kind === 'bottom') return b.kind === 'bottom' ? Ordering.Equal : Ordering.Less;
-  if (b.kind === 'bottom') return Ordering.Greater;
+  if (a.kind === ShelfTag.Bottom) return b.kind === ShelfTag.Bottom ? Ordering.Equal : Ordering.Less;
+  if (b.kind === ShelfTag.Bottom) return Ordering.Greater;
   const ord = relation.ordering(a.value, b.value);
   return ord == Ordering.Equal ? shelfCompare(a.tail, b.tail) : ord;
 }
@@ -204,7 +211,7 @@ export function isShelf<T>(value: any): value is Shelf<T> {
   return typeof value == 'object'
     && value !== null
     && tag in value
-    && value[tag] === 'shelf';
+    && value[tag] === MTag.Shelf;
 }
 
 /* - * - * - * - * - * - * - * - *
@@ -214,7 +221,7 @@ export function isShelf<T>(value: any): value is Shelf<T> {
 export function createBox<T>(init: T, copy: boolean = false,): Box<T> {
   const innerBox = copy ? {...init} : init;
   const box: Box<T> = {
-    [tag]: 'box',
+    [tag]: MTag.Box,
     bindings: innerBox,
     get(key: keyof T): ValueOf<T> {
       return innerBox[key];
@@ -230,7 +237,7 @@ export function isBox<T>(value: any): value is Box<T> {
   return typeof value === 'object'
     && value !== null
     && tag in value
-    && value[tag] === 'box';
+    && value[tag] === MTag.Box;
 }
 
 /* - * - * - * - * - * - * - * - *
@@ -248,7 +255,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
       if (k === 'value') return i;
     }
     const fruit: CatFruit = {
-      [tag]: 'cat fruit',
+      [tag]: MTag.CatFruit,
       key: key,
       value: i,
       get: get,
@@ -257,7 +264,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
     i++;
   }
   return {
-    [tag]: 'cat tree',
+    [tag]: MTag.CatTree,
     name: name,
     fruits: fruits,
     get(key: string): TryGet<CatFruit> {
@@ -272,7 +279,7 @@ export function createCatTree(name: string, keys: string[]): CatTree {
 
 export function createYarnBall<T>(key: string, lib: T): YarnBall<T> {
   return {
-    [tag]: 'yarnball',
+    [tag]: MTag.YarnBall,
     key: key,
     get(key: keyof T): ValueOf<T> {
       return lib[key];
@@ -283,7 +290,7 @@ export function createYarnBall<T>(key: string, lib: T): YarnBall<T> {
 export function mixYarnBall<T1, T2>(key: string, a: T1, b: T2): YarnBall<T1 & T2> {
   const lib: T1 & T2 = { ...a, ...b };
   return {
-    [tag]: 'yarnball',
+    [tag]: MTag.YarnBall,
     key: key,
     get(key: keyof T1 | keyof T2): ValueOf<T1 & T2> {
       return lib[key] as any; /* todo: improve this */
@@ -300,7 +307,7 @@ export function bindYarnBall<T>(key: string, map: BindingMap<T>): YarnBall<Recor
     bindings[key] = value;
   }
   return {
-    [tag]: 'yarnball',
+    [tag]: MTag.YarnBall,
     key: key,
     get(key: string): T {
       return bindings[key]?.();
@@ -314,7 +321,7 @@ export function bindYarnBall<T>(key: string, map: BindingMap<T>): YarnBall<Recor
 
 export function createClowder(name: string, parent: Clowder | null, blueprint: ClowderBlueprint): Clowder {
   const clowder: Clowder = {
-    [tag]: 'clowder',
+    [tag]: MTag.Clowder,
     kind: Symbol(name),
     name: name,
     parent: parent,
@@ -349,7 +356,7 @@ function getMethod(clowder: Clowder, key: string): Function | undefined {
 
 function instanceClowder(clowder: Clowder): ClowderInstance {
   const instance: ClowderInstance = {
-    [tag]: 'clowder instance',
+    [tag]: MTag.ClowderInstance,
     clowder: clowder,
     home: {},
     wake(...args) {
@@ -398,7 +405,7 @@ export function isClowderInstance(value: any): value is ClowderInstance {
   return typeof value === 'object'
     && value !== null
     && tag in value
-    && value[tag] === 'clowder instance';
+    && value[tag] === MTag.ClowderInstance;
 }
 
 export function isGettable(a: any) {
@@ -410,7 +417,7 @@ export function isGettable(a: any) {
 /* - * - * - * - * - * - * - * - * */
 
 export type Namespace<T> = Readonly<{
-  [tag]: 'namespace',
+  [tag]: MTag.Namespace,
   name: string;
   cache: Map<string, T>;
   modules: Map<string, () => T>;
@@ -418,7 +425,7 @@ export type Namespace<T> = Readonly<{
 
 export function createNamespace<T>(name: string): Namespace<T> {
   return {
-    [tag]: 'namespace',
+    [tag]: MTag.Namespace,
     name: name,
     cache: new Map(),
     modules: new Map(),
@@ -510,23 +517,23 @@ export function getEntries<T>(record: Record<string, T>): [string, T][] {
 
 type RefSet = Set<MewlixObject>;
 
-const purrifyTable: Record<ObjectTag, (a: any, refs: RefSet) => string> = {
-  'shelf': function<T>(shelf: Shelf<T>, refs: RefSet): string {
+const purrifyTable: Record<MTag, (a: any, refs: RefSet) => string> = {
+  [MTag.Shelf]: function<T>(shelf: Shelf<T>, refs: RefSet): string {
     const items = shelfToArray(shelf)
       .map(x => purrify(x, true, refs))
       .join(', ');
     return `[${items}]`;
   },
-  'box': function<T extends { [key: string]: any }>(box: Box<T>, refs: RefSet): string {
+  [MTag.Box]: function<T extends { [key: string]: any }>(box: Box<T>, refs: RefSet): string {
     const items = getEntries(box.bindings)
       .map(([key, value]) => `"${key}": ${purrify(value, true, refs)}`)
       .join(', ');
     return `📦 [${items}]`;
   },
-  'clowder': function(clowder: Clowder): string {
+  [MTag.Clowder]: function(clowder: Clowder): string {
     return `clowder ${clowder.name}`;
   },
-  'clowder instance': function(instance: ClowderInstance, refs: RefSet): string {
+  [MTag.ClowderInstance]: function(instance: ClowderInstance, refs: RefSet): string {
     if (instance.clowder.meta.purr) {
       return purrify(
         instance.clowder.meta.purr.call(instance)
@@ -537,17 +544,20 @@ const purrifyTable: Record<ObjectTag, (a: any, refs: RefSet) => string> = {
       .join(', ');
     return `clowder instance ${instance.clowder.name} [${items}]`;
   },
-  'yarnball': function<T>(yarnball: YarnBall<T>): string {
+  [MTag.YarnBall]: function<T>(yarnball: YarnBall<T>): string {
     return `yarnball ${yarnball.key}`;
   },
-  'cat tree': function(tree: CatTree): string {
+  [MTag.CatTree]: function(tree: CatTree): string {
     const items = getEntries(tree.fruits)
       .map(([key, value]) => `"${key}": ${value.value}`)
       .join(', ');
     return `cat tree ${tree.name} [${items}]`;
   },
-  'cat fruit': function(fruit: CatFruit): string {
+  [MTag.CatFruit]: function(fruit: CatFruit): string {
     return `cat fruit [${fruit.key}: ${fruit.value}]`;
+  },
+  [MTag.Namespace]: function(namespace: Namespace<any>): string {
+    return `<namespace ${namespace.name}`;
   },
 };
 
@@ -556,7 +566,7 @@ export function purrify(value: any, nested: boolean = false, refs?: RefSet): str
     if (refs && refs.has(value)) return '[circular reference 🔁]';
     refs ??= new Set();
     refs.add(value);
-    return purrifyTable[value[tag] as ObjectTag](value, refs);
+    return purrifyTable[value[tag] as MTag](value, refs);
   }
   if (value === null || value === undefined) { return 'nothing'; }
   switch (typeof value) {
@@ -587,28 +597,29 @@ export type SerializableObject = {
   [key: string]: Serializable;
 };
 
-const mewlixSerialize: Record<ObjectTag, (a: any) => Serializable> = {
-  'shelf': function<T>(shelf: Shelf<T>): Serializable {
+const mewlixSerialize: Record<MTag, (a: any) => Serializable> = {
+  [MTag.Shelf]: function<T>(shelf: Shelf<T>): Serializable {
     return shelfToArray(shelf).map(toSerializable);
   },
-  'box': function<T extends { [key: string]: any }>(box: Box<T>): Serializable {
+  [MTag.Box]: function<T extends { [key: string]: any }>(box: Box<T>): Serializable {
     return makeObjectSerializable(box.bindings);
   },
-  'clowder instance': function(instance: ClowderInstance): Serializable {
+  [MTag.ClowderInstance]: function(instance: ClowderInstance): Serializable {
     return makeObjectSerializable(instance.home);
   },
-  'cat fruit': function(fruit: CatFruit): Serializable {
+  [MTag.CatFruit]: function(fruit: CatFruit): Serializable {
     return fruit.key;
   },
   /* Not convertible: */
-  'cat tree': (_) => null,
-  'clowder' : (_) => null,
-  'yarnball': (_) => null,
+  [MTag.CatTree]: (_) => null,
+  [MTag.Clowder] : (_) => null,
+  [MTag.YarnBall]: (_) => null,
+  [MTag.Namespace]: (_) => null,
 };
 
 export function toSerializable(value: any): Serializable {
   if (typeof value === 'object' && value !== null && tag in value) {
-    return mewlixSerialize[value[tag] as ObjectTag](value);
+    return mewlixSerialize[value[tag] as MTag](value);
   }
   if (Array.isArray(value)) {
     return value.map(toSerializable);
@@ -716,14 +727,23 @@ export const convert = {
 
 export const reflection = {
   typeOf(a: any): string {
+    if (a === null) return 'nothing';
+    if (typeof a === 'object' && tag in a) {
+      switch (a[tag] as MTag) {
+        case MTag.Shelf  : return 'shelf';
+        case MTag.Box    : return 'box';
+        case MTag.Clowder: return 'clowder';
+        case MTag.ClowderInstance: return 'clowder instance';
+        case MTag.CatTree : return 'cat tree';
+        case MTag.CatFruit: return 'cat fruit';
+        case MTag.YarnBall: return 'yarn ball';
+        case MTag.Namespace: return 'namespace';
+      }
+    }
     switch (typeof a) {
       case 'number' : return 'number';
       case 'string' : return 'string';
       case 'boolean': return 'boolean';
-      case 'object' :
-        if (a === null) return 'nothing';
-        if (tag in a) return a[tag] as string;
-        break;
       case 'function': return 'function';
       case 'undefined': return 'nothing';
     }
@@ -733,8 +753,8 @@ export const reflection = {
     if (typeof a === 'object' && typeof b === 'object'
       && a !== null && b !== null
       && tag in a && tag in b
-      && a[tag] === 'clowder instance'
-      && b[tag] === 'clowder') {
+      && a[tag] === MTag.ClowderInstance
+      && b[tag] === MTag.Clowder) {
       return instanceOf(a, b);
     }
     const typeOfA = reflection.typeOf(a);
@@ -898,7 +918,7 @@ export const collections = {
     if (typeof value === 'object'
       && value !== null
       && tag in value
-      && value[tag] === 'shelf') {
+      && value[tag] === MTag.Shelf) {
       return shelfLength(value);
     }
     const typeOfValue = reflection.typeOf(value);
@@ -1115,7 +1135,7 @@ export function standardLibrary(meow?: MeowState) {
   function empty<T>(value: Shelf<T>): boolean;
   function empty<T>(value: string | Shelf<T>): boolean {
     if (typeof value === 'string') return value === '';
-    if (isShelf(value)) return value.kind === 'bottom';
+    if (isShelf(value)) return value.kind === ShelfTag.Bottom;
 
     const typeOfValue = reflection.typeOf(value);
     throw new MewlixError(ErrorCode.TypeMismatch,
@@ -1219,7 +1239,7 @@ export function standardLibrary(meow?: MeowState) {
     isShelf(shelf)                  || report.shelf('std.find', shelf);
     typeof predicate === 'function' || report.func('std.find', predicate);
 
-    for (let node = shelf, i = 0; node.kind === 'node'; node = node.tail, i++) {
+    for (let node = shelf, i = 0; node.kind === ShelfTag.Node; node = node.tail, i++) {
       const result = predicate(node.value);
       if (convert.bool(result)) return i;
     }
@@ -1235,7 +1255,7 @@ export function standardLibrary(meow?: MeowState) {
       ? index
       : shelfLength(shelf) + index + 1;
 
-    while (counter-- > 0 && bottom.kind === 'node') {
+    while (counter-- > 0 && bottom.kind === ShelfTag.Node) {
       top = top && shelfPush(top, shelfPeek(bottom)!);
       bottom = shelfPop(bottom)!;
     }
@@ -1257,11 +1277,11 @@ export function standardLibrary(meow?: MeowState) {
       ? index
       : shelfLength(shelf) + index;
 
-    while (counter-- > 0 && bottom.kind === 'node') {
+    while (counter-- > 0 && bottom.kind === ShelfTag.Node) {
       top = top && shelfPush(top, shelfPeek(bottom)!);
       bottom = shelfPop(bottom)!;
     }
-    bottom = bottom.kind === 'node' ? shelfPop(bottom)! : bottom;
+    bottom = bottom.kind === ShelfTag.Node ? shelfPop(bottom)! : bottom;
 
     const topIterator = shelfIterator(top);
     for (const item of topIterator) {
@@ -1347,7 +1367,7 @@ export function standardLibrary(meow?: MeowState) {
     let left:  Shelf<T1> = a;
     let right: Shelf<T2> = b;
 
-    while (left.kind === 'node' && right.kind === 'node') {
+    while (left.kind === ShelfTag.Node && right.kind === ShelfTag.Node) {
       output[i--] = createBox<ZipPair<T1, T2>>({
         first:  shelfPeek(left)!,
         second: shelfPeek(right)!,
@@ -1362,7 +1382,7 @@ export function standardLibrary(meow?: MeowState) {
     typeof number   === 'number'   || report.number('std.repeat', number);
     typeof callback === 'function' || report.func('std.repeat', callback);
 
-    let shelf: Shelf<T> = { [tag]: 'shelf', kind: 'bottom' };
+    let shelf: Shelf<T> = { [tag]: MTag.Shelf, kind: ShelfTag.Bottom };
     for (let i = 0; i < number; i++) {
       shelf = shelfPush(shelf, callback(i));
     }
@@ -1768,7 +1788,7 @@ export function standardLibrary(meow?: MeowState) {
 export function wrap<T>(object: T, copy: boolean = false): Box<T> {
   const wrapped: T = copy ? {...object} : object;
   return {
-    [tag]: 'box',
+    [tag]: MTag.Box,
     bindings: wrapped,
     get(key: keyof T): ValueOf<T> {
       return wrapped[key];
